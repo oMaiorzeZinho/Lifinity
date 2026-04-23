@@ -11,7 +11,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000y-api.loca.lt/api/auth/login', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, {
         email,
         password,
       } );
@@ -20,7 +20,7 @@ const Login = () => {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
 
-      navigate('/dashboard');
+      navigate('/dashboard/tasks'); // Redireciona para o dashboard após login
     } catch (error) {
       setMessage(error.response?.data?.message || 'Erro no login.');
     }

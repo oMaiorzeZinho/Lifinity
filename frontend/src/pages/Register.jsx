@@ -11,19 +11,19 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      const response = await axios.post('http://localhost:3000y-api.loca.lt/api/auth/register', {
+      await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, {
         username,
         email,
         password,
-      } );
+      });
+
       setMessage('Conta criada com sucesso! A redirecionar para o login...');
-      
-      // Aguarda 2 segundos para o utilizador ler a mensagem e depois redireciona
+
       setTimeout(() => {
         navigate('/login');
       }, 2000);
-
     } catch (error) {
       setMessage(error.response?.data?.message || 'Erro ao registar.');
     }
@@ -32,7 +32,6 @@ const Register = () => {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 font-sans">
       <div className="bg-white w-full max-w-md p-10 rounded-3xl shadow-xl border border-slate-100">
-        {/* Botão Voltar para a Home */}
         <Link to="/" className="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-blue-600 transition block mb-8">
           ← Voltar à Home
         </Link>
