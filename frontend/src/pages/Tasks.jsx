@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 // --- MOTOR DE GAMIFICAÇÃO (FRONTEND) ---
 // Esta função pode ser movida para um ficheiro de utilidades mais tarde
@@ -22,7 +24,10 @@ const getLevelData = (xp) => {
 };
 
 const Tasks = () => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   const [tasks, setTasks] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newTask, setNewTask] = useState({ title: '', description: '', priority: 'media' });
@@ -34,41 +39,47 @@ const Tasks = () => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    const token = localStorage.getItem('token');
-    if (!savedUser || !token) {
-      navigate('/login');
-      return;
-    }
-    setUser(JSON.parse(savedUser));
-    fetchTasks(token);
-  }, [navigate]);
 
-  const fetchTasks = async (token) => {
+  const fetchTasks = useCallback(async (token) => {
     try {
-      const res = await axios.get('http://localhost:3000/api/tasks', {
+      const res = await axios.get(`${API_URL}/tasks`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setTasks(res.data);
     } catch (err) {
       console.error("Erro ao carregar tarefas:", err);
     }
-  };
+  }, []);
+  
+  useEffect(() => {
+  const token = localStorage.getItem('token');
+
+  if (!user || !token) {
+    navigate('/login');
+    return;
+  }
+
+  fetchTasks(token);
+}, [navigate, user, fetchTasks]);
+
+  
 
   const handleCompleteTask = async (idtask) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.put(`http://localhost:3000/api/tasks/complete/${idtask}`, {}, {
+      const res = await axios.put(`${API_URL}/tasks/complete/${idtask}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      const localUser = JSON.parse(localStorage.getItem('user'));
+      const localUser = JSON.parse(localStorage.getItem('user') || '{}');
       const updatedUser = { ...localUser, xp: res.data.newXP, level: res.data.newLevel };
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
-      fetchTasks(token);
+      window.dispatchEvent(new Event('lifinity-user-updated'));
+      await fetchTasks(token);
+      window.dispatchEvent(new Event('lifinity-tasks-updated'));
     } catch (err) {
+      console.error("Erro ao concluir tarefa:", err);
       alert("Erro ao concluir tarefa.");
     }
   };
@@ -77,11 +88,13 @@ const Tasks = () => {
     if (!window.confirm("Tens a certeza que queres eliminar esta tarefa?")) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:3000/api/tasks/${idtask}`, {
+      await axios.delete(`${API_URL}/tasks/${idtask}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      fetchTasks(token);
+      await fetchTasks(token);
+      window.dispatchEvent(new Event('lifinity-tasks-updated'));
     } catch (err) {
+      console.error("Erro ao eliminar tarefa:", err);
       alert("Erro ao eliminar tarefa.");
     }
   };
@@ -90,11 +103,13 @@ const Tasks = () => {
     if (!window.confirm("Tens a certeza que queres apagar permanentemente todas as tarefas concluídas?")) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:3000/api/tasks/completed/all`, {
+      await axios.delete(`${API_URL}/tasks/completed/all`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      fetchTasks(token);
+      await fetchTasks(token);
+      window.dispatchEvent(new Event('lifinity-tasks-updated'));
     } catch (err) {
+      console.error("Erro ao limpar histórico:", err);
       alert("Erro ao limpar histórico.");
     }
   };
@@ -103,13 +118,15 @@ const Tasks = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:3000/api/tasks', newTask, {
+      await axios.post(`${API_URL}/tasks`, newTask, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setNewTask({ title: '', description: '', priority: 'media' });
       setIsModalOpen(false);
-      fetchTasks(token);
+      await fetchTasks(token);
+      window.dispatchEvent(new Event('lifinity-tasks-updated')); 
     } catch (err) {
+      console.error("Erro ao criar tarefa:", err);
       alert("Erro ao criar tarefa.");
     }
   };
@@ -122,7 +139,7 @@ const Tasks = () => {
   const filteredTasks = tasks.filter(t => {
     const matchesStatus = filterStatus === 'all' ? true : (filterStatus === 'completed' ? t.status === 'concluida' : t.status !== 'concluida');
     const matchesPriority = filterPriority === 'all' ? true : t.priority === filterPriority;
-    const matchesSearch = t.title.toLowerCase().includes(searchTask.toLowerCase());
+    const matchesSearch = (t.title || '').toLowerCase().includes(searchTask.toLowerCase());
     return matchesStatus && matchesPriority && matchesSearch;
   });
 
