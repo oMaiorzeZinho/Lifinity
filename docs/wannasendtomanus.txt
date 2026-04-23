@@ -1,0 +1,5552 @@
+Preciso de ajuda na realização do meu projeto de aptidão profissional do curso Técnico de Gestão de Programação de sistemas informáticos. Estou a estudar na escola secundária sá de miranda e o tema do meu projeto consistirá no seguinte:
+Titulo: Lifinity - Aplicação colaborativa para gestão e motivação diária.
+Projeto Final: Aplicação móvel e web colaborativa que permite a gestão partilhada de tarefas, compromissos e objetivos entre utilizadores, com funcionalidades de gamificação, chatbot integrado, notificações e inspiração diária.
+Breve Descrição: O projeto Lifinity tem como objetivo desenvolver uma aplicação multiplataforma (mobile e web) para gestão colaborativa de tarefas, objetivos e rotinas diárias entre familiares, amigos ou equipas.
+A aplicação permitirá criar tarefas partilhadas, definir prazos e recompensas, acompanhar o progresso através de gráficos e receber notificações automáticas (push ou e-mail).
+Integrará também um chatbot inteligente, capaz de interagir com o utilizador para ajudar na gestão das tarefas, responder a dúvidas e fornecer sugestões motivacionais.
+A componente de gamificação incentivará o cumprimento de objetivos, enquanto o módulo de inspiração diária apresentará versículos bíblicos ou frases motivacionais.
+O projeto será desenvolvido com tecnologias web e mobile modernas, integrando a API de um chatbot, base de dados e interface responsiva para uma experiência completa.
+Até então, já fiz
+
+Funcionalidade	Estado
+✅ Autenticação	Completo
+✅ Tarefas (CRUD)	Completo
+✅ Grupos Partilhados	Completo
+✅ Atribuir Tarefas	Completo
+✅ Sistema XP/Níveis	Completo
+✅ Perfil + Leaderboard	Completo
+✅ Gráficos e Estatísticas	Completo
+✅ Versículos Diários	Completo
+✅ Módulo C	Completo
+✅ GitHub	Completo
+Chatbot/Assistente 	A REALIZAR NESTE MOMENTO
+Notificações PUSH	Por FAZER
+Conquistas(Badges)	Por fazer (últimos)
+
+
+Estruturação:
+--- LIFINITY---
+Raíz - db.js; hereswhynot_htdocs.txt; package-lock.json; package.json; server.js; .env; .gitattributes; .gitignore;
+addons - index.cjs; lifinity_addon.node;
+lifinity\c-addon - binding.gyp; package-lock.json; package.json;
+lifinity\c-addon\.vscode - c_cpp_properties.json
+lifinity\c-addon\build - Não mexi, acho que apareceu através de downloads.
+lifinity\c-addon\node_modules - .package-lock.json
+lifinity\c-addon\node_modules\node-addon-api - não mexi, acho que apareceu através de downloads.
+lifinity\c-addon\src - addon.cpp; code_generator.c; code_generator.h; task_sorter.c; task_sorter.h; xp_calculator.c; xp_calculator.h;
+lifinity\controllers - authController.js; groupController.js; profileController.js; statsController.js; taskController.js; verseController.js; chatbotController.js;
+lifinity\middleware - authMiddleware.js;
+lifinity\node_modules - Não mexi, acho que veio tudo com instalações;
+lifinity\routes - authRoutes.js; groupRoutes.js; profileRoutes.js; statsRoutes.js; taskRoutes.js; verseRoutes.js; chatbotRoutes.js;
+lifinity\web - .gitignore; eslint.config.js; index.html; package-lock.json; package.json; postcss.config.js; README.md; tailwind.config.js; vite.config.js;
+lifinity\web\node_modules - não mexi, veio com instalações;
+lifinity\web\public - vite.svg Não mexi;
+lifinity\web\src - App.css; App.jsx; index.css; main.jsx;
+lifinity\web\src\assets - react.svg Não mexi;
+lifinity\web\src\components - Login.jsx: Navbar.jsx; Register.jsx; TaskCard.jsx;
+lifinity\web\src\pages - ChatbotPage.jsx; CreatePage.jsx; HomePage.jsx; ProfilePage.jsx; StatsPage.jsx; TasksPage.jsx;
+
+
+--- CÓDIGOS --- 
+
+lifinity/.env -
+GEMINI_API_KEY=AIzaSyCkobYF0Llp9vZ8bob7O3bxt1PGxX-JFdY
+
+lifinity/.gitattributes -
+Não vou mandar porque não consigo, dá erro e também porque não é necessário
+
+lifinity/.gitignore -
+Não vou mandar porque não consigo, dá erro e também porque não é necessário
+
+lifinity/db.js -
+import mysql from 'mysql2';
+
+const pool = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'lifinity_db',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
+
+// Agora usa-se "export default"
+export default pool.promise();
+
+lifinity/server.js -
+import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
+import cors from 'cors';
+import authRoutes from './routes/authRoutes.js';
+import taskRoutes from './routes/taskRoutes.js';
+import groupRoutes from './routes/groupRoutes.js';
+import profileRoutes from './routes/profileRoutes.js';
+import statsRoutes from './routes/statsRoutes.js';
+import verseRoutes from './routes/verseRoutes.js';
+import chatbotRoutes from './routes/chatbotRoutes.js';
+
+const app = express();
+const PORT = 5000;
+
+app.use(cors());
+app.use(express.json());
+
+// Rotas
+app.use('/auth', authRoutes);
+app.use('/tasks', taskRoutes);
+app.use('/groups', groupRoutes);
+app.use('/profile', profileRoutes);
+app.use('/stats', statsRoutes);
+app.use('/verses', verseRoutes);
+app.use('/chatbot', chatbotRoutes);
+
+app.get('/', (req, res) => {
+    res.send('Backend Lifinity a funcionar! 🚀');
+});
+
+app.listen(PORT, () => {
+    console.log(`Servidor a rodar em http://localhost:${PORT}`);
+});
+
+lifinity/package-lock.json -
+Veio com instalação, se precisares que mande, avisa
+
+lifinity/package.json -
+Veio com instalação, se precisares que mande, avisa
+
+lifinity/addons/index.cjs -
+const path = require('path');
+
+let addon;
+
+try {
+    addon = require(path.join(__dirname, 'lifinity_addon.node'));
+    console.log("✅ Addon C carregado com sucesso!");
+} catch (error) {
+    console.log("⚠️ Addon C não disponível:", error.message);
+    addon = null;
+}
+
+// ============================================
+// FUNÇÃO 1: Gerar Código de Grupo
+// ============================================
+function generateCode() {
+    if (addon) {
+        return addon.generateCode();
+    }
+    // Fallback JavaScript
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 8; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+}
+
+// ============================================
+// FUNÇÃO 2: Ordenar Tarefas (QuickSort)
+// ============================================
+function sortTasks(tasks) {
+    if (addon && tasks && tasks.length > 0) {
+        try {
+            return addon.sortTasks(tasks);
+        } catch (error) {
+            console.log("⚠️ Erro no sortTasks C, usando fallback JS");
+        }
+    }
+    // Fallback JavaScript
+    return [...tasks].sort((a, b) => {
+        if (a.is_completed !== b.is_completed) return a.is_completed - b.is_completed;
+        const priorityOrder = { high: 1, medium: 2, low: 3 };
+        return (priorityOrder[a.priority] || 2) - (priorityOrder[b.priority] || 2);
+    });
+}
+
+// ============================================
+// FUNÇÃO 3: Calcular XP de uma Tarefa
+// ============================================
+function calculateTaskXP(priority = 'medium', completedOnTime = false, streakDays = 0) {
+    if (addon) {
+        return addon.calculateTaskXP(priority, completedOnTime, streakDays);
+    }
+    // Fallback JavaScript
+    let xp = 10;
+    if (priority === 'high') xp += 5;
+    if (priority === 'low') xp -= 3;
+    if (completedOnTime) xp += 3;
+    if (streakDays >= 7) xp += 5;
+    else if (streakDays >= 3) xp += 2;
+    return Math.max(1, xp);
+}
+
+// ============================================
+// FUNÇÃO 4: Calcular Nível
+// ============================================
+function calculateLevel(totalXP) {
+    if (addon) {
+        return addon.calculateLevel(totalXP);
+    }
+    // Fallback JavaScript
+    let level = 1;
+    let xpNeeded = 100;
+    let accumulated = 0;
+    while (accumulated + xpNeeded <= totalXP) {
+        accumulated += xpNeeded;
+        level++;
+        xpNeeded = 100 + (level - 1) * 50;
+    }
+    return level;
+}
+
+// ============================================
+// FUNÇÃO 5: XP para Próximo Nível
+// ============================================
+function xpForNextLevel(currentLevel) {
+    if (addon) {
+        return addon.xpForNextLevel(currentLevel);
+    }
+    // Fallback JavaScript
+    return 100 + (currentLevel - 1) * 50;
+}
+
+// ============================================
+// FUNÇÃO 6: Progresso do Nível (%)
+// ============================================
+function calculateLevelProgress(totalXP, currentLevel) {
+    if (addon) {
+        return addon.calculateLevelProgress(totalXP, currentLevel);
+    }
+    // Fallback JavaScript
+    let accumulated = 0;
+    for (let i = 1; i < currentLevel; i++) {
+        accumulated += 100 + (i - 1) * 50;
+    }
+    const xpInCurrentLevel = totalXP - accumulated;
+    const xpNeeded = 100 + (currentLevel - 1) * 50;
+    return Math.min(100, Math.max(0, Math.floor((xpInCurrentLevel * 100) / xpNeeded)));
+}
+
+// ============================================
+// VERIFICAR DISPONIBILIDADE
+// ============================================
+function isAddonAvailable() {
+    return addon !== null;
+}
+
+module.exports = {
+    generateCode,
+    sortTasks,
+    calculateTaskXP,
+    calculateLevel,
+    xpForNextLevel,
+    calculateLevelProgress,
+    isAddonAvailable
+};
+
+lifinity/addons/lifinity_addon.node -
+Está em binário e apareceu com instalações, então não vou mandar.
+
+
+lifinity/c-addon/build - 
+Não vou enviar porque veio através de instalação, então nem mexi lá, se precisares que mande, avisa
+
+
+lifinity/c-addon/node_modules/node-addon-api -
+Não vou enviar porque veio através de instalação, nem mexi lá. Se precisares que mande, avisa
+
+
+lifinity/c-addon/node_modules/.package-lock.json -
+Não vou enviar porque não me lembro de mexer lá, Se precisares que mande, avisa.
+
+
+lifinity/c-addon/src/addon.cpp -
+#include <napi.h>
+#include <vector>
+#include <string>
+
+extern "C" {
+    #include "task_sorter.h"
+    #include "code_generator.h"
+    #include "xp_calculator.h"
+}
+
+// FUNÇÃO 1: Ordenar Tarefas
+Napi::Array SortTasks(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    
+    if (info.Length() < 1 || !info[0].IsArray()) {
+        Napi::TypeError::New(env, "Esperado um array de tarefas").ThrowAsJavaScriptException();
+        return Napi::Array::New(env, 0);
+    }
+    
+    Napi::Array jsArray = info[0].As<Napi::Array>();
+    uint32_t length = jsArray.Length();
+    
+    if (length == 0) {
+        return Napi::Array::New(env, 0);
+    }
+    
+    std::vector<Task> tasks(length);
+    std::vector<Napi::Object> originalTasks(length);
+    
+    for (uint32_t i = 0; i < length; i++) {
+        Napi::Object task = jsArray.Get(i).As<Napi::Object>();
+        originalTasks[i] = task;
+        
+        tasks[i].id = task.Has("id") ? task.Get("id").ToNumber().Int32Value() : (int)i;
+        
+        std::string priority = task.Has("priority") ? 
+            task.Get("priority").ToString().Utf8Value() : "medium";
+        
+        if (priority == "high") tasks[i].priority = 1;
+        else if (priority == "medium") tasks[i].priority = 2;
+        else tasks[i].priority = 3;
+        
+        tasks[i].due_date = 0;
+        tasks[i].is_completed = task.Has("is_completed") ? 
+            task.Get("is_completed").ToNumber().Int32Value() : 0;
+    }
+    
+    sort_tasks_by_priority_and_date(tasks.data(), length);
+    
+    Napi::Array result = Napi::Array::New(env, length);
+    
+    for (uint32_t i = 0; i < length; i++) {
+        for (uint32_t j = 0; j < length; j++) {
+            int originalId = originalTasks[j].Has("id") ? 
+                originalTasks[j].Get("id").ToNumber().Int32Value() : (int)j;
+            if (originalId == tasks[i].id) {
+                result.Set(i, originalTasks[j]);
+                break;
+            }
+        }
+    }
+    
+    return result;
+}
+
+// FUNÇÃO 2: Gerar Código
+Napi::String GenerateCode(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    
+    char code[9];
+    generate_invite_code(code, 9);
+    
+    return Napi::String::New(env, code);
+}
+
+// FUNÇÃO 3: Calcular XP
+Napi::Number CalculateTaskXP(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    
+    int priority = 2;
+    int completed_on_time = 0;
+    int streak_days = 0;
+    
+    if (info.Length() >= 1) {
+        std::string p = info[0].ToString().Utf8Value();
+        if (p == "high") priority = 1;
+        else if (p == "low") priority = 3;
+        else priority = 2;
+    }
+    
+    if (info.Length() >= 2) {
+        completed_on_time = info[1].ToBoolean().Value() ? 1 : 0;
+    }
+    
+    if (info.Length() >= 3) {
+        streak_days = info[2].ToNumber().Int32Value();
+    }
+    
+    int xp = calculate_task_xp(priority, completed_on_time, streak_days);
+    
+    return Napi::Number::New(env, xp);
+}
+
+// FUNÇÃO 4: Calcular Nível
+Napi::Number CalculateLevel(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    
+    int total_xp = 0;
+    if (info.Length() >= 1) {
+        total_xp = info[0].ToNumber().Int32Value();
+    }
+    
+    int level = calculate_level(total_xp);
+    
+    return Napi::Number::New(env, level);
+}
+
+// FUNÇÃO 5: XP para Próximo Nível
+Napi::Number XPForNextLevel(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    
+    int current_level = 1;
+    if (info.Length() >= 1) {
+        current_level = info[0].ToNumber().Int32Value();
+    }
+    
+    int xp_needed = xp_for_next_level(current_level);
+    
+    return Napi::Number::New(env, xp_needed);
+}
+
+// FUNÇÃO 6: Progresso do Nível
+Napi::Number CalculateLevelProgress(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    
+    int total_xp = 0;
+    int current_level = 1;
+    
+    if (info.Length() >= 1) {
+        total_xp = info[0].ToNumber().Int32Value();
+    }
+    if (info.Length() >= 2) {
+        current_level = info[1].ToNumber().Int32Value();
+    }
+    
+    int progress = calculate_level_progress(total_xp, current_level);
+    
+    return Napi::Number::New(env, progress);
+}
+
+// INICIALIZAÇÃO
+Napi::Object Init(Napi::Env env, Napi::Object exports) {
+    exports.Set("sortTasks", Napi::Function::New(env, SortTasks));
+    exports.Set("generateCode", Napi::Function::New(env, GenerateCode));
+    exports.Set("calculateTaskXP", Napi::Function::New(env, CalculateTaskXP));
+    exports.Set("calculateLevel", Napi::Function::New(env, CalculateLevel));
+    exports.Set("xpForNextLevel", Napi::Function::New(env, XPForNextLevel));
+    exports.Set("calculateLevelProgress", Napi::Function::New(env, CalculateLevelProgress));
+    
+    return exports;
+}
+
+NODE_API_MODULE(lifinity_addon, Init)
+
+
+lifinity/c-addon/src/code_generator.c -
+#include "code_generator.h"
+#include <stdlib.h>
+#include <time.h>
+
+void generate_invite_code(char* buffer, int length) {
+    const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    int charset_size = 36;
+    
+    static int initialized = 0;
+    if (!initialized) {
+        srand((unsigned int)time(NULL));
+        initialized = 1;
+    }
+    
+    for (int i = 0; i < length - 1; i++) {
+        int key = rand() % charset_size;
+        buffer[i] = charset[key];
+    }
+    buffer[length - 1] = '\0';
+}
+
+
+lifinity/c-addon/src/code_generator.h
+#ifndef CODE_GENERATOR_H
+#define CODE_GENERATOR_H
+
+// Geração de códigos
+void generate_invite_code(char* buffer, int length);
+
+// Sistema de XP
+int calculate_task_xp(int priority, int completed_on_time, int streak_days);
+int calculate_level(int total_xp);
+int xp_for_next_level(int current_level);
+int calculate_level_progress(int total_xp, int current_level);
+
+#endif
+
+
+lifinity/c-addon/src/task_sorter.c -
+#include "task_sorter.h"
+
+int compare_tasks(Task* a, Task* b) {
+    if (a->is_completed != b->is_completed) {
+        return a->is_completed - b->is_completed;
+    }
+    if (a->priority != b->priority) {
+        return a->priority - b->priority;
+    }
+    if (a->due_date != b->due_date) {
+        return (a->due_date < b->due_date) ? -1 : 1;
+    }
+    return 0;
+}
+
+void swap(Task* a, Task* b) {
+    Task temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+int partition(Task* tasks, int low, int high) {
+    Task pivot = tasks[high];
+    int i = low - 1;
+    
+    for (int j = low; j < high; j++) {
+        if (compare_tasks(&tasks[j], &pivot) <= 0) {
+            i++;
+            swap(&tasks[i], &tasks[j]);
+        }
+    }
+    swap(&tasks[i + 1], &tasks[high]);
+    return i + 1;
+}
+
+void quicksort_tasks(Task* tasks, int low, int high) {
+    if (low < high) {
+        int pi = partition(tasks, low, high);
+        quicksort_tasks(tasks, low, pi - 1);
+        quicksort_tasks(tasks, pi + 1, high);
+    }
+}
+
+void sort_tasks_by_priority_and_date(Task* tasks, int count) {
+    if (count > 1) {
+        quicksort_tasks(tasks, 0, count - 1);
+    }
+}
+
+
+lifinity/c-addon/src/task_sorter.h
+#ifndef TASK_SORTER_H
+#define TASK_SORTER_H
+
+typedef struct{
+    int id;
+    int priority; //1= high, 2=medium, 3=low
+    long long due_date; // timestamp
+    int is_completed;
+}Task;
+
+void quicksort_tasks(Task* tasks, int low, int high);
+void sort_tasks_by_priority_and_date(Task* tasks, int count);
+
+#endif
+
+lifinity/c-addon/src/xp_calculator.c -
+#include "xp_calculator.h"
+
+int calculate_task_xp(int priority, int completed_on_time, int streak_days) {
+    int base_xp = 10;
+    
+    if (priority == 1) {
+        base_xp += 5;
+    } else if (priority == 3) {
+        base_xp -= 3;
+    }
+    
+    if (completed_on_time) {
+        base_xp += 3;
+    }
+    
+    if (streak_days >= 7) {
+        base_xp += 5;
+    } else if (streak_days >= 3) {
+        base_xp += 2;
+    }
+    
+    if (base_xp < 1) {
+        base_xp = 1;
+    }
+    
+    return base_xp;
+}
+
+int calculate_level(int total_xp) {
+    int level = 1;
+    int xp_needed = 100;
+    int accumulated = 0;
+    
+    while (accumulated + xp_needed <= total_xp) {
+        accumulated += xp_needed;
+        level++;
+        xp_needed = 100 + (level - 1) * 50;
+    }
+    
+    return level;
+}
+
+int xp_for_next_level(int current_level) {
+    return 100 + (current_level - 1) * 50;
+}
+
+int calculate_level_progress(int total_xp, int current_level) {
+    int xp_needed = xp_for_next_level(current_level);
+    
+    int accumulated = 0;
+    int i;
+    for (i = 1; i < current_level; i++) {
+        accumulated += 100 + (i - 1) * 50;
+    }
+    
+    int xp_in_current_level = total_xp - accumulated;
+    int progress = (xp_in_current_level * 100) / xp_needed;
+    
+    if (progress > 100) progress = 100;
+    if (progress < 0) progress = 0;
+    
+    return progress;
+}
+
+
+lifinity/c-addon/src/xp_calculator.h -
+#ifndef XP_CALCULATOR_H
+#define XP_CALCULATOR_H
+
+int calculate_task_xp(int priority, int completed_on_time, int streak_days);
+int calculate_level(int total_xp);
+int xp_for_next_level(int current_level);
+int calculate_level_progress(int total_xp, int current_level);
+
+#endif
+
+lifinity/c-addon -
+{
+    "targets": [
+        {
+            "target_name": "lifinity_addon",
+            "sources": [
+                "src/addon.cpp",
+                "src/task_sorter.c",
+                "src/code_generator.c",
+                "src/xp_calculator.c"
+            ],
+            "include_dirs": [
+                "<!@(node -p \"require('node-addon-api').include\")",
+                "src"
+            ],
+            "defines": [
+                "NAPI_DISABLE_CPP_EXCEPTIONS"
+            ]
+        }
+    ]
+}
+
+lifinity/c-addon/package-lock.json -
+Não vou enviar porque acho que apareceu com downmloads no terminal, avisa se precisares que eu mande.
+
+
+lifinity/c-addon/package.json -
+Não vou enviar porque acho que apareceu com downloads no terminal, avisa se precisares que eu mande.
+
+
+lifinity/controllers/authController.js
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import db from '../db.js'; // <--- ATENÇÃO: Em módulos tens de por o .js no fim!
+
+const JWT_SECRET = 'chave_super_secreta_lifinity_2024'; // Numa empresa real, fica num ficheiro .env
+
+export const register = async (req, res) => {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+        return res.status(400).json({ error: "Preenche todos os campos!" });
+    }
+
+    try {
+        const [users] = await db.query('SELECT email FROM users WHERE email = ?', [email]);
+        if (users.length > 0) {
+            return res.status(409).json({ error: "Este email já está registado." });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        const [result] = await db.query(
+            'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
+            [name, email, hashedPassword]
+        );
+
+        res.status(201).json({ 
+            message: "Utilizador criado com sucesso!",
+            userId: result.insertId
+        });
+
+    } catch (error) {
+        res.status(500).json({ error: "Erro no servidor." });
+    }
+};
+
+// --- LOGIN ---
+export const login = async (req, res) => {
+    const {email, password} = req.body;
+
+    if(!email || !password){
+        return res.status(400).json({ error: "Preenche email e senha!"});
+    }
+
+    try{
+        //1. Procurar o utilizador pelo email
+        const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+
+        //se não encontrar ninguém
+        if(users.length === 0 ){
+            return res.status(401).json({error: "Email ou senha incorretos."});
+        }
+
+        const user = users[0]; // Pegar o primeiro (e único) utilizador encontrado
+
+        //2. Comparar a senha enviada com a encriptada no BD
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if(!isMatch){
+            return res.status(401).json({ error: "Email ou senha incorretos." });
+        }
+
+        //3. Gerar o Token
+        const token = jwt.sign(
+            { id: user.id, name: user.name }, //O que guardamos no token
+            JWT_SECRET,                       //A chave Secreta
+            { expiresIn: '1h' }               //O token expira em 1 hora
+        );
+
+        //4. Enviar tudo de volta
+        res.json({
+            message: "Login com sucesso!",
+            token: token,
+            user: { id: user.id, name: user.name, email: user.email }
+        });
+    }catch(error){
+        res.status(500).json({ error: "Erro ao fazer login." });
+    }
+};
+
+
+lifinity/controllers/chatBotController.js
+import db from '../db.js';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+// Inicializar Gemini
+let genAI;
+let model;
+
+try {
+    genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    console.log("✅ Gemini AI inicializado com sucesso!");
+} catch (error) {
+    console.log("⚠️ Gemini AI não disponível:", error.message);
+}
+
+// ============================================
+// FUNÇÕES AUXILIARES
+// ============================================
+
+// Extrair data/hora do texto
+const extractDateTime = (text) => {
+    const now = new Date();
+    let dueDate = null;
+
+    if (text.includes('amanhã') || text.includes('amanha')) {
+        dueDate = new Date(now);
+        dueDate.setDate(dueDate.getDate() + 1);
+    } else if (text.includes('depois de amanhã') || text.includes('depois de amanha')) {
+        dueDate = new Date(now);
+        dueDate.setDate(dueDate.getDate() + 2);
+    } else if (text.includes('hoje')) {
+        dueDate = new Date(now);
+    } else if (text.includes('próxima semana') || text.includes('proxima semana')) {
+        dueDate = new Date(now);
+        dueDate.setDate(dueDate.getDate() + 7);
+    } else if (text.includes('próximo mês') || text.includes('proximo mes')) {
+        dueDate = new Date(now);
+        dueDate.setMonth(dueDate.getMonth() + 1);
+    }
+
+    // Extrair hora (ex: "às 15h", "às 14:30", "15:00")
+    const timeMatch = text.match(/(?:às|as|à|a)\s*(\d{1,2})[h:]?(\d{0,2})?/i) || 
+                      text.match(/(\d{1,2})[h:](\d{0,2})?/);
+    if (timeMatch && dueDate) {
+        const hours = parseInt(timeMatch[1]);
+        const minutes = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
+        if (hours >= 0 && hours <= 23) {
+            dueDate.setHours(hours, minutes, 0, 0);
+        }
+    } else if (dueDate) {
+        dueDate.setHours(23, 59, 59, 59);
+    }
+
+    return dueDate;
+};
+
+// Extrair prioridade do texto
+const extractPriority = (text) => {
+    if (text.match(/(urgente|muito importante|prioridade alta|alta prioridade|crítico|critico)/i)) {
+        return 'high';
+    }
+    if (text.match(/(baixa prioridade|prioridade baixa|quando puder|sem pressa|calma|tranquilo)/i)) {
+        return 'low';
+    }
+    return 'medium';
+};
+
+// Extrair nome do grupo do texto
+const extractGroupName = (text) => {
+    // Padrões: "para grupo X", "para o grupo X", "grupo X", "para X"
+    const groupMatch = text.match(/(?:para\s+(?:o\s+)?grupo\s+|grupo\s+)["']?([^"']+?)["']?(?:\s+|$)/i) ||
+                       text.match(/para\s+["']([^"']+)["']/i);
+    
+    if (groupMatch) {
+        return groupMatch[1].trim();
+    }
+    
+    // Verificar "para todos"
+    if (text.match(/para\s+todos/i)) {
+        return '__ALL__';
+    }
+    
+    return null;
+};
+
+// Extrair título da tarefa (limpar palavras-chave)
+const extractTaskTitle = (text) => {
+    let title = text
+        // Remover comandos iniciais
+        .replace(/^(criar tarefa|cria tarefa|nova tarefa|adicionar tarefa|adiciona tarefa|lembrar de|lembrar|lembra-me de|lembra-me|tarefa)\s*/i, '')
+        // Remover datas
+        .replace(/\s*(amanhã|amanha|hoje|depois de amanhã|depois de amanha|próxima semana|proxima semana|próximo mês|proximo mes)\s*/gi, ' ')
+        // Remover horas
+        .replace(/\s*(?:às|as|à|a)\s*\d{1,2}[h:]?\d{0,2}\s*/gi, ' ')
+        .replace(/\s*\d{1,2}[h:]\d{0,2}\s*/gi, ' ')
+        // Remover prioridades
+        .replace(/\s*(urgente|muito importante|importante|prioridade alta|alta prioridade|baixa prioridade|prioridade baixa|quando puder|sem pressa|crítico|critico)\s*/gi, ' ')
+        // Remover referências a grupos
+        .replace(/\s*(?:para\s+(?:o\s+)?grupo\s+["']?[^"']+["']?|para\s+["'][^"']+["']|para\s+todos)\s*/gi, ' ')
+        // Limpar espaços extras
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    // Capitalizar primeira letra
+    if (title.length > 0) {
+        title = title.charAt(0).toUpperCase() + title.slice(1);
+    }
+
+    return title || 'Nova tarefa';
+};
+
+// Buscar estatísticas do utilizador
+const getUserStats = async (userId) => {
+    try {
+        const [users] = await db.query(
+            'SELECT name, xp, level, tasks_completed FROM users WHERE id = ?',
+            [userId]
+        );
+
+        const [pendingTasks] = await db.query(
+            'SELECT COUNT(*) as count FROM tasks WHERE (user_id = ? OR assigned_to = ?) AND is_completed = 0',
+            [userId, userId]
+        );
+
+        const [completedTasks] = await db.query(
+            'SELECT COUNT(*) as count FROM tasks WHERE (user_id = ? OR assigned_to = ?) AND is_completed = 1',
+            [userId, userId]
+        );
+
+        const [groups] = await db.query(
+            'SELECT COUNT(*) as count FROM group_members WHERE user_id = ?',
+            [userId]
+        );
+
+        return {
+            name: users[0]?.name || 'Utilizador',
+            xp: users[0]?.xp || 0,
+            level: users[0]?.level || 1,
+            tasks_completed: users[0]?.tasks_completed || 0,
+            pending_tasks: pendingTasks[0]?.count || 0,
+            completed_count: completedTasks[0]?.count || 0,
+            groups_count: groups[0]?.count || 0
+        };
+    } catch (error) {
+        console.error("Erro ao buscar stats:", error);
+        return null;
+    }
+};
+
+// Buscar grupos do utilizador
+const getUserGroups = async (userId) => {
+    try {
+        const [groups] = await db.query(`
+            SELECT g.id, g.name, g.invite_code, gm.role,
+                   (SELECT COUNT(*) FROM group_members WHERE group_id = g.id) as member_count
+            FROM groups g
+            INNER JOIN group_members gm ON g.id = gm.group_id
+            WHERE gm.user_id = ?
+            ORDER BY g.name
+        `, [userId]);
+        return groups;
+    } catch (error) {
+        console.error("Erro ao buscar grupos:", error);
+        return [];
+    }
+};
+
+// Encontrar grupo por nome
+const findGroupByName = async (userId, groupName) => {
+    try {
+        const [groups] = await db.query(`
+            SELECT g.id, g.name FROM groups g
+            INNER JOIN group_members gm ON g.id = gm.group_id
+            WHERE gm.user_id = ? AND LOWER(g.name) LIKE ?
+        `, [userId, `%${groupName.toLowerCase()}%`]);
+        return groups.length > 0 ? groups[0] : null;
+    } catch (error) {
+        return null;
+    }
+};
+
+// ============================================
+// COMANDOS MANUAIS (SOBRE O SITE)
+// ============================================
+
+const processManualCommand = async (text, userId) => {
+    
+    // ==========================================
+    // COMANDO: AJUDA
+    // ==========================================
+    if (text === 'ajuda' || text === 'help' || text === 'comandos' || text === '?') {
+        return {
+            handled: true,
+            response: `📚 **Todos os Comandos do Lifinity:**
+
+**📝 TAREFAS:**
+• \`criar tarefa [nome]\` - Criar tarefa pessoal
+• \`criar tarefa [nome] amanhã às 15h\` - Com prazo
+• \`criar tarefa [nome] urgente\` - Alta prioridade
+• \`criar tarefa [nome] para grupo [nome]\` - Para um grupo
+• \`criar tarefa [nome] para todos\` - Para todos os grupos
+• \`tarefas pendentes\` - Ver tarefas por fazer
+• \`tarefas concluídas\` - Ver tarefas feitas
+• \`tarefas de hoje\` - Tarefas com prazo hoje
+• \`tarefas urgentes\` - Só prioridade alta
+
+**👥 GRUPOS:**
+• \`meus grupos\` - Listar os teus grupos
+• \`criar grupo [nome]\` - Criar novo grupo
+• \`entrar grupo [código]\` - Entrar com código
+• \`membros do grupo [nome]\` - Ver membros
+
+**📊 ESTATÍSTICAS:**
+• \`meu nível\` ou \`meu xp\` - Ver progresso
+• \`estatísticas\` - Resumo completo
+• \`ranking\` - Ver leaderboard
+
+**ℹ️ INFORMAÇÕES:**
+• \`como funciona o xp?\` - Sistema de pontos
+• \`como criar grupo?\` - Tutorial grupos
+• \`sobre o lifinity\` - Sobre a app
+
+**💡 IA (Gemini):**
+• Qualquer outra pergunta vai para a IA!
+• Ex: "dá-me motivação", "dicas de estudo"`,
+            type: "help"
+        };
+    }
+
+    // ==========================================
+    // COMANDO: CRIAR TAREFA (Avançado)
+    // ==========================================
+    if (text.match(/^(criar tarefa|cria tarefa|nova tarefa|adicionar tarefa|adiciona tarefa|lembrar|lembra-me)/i)) {
+        const title = extractTaskTitle(text);
+        const dueDate = extractDateTime(text);
+        const priority = extractPriority(text);
+        const groupName = extractGroupName(text);
+
+        let groupId = null;
+        let groupInfo = null;
+        let createdForAll = false;
+
+        // Se especificou grupo
+        if (groupName) {
+            if (groupName === '__ALL__') {
+                // Criar para todos os grupos
+                createdForAll = true;
+                const userGroups = await getUserGroups(userId);
+                
+                if (userGroups.length === 0) {
+                    return {
+                        handled: true,
+                        response: "❌ Não tens nenhum grupo. Cria um primeiro com: **criar grupo [nome]**",
+                        type: "error"
+                    };
+                }
+
+                // Criar tarefa em cada grupo
+                let createdCount = 0;
+                for (const group of userGroups) {
+                    try {
+                        await db.query(
+                            'INSERT INTO tasks (user_id, group_id, title, priority, due_date) VALUES (?, ?, ?, ?, ?)',
+                            [userId, group.id, title, priority, dueDate]
+                        );
+                        createdCount++;
+                    } catch (err) {
+                        console.error("Erro ao criar tarefa no grupo", group.id, err);
+                    }
+                }
+
+                let response = `✅ **Tarefa criada em ${createdCount} grupo(s)!**\n\n📝 **${title}**`;
+                const priorityEmoji = priority === 'high' ? '🔴 Alta' : priority === 'low' ? '🟢 Baixa' : '🟡 Média';
+                response += `\n⚡ Prioridade: ${priorityEmoji}`;
+                if (dueDate) {
+                    const options = { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' };
+                    response += `\n📅 Prazo: ${dueDate.toLocaleDateString('pt-PT', options)}`;
+                }
+                response += `\n👥 Grupos: Todos os teus grupos`;
+
+                return { handled: true, response, type: "task_created" };
+            } else {
+                // Procurar grupo específico
+                groupInfo = await findGroupByName(userId, groupName);
+                if (!groupInfo) {
+                    return {
+                        handled: true,
+                        response: `❌ Grupo "${groupName}" não encontrado.\n\nUsa **meus grupos** para ver os teus grupos.`,
+                        type: "error"
+                    };
+                }
+                groupId = groupInfo.id;
+            }
+        }
+
+        // Criar tarefa
+        try {
+            const [result] = await db.query(
+                'INSERT INTO tasks (user_id, group_id, title, priority, due_date) VALUES (?, ?, ?, ?, ?)',
+                [userId, groupId, title, priority, dueDate]
+            );
+
+            let response = `✅ **Tarefa criada com sucesso!**\n\n📝 **${title}**`;
+            
+            const priorityEmoji = priority === 'high' ? '🔴 Alta' : priority === 'low' ? '🟢 Baixa' : '🟡 Média';
+            response += `\n⚡ Prioridade: ${priorityEmoji}`;
+            
+            if (dueDate) {
+                const options = { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' };
+                response += `\n📅 Prazo: ${dueDate.toLocaleDateString('pt-PT', options)}`;
+            }
+
+            if (groupInfo) {
+                response += `\n👥 Grupo: ${groupInfo.name}`;
+            } else {
+                response += `\n👤 Tarefa pessoal`;
+            }
+
+            return {
+                handled: true,
+                response,
+                type: "task_created",
+                task: { id: result.insertId, title, priority, due_date: dueDate, group_id: groupId }
+            };
+        } catch (error) {
+            console.error("Erro ao criar tarefa:", error);
+            return {
+                handled: true,
+                response: "❌ Erro ao criar tarefa. Tenta novamente.",
+                type: "error"
+            };
+        }
+    }
+
+    // ==========================================
+    // COMANDO: TAREFAS PENDENTES
+    // ==========================================
+    if (text.match(/(tarefas pendentes|minhas tarefas|tarefas por fazer|por fazer|pendentes)/i)) {
+        try {
+            const [tasks] = await db.query(`
+                SELECT t.title, t.priority, t.due_date, g.name as group_name
+                FROM tasks t
+                LEFT JOIN groups g ON t.group_id = g.id
+                WHERE (t.user_id = ? OR t.assigned_to = ?) AND t.is_completed = 0
+                ORDER BY 
+                    CASE t.priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END,
+                    t.due_date ASC
+                LIMIT 10
+            `, [userId, userId]);
+
+            if (tasks.length === 0) {
+                return {
+                    handled: true,
+                    response: "🎉 **Parabéns!** Não tens tarefas pendentes!\n\nAproveita para descansar ou criar novas metas. 😊",
+                    type: "tasks"
+                };
+            }
+
+            let response = "📋 **Tarefas pendentes:**\n\n";
+            tasks.forEach((task, i) => {
+                const emoji = task.priority === 'high' ? '🔴' : task.priority === 'low' ? '🟢' : '🟡';
+                const groupTag = task.group_name ? ` [${task.group_name}]` : '';
+                response += `${i + 1}. ${emoji} ${task.title}${groupTag}\n`;
+            });
+
+            const stats = await getUserStats(userId);
+            response += `\n📊 Total pendentes: **${stats.pending_tasks}**`;
+
+            return { handled: true, response, type: "tasks" };
+        } catch (error) {
+            return { handled: true, response: "❌ Erro ao carregar tarefas.", type: "error" };
+        }
+    }
+
+    // ==========================================
+    // COMANDO: TAREFAS URGENTES
+    // ==========================================
+    if (text.match(/(tarefas urgentes|urgentes|prioridade alta)/i)) {
+        try {
+            const [tasks] = await db.query(`
+                SELECT t.title, t.due_date, g.name as group_name
+                FROM tasks t
+                LEFT JOIN groups g ON t.group_id = g.id
+                WHERE (t.user_id = ? OR t.assigned_to = ?) 
+                  AND t.is_completed = 0 
+                  AND t.priority = 'high'
+                ORDER BY t.due_date ASC
+                LIMIT 10
+            `, [userId, userId]);
+
+            if (tasks.length === 0) {
+                return {
+                    handled: true,
+                    response: "✅ Não tens tarefas urgentes! Bom trabalho! 🎯",
+                    type: "tasks"
+                };
+            }
+
+            let response = "🔴 **Tarefas URGENTES:**\n\n";
+            tasks.forEach((task, i) => {
+                const groupTag = task.group_name ? ` [${task.group_name}]` : '';
+                response += `${i + 1}. ⚠️ ${task.title}${groupTag}\n`;
+            });
+
+            return { handled: true, response, type: "tasks" };
+        } catch (error) {
+            return { handled: true, response: "❌ Erro ao carregar tarefas.", type: "error" };
+        }
+    }
+
+    // ==========================================
+    // COMANDO: TAREFAS DE HOJE
+    // ==========================================
+    if (text.match(/(tarefas de hoje|hoje|para hoje)/i)) {
+        try {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            const [tasks] = await db.query(`
+                SELECT t.title, t.priority, t.due_date, g.name as group_name
+                FROM tasks t
+                LEFT JOIN groups g ON t.group_id = g.id
+                WHERE (t.user_id = ? OR t.assigned_to = ?) 
+                  AND t.is_completed = 0 
+                  AND t.due_date >= ? AND t.due_date < ?
+                ORDER BY t.due_date ASC
+            `, [userId, userId, today, tomorrow]);
+
+            if (tasks.length === 0) {
+                return {
+                    handled: true,
+                    response: "📅 Não tens tarefas com prazo para hoje.\n\nAproveita para adiantar trabalho! 💪",
+                    type: "tasks"
+                };
+            }
+
+            let response = "📅 **Tarefas para HOJE:**\n\n";
+            tasks.forEach((task, i) => {
+                const emoji = task.priority === 'high' ? '🔴' : task.priority === 'low' ? '🟢' : '🟡';
+                const hora = task.due_date ? new Date(task.due_date).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : '';
+                response += `${i + 1}. ${emoji} ${task.title} ${hora ? `(${hora})` : ''}\n`;
+            });
+
+            return { handled: true, response, type: "tasks" };
+        } catch (error) {
+            return { handled: true, response: "❌ Erro ao carregar tarefas.", type: "error" };
+        }
+    }
+
+    // ==========================================
+    // COMANDO: TAREFAS CONCLUÍDAS
+    // ==========================================
+    if (text.match(/(tarefas concluídas|tarefas concluidas|tarefas feitas|concluídas|feitas)/i)) {
+        try {
+            const [tasks] = await db.query(`
+                SELECT t.title, g.name as group_name
+                FROM tasks t
+                LEFT JOIN groups g ON t.group_id = g.id
+                WHERE (t.user_id = ? OR t.assigned_to = ?) AND t.is_completed = 1
+                ORDER BY t.created_at DESC
+                LIMIT 10
+            `, [userId, userId]);
+
+            if (tasks.length === 0) {
+                return {
+                    handled: true,
+                    response: "📝 Ainda não concluíste nenhuma tarefa.\n\nVamos começar? Cria a tua primeira tarefa! 💪",
+                    type: "tasks"
+                };
+            }
+
+            let response = "✅ **Últimas tarefas concluídas:**\n\n";
+            tasks.forEach((task, i) => {
+                const groupTag = task.group_name ? ` [${task.group_name}]` : '';
+                response += `${i + 1}. ✓ ${task.title}${groupTag}\n`;
+            });
+
+            const stats = await getUserStats(userId);
+            response += `\n🏆 Total concluídas: **${stats.completed_count}**`;
+
+            return { handled: true, response, type: "tasks" };
+        } catch (error) {
+            return { handled: true, response: "❌ Erro ao carregar tarefas.", type: "error" };
+        }
+    }
+
+    // ==========================================
+    // COMANDO: MEUS GRUPOS
+    // ==========================================
+    if (text.match(/(meus grupos|os meus grupos|listar grupos|ver grupos)/i)) {
+        try {
+            const groups = await getUserGroups(userId);
+
+            if (groups.length === 0) {
+                return {
+                    handled: true,
+                    response: "👥 Ainda não tens grupos.\n\n**Para criar:** `criar grupo [nome]`\n**Para entrar:** `entrar grupo [código]`",
+                    type: "groups"
+                };
+            }
+
+            let response = "👥 **Os teus grupos:**\n\n";
+            groups.forEach((group, i) => {
+                const roleEmoji = group.role === 'admin' ? '👑' : '👤';
+                response += `${i + 1}. ${roleEmoji} **${group.name}**\n`;
+                response += `   📋 Código: \`${group.invite_code}\` | 👥 ${group.member_count} membro(s)\n\n`;
+            });
+
+            return { handled: true, response, type: "groups" };
+        } catch (error) {
+            return { handled: true, response: "❌ Erro ao carregar grupos.", type: "error" };
+        }
+    }
+
+    // ==========================================
+    // COMANDO: CRIAR GRUPO
+    // ==========================================
+    if (text.match(/^(criar grupo|cria grupo|novo grupo)/i)) {
+        const groupName = text.replace(/^(criar grupo|cria grupo|novo grupo)\s*/i, '').trim();
+
+        if (!groupName || groupName.length < 2) {
+            return {
+                handled: true,
+                response: "❌ Indica o nome do grupo.\n\n**Exemplo:** `criar grupo Família`",
+                type: "error"
+            };
+        }
+
+        try {
+            // Gerar código de convite
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let inviteCode = '';
+            for (let i = 0; i < 8; i++) {
+                inviteCode += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+
+            // Criar grupo
+            const [result] = await db.query(
+                'INSERT INTO groups (name, created_by, invite_code) VALUES (?, ?, ?)',
+                [groupName, userId, inviteCode]
+            );
+
+            // Adicionar criador como admin
+            await db.query(
+                'INSERT INTO group_members (group_id, user_id, role) VALUES (?, ?, ?)',
+                [result.insertId, userId, 'admin']
+            );
+
+            return {
+                handled: true,
+                response: `✅ **Grupo criado com sucesso!**
+
+👥 **${groupName}**
+📋 Código de convite: \`${inviteCode}\`
+
+Partilha este código com quem quiseres convidar!
+Eles podem usar: \`entrar grupo ${inviteCode}\``,
+                type: "group_created"
+            };
+        } catch (error) {
+            console.error("Erro ao criar grupo:", error);
+            return {
+                handled: true,
+                response: "❌ Erro ao criar grupo. Tenta novamente.",
+                type: "error"
+            };
+        }
+    }
+
+    // ==========================================
+    // COMANDO: ENTRAR GRUPO
+    // ==========================================
+    if (text.match(/^(entrar grupo|entrar no grupo|juntar grupo|código|codigo)/i)) {
+        const code = text.replace(/^(entrar grupo|entrar no grupo|juntar grupo|código|codigo)\s*/i, '').trim().toUpperCase();
+
+        if (!code || code.length < 4) {
+            return {
+                handled: true,
+                response: "❌ Indica o código de convite.\n\n**Exemplo:** `entrar grupo ABC12345`",
+                type: "error"
+            };
+        }
+
+        try {
+            // Procurar grupo pelo código
+            const [groups] = await db.query('SELECT * FROM groups WHERE invite_code = ?', [code]);
+
+            if (groups.length === 0) {
+                return {
+                    handled: true,
+                    response: "❌ Código de convite inválido.\n\nVerifica se copiaste corretamente.",
+                    type: "error"
+                };
+            }
+
+            const group = groups[0];
+
+            // Verificar se já é membro
+            const [existing] = await db.query(
+                'SELECT * FROM group_members WHERE group_id = ? AND user_id = ?',
+                [group.id, userId]
+            );
+
+            if (existing.length > 0) {
+                return {
+                    handled: true,
+                    response: `ℹ️ Já és membro do grupo **${group.name}**!`,
+                    type: "info"
+                };
+            }
+
+            // Adicionar ao grupo
+            await db.query(
+                'INSERT INTO group_members (group_id, user_id, role) VALUES (?, ?, ?)',
+                [group.id, userId, 'member']
+            );
+
+            return {
+                handled: true,
+                response: `✅ **Entraste no grupo!**\n\n👥 **${group.name}**\n\nAgora podes ver e criar tarefas neste grupo!`,
+                type: "group_joined"
+            };
+        } catch (error) {
+            console.error("Erro ao entrar no grupo:", error);
+            return {
+                handled: true,
+                response: "❌ Erro ao entrar no grupo. Tenta novamente.",
+                type: "error"
+            };
+        }
+    }
+
+    // ==========================================
+    // COMANDO: MEMBROS DO GRUPO
+    // ==========================================
+    if (text.match(/(membros do grupo|membros grupo|quem está no grupo)/i)) {
+        const groupName = text.replace(/(membros do grupo|membros grupo|quem está no grupo)\s*/i, '').trim();
+
+        if (!groupName) {
+            return {
+                handled: true,
+                response: "❌ Indica o nome do grupo.\n\n**Exemplo:** `membros do grupo Família`",
+                type: "error"
+            };
+        }
+
+        try {
+            const group = await findGroupByName(userId, groupName);
+            if (!group) {
+                return {
+                    handled: true,
+                    response: `❌ Grupo "${groupName}" não encontrado ou não tens acesso.`,
+                    type: "error"
+                };
+            }
+
+            const [members] = await db.query(`
+                SELECT u.name, gm.role
+                FROM users u
+                INNER JOIN group_members gm ON u.id = gm.user_id
+                WHERE gm.group_id = ?
+                ORDER BY gm.role DESC, u.name
+            `, [group.id]);
+
+            let response = `👥 **Membros de "${group.name}":**\n\n`;
+            members.forEach((member, i) => {
+                const roleEmoji = member.role === 'admin' ? '👑' : '👤';
+                response += `${i + 1}. ${roleEmoji} ${member.name}\n`;
+            });
+
+            return { handled: true, response, type: "groups" };
+        } catch (error) {
+            return { handled: true, response: "❌ Erro ao carregar membros.", type: "error" };
+        }
+    }
+
+    // ==========================================
+    // COMANDO: MEU NÍVEL / XP
+    // ==========================================
+    if (text.match(/(meu nível|meu nivel|meu xp|minha pontuação|meu progresso|quanto xp|qual.*nível)/i)) {
+        const stats = await getUserStats(userId);
+        if (!stats) {
+            return { handled: true, response: "❌ Erro ao carregar dados.", type: "error" };
+        }
+
+        return {
+            handled: true,
+            response: `🏆 **O teu progresso, ${stats.name}!**
+
+⭐ **Nível:** ${stats.level}
+✨ **XP Total:** ${stats.xp}
+✅ **Tarefas completadas:** ${stats.tasks_completed}
+⏳ **Tarefas pendentes:** ${stats.pending_tasks}
+👥 **Grupos:** ${stats.groups_count}
+
+Continua assim! Cada tarefa concluída dá XP! 💪`,
+            type: "level"
+        };
+    }
+
+    // ==========================================
+    // COMANDO: ESTATÍSTICAS
+    // ==========================================
+    if (text.match(/(estatísticas|estatisticas|stats|resumo|dashboard)/i)) {
+        const stats = await getUserStats(userId);
+        if (!stats) {
+            return { handled: true, response: "❌ Erro ao carregar dados.", type: "error" };
+        }
+
+        const total = stats.pending_tasks + stats.completed_count;
+        const rate = total > 0 ? Math.round((stats.completed_count / total) * 100) : 0;
+
+        return {
+            handled: true,
+            response: `📊 **Estatísticas de ${stats.name}:**
+
+📋 **Tarefas:**
+• Total: ${total}
+• Concluídas: ${stats.completed_count} ✅
+• Pendentes: ${stats.pending_tasks} ⏳
+• Taxa de conclusão: ${rate}%
+
+🏆 **Gamificação:**
+• Nível: ${stats.level}
+• XP: ${stats.xp}
+
+👥 **Social:**
+• Grupos: ${stats.groups_count}
+
+📈 Vai à página **Estatísticas** para ver gráficos detalhados!`,
+            type: "stats"
+        };
+    }
+
+    // ==========================================
+    // COMANDO: RANKING
+    // ==========================================
+    if (text.match(/(ranking|leaderboard|top|melhores)/i)) {
+        try {
+            const [users] = await db.query(`
+                SELECT name, xp, level, tasks_completed
+                FROM users
+                ORDER BY xp DESC
+                LIMIT 10
+            `);
+
+            if (users.length === 0) {
+                return {
+                    handled: true,
+                    response: "📊 Ainda não há dados no ranking.",
+                    type: "stats"
+                };
+            }
+
+            let response = "🏆 **Top 10 Ranking:**\n\n";
+            users.forEach((user, i) => {
+                let medal = '';
+                if (i === 0) medal = '🥇';
+                else if (i === 1) medal = '🥈';
+                else if (i === 2) medal = '🥉';
+                else medal = `${i + 1}.`;
+
+                response += `${medal} **${user.name}** - Nv.${user.level} (${user.xp} XP)\n`;
+            });
+
+            response += `\n💡 Completa tarefas para subir no ranking!`;
+
+            return { handled: true, response, type: "stats" };
+        } catch (error) {
+            return { handled: true, response: "❌ Erro ao carregar ranking.", type: "error" };
+        }
+    }
+
+    // ==========================================
+    // COMANDO: COMO CRIAR GRUPO
+    // ==========================================
+    if (text.match(/(como criar grupo|tutorial grupo|ajuda grupo)/i)) {
+        return {
+            handled: true,
+            response: `👥 **Como usar Grupos:**
+
+**Criar grupo:**
+\`criar grupo [nome]\`
+Ex: \`criar grupo Família\`
+
+**Entrar num grupo:**
+\`entrar grupo [código]\`
+Ex: \`entrar grupo ABC12345\`
+
+**Ver os teus grupos:**
+\`meus grupos\`
+
+**Criar tarefa para grupo:**
+\`criar tarefa [nome] para grupo [nome do grupo]\`
+
+**Criar tarefa para todos os grupos:**
+\`criar tarefa [nome] para todos\``,
+            type: "help"
+        };
+    }
+
+    // ==========================================
+    // COMANDO: COMO FUNCIONA XP
+    // ==========================================
+    if (text.match(/(como funciona.*xp|sistema de xp|ganhar xp|como ganho xp|pontos)/i)) {
+        return {
+            handled: true,
+            response: `⭐ **Sistema de XP:**
+
+**Ganhas XP ao completar tarefas:**
+• 🟢 Prioridade Baixa: **7 XP**
+• 🟡 Prioridade Média: **10 XP**
+• 🔴 Prioridade Alta: **15 XP**
+
+**Bónus:**
+• ⏰ Completar no prazo: **+3 XP**
+• 🔥 Streak 3+ dias: **+2 XP**
+• 🔥 Streak 7+ dias: **+5 XP**
+
+**Níveis:**
+• Nível 1→2: 100 XP
+• Cada nível seguinte: +50 XP extra
+
+🏆 Compete no **ranking** com os teus amigos!`,
+            type: "help"
+        };
+    }
+
+    // ==========================================
+    // COMANDO: SOBRE O LIFINITY
+    // ==========================================
+    if (text.match(/(o que é.*lifinity|sobre.*lifinity|sobre a app|sobre o site)/i)) {
+        return {
+            handled: true,
+            response: `🌟 **O que é o Lifinity?**
+
+O Lifinity é uma **agenda partilhada** para famílias e equipas!
+
+**✨ Funcionalidades:**
+• ✅ Criar e gerir tarefas com prioridades
+• 👥 Grupos para partilhar tarefas
+• 📊 Estatísticas e gráficos
+• ⭐ Sistema de XP e níveis (gamificação)
+• 📖 Versículos diários de inspiração
+• 🤖 Assistente IA com Google Gemini
+
+**🛠️ Tecnologias:**
+• Frontend: React + Tailwind CSS
+• Backend: Node.js + Express
+• Base de dados: MySQL
+• Módulo nativo em C para performance
+• IA: Google Gemini
+
+Desenvolvido como projeto PAP! 🎓`,
+            type: "help"
+        };
+    }
+
+    // ==========================================
+    // SAUDAÇÕES
+    // ==========================================
+    if (text.match(/^(olá|ola|oi|hey|bom dia|boa tarde|boa noite|e aí|eai)$/i)) {
+        const stats = await getUserStats(userId);
+        const greeting = new Date().getHours() < 12 ? 'Bom dia' : new Date().getHours() < 19 ? 'Boa tarde' : 'Boa noite';
+
+        return {
+            handled: true,
+            response: `${greeting}, ${stats?.name || 'utilizador'}! 👋
+
+Como posso ajudar-te hoje?
+
+📝 **Ações rápidas:**
+• \`criar tarefa [nome]\`
+• \`tarefas pendentes\`
+• \`meu nível\`
+
+💡 Escreve **ajuda** para ver todos os comandos!`,
+            type: "greeting"
+        };
+    }
+
+    // Não é um comando manual
+    return { handled: false };
+};
+
+// ============================================
+// GEMINI AI (CONVERSAS INTELIGENTES)
+// ============================================
+
+const processWithGemini = async (message, userId, history) => {
+    if (!model) {
+        return {
+            response: "🤖 O assistente IA não está disponível de momento.\n\nMas podes usar os comandos do site! Escreve **\"ajuda\"** para ver.",
+            type: "error"
+        };
+    }
+
+    try {
+        const stats = await getUserStats(userId);
+        
+        const systemPrompt = `Tu és o assistente virtual do Lifinity, uma app de gestão de tarefas.
+
+UTILIZADOR: ${stats?.name || 'Utilizador'} (Nível ${stats?.level || 1}, ${stats?.pending_tasks || 0} tarefas pendentes)
+
+REGRAS IMPORTANTES:
+1. Responde SEMPRE em Português de Portugal
+2. Sê simpático, motivador e usa emojis
+3. Respostas curtas e úteis (máximo 3-4 parágrafos)
+4. NÃO uses markdown complexo, apenas **negrito** e listas simples
+5. Podes dar dicas de produtividade, motivação, organização
+6. Se perguntarem como fazer algo na app, explica de forma simples
+7. Se perguntarem sobre comandos, sugere escrever "ajuda"
+8. Se quiserem criar tarefas, sugere usar: criar tarefa [nome]`;
+
+        const chatHistory = history.slice(-6).map(msg => ({
+            role: msg.type === 'user' ? 'user' : 'model',
+            parts: [{ text: msg.text }]
+        }));
+
+        const chat = model.startChat({
+            history: [
+                { role: 'user', parts: [{ text: systemPrompt }] },
+                { role: 'model', parts: [{ text: 'Entendido! Vou ajudar em Português de Portugal, ser simpático e usar emojis! 😊' }] },
+                ...chatHistory
+            ]
+        });
+
+        const result = await chat.sendMessage(message);
+        const response = result.response.text();
+
+        return { response, type: "gemini" };
+
+    } catch (error) {
+        console.error("Erro Gemini:", error);
+        return {
+            response: "😅 Desculpa, tive um problema a processar.\n\nTenta perguntar de outra forma ou usa **\"ajuda\"** para ver comandos!",
+            type: "error"
+        };
+    }
+};
+
+// ============================================
+// PROCESSADOR PRINCIPAL (HÍBRIDO)
+// ============================================
+
+export const processMessage = async (req, res) => {
+    const { message, history = [] } = req.body;
+    const userId = req.user.id;
+
+    if (!message || message.trim().length === 0) {
+        return res.json({
+            response: "🤔 Não percebi. Escreve algo!",
+            type: "error"
+        });
+    }
+
+    const text = message.toLowerCase().trim();
+
+    try {
+        // 1️⃣ PRIMEIRO: Tentar comando manual (site)
+        const manualResult = await processManualCommand(text, userId);
+        
+        if (manualResult.handled) {
+            console.log("📌 Comando manual:", text);
+            return res.json({
+                response: manualResult.response,
+                type: manualResult.type,
+                task: manualResult.task || null
+            });
+        }
+
+        // 2️⃣ SEGUNDO: Enviar para Gemini AI
+        console.log("🤖 Enviando para Gemini:", text);
+        const geminiResult = await processWithGemini(message, userId, history);
+        
+        return res.json({
+            response: geminiResult.response,
+            type: geminiResult.type
+        });
+
+    } catch (error) {
+        console.error("Erro no chatbot:", error);
+        return res.status(500).json({
+            response: "❌ Ocorreu um erro. Tenta novamente.",
+            type: "error"
+        });
+    }
+};
+
+
+lifinity/controllers/groupController.js
+import db from '../db.js';
+import { createRequire } from 'module';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+// Criar require para importar o addon
+const require = createRequire(import.meta.url);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Importar o addon C
+let cAddon;
+try {
+    cAddon = require(join(__dirname, '../addons/index.cjs'));
+    console.log("✅ Addon C disponível para grupos");
+} catch (error) {
+    console.log("⚠️ Addon C não disponível para grupos:", error.message);
+    cAddon = null;
+}
+
+// Gerar código de convite usando C!
+const generateInviteCode = () => {
+    if (cAddon && cAddon.isAddonAvailable()) {
+        const code = cAddon.generateCode();
+        console.log("🔧 Código gerado por C:", code);
+        return code;
+    }
+    // Fallback JavaScript
+    console.log("🔧 Código gerado por JavaScript (fallback)");
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 8; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+};
+
+// 1. CRIAR GRUPO
+export const createGroup = async (req, res) => {
+    const { name, description } = req.body;
+    const userId = req.user.id;
+
+    if (!name) {
+        return res.status(400).json({ error: "O nome do grupo é obrigatório." });
+    }
+
+    try {
+        const inviteCode = generateInviteCode();
+
+        const [result] = await db.query(
+            'INSERT INTO groups (name, description, created_by, invite_code) VALUES (?, ?, ?, ?)',
+            [name, description, userId, inviteCode]
+        );
+
+        const groupId = result.insertId;
+
+        await db.query(
+            'INSERT INTO group_members (group_id, user_id, role) VALUES (?, ?, ?)',
+            [groupId, userId, 'admin']
+        );
+
+        res.status(201).json({
+            message: "Grupo criado com sucesso!",
+            group: {
+                id: groupId,
+                name,
+                description,
+                invite_code: inviteCode,
+                role: 'admin'
+            }
+        });
+
+    } catch (error) {
+        console.error("Erro ao criar grupo:", error);
+        res.status(500).json({ error: "Erro ao criar grupo." });
+    }
+};
+
+// 2. ENTRAR NUM GRUPO
+export const joinGroup = async (req, res) => {
+    const { inviteCode } = req.body;
+    const userId = req.user.id;
+
+    if (!inviteCode) {
+        return res.status(400).json({ error: "Código de convite obrigatório." });
+    }
+
+    try {
+        const [groups] = await db.query(
+            'SELECT * FROM groups WHERE invite_code = ?',
+            [inviteCode.toUpperCase()]
+        );
+
+        if (groups.length === 0) {
+            return res.status(404).json({ error: "Código de convite inválido." });
+        }
+
+        const group = groups[0];
+
+        const [existing] = await db.query(
+            'SELECT * FROM group_members WHERE group_id = ? AND user_id = ?',
+            [group.id, userId]
+        );
+
+        if (existing.length > 0) {
+            return res.status(409).json({ error: "Já és membro deste grupo." });
+        }
+
+        await db.query(
+            'INSERT INTO group_members (group_id, user_id, role) VALUES (?, ?, ?)',
+            [group.id, userId, 'member']
+        );
+
+        res.json({
+            message: "Entraste no grupo com sucesso!",
+            group: {
+                id: group.id,
+                name: group.name,
+                description: group.description,
+                role: 'member'
+            }
+        });
+
+    } catch (error) {
+        console.error("Erro ao entrar no grupo:", error);
+        res.status(500).json({ error: "Erro ao entrar no grupo." });
+    }
+};
+
+// 3. LISTAR MEUS GRUPOS
+export const getMyGroups = async (req, res) => {
+    const userId = req.user.id;
+
+    try {
+        const [groups] = await db.query(`
+            SELECT 
+                g.id, 
+                g.name, 
+                g.description, 
+                g.invite_code,
+                g.created_at,
+                gm.role,
+                (SELECT COUNT(*) FROM group_members WHERE group_id = g.id) as member_count
+            FROM groups g
+            INNER JOIN group_members gm ON g.id = gm.group_id
+            WHERE gm.user_id = ?
+            ORDER BY g.created_at DESC
+        `, [userId]);
+
+        res.json(groups);
+
+    } catch (error) {
+        console.error("Erro ao listar grupos:", error);
+        res.status(500).json({ error: "Erro ao carregar grupos." });
+    }
+};
+
+// 4. VER MEMBROS DO GRUPO
+export const getGroupMembers = async (req, res) => {
+    const { groupId } = req.params;
+    const userId = req.user.id;
+
+    try {
+        const [membership] = await db.query(
+            'SELECT * FROM group_members WHERE group_id = ? AND user_id = ?',
+            [groupId, userId]
+        );
+
+        if (membership.length === 0) {
+            return res.status(403).json({ error: "Não tens acesso a este grupo." });
+        }
+
+        const [members] = await db.query(`
+            SELECT u.id, u.name, u.email, gm.role, gm.joined_at
+            FROM users u
+            INNER JOIN group_members gm ON u.id = gm.user_id
+            WHERE gm.group_id = ?
+            ORDER BY gm.role DESC, gm.joined_at ASC
+        `, [groupId]);
+
+        res.json(members);
+
+    } catch (error) {
+        console.error("Erro ao listar membros:", error);
+        res.status(500).json({ error: "Erro ao carregar membros." });
+    }
+};
+
+// 5. SAIR DO GRUPO
+export const leaveGroup = async (req, res) => {
+    const { groupId } = req.params;
+    const userId = req.user.id;
+
+    try {
+        const [result] = await db.query(
+            'DELETE FROM group_members WHERE group_id = ? AND user_id = ?',
+            [groupId, userId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Não és membro deste grupo." });
+        }
+
+        res.json({ message: "Saíste do grupo." });
+
+    } catch (error) {
+        console.error("Erro ao sair do grupo:", error);
+        res.status(500).json({ error: "Erro ao sair do grupo." });
+    }
+};
+
+
+lifinity/controllers/profileController.js
+import db from '../db.js';
+import { createRequire } from 'module';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const require = createRequire(import.meta.url);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Importar o addon C
+let cAddon;
+try {
+    cAddon = require(join(__dirname, '../addons/index.cjs'));
+    console.log("✅ Addon C disponível para perfil");
+} catch (error) {
+    console.log("⚠️ Addon C não disponível para perfil:", error.message);
+    cAddon = null;
+}
+
+// 1. OBTER PERFIL
+export const getProfile = async (req, res) => {
+    const userId = req.user.id;
+
+    try {
+        const [users] = await db.query(
+            'SELECT id, name, email, xp, level, tasks_completed, created_at FROM users WHERE id = ?',
+            [userId]
+        );
+
+        if (users.length === 0) {
+            return res.status(404).json({ error: "Utilizador não encontrado." });
+        }
+
+        const user = users[0];
+
+        // Usar C para calcular nível e progresso!
+        let level, xpProgress, xpNeeded, progressPercent;
+        
+        if (cAddon && cAddon.isAddonAvailable()) {
+            level = cAddon.calculateLevel(user.xp);
+            xpNeeded = cAddon.xpForNextLevel(level);
+            progressPercent = cAddon.calculateLevelProgress(user.xp, level);
+            
+            // Calcular XP no nível atual
+            let accumulated = 0;
+            for (let i = 1; i < level; i++) {
+                accumulated += 100 + (i - 1) * 50;
+            }
+            xpProgress = user.xp - accumulated;
+            
+            console.log("🔧 Nível calculado por C:", level);
+        } else {
+            // Fallback JavaScript
+            level = user.level;
+            xpProgress = user.xp % 100;
+            xpNeeded = 100;
+            progressPercent = xpProgress;
+        }
+
+        // Contar grupos
+        const [groups] = await db.query(
+            'SELECT COUNT(*) as count FROM group_members WHERE user_id = ?',
+            [userId]
+        );
+
+        // Estatísticas de tarefas
+        const [taskStats] = await db.query(`
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN is_completed = 1 THEN 1 ELSE 0 END) as completed,
+                SUM(CASE WHEN is_completed = 0 THEN 1 ELSE 0 END) as pending
+            FROM tasks 
+            WHERE user_id = ? OR assigned_to = ?
+        `, [userId, userId]);
+
+        res.json({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            xp: user.xp,
+            level: level,
+            tasks_completed: user.tasks_completed,
+            created_at: user.created_at,
+            xp_progress: xpProgress,
+            xp_needed: xpNeeded,
+            progress_percent: progressPercent,
+            groups_count: groups[0].count,
+            stats: taskStats[0],
+            calculated_by: cAddon && cAddon.isAddonAvailable() ? 'C' : 'JavaScript'
+        });
+
+    } catch (error) {
+        console.error("Erro ao obter perfil:", error);
+        res.status(500).json({ error: "Erro ao carregar perfil." });
+    }
+};
+
+// 2. ATUALIZAR PERFIL
+export const updateProfile = async (req, res) => {
+    const userId = req.user.id;
+    const { name } = req.body;
+
+    if (!name || name.trim().length < 2) {
+        return res.status(400).json({ error: "Nome deve ter pelo menos 2 caracteres." });
+    }
+
+    try {
+        await db.query('UPDATE users SET name = ? WHERE id = ?', [name.trim(), userId]);
+
+        res.json({ 
+            message: "Perfil atualizado com sucesso!",
+            name: name.trim()
+        });
+
+    } catch (error) {
+        console.error("Erro ao atualizar perfil:", error);
+        res.status(500).json({ error: "Erro ao atualizar perfil." });
+    }
+};
+
+// 3. ADICIONAR XP (usando C!)
+export const addXP = async (userId, taskPriority = 'medium') => {
+    try {
+        // Buscar dados atuais
+        const [users] = await db.query('SELECT xp, level FROM users WHERE id = ?', [userId]);
+        if (users.length === 0) return null;
+
+        const currentXP = users[0].xp;
+        
+        // Usar C para calcular XP ganho!
+        let xpToAdd;
+        if (cAddon && cAddon.isAddonAvailable()) {
+            xpToAdd = cAddon.calculateTaskXP(taskPriority, true, 0);
+            console.log("🔧 XP calculado por C:", xpToAdd);
+        } else {
+            // Fallback JavaScript
+            xpToAdd = 10;
+            if (taskPriority === 'high') xpToAdd += 5;
+            if (taskPriority === 'low') xpToAdd -= 3;
+        }
+
+        const newXP = currentXP + xpToAdd;
+        
+        // Usar C para calcular novo nível!
+        let newLevel;
+        if (cAddon && cAddon.isAddonAvailable()) {
+            newLevel = cAddon.calculateLevel(newXP);
+        } else {
+            newLevel = Math.floor(newXP / 100) + 1;
+        }
+        
+        const leveledUp = newLevel > users[0].level;
+
+        // Atualizar base de dados
+        await db.query(
+            'UPDATE users SET xp = ?, level = ?, tasks_completed = tasks_completed + 1 WHERE id = ?',
+            [newXP, newLevel, userId]
+        );
+
+        return { xpGained: xpToAdd, newXP, newLevel, leveledUp };
+
+    } catch (error) {
+        console.error("Erro ao adicionar XP:", error);
+        return null;
+    }
+};
+
+/// ⬇️⬇️⬇️ ADICIONA AQUI ⬇️⬇️⬇️
+
+// 3.5. REMOVER XP (quando reabre tarefa)
+export const removeXP = async (userId, taskPriority = 'medium') => {
+    try {
+        // Buscar dados atuais
+        const [users] = await db.query('SELECT xp, level FROM users WHERE id = ?', [userId]);
+        if (users.length === 0) return null;
+
+        const currentXP = users[0].xp;
+        
+        // Usar C para calcular XP a remover!
+        let xpToRemove;
+        if (cAddon && cAddon.isAddonAvailable()) {
+            xpToRemove = cAddon.calculateTaskXP(taskPriority, true, 0);
+            console.log("🔧 XP a remover calculado por C:", xpToRemove);
+        } else {
+            // Fallback JavaScript
+            xpToRemove = 10;
+            if (taskPriority === 'high') xpToRemove += 5;
+            if (taskPriority === 'low') xpToRemove -= 3;
+        }
+
+        // Não deixar XP ficar negativo
+        const newXP = Math.max(0, currentXP - xpToRemove);
+        
+        // Usar C para calcular novo nível!
+        let newLevel;
+        if (cAddon && cAddon.isAddonAvailable()) {
+            newLevel = cAddon.calculateLevel(newXP);
+        } else {
+            newLevel = Math.floor(newXP / 100) + 1;
+        }
+        
+        const leveledDown = newLevel < users[0].level;
+
+        // Atualizar base de dados (diminui tasks_completed também)
+        await db.query(
+            'UPDATE users SET xp = ?, level = ?, tasks_completed = GREATEST(0, tasks_completed - 1) WHERE id = ?',
+            [newXP, newLevel, userId]
+        );
+
+        return { xpRemoved: xpToRemove, newXP, newLevel, leveledDown };
+
+    } catch (error) {
+        console.error("Erro ao remover XP:", error);
+        return null;
+    }
+};
+
+// 4. PESQUISAR UTILIZADORES
+export const searchUsers = async (req, res) => {
+    const { q } = req.query;
+    const userId = req.user.id;
+
+    if (!q || q.length < 2) {
+        return res.status(400).json({ error: "Pesquisa deve ter pelo menos 2 caracteres." });
+    }
+
+    try {
+        const [users] = await db.query(`
+            SELECT id, name, email, level 
+            FROM users 
+            WHERE (name LIKE ? OR email LIKE ?) AND id != ?
+            LIMIT 10
+        `, [`%${q}%`, `%${q}%`, userId]);
+
+        res.json(users);
+
+    } catch (error) {
+        console.error("Erro na pesquisa:", error);
+        res.status(500).json({ error: "Erro ao pesquisar utilizadores." });
+    }
+};
+
+// 5. OBTER LEADERBOARD
+export const getLeaderboard = async (req, res) => {
+    try {
+        const [users] = await db.query(`
+            SELECT id, name, xp, level, tasks_completed
+            FROM users 
+            ORDER BY xp DESC
+            LIMIT 10
+        `);
+
+        res.json(users);
+
+    } catch (error) {
+        console.error("Erro ao obter leaderboard:", error);
+        res.status(500).json({ error: "Erro ao carregar ranking." });
+    }
+};
+
+
+lifinity/controllers/statsController.js
+import db from '../db.js';
+
+// 1. ESTATÍSTICAS GERAIS DO UTILIZADOR
+export const getUserStats = async (req, res) => {
+    const userId = req.user.id;
+
+    try {
+        // Dados do utilizador
+        const [users] = await db.query(
+            'SELECT xp, level, tasks_completed, created_at FROM users WHERE id = ?',
+            [userId]
+        );
+
+        if (users.length === 0) {
+            return res.status(404).json({ error: "Utilizador não encontrado." });
+        }
+
+        const user = users[0];
+
+        // Total de tarefas (criadas ou atribuídas)
+        const [taskCount] = await db.query(`
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN is_completed = 1 THEN 1 ELSE 0 END) as completed,
+                SUM(CASE WHEN is_completed = 0 THEN 1 ELSE 0 END) as pending
+            FROM tasks 
+            WHERE user_id = ? OR assigned_to = ?
+        `, [userId, userId]);
+
+        // Taxa de conclusão
+        const completionRate = taskCount[0].total > 0 
+            ? Math.round((taskCount[0].completed / taskCount[0].total) * 100) 
+            : 0;
+
+        // Tarefas por prioridade
+        const [priorityStats] = await db.query(`
+            SELECT 
+                priority,
+                COUNT(*) as count,
+                SUM(CASE WHEN is_completed = 1 THEN 1 ELSE 0 END) as completed
+            FROM tasks 
+            WHERE user_id = ? OR assigned_to = ?
+            GROUP BY priority
+        `, [userId, userId]);
+
+        // Tarefas nos últimos 7 dias (para o gráfico de linha)
+        const [weeklyStats] = await db.query(`
+            SELECT 
+                DATE(created_at) as date,
+                COUNT(*) as created,
+                SUM(CASE WHEN is_completed = 1 THEN 1 ELSE 0 END) as completed
+            FROM tasks 
+            WHERE (user_id = ? OR assigned_to = ?) 
+                AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+            GROUP BY DATE(created_at)
+            ORDER BY date ASC
+        `, [userId, userId]);
+
+        // Tarefas por grupo
+        const [groupStats] = await db.query(`
+            SELECT 
+                g.name as group_name,
+                COUNT(t.id) as total,
+                SUM(CASE WHEN t.is_completed = 1 THEN 1 ELSE 0 END) as completed
+            FROM tasks t
+            INNER JOIN groups g ON t.group_id = g.id
+            WHERE t.group_id IN (SELECT group_id FROM group_members WHERE user_id = ?)
+            GROUP BY g.id, g.name
+        `, [userId]);
+
+        // Calcular streak (dias consecutivos)
+        const [streakData] = await db.query(`
+            SELECT DISTINCT DATE(created_at) as date
+            FROM tasks
+            WHERE (user_id = ? OR assigned_to = ?) AND is_completed = 1
+            ORDER BY date DESC
+            LIMIT 30
+        `, [userId, userId]);
+
+        let currentStreak = 0;
+        let checkDate = new Date();
+        checkDate.setHours(0, 0, 0, 0);
+
+        for (let i = 0; i < streakData.length; i++) {
+            const taskDate = new Date(streakData[i].date);
+            taskDate.setHours(0, 0, 0, 0);
+
+            const diffDays = Math.floor((checkDate - taskDate) / (1000 * 60 * 60 * 24));
+
+            if (diffDays === currentStreak) {
+                currentStreak++;
+            } else {
+                break;
+            }
+        }
+
+        res.json({
+            user: {
+                xp: user.xp,
+                level: user.level,
+                tasks_completed: user.tasks_completed,
+                member_since: user.created_at
+            },
+            tasks: {
+                total: taskCount[0].total,
+                completed: taskCount[0].completed,
+                pending: taskCount[0].pending,
+                completion_rate: completionRate
+            },
+            priority_distribution: priorityStats,
+            weekly_activity: weeklyStats,
+            group_stats: groupStats,
+            streak: currentStreak
+        });
+
+    } catch (error) {
+        console.error("Erro ao obter estatísticas:", error);
+        res.status(500).json({ error: "Erro ao carregar estatísticas." });
+    }
+};
+
+// 2. HISTÓRICO DE XP (últimos 30 dias)
+export const getXPHistory = async (req, res) => {
+    const userId = req.user.id;
+
+    try {
+        // Simular histórico (numa app real, guardarias num log)
+        // Por agora, vamos estimar baseado nas tarefas completadas
+        const [xpHistory] = await db.query(`
+            SELECT 
+                DATE(created_at) as date,
+                COUNT(*) as tasks,
+                SUM(CASE 
+                    WHEN priority = 'high' THEN 15
+                    WHEN priority = 'low' THEN 7
+                    ELSE 10
+                END) as estimated_xp
+            FROM tasks
+            WHERE (user_id = ? OR assigned_to = ?) 
+                AND is_completed = 1
+                AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+            GROUP BY DATE(created_at)
+            ORDER BY date ASC
+        `, [userId, userId]);
+
+        res.json(xpHistory);
+
+    } catch (error) {
+        console.error("Erro ao obter histórico de XP:", error);
+        res.status(500).json({ error: "Erro ao carregar histórico." });
+    }
+};
+
+
+lifinity/controllers/taskController.js
+import db from '../db.js';
+import { addXP, removeXP } from './profileController.js';e
+
+// Verificar se user pertence ao grupo
+const userBelongsToGroup = async (userId, groupId) => {
+    if (!groupId) return false;
+    const [rows] = await db.query(
+        'SELECT * FROM group_members WHERE user_id = ? AND group_id = ?',
+        [userId, groupId]
+    );
+    return rows.length > 0;
+};
+
+// 1. CRIAR TAREFA
+export const createTask = async (req, res) => {
+    const { title, description, due_date, priority, group_id, assigned_to } = req.body;
+    const userId = req.user ? req.user.id : null;
+
+    console.log(">>> NOVA TAREFA <<<");
+    console.log("Body:", req.body);
+    console.log("Atribuída a:", assigned_to);
+
+    if (!userId) {
+        return res.status(401).json({ error: "Utilizador não autenticado." });
+    }
+
+    if (!title) {
+        return res.status(400).json({ error: "O título é obrigatório." });
+    }
+
+    try {
+        // Se especificou um grupo, verificar se pertence
+        if (group_id) {
+            const belongs = await userBelongsToGroup(userId, group_id);
+            if (!belongs) {
+                return res.status(403).json({ error: "Não tens acesso a este grupo." });
+            }
+
+            // Se atribuiu a alguém, verificar se essa pessoa está no grupo
+            if (assigned_to) {
+                const assignedBelongs = await userBelongsToGroup(assigned_to, group_id);
+                if (!assignedBelongs) {
+                    return res.status(400).json({ error: "Essa pessoa não pertence ao grupo." });
+                }
+            }
+        }
+
+        const groupIdValue = group_id ? group_id : null;
+        const assignedToValue = assigned_to ? assigned_to : null;
+
+        const [result] = await db.query(
+            `INSERT INTO tasks (user_id, group_id, title, description, due_date, priority, assigned_to) 
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [userId, groupIdValue, title, description || null, due_date || null, priority || 'medium', assignedToValue]
+        );
+
+        // Buscar o nome da pessoa atribuída
+        let assignedName = null;
+        if (assignedToValue) {
+            const [users] = await db.query('SELECT name FROM users WHERE id = ?', [assignedToValue]);
+            if (users.length > 0) assignedName = users[0].name;
+        }
+
+        res.status(201).json({
+            id: result.insertId,
+            user_id: userId,
+            title,
+            description: description || null,
+            due_date: due_date || null,
+            priority: priority || 'medium',
+            group_id: groupIdValue,
+            assigned_to: assignedToValue,
+            assigned_to_name: assignedName,
+            is_completed: 0,
+            created_at: new Date()
+        });
+
+    } catch (error) {
+        console.error("ERRO SQL:", error.message);
+        res.status(500).json({ error: "Erro ao criar tarefa: " + error.message });
+    }
+};
+
+// 2. BUSCAR TAREFAS
+export const getMyTasks = async (req, res) => {
+    const userId = req.user.id;
+    const { group_id } = req.query;
+
+    console.log(">>> A BUSCAR TAREFAS <<<");
+    console.log("User ID:", userId);
+
+    try {
+        let query;
+        let params;
+
+        if (group_id) {
+            const belongs = await userBelongsToGroup(userId, group_id);
+            if (!belongs) {
+                return res.status(403).json({ error: "Não tens acesso a este grupo." });
+            }
+
+            query = `
+                SELECT t.*, 
+                       u.name as created_by_name, 
+                       a.name as assigned_to_name,
+                       g.name as group_name
+                FROM tasks t
+                LEFT JOIN users u ON t.user_id = u.id
+                LEFT JOIN users a ON t.assigned_to = a.id
+                LEFT JOIN groups g ON t.group_id = g.id
+                WHERE t.group_id = ?
+                ORDER BY t.is_completed ASC, t.priority DESC, t.created_at DESC
+            `;
+            params = [group_id];
+
+        } else {
+            query = `
+                SELECT t.*, 
+                       u.name as created_by_name, 
+                       a.name as assigned_to_name,
+                       g.name as group_name
+                FROM tasks t
+                LEFT JOIN users u ON t.user_id = u.id
+                LEFT JOIN users a ON t.assigned_to = a.id
+                LEFT JOIN groups g ON t.group_id = g.id
+                WHERE 
+                    (t.user_id = ? AND t.group_id IS NULL)
+                    OR 
+                    t.group_id IN (SELECT group_id FROM group_members WHERE user_id = ?)
+                ORDER BY t.is_completed ASC, t.priority DESC, t.created_at DESC
+            `;
+            params = [userId, userId];
+        }
+
+        const [tasks] = await db.query(query, params);
+        console.log("Tarefas encontradas:", tasks.length);
+        res.json(tasks);
+
+    } catch (error) {
+        console.error("Erro ao buscar tarefas:", error);
+        res.status(500).json({ error: "Erro ao carregar tarefas: " + error.message });
+    }
+};
+
+// 3. ATUALIZAR ESTADO (agora dá XP!)
+export const updateTaskStatus = async (req, res) => {
+    const { id } = req.params;
+    const { is_completed } = req.body;
+    const userId = req.user.id;
+
+    try {
+        const [tasks] = await db.query('SELECT * FROM tasks WHERE id = ?', [id]);
+
+        if (tasks.length === 0) {
+            return res.status(404).json({ error: "Tarefa não encontrada." });
+        }
+
+        const task = tasks[0];
+
+        // Verificar permissão
+        const isCreator = task.user_id === userId;
+        const isAssigned = task.assigned_to === userId;
+        const hasNoAssignment = task.assigned_to === null;
+
+        if (hasNoAssignment) {
+            if (task.group_id) {
+                const belongs = await userBelongsToGroup(userId, task.group_id);
+                if (!belongs && !isCreator) {
+                    return res.status(403).json({ error: "Não tens permissão para concluir esta tarefa." });
+                }
+            } else if (!isCreator) {
+                return res.status(403).json({ error: "Não tens permissão para concluir esta tarefa." });
+            }
+        } else {
+            if (!isAssigned) {
+                return res.status(403).json({ 
+                    error: "Apenas a pessoa atribuída pode concluir esta tarefa." 
+                });
+            }
+        }
+
+        // Verificar se está a COMPLETAR ou REABRIR
+        const wasCompleted = task.is_completed;
+        const isCompleting = is_completed && !wasCompleted;
+        const isReopening = !is_completed && wasCompleted;
+
+        await db.query('UPDATE tasks SET is_completed = ? WHERE id = ?', [is_completed, id]);
+
+        // DAR XP se está a completar pela primeira vez
+        let xpResult = null;
+        if (isCompleting) {
+            xpResult = await addXP(userId, task.priority);
+            console.log("XP adicionado: ", xpResult);
+        }
+        
+        // Remover XP se está a reabrir tarefa
+        if(isReopening){
+            xpResult = await removeXP(userId, task.priority);
+            console.log("XP removido: ", xpResult);
+        }
+
+        res.json({ 
+            message: isCompleting ? "Tarefa Concluída! " : isReopening ? "Tarefa reaberta." : "Tarefa atualizada!",
+            xp: xpResult // Enviar info do XP ganho/perdido
+        });
+
+    } catch (error) {
+        console.error("Erro ao atualizar:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// 4. ELIMINAR TAREFA
+export const deleteTask = async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    try {
+        const [tasks] = await db.query('SELECT * FROM tasks WHERE id = ?', [id]);
+
+        if (tasks.length === 0) {
+            return res.status(404).json({ error: "Tarefa não encontrada." });
+        }
+
+        const task = tasks[0];
+        const isOwner = task.user_id === userId;
+        
+        let isGroupAdmin = false;
+        if (task.group_id) {
+            const [membership] = await db.query(
+                'SELECT role FROM group_members WHERE group_id = ? AND user_id = ?',
+                [task.group_id, userId]
+            );
+            isGroupAdmin = membership.length > 0 && membership[0].role === 'admin';
+        }
+
+        if (!isOwner && !isGroupAdmin) {
+            return res.status(403).json({ error: "Sem permissão para eliminar esta tarefa." });
+        }
+
+        await db.query('DELETE FROM tasks WHERE id = ?', [id]);
+        res.json({ message: "Tarefa eliminada com sucesso!" });
+
+    } catch (error) {
+        console.error("Erro ao eliminar:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+lifinity/controllers/verseController.js
+import db from '../db.js';
+
+// Calcular número do dia do ano (para rotação diária)
+const getDayOfYear = () => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 0);
+    const diff = now - start;
+    const oneDay = 1000 * 60 * 60 * 24;
+    return Math.floor(diff / oneDay);
+};
+
+// 1. OBTER VERSÍCULO DO DIA
+export const getVerseOfTheDay = async (req, res) => {
+    try {
+        // Contar total de versículos
+        const [countResult] = await db.query('SELECT COUNT(*) as total FROM verses');
+        const totalVerses = countResult[0].total;
+
+        if (totalVerses === 0) {
+            return res.status(404).json({ error: "Nenhum versículo disponível." });
+        }
+
+        // Usar dia do ano para selecionar versículo (muda todos os dias)
+        const dayOfYear = getDayOfYear();
+        const verseIndex = dayOfYear % totalVerses;
+
+        // Buscar versículo
+        const [verses] = await db.query(
+            'SELECT * FROM verses LIMIT 1 OFFSET ?',
+            [verseIndex]
+        );
+
+        if (verses.length === 0) {
+            return res.status(404).json({ error: "Versículo não encontrado." });
+        }
+
+        const verse = verses[0];
+
+        // Se o utilizador estiver autenticado, verificar se é favorito
+        let isFavorite = false;
+        if (req.user) {
+            const [favorites] = await db.query(
+                'SELECT * FROM favorite_verses WHERE user_id = ? AND verse_id = ?',
+                [req.user.id, verse.id]
+            );
+            isFavorite = favorites.length > 0;
+        }
+
+        res.json({
+            ...verse,
+            is_favorite: isFavorite,
+            day_of_year: dayOfYear
+        });
+
+    } catch (error) {
+        console.error("Erro ao obter versículo:", error);
+        res.status(500).json({ error: "Erro ao carregar versículo." });
+    }
+};
+
+// 2. OBTER VERSÍCULO ALEATÓRIO
+export const getRandomVerse = async (req, res) => {
+    try {
+        const [verses] = await db.query('SELECT * FROM verses ORDER BY RAND() LIMIT 1');
+
+        if (verses.length === 0) {
+            return res.status(404).json({ error: "Nenhum versículo disponível." });
+        }
+
+        const verse = verses[0];
+
+        // Se autenticado, verificar se é favorito
+        let isFavorite = false;
+        if (req.user) {
+            const [favorites] = await db.query(
+                'SELECT * FROM favorite_verses WHERE user_id = ? AND verse_id = ?',
+                [req.user.id, verse.id]
+            );
+            isFavorite = favorites.length > 0;
+        }
+
+        res.json({
+            ...verse,
+            is_favorite: isFavorite
+        });
+
+    } catch (error) {
+        console.error("Erro ao obter versículo:", error);
+        res.status(500).json({ error: "Erro ao carregar versículo." });
+    }
+};
+
+// 3. ADICIONAR VERSÍCULO AOS FAVORITOS
+export const toggleFavoriteVerse = async (req, res) => {
+    const userId = req.user.id;
+    const { verse_id } = req.body;
+
+    if (!verse_id) {
+        return res.status(400).json({ error: "ID do versículo é obrigatório." });
+    }
+
+    try {
+        // Verificar se já é favorito
+        const [existing] = await db.query(
+            'SELECT * FROM favorite_verses WHERE user_id = ? AND verse_id = ?',
+            [userId, verse_id]
+        );
+
+        if (existing.length > 0) {
+            // Remover dos favoritos
+            await db.query(
+                'DELETE FROM favorite_verses WHERE user_id = ? AND verse_id = ?',
+                [userId, verse_id]
+            );
+            res.json({ message: "Removido dos favoritos.", is_favorite: false });
+        } else {
+            // Adicionar aos favoritos
+            await db.query(
+                'INSERT INTO favorite_verses (user_id, verse_id) VALUES (?, ?)',
+                [userId, verse_id]
+            );
+            res.json({ message: "Adicionado aos favoritos!", is_favorite: true });
+        }
+
+    } catch (error) {
+        console.error("Erro ao alternar favorito:", error);
+        res.status(500).json({ error: "Erro ao processar favorito." });
+    }
+};
+
+// 4. LISTAR VERSÍCULOS FAVORITOS DO UTILIZADOR
+export const getFavoriteVerses = async (req, res) => {
+    const userId = req.user.id;
+
+    try {
+        const [favorites] = await db.query(`
+            SELECT v.*, fv.created_at as favorited_at
+            FROM verses v
+            INNER JOIN favorite_verses fv ON v.id = fv.verse_id
+            WHERE fv.user_id = ?
+            ORDER BY fv.created_at DESC
+        `, [userId]);
+
+        res.json(favorites);
+
+    } catch (error) {
+        console.error("Erro ao listar favoritos:", error);
+        res.status(500).json({ error: "Erro ao carregar favoritos." });
+    }
+};
+
+// 5. ADICIONAR NOVO VERSÍCULO (admin - pode adicionar depois)
+export const addVerse = async (req, res) => {
+    const { text, reference } = req.body;
+
+    if (!text || !reference) {
+        return res.status(400).json({ error: "Texto e referência são obrigatórios." });
+    }
+
+    try {
+        const [result] = await db.query(
+            'INSERT INTO verses (text, reference) VALUES (?, ?)',
+            [text, reference]
+        );
+
+        res.status(201).json({
+            id: result.insertId,
+            text,
+            reference,
+            message: "Versículo adicionado com sucesso!"
+        });
+
+    } catch (error) {
+        console.error("Erro ao adicionar versículo:", error);
+        res.status(500).json({ error: "Erro ao adicionar versículo." });
+    }
+};
+
+
+
+lifinity/middleware/authMiddleware.js
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = 'chave_super_secreta_lifinity_2024'; 
+
+export const verifyToken = (req, res, next) => {
+    const token = req.header('Authorization');
+
+    if (!token) return res.status(401).json({ error: "Acesso negado." });
+
+    try {
+        const tokenClean = token.replace("Bearer ", "");
+        const verified = jwt.verify(tokenClean, JWT_SECRET);
+        
+        req.user = verified; // <--- ESTA LINHA É CRUCIAL!
+        next();
+    } catch (error) {
+        res.status(400).json({ error: "Token inválido." });
+    }
+};
+
+
+lifinity/node_modules -
+Não vou enviar porque veio através de instalações, se precisares que mande avisa 
+
+lifinity/routes/authRoutes.js -
+import express from 'express';
+import { register, login } from '../controllers/authController.js'; // <--- Importa o Login
+
+const router = express.Router();
+
+router.post('/register', register);
+router.post('/login', login); // <-- Nota Rota
+
+export default router;
+
+lifinity/routes/chatbotRoutes.js -
+import express from 'express';
+import { processMessage } from '../controllers/chatbotController.js';
+import { verifyToken } from '../middleware/authMiddleware.js';
+
+const router = express.Router();
+
+router.post('/message', verifyToken, processMessage);
+
+export default router;
+
+
+lifinity/routes/groupRoutes.js -
+import express from 'express';
+import {
+    createGroup,
+    joinGroup,
+    getMyGroups,
+    getGroupMembers,
+    leaveGroup
+} from '../controllers/groupController.js';
+import { verifyToken } from '../middleware/authMiddleware.js';
+
+const router = express.Router();
+
+router.post('/', verifyToken, createGroup);     // POST /groups - criar grupo
+router.post('/join', verifyToken, joinGroup);   // POST /groups/join - entrar com código
+router.get('/', verifyToken, getMyGroups);      // GET /groups - listar meus grupos
+router.get('/:groupId/members', verifyToken, getGroupMembers); // GET
+router.delete('/:groupId/leave', verifyToken, leaveGroup);     // DELETE /groups/:id/leave
+
+export default router;
+
+
+lifinity/routes/profileRoutes.js -
+import express from 'express';
+import { 
+    getProfile, 
+    updateProfile, 
+    searchUsers, 
+    getLeaderboard 
+} from '../controllers/profileController.js';
+import { verifyToken } from '../middleware/authMiddleware.js';
+
+const router = express.Router();
+
+router.get('/', verifyToken, getProfile);           // GET /profile
+router.put('/', verifyToken, updateProfile);        // PUT /profile
+router.get('/search', verifyToken, searchUsers);    // GET /profile/search?q=nome
+router.get('/leaderboard', verifyToken, getLeaderboard); // GET /profile/leaderboard
+
+export default router;
+
+
+lifinity/routes/statsRoutes.js -
+import express from 'express';
+import { getUserStats, getXPHistory } from '../controllers/statsController.js';
+import { verifyToken } from '../middleware/authMiddleware.js';
+
+const router = express.Router();
+
+router.get('/', verifyToken, getUserStats);         //GET /stats
+router.get('/xp', verifyToken, getXPHistory);       //GET /stats/xp
+
+export default router;
+
+
+lifinity/routes/taskRoutes.js -
+import express from 'express';
+import { createTask, getMyTasks, updateTaskStatus, deleteTask } from '../controllers/taskController.js';
+import { verifyToken } from '../middleware/authMiddleware.js'; // <--- TEM DE ESTAR AQUI
+
+const router = express.Router();
+
+// O 'verifyToken' tem de estar no meio, entre a barra '/' e o 'createTask'
+router.post('/', verifyToken, createTask);       
+router.get('/', verifyToken, getMyTasks);        
+router.put('/:id', verifyToken, updateTaskStatus);
+router.delete('/:id', verifyToken, deleteTask);
+
+export default router;
+
+
+lifinity/routes/verseRoutes.js -
+import express from 'express';
+import { 
+    getVerseOfTheDay, 
+    getRandomVerse, 
+    toggleFavoriteVerse,
+    getFavoriteVerses,
+    addVerse
+} from '../controllers/verseController.js';
+import { verifyToken } from '../middleware/authMiddleware.js';
+
+const router = express.Router();
+
+// Rotas públicas (não precisa login)
+router.get('/today', getVerseOfTheDay);       // GET /verses/today
+router.get('/random', getRandomVerse);        // GET /verses/random
+
+// Rotas protegidas (precisa login)
+router.post('/favorite', verifyToken, toggleFavoriteVerse);  // POST /verses/favorite
+router.get('/favorites', verifyToken, getFavoriteVerses);    // GET /verses/favorites
+router.post('/', verifyToken, addVerse);                     // POST /verses (admin)
+
+export default router;
+
+
+lifinity/web/node_modules -
+Não mexi nessa pasta, veio com instalações, se precisares que envie avisa
+
+
+lifinity/web/src/componentes/Login.jsx -
+import { useState } from 'react';
+
+// Recebemos uma função "onLoginSuccess" vinda do App.jsx
+export default function Login({ onLoginSuccess, onSwitchToRegister }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch('http://localhost:5000/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // SUCESSO: Chama a função do Pai (App.jsx) enviando os dados
+        onLoginSuccess(data.token, data.user);
+      } else {
+        alert("Erro: " + data.error);
+      }
+    } catch (error) {
+      alert("Erro ao conectar ao servidor.");
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
+      <div className="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md border border-gray-700">
+        <h2 className="text-3xl font-bold text-center text-white mb-8">
+          Lifinity <span className="text-blue-500">Login</span>
+        </h2>
+
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div>
+            <label className="block text-gray-400 text-sm font-bold mb-2">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full p-3 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
+              placeholder="seu@email.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-400 text-sm font-bold mb-2">Senha</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full p-3 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
+              placeholder="********"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-all transform hover:scale-105"
+          >
+            Entrar
+          </button>
+        </form>
+                <div className="mt-6 text-center">
+                    <p className="text-gray-400">
+                        Ainda não tens conta?{' '}
+                        <button 
+                        onClick={onSwitchToRegister} 
+                        className="text-green-400 hover:text-green-300 font-bold hover:underline"
+                        >
+                        Criar conta
+                        </button>
+                    </p>
+                 </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+lifinity/web/src/componentes/Navbar.jsx -
+import { useState } from 'react';
+import { NavLink, Link } from 'react-router-dom';
+
+export default function Navbar({ user, onLogout }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const baseStyle = "px-4 py-2 rounded-lg transition-all flex items-center gap-2";
+  
+  const getLinkStyle = ({ isActive }) => 
+    `${baseStyle} ${isActive 
+      ? 'bg-blue-600 text-white' 
+      : 'text-gray-400 hover:bg-gray-700 hover:text-white'}`;
+
+  const closeMenu = () => setIsMenuOpen(false);
+
+  return (
+    <nav className="bg-gray-800 border-b border-gray-700">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex justify-between items-center h-16">
+          
+          {/* Logo (agora é um Link para Home) + Links Desktop */}
+          <div className="flex items-center gap-8">
+            <Link 
+              to="/home" 
+              className="text-2xl font-bold text-blue-500 hover:text-blue-400 transition"
+            >
+              Lifinity
+            </Link>
+            
+            {/* Links Desktop */}
+            <div className="hidden md:flex items-center gap-2">
+              <NavLink to="/create" className={getLinkStyle}>
+                ✏️ Criar
+              </NavLink>
+              <NavLink to="/tasks" className={getLinkStyle}>
+                📋 Tarefas
+              </NavLink>
+              <NavLink to="/stats" className={getLinkStyle}>
+                📊 Estatísticas
+              </NavLink>
+              <NavLink to="/chatbot" className={getLinkStyle}>
+                🤖 Assistente
+              </NavLink>
+              <NavLink to="/profile" className={getLinkStyle}>
+                👤 Perfil
+              </NavLink>
+            </div>
+          </div>
+
+          {/* User Info + Logout + Hamburger */}
+          <div className="flex items-center gap-4">
+            <span className="text-gray-400 text-sm hidden sm:block">
+              Olá, <span className="text-white font-medium">{user?.name}</span>
+            </span>
+            
+            <button 
+              onClick={onLogout} 
+              className="hidden md:block bg-red-600 hover:bg-red-500 px-4 py-2 rounded text-sm font-bold text-white"
+            >
+              Sair
+            </button>
+
+            {/* Hamburger Button - Mobile Only */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="md:hidden p-2 rounded-lg hover:bg-gray-700 transition"
+              aria-label="Menu"
+            >
+              {isMenuOpen ? (
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Menu Mobile - Dropdown */}
+        {isMenuOpen && (
+          <div className="md:hidden pb-4 border-t border-gray-700 pt-4">
+            <div className="flex flex-col gap-2">
+              <NavLink to="/home" className={getLinkStyle} onClick={closeMenu}>
+                🏠 Início
+              </NavLink>
+              <NavLink to="/create" className={getLinkStyle} onClick={closeMenu}>
+                ✏️ Criar
+              </NavLink>
+              <NavLink to="/tasks" className={getLinkStyle} onClick={closeMenu}>
+                📋 Tarefas
+              </NavLink>
+              <NavLink to="/stats" className={getLinkStyle} onClick={closeMenu}>
+                📊 Estatísticas
+              </NavLink>
+              <NavLink to="/chatbot" className={getLinkStyle} onClick={closeMenu}>
+                🤖 Assistente
+              </NavLink>
+              <NavLink to="/profile" className={getLinkStyle} onClick={closeMenu}>
+                👤 Perfil
+              </NavLink>
+              
+              <div className="border-t border-gray-700 mt-2 pt-2">
+                <button 
+                  onClick={() => { closeMenu(); onLogout(); }}
+                  className="w-full bg-red-600 hover:bg-red-500 px-4 py-2 rounded text-sm font-bold text-white"
+                >
+                  Sair
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </nav>
+  );
+}
+
+
+
+(1º Parte, vou mandar mais uma parte, diz-me só se compreendeste tudo até agora. )
+
+2º parte: 
+lifinity/web/src/componentes/Register.jsx
+import { useState } from 'react';
+
+export default function Register({ onSwitchToLogin }) {
+  // Definimos os estados iniciais vazios
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+
+    // LOG DE DEBUG: Vamos ver o que está a ser enviado no Console do navegador (F12)
+    console.log("A tentar registar com:", { name, email, password });
+
+    try {
+      const response = await fetch('http://localhost:5000/auth/register', {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json' 
+        },
+        // Garantimos que as chaves (name, email, password) batem certo com o Backend
+        body: JSON.stringify({ 
+            name: name, 
+            email: email, 
+            password: password 
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Conta criada com sucesso! Podes fazer login agora.");
+        onSwitchToLogin(); 
+      } else {
+        // Mostra o erro que vem do servidor
+        alert("Erro do Servidor: " + data.error);
+      }
+    } catch (error) {
+      console.error("Erro de rede:", error);
+      alert("Erro ao conectar ao servidor. Verifica se o terminal do Backend está ligado.");
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
+      <div className="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md border border-gray-700">
+        <h2 className="text-3xl font-bold text-center text-white mb-8">
+          Criar Conta <span className="text-blue-500">Lifinity</span>
+        </h2>
+
+        <form onSubmit={handleRegister} className="space-y-6">
+          {/* CAMPO NOME */}
+          <div>
+            <label className="block text-gray-400 text-sm font-bold mb-2">Nome</label>
+            <input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)} // <--- Isto atualiza a variável name
+              className="w-full p-3 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
+              placeholder="Teu Nome"
+              required
+            />
+          </div>
+
+          {/* CAMPO EMAIL */}
+          <div>
+            <label className="block text-gray-400 text-sm font-bold mb-2">Email</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)} // <--- Isto atualiza a variável email
+              className="w-full p-3 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
+              placeholder="seu@email.com"
+              required
+            />
+          </div>
+
+          {/* CAMPO SENHA */}
+          <div>
+            <label className="block text-gray-400 text-sm font-bold mb-2">Senha</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)} // <--- Isto atualiza a variável password
+              className="w-full p-3 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
+              placeholder="********"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg transition-all transform hover:scale-105"
+          >
+            Registar
+          </button>
+        </form>
+
+        <div className="mt-6 text-center">
+          <p className="text-gray-400">
+            Já tens conta?{' '}
+            <button 
+              onClick={onSwitchToLogin} 
+              className="text-blue-400 hover:text-blue-300 font-bold hover:underline"
+            >
+              Entrar aqui
+            </button>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+lifinity/web/src/componentes/TaskCard.jsx
+import { useState } from 'react';
+
+export default function TaskCard({ task, user, onToggle, onDelete, canComplete }) {
+  const [showXP, setShowXP] = useState(false);
+
+  const formatarData = (dataString) => {
+    if (!dataString) return "Sem prazo";
+    const opcoes = { day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+    return new Date(dataString).toLocaleDateString('pt-PT', opcoes);
+  };
+
+  const getXPAmount = () => {
+    if (task.priority === 'high') return 15;
+    if (task.priority === 'low') return 7;
+    return 10;
+  };
+
+  const handleToggle = () => {
+    // Se vai completar (ganhar XP)
+    if (!task.is_completed && canComplete) {
+      // 1. Mostrar animação IMEDIATAMENTE
+      setShowXP(true);
+      
+      // 2. Esperar 1 segundo antes de atualizar a tarefa
+      setTimeout(() => {
+        onToggle(task.id, task.is_completed);
+      }, 1000);
+      
+      // 3. Esconder a animação depois de 4 segundos
+      setTimeout(() => {
+        setShowXP(false);
+      }, 4000);
+    } else {
+      // Se é para reabrir, atualiza imediatamente
+      onToggle(task.id, task.is_completed);
+    }
+  };
+
+  return (
+    <div className="relative mb-12">
+      {/* Wrapper extra para garantir que o badge não é cortado */}
+      <div
+        className={`p-5 rounded-lg border shadow flex justify-between items-start transition-all ${
+          task.is_completed
+            ? 'bg-gray-800/50 border-green-500/50 opacity-60'
+            : 'bg-gray-800 border-gray-700 hover:border-blue-500'
+        }`}
+      >
+        {/* Animação de XP - FORA do card, acima */}
+        {showXP && (
+          <div 
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[9999] pointer-events-none"
+            style={{ 
+              animation: 'xpBounce 0.6s ease-in-out infinite',
+            }}
+          >
+            <div 
+              className="bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-white font-black text-3xl px-8 py-4 rounded-2xl shadow-2xl border-4 border-yellow-200"
+              style={{ 
+                boxShadow: '0 0 60px rgba(251, 191, 36, 0.8), 0 0 100px rgba(251, 191, 36, 0.4)',
+              }}
+            >
+              +{getXPAmount()} XP! ⭐✨🎉
+            </div>
+          </div>
+        )}
+
+        {/* Info da tarefa */}
+        <div className={`flex-1 ${task.is_completed ? 'line-through text-gray-500' : ''}`}>
+          <h3 className="font-bold text-lg text-white flex items-center gap-2 flex-wrap">
+            {task.title}
+            {task.priority === 'high' && (
+              <span className="text-xs bg-red-900 text-red-200 px-2 py-0.5 rounded">Alta</span>
+            )}
+            {task.priority === 'medium' && (
+              <span className="text-xs bg-yellow-900 text-yellow-200 px-2 py-0.5 rounded">Média</span>
+            )}
+            {task.priority === 'low' && (
+              <span className="text-xs bg-green-900 text-green-200 px-2 py-0.5 rounded">Baixa</span>
+            )}
+            {task.group_name && (
+              <span className="text-xs bg-purple-900 text-purple-200 px-2 py-0.5 rounded">
+                👥 {task.group_name}
+              </span>
+            )}
+          </h3>
+          
+          <p className="text-gray-400 text-sm mt-1">{task.description}</p>
+          
+          <div className="flex gap-4 mt-3 text-xs text-gray-500 flex-wrap items-center">
+            <p>📅 {formatarData(task.due_date)}</p>
+            {task.created_by_name && <p>Criado por: {task.created_by_name}</p>}
+            {task.assigned_to_name && (
+              <p className="text-blue-400 font-medium">
+                👤 Atribuído a: {task.assigned_to_name}
+                {task.assigned_to === user?.id && " (tu)"}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Botões */}
+        <div className="flex flex-col gap-2 items-center ml-4">
+          <button
+            onClick={handleToggle}
+            disabled={!canComplete}
+            className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition ${
+              task.is_completed
+                ? 'bg-green-500 border-green-500 text-white'
+                : canComplete
+                  ? 'border-gray-500 text-gray-500 hover:border-green-400 hover:text-green-400 hover:scale-110'
+                  : 'border-gray-700 text-gray-700 cursor-not-allowed'
+            }`}
+            title={
+              task.is_completed 
+                ? "Reabrir" 
+                : canComplete 
+                  ? `Concluir (+${getXPAmount()} XP)` 
+                  : `Apenas ${task.assigned_to_name} pode concluir`
+            }
+          >
+            {task.is_completed ? '✓' : ''}
+          </button>
+
+          <button
+            onClick={() => onDelete(task.id)}
+            className="w-10 h-10 rounded-full border-2 border-red-500/50 text-red-500 
+                       hover:bg-red-500 hover:text-white hover:border-red-500 
+                       flex items-center justify-center transition text-sm hover:scale-110"
+            title="Eliminar tarefa"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+lifinity/web/src/pages/ChatbotPage.jsx -
+import { useState, useRef, useEffect } from 'react';
+
+export default function ChatbotPage({ user }) {
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      type: 'bot',
+      text: `Olá, ${user?.name || 'utilizador'}! 👋
+
+Sou o **Assistente Lifinity** - sistema híbrido com IA!
+
+🔧 **Comandos rápidos** (processados localmente)
+🤖 **Perguntas gerais** (respondidas pelo Gemini)
+
+Clica nos botões abaixo ou escreve **"ajuda"** para ver tudo! 😊`
+    }
+  ]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  const token = localStorage.getItem('token');
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const sendMessage = async (e) => {
+    e?.preventDefault();
+    if (!input.trim() || loading) return;
+
+    const userMessage = input.trim();
+    setInput('');
+
+    const newUserMessage = {
+      id: Date.now(),
+      type: 'user',
+      text: userMessage
+    };
+    setMessages(prev => [...prev, newUserMessage]);
+
+    setLoading(true);
+
+    try {
+      const history = messages.slice(-10).map(m => ({
+        type: m.type,
+        text: m.text
+      }));
+
+      const response = await fetch('http://localhost:5000/chatbot/message', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          message: userMessage,
+          history: history
+        })
+      });
+
+      const data = await response.json();
+
+      const botMessage = {
+        id: Date.now() + 1,
+        type: 'bot',
+        text: data.response,
+        messageType: data.type,
+        task: data.task
+      };
+      setMessages(prev => [...prev, botMessage]);
+
+    } catch (error) {
+      console.error('Erro:', error);
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        type: 'bot',
+        text: '❌ Erro de conexão. Verifica se o servidor está ligado.',
+        messageType: 'error'
+      }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Envia mensagem diretamente (para botões)
+  const sendDirectMessage = async (text) => {
+    setInput(text);
+    // Pequeno delay para atualizar o input antes de enviar
+    setTimeout(() => {
+      const fakeEvent = { preventDefault: () => {} };
+      setInput(text);
+    }, 50);
+  };
+
+  // Botões de ação rápida - TAREFAS
+  const taskButtons = [
+    { 
+      label: '📝 Nova Tarefa', 
+      action: () => setInput('criar tarefa NOME HORAS GRUPO'),
+      color: 'bg-emerald-600 hover:bg-emerald-500'
+    },
+    { 
+      label: '📋 Pendentes', 
+      action: () => { setInput('tarefas pendentes'); setTimeout(() => document.querySelector('form')?.requestSubmit(), 100); },
+      color: 'bg-blue-600 hover:bg-blue-500'
+    },
+    { 
+      label: '🔴 Urgentes', 
+      action: () => { setInput('tarefas urgentes'); setTimeout(() => document.querySelector('form')?.requestSubmit(), 100); },
+      color: 'bg-red-600 hover:bg-red-500'
+    },
+    { 
+      label: '📅 Hoje', 
+      action: () => { setInput('tarefas de hoje'); setTimeout(() => document.querySelector('form')?.requestSubmit(), 100); },
+      color: 'bg-orange-600 hover:bg-orange-500'
+    },
+  ];
+
+  // Botões de ação rápida - GRUPOS & STATS
+  const otherButtons = [
+    { 
+      label: '👥 Meus Grupos', 
+      action: () => { setInput('meus grupos'); setTimeout(() => document.querySelector('form')?.requestSubmit(), 100); },
+      color: 'bg-purple-600 hover:bg-purple-500'
+    },
+    { 
+      label: '⭐ Meu Nível', 
+      action: () => { setInput('meu nível'); setTimeout(() => document.querySelector('form')?.requestSubmit(), 100); },
+      color: 'bg-yellow-600 hover:bg-yellow-500'
+    },
+    { 
+      label: '📊 Estatísticas', 
+      action: () => { setInput('estatísticas'); setTimeout(() => document.querySelector('form')?.requestSubmit(), 100); },
+      color: 'bg-cyan-600 hover:bg-cyan-500'
+    },
+    { 
+      label: '🏆 Ranking', 
+      action: () => { setInput('ranking'); setTimeout(() => document.querySelector('form')?.requestSubmit(), 100); },
+      color: 'bg-amber-600 hover:bg-amber-500'
+    },
+  ];
+
+  // Botões IA
+  const aiButtons = [
+    { 
+      label: '💪 Motivação', 
+      action: () => { setInput('Preciso de motivação'); setTimeout(() => document.querySelector('form')?.requestSubmit(), 100); },
+      color: 'bg-pink-600 hover:bg-pink-500'
+    },
+    { 
+      label: '💡 Dicas', 
+      action: () => { setInput('Dá-me dicas de produtividade'); setTimeout(() => document.querySelector('form')?.requestSubmit(), 100); },
+      color: 'bg-indigo-600 hover:bg-indigo-500'
+    },
+    { 
+      label: '❓ Ajuda', 
+      action: () => { setInput('ajuda'); setTimeout(() => document.querySelector('form')?.requestSubmit(), 100); },
+      color: 'bg-gray-600 hover:bg-gray-500'
+    },
+  ];
+
+  const formatText = (text) => {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/`([^`]+)`/g, '<code class="bg-gray-600 px-1 rounded text-sm">$1</code>')
+      .replace(/\n/g, '<br/>');
+  };
+
+  const getMessageStyle = (msg) => {
+    if (msg.type === 'user') {
+      return 'bg-blue-600 text-white rounded-br-sm';
+    }
+    
+    switch(msg.messageType) {
+      case 'task_created':
+      case 'group_created':
+      case 'group_joined':
+        return 'bg-green-900/50 border border-green-600 text-white rounded-bl-sm';
+      case 'help':
+        return 'bg-purple-900/50 border border-purple-600 text-white rounded-bl-sm';
+      case 'gemini':
+        return 'bg-cyan-900/50 border border-cyan-600 text-white rounded-bl-sm';
+      case 'error':
+        return 'bg-red-900/50 border border-red-600 text-white rounded-bl-sm';
+      case 'tasks':
+        return 'bg-blue-900/50 border border-blue-600 text-white rounded-bl-sm';
+      case 'groups':
+        return 'bg-purple-900/50 border border-purple-600 text-white rounded-bl-sm';
+      case 'stats':
+      case 'level':
+        return 'bg-yellow-900/50 border border-yellow-600 text-white rounded-bl-sm';
+      default:
+        return 'bg-gray-700 text-white rounded-bl-sm';
+    }
+  };
+
+  const getTypeLabel = (type) => {
+    switch(type) {
+      case 'task_created': return '✅ Tarefa Criada';
+      case 'group_created': return '👥 Grupo Criado';
+      case 'group_joined': return '👥 Entrou no Grupo';
+      case 'help': return '📚 Ajuda';
+      case 'gemini': return '🤖 Gemini IA';
+      case 'tasks': return '📋 Tarefas';
+      case 'groups': return '👥 Grupos';
+      case 'stats': return '📊 Estatísticas';
+      case 'level': return '⭐ Progresso';
+      case 'greeting': return '👋 Olá!';
+      case 'error': return '⚠️ Erro';
+      default: return '🤖 Assistente';
+    }
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto p-4 h-[calc(100vh-80px)] flex flex-col">
+      
+      {/* Header */}
+      <div className="text-center mb-3">
+        <h1 className="text-xl font-bold text-cyan-400 flex items-center justify-center gap-2">
+          🤖 Assistente Lifinity
+        </h1>
+        <p className="text-gray-500 text-xs">
+          Comandos do Site + Google Gemini IA
+        </p>
+      </div>
+
+      {/* Botões de Ação Rápida */}
+      <div className="mb-3 space-y-2">
+        {/* Tarefas */}
+        <div className="flex flex-wrap gap-1.5 justify-center">
+          {taskButtons.map((btn, i) => (
+            <button
+              key={i}
+              onClick={btn.action}
+              disabled={loading}
+              className={`${btn.color} text-white text-xs px-3 py-1.5 rounded-full transition disabled:opacity-50`}
+            >
+              {btn.label}
+            </button>
+          ))}
+        </div>
+        {/* Grupos & Stats */}
+        <div className="flex flex-wrap gap-1.5 justify-center">
+          {otherButtons.map((btn, i) => (
+            <button
+              key={i}
+              onClick={btn.action}
+              disabled={loading}
+              className={`${btn.color} text-white text-xs px-3 py-1.5 rounded-full transition disabled:opacity-50`}
+            >
+              {btn.label}
+            </button>
+          ))}
+        </div>
+        {/* IA */}
+        <div className="flex flex-wrap gap-1.5 justify-center">
+          {aiButtons.map((btn, i) => (
+            <button
+              key={i}
+              onClick={btn.action}
+              disabled={loading}
+              className={`${btn.color} text-white text-xs px-3 py-1.5 rounded-full transition disabled:opacity-50`}
+            >
+              {btn.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Área de Mensagens */}
+      <div className="flex-1 bg-gray-800/50 rounded-xl border border-gray-700 p-3 overflow-y-auto mb-3">
+        <div className="space-y-3">
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div className={`max-w-[90%] p-3 rounded-2xl ${getMessageStyle(msg)}`}>
+                {msg.type === 'bot' && (
+                  <div className="text-xs text-gray-400 mb-1.5 font-medium">
+                    {getTypeLabel(msg.messageType)}
+                  </div>
+                )}
+                <div
+                  className="text-sm leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: formatText(msg.text) }}
+                />
+              </div>
+            </div>
+          ))}
+
+          {loading && (
+            <div className="flex justify-start">
+              <div className="bg-gray-700 p-3 rounded-2xl rounded-bl-sm">
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                    <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                    <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                  </div>
+                  <span className="text-gray-400 text-xs">A processar...</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
+
+      {/* Input */}
+      <form onSubmit={sendMessage} className="flex gap-2">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Escreve um comando ou pergunta..."
+          className="flex-1 bg-gray-700 border border-gray-600 rounded-xl p-3 text-white text-sm focus:border-cyan-500 focus:outline-none"
+          disabled={loading}
+        />
+        <button
+          type="submit"
+          disabled={loading || !input.trim()}
+          className="bg-cyan-600 hover:bg-cyan-500 disabled:bg-gray-600 text-white px-4 py-3 rounded-xl font-bold transition"
+        >
+          📤
+        </button>
+      </form>
+
+      {/* Dica */}
+      <p className="text-center text-gray-600 text-xs mt-2">
+        💡 Exemplo: "criar tarefa Estudar matemática amanhã às 15h urgente para grupo Família"
+      </p>
+    </div>
+  );
+}
+
+
+lifinity/web/src/pages/CreatePage.jsx
+import { useState, useEffect } from 'react';
+
+export default function CreatePage({ user }) {
+  const [groups, setGroups] = useState([]);
+  const [groupMembers, setGroupMembers] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  
+  // Form Tarefa
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [priority, setPriority] = useState('medium');
+  const [assignedTo, setAssignedTo] = useState('');
+  
+  // Form Grupo
+  const [groupName, setGroupName] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
+  
+  // UI State
+  const [showGroupForm, setShowGroupForm] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const token = localStorage.getItem('token');
+
+  // --- FETCH GROUPS ---
+  const fetchGroups = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/groups', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setGroups(data);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar grupos:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- FETCH GROUP MEMBERS ---
+  const fetchGroupMembers = async (groupId) => {
+    if (!groupId) {
+      setGroupMembers([]);
+      return;
+    }
+    try {
+      const response = await fetch(`http://localhost:5000/groups/${groupId}/members`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setGroupMembers(data);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar membros:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchGroups();
+  }, []);
+
+  useEffect(() => {
+    fetchGroupMembers(selectedGroup);
+    setAssignedTo('');
+  }, [selectedGroup]);
+
+  // --- CRIAR TAREFA ---
+  const handleCreateTask = async (e) => {
+    e.preventDefault();
+    if (!title) return alert("O título é obrigatório!");
+
+    try {
+      const response = await fetch('http://localhost:5000/tasks', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title,
+          description,
+          due_date: dueDate,
+          priority,
+          group_id: selectedGroup,
+          assigned_to: assignedTo || null
+        })
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        // Limpar form
+        setTitle('');
+        setDescription('');
+        setDueDate('');
+        setPriority('medium');
+        setAssignedTo('');
+        
+        // Mostrar mensagem de sucesso
+        setSuccessMessage('✅ Tarefa criada com sucesso!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+      } else {
+        alert(data.error);
+      }
+    } catch (error) {
+      alert("Erro ao criar tarefa");
+    }
+  };
+
+  // --- CRIAR GRUPO ---
+  const handleCreateGroup = async () => {
+    if (!groupName) return alert("Nome do grupo obrigatório!");
+
+    try {
+      const response = await fetch('http://localhost:5000/groups', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: groupName })
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert(`Grupo criado! Código de convite: ${data.group.invite_code}`);
+        setGroups([data.group, ...groups]);
+        setGroupName('');
+      } else {
+        alert(data.error);
+      }
+    } catch (error) {
+      alert("Erro ao criar grupo");
+    }
+  };
+
+  // --- ENTRAR NUM GRUPO ---
+  const handleJoinGroup = async () => {
+    if (!inviteCode) return alert("Código obrigatório!");
+
+    try {
+      const response = await fetch('http://localhost:5000/groups/join', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ inviteCode })
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert(`Entraste no grupo: ${data.group.name}`);
+        setGroups([data.group, ...groups]);
+        setInviteCode('');
+      } else {
+        alert(data.error);
+      }
+    } catch (error) {
+      alert("Erro ao entrar no grupo");
+    }
+  };
+
+  // --- SAIR DO GRUPO ---
+  const handleLeaveGroup = async (groupId) => {
+    if (!confirm("Tens a certeza que queres sair deste grupo?")) return;
+
+    try {
+      const response = await fetch(`http://localhost:5000/groups/${groupId}/leave`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        setGroups(groups.filter(g => g.id !== groupId));
+        if (selectedGroup === groupId) {
+          setSelectedGroup(null);
+        }
+      } else {
+        const data = await response.json();
+        alert(data.error);
+      }
+    } catch (error) {
+      alert("Erro ao sair do grupo");
+    }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    alert("Código copiado!");
+  };
+
+  const getNowString = () => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    return now.toISOString().slice(0, 16);
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto p-4 md:p-8">
+      
+      {/* Mensagem de Sucesso */}
+      {successMessage && (
+        <div className="mb-6 bg-green-600/20 border border-green-500 text-green-400 px-4 py-3 rounded-lg text-center animate-pulse">
+          {successMessage}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* COLUNA ESQUERDA - Grupos */}
+        <div className="space-y-6">
+          
+          {/* Selecionar Grupo */}
+          <div className="bg-gray-800 p-4 rounded-xl border border-gray-700">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold text-purple-400">👥 Grupos</h3>
+              <button
+                onClick={() => setShowGroupForm(!showGroupForm)}
+                className="text-sm text-purple-400 hover:text-purple-300"
+              >
+                {showGroupForm ? '✕ Fechar' : '+ Novo'}
+              </button>
+            </div>
+            
+            {/* Form Criar/Entrar Grupo */}
+            {showGroupForm && (
+              <div className="mb-4 p-3 bg-gray-700/50 rounded-lg space-y-3">
+                <div>
+                  <input
+                    type="text"
+                    value={groupName}
+                    onChange={(e) => setGroupName(e.target.value)}
+                    placeholder="Nome do novo grupo..."
+                    className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-sm"
+                  />
+                  <button
+                    onClick={handleCreateGroup}
+                    className="w-full mt-2 bg-purple-600 hover:bg-purple-500 py-2 rounded text-sm font-bold"
+                  >
+                    Criar Grupo
+                  </button>
+                </div>
+                
+                <div className="border-t border-gray-600 pt-3">
+                  <input
+                    type="text"
+                    value={inviteCode}
+                    onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                    placeholder="Código de convite..."
+                    className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-sm font-mono uppercase"
+                  />
+                  <button
+                    onClick={handleJoinGroup}
+                    className="w-full mt-2 bg-blue-600 hover:bg-blue-500 py-2 rounded text-sm font-bold"
+                  >
+                    Entrar com Código
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {/* Lista de Grupos */}
+            <div className="space-y-2">
+              <button
+                onClick={() => setSelectedGroup(null)}
+                className={`w-full text-left px-3 py-2 rounded transition ${
+                  selectedGroup === null ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'
+                }`}
+              >
+                📋 Tarefa Pessoal
+              </button>
+
+              {loading ? (
+                <p className="text-gray-500 text-sm p-2">A carregar...</p>
+              ) : groups.length === 0 ? (
+                <p className="text-gray-500 text-sm p-2">Sem grupos. Cria um acima!</p>
+              ) : (
+                groups.map(group => (
+                  <div
+                    key={group.id}
+                    className={`rounded transition ${
+                      selectedGroup === group.id ? 'bg-purple-600' : 'bg-gray-700 hover:bg-gray-600'
+                    }`}
+                  >
+                    <button
+                      onClick={() => setSelectedGroup(group.id)}
+                      className="w-full text-left px-3 py-2"
+                    >
+                      <div className="flex justify-between items-center">
+                        <span>👥 {group.name}</span>
+                        <span className="text-xs text-gray-400">({group.member_count})</span>
+                      </div>
+                    </button>
+                    
+                    {/* Expandir quando selecionado */}
+                    {selectedGroup === group.id && (
+                      <div className="px-3 pb-3 pt-1 border-t border-purple-500/30">
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            onClick={() => copyToClipboard(group.invite_code)}
+                            className="flex-1 text-xs bg-gray-600 hover:bg-gray-500 py-1 rounded"
+                            title="Copiar código"
+                          >
+                            📋 {group.invite_code}
+                          </button>
+                          <button
+                            onClick={() => handleLeaveGroup(group.id)}
+                            className="text-xs bg-red-600/50 hover:bg-red-600 px-2 py-1 rounded"
+                            title="Sair do grupo"
+                          >
+                            🚪
+                          </button>
+                        </div>
+                        
+                        {/* Membros */}
+                        <div className="mt-2">
+                          <p className="text-xs text-gray-400 mb-1">Membros:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {groupMembers.map(member => (
+                              <span 
+                                key={member.id} 
+                                className="text-xs bg-gray-600 px-2 py-0.5 rounded"
+                              >
+                                {member.name} {member.id === user?.id && '(tu)'}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* COLUNA DIREITA - Formulário de Criar Tarefa */}
+        <div className="lg:col-span-2">
+          <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+            <h2 className="text-2xl font-bold mb-6 text-emerald-400">
+              ✏️ Nova Tarefa
+              {selectedGroup && (
+                <span className="text-purple-400 text-base ml-2">
+                  → {groups.find(g => g.id === selectedGroup)?.name}
+                </span>
+              )}
+            </h2>
+            
+            <form onSubmit={handleCreateTask} className="space-y-5">
+              {/* Título */}
+              <div>
+                <label className="text-sm text-gray-400 block mb-1">Título *</label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white text-lg"
+                  placeholder="O que precisas fazer?"
+                />
+              </div>
+
+              {/* Descrição */}
+              <div>
+                <label className="text-sm text-gray-400 block mb-1">Descrição</label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white h-24 resize-none"
+                  placeholder="Detalhes adicionais..."
+                />
+              </div>
+              
+              {/* Grid de opções */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Prazo */}
+                <div>
+                  <label className="text-sm text-gray-400 block mb-1">📅 Prazo</label>
+                  <input
+                    type="datetime-local"
+                    min={getNowString()}
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white"
+                  />
+                </div>
+
+                {/* Prioridade */}
+                <div>
+                  <label className="text-sm text-gray-400 block mb-1">🎯 Prioridade</label>
+                  <select
+                    value={priority}
+                    onChange={(e) => setPriority(e.target.value)}
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white"
+                  >
+                    <option value="low">🟢 Baixa</option>
+                    <option value="medium">🟡 Média</option>
+                    <option value="high">🔴 Alta</option>
+                  </select>
+                </div>
+
+                {/* Atribuir a */}
+                <div>
+                  <label className="text-sm text-gray-400 block mb-1">👤 Atribuir a</label>
+                  <select
+                    value={assignedTo}
+                    onChange={(e) => setAssignedTo(e.target.value)}
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white"
+                    disabled={!selectedGroup}
+                  >
+                    <option value="">Qualquer um</option>
+                    {groupMembers.map(member => (
+                      <option key={member.id} value={member.id}>
+                        {member.name} {member.id === user?.id ? '(tu)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                  {!selectedGroup && (
+                    <p className="text-xs text-gray-500 mt-1">Seleciona um grupo primeiro</p>
+                  )}
+                </div>
+              </div>
+              
+              {/* Botão Submit */}
+              <button 
+                type="submit" 
+                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-lg text-lg transition-all hover:scale-[1.02]"
+              >
+                ✅ Criar Tarefa
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+lifinity/web/src/pages/HomePage.jsx
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+
+export default function HomePage() {
+  const [verse, setVerse] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  const token = localStorage.getItem('token');
+  const isAuthenticated = !!token;
+
+  // Fetch versículo do dia
+  const fetchVerse = async () => {
+    try {
+      const headers = isAuthenticated ? { 'Authorization': `Bearer ${token}` } : {};
+      
+      const response = await fetch('http://localhost:5000/verses/today', { headers });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setVerse(data);
+        setIsFavorite(data.is_favorite || false);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar versículo:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Buscar novo versículo aleatório
+  const fetchRandomVerse = async () => {
+    setLoading(true);
+    try {
+      const headers = isAuthenticated ? { 'Authorization': `Bearer ${token}` } : {};
+      
+      const response = await fetch('http://localhost:5000/verses/random', { headers });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setVerse(data);
+        setIsFavorite(data.is_favorite || false);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar versículo:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Toggle favorito
+  const toggleFavorite = async () => {
+    if (!isAuthenticated) {
+      alert("Faz login para guardar favoritos!");
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/verses/favorite', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ verse_id: verse.id })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsFavorite(data.is_favorite);
+      }
+    } catch (error) {
+      console.error("Erro ao favoritar:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchVerse();
+  }, []);
+
+  return (
+    <div className="max-w-5xl mx-auto p-4 md:p-8">
+      
+      {/* Hero Section */}
+      <div className="text-center py-12 mb-8">
+        <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-4">
+          Lifinity
+        </h1>
+        <p className="text-xl text-gray-400">
+          Agenda Partilhada para Famílias e Equipas
+        </p>
+        <p className="text-sm text-gray-500 mt-2">
+          Organiza, colabora e cresce em produtividade 🚀
+        </p>
+      </div>
+
+      {/* Versículo do Dia */}
+      <div className="mb-12">
+        <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 backdrop-blur-sm border border-blue-500/30 rounded-2xl p-8 relative overflow-hidden">
+          {/* Decoração de fundo */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl" />
+          
+          <div className="relative z-10">
+            <div className="flex justify-between items-start mb-6">
+              <h2 className="text-2xl font-bold text-blue-300 flex items-center gap-2">
+                📖 Versículo do Dia
+              </h2>
+              
+              <div className="flex gap-2">
+                {/* Botão Favoritar */}
+                {isAuthenticated && (
+                  <button
+                    onClick={toggleFavorite}
+                    className={`p-2 rounded-lg transition-all ${
+                      isFavorite 
+                        ? 'bg-yellow-500 text-white hover:bg-yellow-600' 
+                        : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                    }`}
+                    title={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                  >
+                    {isFavorite ? '⭐' : '☆'}
+                  </button>
+                )}
+                
+                {/* Botão Novo Versículo */}
+                <button
+                  onClick={fetchRandomVerse}
+                  className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg transition-all flex items-center gap-2"
+                  disabled={loading}
+                >
+                  🔄 {loading ? 'A carregar...' : 'Outro versículo'}
+                </button>
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="text-center py-12">
+                <p className="text-gray-400 animate-pulse">A carregar versículo...</p>
+              </div>
+            ) : verse ? (
+              <div>
+                <p className="text-2xl md:text-3xl font-serif text-white leading-relaxed mb-4 italic">
+                  "{verse.text}"
+                </p>
+                <p className="text-right text-blue-300 font-semibold text-lg">
+                  — {verse.reference}
+                </p>
+              </div>
+            ) : (
+              <p className="text-gray-400 text-center py-8">
+                Não foi possível carregar o versículo.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Features Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-blue-500 transition-all">
+          <div className="text-4xl mb-4">✅</div>
+          <h3 className="text-xl font-bold text-white mb-2">Gerir Tarefas</h3>
+          <p className="text-gray-400 text-sm">
+            Cria, organiza e completa tarefas com prioridades e prazos.
+          </p>
+        </div>
+
+        <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-purple-500 transition-all">
+          <div className="text-4xl mb-4">👥</div>
+          <h3 className="text-xl font-bold text-white mb-2">Trabalho em Equipa</h3>
+          <p className="text-gray-400 text-sm">
+            Cria grupos e partilha tarefas com família ou colegas.
+          </p>
+        </div>
+
+        <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-green-500 transition-all">
+          <div className="text-4xl mb-4">📊</div>
+          <h3 className="text-xl font-bold text-white mb-2">Estatísticas</h3>
+          <p className="text-gray-400 text-sm">
+            Acompanha o teu progresso com gráficos e níveis de XP.
+          </p>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="bg-gray-800 p-8 rounded-xl border border-gray-700 text-center">
+        <h2 className="text-2xl font-bold text-white mb-6">Começar Agora</h2>
+        <div className="flex flex-wrap justify-center gap-4">
+          <Link 
+            to="/create" 
+            className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-lg font-bold transition-all transform hover:scale-105"
+          >
+            ✏️ Criar Tarefa
+          </Link>
+          <Link 
+            to="/tasks" 
+            className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-lg font-bold transition-all transform hover:scale-105"
+          >
+            📋 Ver Tarefas
+          </Link>
+          <Link 
+            to="/stats" 
+            className="bg-purple-600 hover:bg-purple-500 text-white px-8 py-3 rounded-lg font-bold transition-all transform hover:scale-105"
+          >
+            📊 Estatísticas
+          </Link> 
+        </div>
+      </div>
+
+      {/* Footer Info */}
+      <div className="mt-12 text-center text-gray-500 text-sm">
+        <p>
+          💡 O versículo muda todos os dias automaticamente
+          {isAuthenticated && ' • Clica na ⭐ para guardar nos favoritos'}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+
+lifinity/web/src/pages/ProfilePage.jsx
+import { useState, useEffect } from 'react';
+
+export default function ProfilePage({ user }) {
+  const [profile, setProfile] = useState(null);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [name, setName] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState('profile'); // 'profile', 'leaderboard', 'search'
+
+  const token = localStorage.getItem('token');
+
+  // --- FETCH PROFILE ---
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/profile', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setProfile(data);
+        setName(data.name);
+      }
+    } catch (error) {
+      console.error("Erro:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- FETCH LEADERBOARD ---
+  const fetchLeaderboard = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/profile/leaderboard', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setLeaderboard(data);
+      }
+    } catch (error) {
+      console.error("Erro:", error);
+    }
+  };
+
+  // --- SEARCH USERS ---
+  const handleSearch = async () => {
+    if (searchQuery.length < 2) return;
+
+    try {
+      const response = await fetch(`http://localhost:5000/profile/search?q=${searchQuery}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setSearchResults(data);
+      }
+    } catch (error) {
+      console.error("Erro:", error);
+    }
+  };
+
+  // --- UPDATE PROFILE ---
+  const handleUpdateProfile = async () => {
+    if (!name.trim()) return alert("O nome é obrigatório!");
+    
+    setSaving(true);
+    try {
+      const response = await fetch('http://localhost:5000/profile', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name })
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert("Perfil atualizado!");
+        // Atualizar localStorage também
+        const savedUser = JSON.parse(localStorage.getItem('user'));
+        savedUser.name = name;
+        localStorage.setItem('user', JSON.stringify(savedUser));
+        fetchProfile();
+      } else {
+        alert(data.error);
+      }
+    } catch (error) {
+      alert("Erro ao atualizar");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+    fetchLeaderboard();
+  }, []);
+
+  useEffect(() => {
+    const delaySearch = setTimeout(() => {
+      if (searchQuery.length >= 2) {
+        handleSearch();
+      } else {
+        setSearchResults([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(delaySearch);
+  }, [searchQuery]);
+
+  // Função para obter título do nível
+  const getLevelTitle = (level) => {
+    if (level < 5) return '🌱 Iniciante';
+    if (level < 10) return '⭐ Aprendiz';
+    if (level < 20) return '🔥 Dedicado';
+    if (level < 35) return '💎 Expert';
+    if (level < 50) return '👑 Mestre';
+    return '🏆 Lenda';
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto p-8 text-center">
+        <p className="text-gray-400 animate-pulse">A carregar perfil...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto p-4 md:p-8">
+      
+      {/* Tabs */}
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => setActiveTab('profile')}
+          className={`px-4 py-2 rounded-lg font-bold transition ${
+            activeTab === 'profile' ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'
+          }`}
+        >
+          👤 Perfil
+        </button>
+        <button
+          onClick={() => setActiveTab('leaderboard')}
+          className={`px-4 py-2 rounded-lg font-bold transition ${
+            activeTab === 'leaderboard' ? 'bg-yellow-600' : 'bg-gray-700 hover:bg-gray-600'
+          }`}
+        >
+          🏆 Ranking
+        </button>
+        <button
+          onClick={() => setActiveTab('search')}
+          className={`px-4 py-2 rounded-lg font-bold transition ${
+            activeTab === 'search' ? 'bg-purple-600' : 'bg-gray-700 hover:bg-gray-600'
+          }`}
+        >
+          🔍 Procurar
+        </button>
+      </div>
+
+      {/* TAB: PERFIL */}
+      {activeTab === 'profile' && profile && (
+        <div className="space-y-6">
+          
+          {/* Card Principal */}
+          <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+            <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
+              
+              {/* Avatar */}
+              <div className="relative">
+                <div className="w-28 h-28 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-5xl font-bold shadow-lg">
+                  {profile.name?.charAt(0).toUpperCase()}
+                </div>
+                <div className="absolute -bottom-2 -right-2 bg-yellow-500 text-black font-bold text-sm px-2 py-1 rounded-full">
+                  Nv.{profile.level}
+                </div>
+              </div>
+
+              {/* Info */}
+              <div className="flex-1 text-center md:text-left">
+                <h1 className="text-2xl font-bold text-white">{profile.name}</h1>
+                <p className="text-gray-400">{profile.email}</p>
+                <p className="text-lg mt-1">{getLevelTitle(profile.level)}</p>
+                
+                {/* Barra de XP */}
+                <div className="mt-4">
+                  <div className="flex justify-between text-sm text-gray-400 mb-1">
+                    <span>XP: {profile.xp_progress} / {profile.xp_needed}</span>
+                    <span>{profile.progress_percent}%</span>
+                  </div>
+                  <div className="h-4 bg-gray-700 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500"
+                      style={{ width: `${profile.progress_percent}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {profile.xp_needed - profile.xp_progress} XP para o próximo nível
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Estatísticas */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-gray-800 p-4 rounded-xl border border-gray-700 text-center">
+              <p className="text-3xl font-bold text-blue-400">{profile.xp}</p>
+              <p className="text-sm text-gray-400">XP Total</p>
+            </div>
+            <div className="bg-gray-800 p-4 rounded-xl border border-gray-700 text-center">
+              <p className="text-3xl font-bold text-green-400">{profile.tasks_completed}</p>
+              <p className="text-sm text-gray-400">Tarefas Feitas</p>
+            </div>
+            <div className="bg-gray-800 p-4 rounded-xl border border-gray-700 text-center">
+              <p className="text-3xl font-bold text-purple-400">{profile.groups_count}</p>
+              <p className="text-sm text-gray-400">Grupos</p>
+            </div>
+            <div className="bg-gray-800 p-4 rounded-xl border border-gray-700 text-center">
+              <p className="text-3xl font-bold text-yellow-400">{profile.level}</p>
+              <p className="text-sm text-gray-400">Nível</p>
+            </div>
+          </div>
+
+          {/* Editar Perfil */}
+          <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+            <h2 className="text-lg font-bold text-gray-300 mb-4">✏️ Editar Perfil</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-gray-400 block mb-1">Nome</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-400 block mb-1">Email</label>
+                <input
+                  type="email"
+                  value={profile.email}
+                  disabled
+                  className="w-full bg-gray-700/50 border border-gray-600 rounded-lg p-3 text-gray-500 cursor-not-allowed"
+                />
+                <p className="text-xs text-gray-500 mt-1">O email não pode ser alterado.</p>
+              </div>
+
+              <button 
+                onClick={handleUpdateProfile}
+                disabled={saving}
+                className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 text-white font-bold py-3 rounded-lg transition"
+              >
+                {saving ? 'A guardar...' : 'Guardar Alterações'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: LEADERBOARD */}
+      {activeTab === 'leaderboard' && (
+        <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+          <h2 className="text-xl font-bold text-yellow-400 mb-4">🏆 Top 10 Ranking</h2>
+          
+          {leaderboard.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">Nenhum utilizador encontrado.</p>
+          ) : (
+            <div className="space-y-3">
+              {leaderboard.map((u, index) => (
+                <div 
+                  key={u.id}
+                  className={`flex items-center justify-between p-4 rounded-lg ${
+                    u.id === user?.id ? 'bg-blue-900/30 border border-blue-500' : 'bg-gray-700'
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <span className={`text-2xl font-bold ${
+                      index === 0 ? 'text-yellow-400' :
+                      index === 1 ? 'text-gray-300' :
+                      index === 2 ? 'text-orange-400' :
+                      'text-gray-500'
+                    }`}>
+                      {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
+                    </span>
+                    <div>
+                      <p className="font-bold text-white">
+                        {u.name} {u.id === user?.id && '(tu)'}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        Nível {u.level} • {u.tasks_completed} tarefas
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xl font-bold text-blue-400">{u.xp}</p>
+                    <p className="text-xs text-gray-500">XP</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TAB: PESQUISAR */}
+      {activeTab === 'search' && (
+        <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+          <h2 className="text-xl font-bold text-purple-400 mb-4">🔍 Procurar Utilizadores</h2>
+          
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Pesquisa por nome ou email..."
+            className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white mb-4"
+          />
+
+          {searchQuery.length < 2 ? (
+            <p className="text-gray-500 text-center py-8">
+              Escreve pelo menos 2 caracteres para pesquisar.
+            </p>
+          ) : searchResults.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">
+              Nenhum utilizador encontrado para "{searchQuery}".
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {searchResults.map(u => (
+                <div 
+                  key={u.id}
+                  className="flex items-center justify-between p-4 bg-gray-700 rounded-lg"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center font-bold">
+                      {u.name?.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-bold text-white">{u.name}</p>
+                      <p className="text-sm text-gray-400">{u.email}</p>
+                    </div>
+                  </div>
+                  <span className="text-sm bg-gray-600 px-2 py-1 rounded">
+                    Nv.{u.level}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+lifinity/web/src/pages/StatsPage.jsx
+import { useState, useEffect } from 'react';
+import {
+  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+} from 'recharts';
+
+export default function StatsPage({ user }) {
+  const [stats, setStats] = useState(null);
+  const [xpHistory, setXPHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const token = localStorage.getItem('token');
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/stats', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+      }
+    } catch (error) {
+      console.error("Erro:", error);
+    }
+  };
+
+  const fetchXPHistory = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/stats/xp', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setXPHistory(data);
+      }
+    } catch (error) {
+      console.error("Erro:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+    fetchXPHistory();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto p-8 text-center">
+        <p className="text-gray-400 animate-pulse text-lg">A carregar estatísticas...</p>
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div className="max-w-6xl mx-auto p-8 text-center">
+        <p className="text-gray-400">Erro ao carregar dados.</p>
+      </div>
+    );
+  }
+
+  // Cores para os gráficos
+  const COLORS = {
+    high: '#ef4444',
+    medium: '#eab308',
+    low: '#22c55e',
+    completed: '#10b981',
+    pending: '#6b7280'
+  };
+
+  // Preparar dados para o gráfico de pizza (prioridades)
+  const priorityData = stats.priority_distribution.map(p => ({
+    name: p.priority === 'high' ? 'Alta' : p.priority === 'medium' ? 'Média' : 'Baixa',
+    value: p.count,
+    color: COLORS[p.priority]
+  }));
+
+  // Preparar dados para gráfico de barras (grupos)
+  const groupData = stats.group_stats.map(g => ({
+    name: g.group_name.length > 15 ? g.group_name.substring(0, 15) + '...' : g.group_name,
+    total: g.total,
+    concluídas: g.completed
+  }));
+
+  // Preparar dados da atividade semanal
+  const weeklyData = stats.weekly_activity.map(w => ({
+    dia: new Date(w.date).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' }),
+    criadas: w.created,
+    concluídas: w.completed
+  }));
+
+  // Preparar dados do histórico de XP
+  const xpData = xpHistory.map(x => ({
+    dia: new Date(x.date).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' }),
+    xp: x.estimated_xp,
+    tarefas: x.tasks
+  }));
+
+  return (
+    <div className="max-w-7xl mx-auto p-4 md:p-8">
+      <h1 className="text-3xl font-bold text-yellow-400 mb-8">📊 Estatísticas & Progresso</h1>
+
+      {/* Cards de Resumo */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-xl text-center">
+          <p className="text-4xl font-bold">{stats.user.level}</p>
+          <p className="text-sm opacity-90">Nível Atual</p>
+        </div>
+        <div className="bg-gradient-to-br from-purple-600 to-purple-800 p-6 rounded-xl text-center">
+          <p className="text-4xl font-bold">{stats.user.xp}</p>
+          <p className="text-sm opacity-90">XP Total</p>
+        </div>
+        <div className="bg-gradient-to-br from-green-600 to-green-800 p-6 rounded-xl text-center">
+          <p className="text-4xl font-bold">{stats.tasks.completed}</p>
+          <p className="text-sm opacity-90">Tarefas Feitas</p>
+        </div>
+        <div className="bg-gradient-to-br from-orange-600 to-orange-800 p-6 rounded-xl text-center">
+          <p className="text-4xl font-bold">{stats.streak}</p>
+          <p className="text-sm opacity-90">🔥 Dias Seguidos</p>
+        </div>
+      </div>
+
+      {/* Taxa de Conclusão */}
+      <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 mb-8">
+        <h2 className="text-xl font-bold text-white mb-4">Taxa de Conclusão</h2>
+        <div className="flex items-center gap-6">
+          <div className="flex-1">
+            <div className="h-8 bg-gray-700 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-1000"
+                style={{ width: `${stats.tasks.completion_rate}%` }}
+              />
+            </div>
+          </div>
+          <div className="text-3xl font-bold text-green-400">{stats.tasks.completion_rate}%</div>
+        </div>
+        <div className="flex justify-between mt-2 text-sm text-gray-400">
+          <span>✅ {stats.tasks.completed} concluídas</span>
+          <span>📝 {stats.tasks.pending} pendentes</span>
+          <span>📊 {stats.tasks.total} total</span>
+        </div>
+      </div>
+
+      {/* Gráficos */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        
+        {/* Gráfico de Linha - Atividade Semanal */}
+        <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+          <h2 className="text-xl font-bold text-white mb-4">📈 Atividade dos Últimos 7 Dias</h2>
+          {weeklyData.length === 0 ? (
+            <p className="text-gray-500 text-center py-12">Sem dados esta semana.</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart data={weeklyData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis dataKey="dia" stroke="#9ca3af" />
+                <YAxis stroke="#9ca3af" />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
+                  labelStyle={{ color: '#fff' }}
+                />
+                <Legend />
+                <Line type="monotone" dataKey="criadas" stroke="#3b82f6" strokeWidth={2} name="Criadas" />
+                <Line type="monotone" dataKey="concluídas" stroke="#10b981" strokeWidth={2} name="Concluídas" />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+
+        {/* Gráfico de Pizza - Distribuição por Prioridade */}
+        <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+          <h2 className="text-xl font-bold text-white mb-4">🎯 Tarefas por Prioridade</h2>
+          {priorityData.length === 0 ? (
+            <p className="text-gray-500 text-center py-12">Sem tarefas ainda.</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={250}>
+              <PieChart>
+                <Pie
+                  data={priorityData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {priorityData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+
+        {/* Gráfico de Barras - Grupos */}
+        {groupData.length > 0 && (
+          <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+            <h2 className="text-xl font-bold text-white mb-4">👥 Tarefas por Grupo</h2>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={groupData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis dataKey="name" stroke="#9ca3af" />
+                <YAxis stroke="#9ca3af" />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
+                  labelStyle={{ color: '#fff' }}
+                />
+                <Legend />
+                <Bar dataKey="total" fill="#6366f1" name="Total" />
+                <Bar dataKey="concluídas" fill="#10b981" name="Concluídas" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* Gráfico de Linha - Histórico de XP */}
+        {xpData.length > 0 && (
+          <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+            <h2 className="text-xl font-bold text-white mb-4">⭐ Histórico de XP (30 dias)</h2>
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart data={xpData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis dataKey="dia" stroke="#9ca3af" />
+                <YAxis stroke="#9ca3af" />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
+                  labelStyle={{ color: '#fff' }}
+                />
+                <Line type="monotone" dataKey="xp" stroke="#eab308" strokeWidth={3} name="XP Ganho" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
+
+      {/* Informação Extra */}
+      <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+        <h2 className="text-xl font-bold text-white mb-4">ℹ️ Informação</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-300">
+          <p>📅 Membro desde: <span className="text-white font-bold">
+            {new Date(stats.user.member_since).toLocaleDateString('pt-PT')}
+          </span></p>
+          <p>🔥 Melhor streak: <span className="text-orange-400 font-bold">{stats.streak} dias</span></p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+lifinity/web/src/pages/TasksPage.jsx
+import { useState, useEffect } from 'react';
+import TaskCard from '../components/TaskCard';
+
+export default function TasksPage({ user }) {
+  const [tasks, setTasks] = useState([]);
+  const [groups, setGroups] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const token = localStorage.getItem('token');
+
+  const fetchGroups = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/groups', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setGroups(data);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar grupos:", error);
+    }
+  };
+
+  const fetchTasks = async (groupId = null) => {
+    try {
+      let url = 'http://localhost:5000/tasks';
+      if (groupId) url += `?group_id=${groupId}`;
+
+      const response = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setTasks(data);
+      }
+    } catch (error) {
+      console.error("Erro:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGroups();
+    fetchTasks();
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    fetchTasks(selectedGroup);
+  }, [selectedGroup]);
+
+  const toggleTask = async (taskId, currentStatus) => {
+    const newStatus = !currentStatus;
+    const previousTasks = [...tasks];
+    setTasks(tasks.map(t => t.id === taskId ? { ...t, is_completed: newStatus } : t));
+
+    try {
+      const response = await fetch(`http://localhost:5000/tasks/${taskId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ is_completed: newStatus })
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        alert(data.error);
+        setTasks(previousTasks);
+      }
+    } catch (error) {
+      setTasks(previousTasks);
+    }
+  };
+
+  const deleteTask = async (taskId) => {
+    if (!confirm("Tens a certeza que queres eliminar esta tarefa?")) return;
+
+    try {
+      const response = await fetch(`http://localhost:5000/tasks/${taskId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        setTasks(tasks.filter(t => t.id !== taskId));
+      } else {
+        const data = await response.json();
+        alert(data.error);
+      }
+    } catch (error) {
+      alert("Erro ao eliminar tarefa");
+    }
+  };
+
+  const pendingTasks = tasks.filter(t => !t.is_completed);
+  const completedTasks = tasks.filter(t => t.is_completed);
+
+  const canComplete = (task) => {
+    if (!task.assigned_to) return true;
+    return task.assigned_to === user?.id;
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto p-4 md:p-8">
+      
+      {/* Filtro por Grupo */}
+      <div className="mb-6">
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setSelectedGroup(null)}
+            className={`px-4 py-2 rounded-lg transition ${
+              selectedGroup === null 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            📋 Todas
+          </button>
+          
+          {groups.map(group => (
+            <button
+              key={group.id}
+              onClick={() => setSelectedGroup(group.id)}
+              className={`px-4 py-2 rounded-lg transition ${
+                selectedGroup === group.id 
+                  ? 'bg-purple-600 text-white' 
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              👥 {group.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-12">
+          <p className="text-gray-400 animate-pulse text-lg">A carregar tarefas...</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          
+          {/* COLUNA ESQUERDA - Pendentes */}
+          <div>
+            <h2 className="text-xl font-bold mb-4 text-blue-400 flex justify-between items-center sticky top-0 bg-gray-900 py-2">
+              <span>📋 Por Fazer</span>
+              <span className="text-sm bg-blue-600 px-3 py-1 rounded-full">{pendingTasks.length}</span>
+            </h2>
+
+            {pendingTasks.length === 0 ? (
+              <div className="bg-gray-800/50 border border-dashed border-gray-700 rounded-xl p-8 text-center">
+                <p className="text-4xl mb-2">🎉</p>
+                <p className="text-gray-500">Nenhuma tarefa pendente!</p>
+              </div>
+            ) : (
+              <div className="space-y-4 pr-2" style={{ maxHeight: '600px', overflowY: 'auto', overflowX: 'visible' }}>
+                {pendingTasks.map((task) => (
+                  <TaskCard 
+                    key={task.id} 
+                    task={task} 
+                    user={user}
+                    onToggle={toggleTask}
+                    onDelete={deleteTask}
+                    canComplete={canComplete(task)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* COLUNA DIREITA - Concluídas */}
+          <div>
+            <h2 className="text-xl font-bold mb-4 text-green-400 flex justify-between items-center sticky top-0 bg-gray-900 py-2">
+              <span>✅ Concluídas</span>
+              <span className="text-sm bg-green-600 px-3 py-1 rounded-full">{completedTasks.length}</span>
+            </h2>
+
+            {completedTasks.length === 0 ? (
+              <div className="bg-gray-800/50 border border-dashed border-gray-700 rounded-xl p-8 text-center">
+                <p className="text-4xl mb-2">📝</p>
+                <p className="text-gray-500">Nenhuma tarefa concluída ainda.</p>
+              </div>
+            ) : (
+              <div className="space-y-4 pr-2" style={{ maxHeight: '600px', overflowY: 'auto', overflowX: 'visible' }}>
+                {completedTasks.map((task) => (
+                  <TaskCard 
+                    key={task.id} 
+                    task={task} 
+                    user={user}
+                    onToggle={toggleTask}
+                    onDelete={deleteTask}
+                    canComplete={canComplete(task)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+lifinity/web/App.css -
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+
+lifinity/web/App.jsx -
+import { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
+import Login from "./components/Login";
+import Register from "./components/Register";
+import Navbar from "./components/Navbar";
+
+import HomePage from "./pages/HomePage";
+import CreatePage from "./pages/CreatePage";
+import TasksPage from "./pages/TasksPage";
+import ProfilePage from "./pages/ProfilePage";
+import StatsPage from "./pages/StatsPage";
+import ChatbotPage from "./pages/ChatbotPage";
+
+function App() {
+  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [user, setUser] = useState(null);
+  const [currentView, setCurrentView] = useState('login');
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  const handleLoginSuccess = (newToken, userData) => {
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('user', JSON.stringify(userData));
+    setToken(newToken);
+    setUser(userData);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setToken(null);
+    setUser(null);
+    setCurrentView('login');
+  };
+
+  if (!token) {
+    if (currentView === 'register') {
+      return <Register onSwitchToLogin={() => setCurrentView('login')} />;
+    }
+    return (
+      <Login 
+        onLoginSuccess={handleLoginSuccess} 
+        onSwitchToRegister={() => setCurrentView('register')} 
+      />
+    );
+  }
+
+  return (
+    <BrowserRouter>
+      <div className="min-h-screen bg-gray-900 text-white">
+        <Navbar user={user} onLogout={handleLogout} />
+        
+        <Routes>
+          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/create" element={<CreatePage user={user} />} />
+          <Route path="/tasks" element={<TasksPage user={user} />} />
+          <Route path="/profile" element={<ProfilePage user={user} />} />
+          <Route path="/stats" element={<StatsPage user={user} />} />
+          <Route path="/chatbot" element={<ChatbotPage user={user} />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
+  );
+}
+
+export default App;
+
+
+lifinity/web/index.css -
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Animação personalizada para o XP - mais intensa */
+@keyframes xpBounce {
+  0% {
+    transform: scale(0.8) translateY(20px);
+    opacity: 0;
+  }
+  10% {
+    transform: scale(1.2) translateY(-15px);
+    opacity: 1;
+  }
+  30% {
+    transform: scale(1) translateY(0);
+  }
+  50% {
+    transform: scale(1.1) translateY(-10px);
+  }
+  70% {
+    transform: scale(1) translateY(0);
+  }
+  90% {
+    transform: scale(1.05) translateY(-5px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Animação de fade para quando desaparece */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+/* Garantir scroll suave */
+html {
+  scroll-behavior: smooth;
+}
+
+
+lifinity/web/main.jss -
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+
+lifinity/.gitignore -
+Não vou enviar porque é do git, se quiseres que envie, avisa.
+
+lifinity/eslint.config.js -
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import { defineConfig, globalIgnores } from 'eslint/config'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{js,jsx}'],
+    extends: [
+      js.configs.recommended,
+      reactHooks.configs.flat.recommended,
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        ecmaFeatures: { jsx: true },
+        sourceType: 'module',
+      },
+    },
+    rules: {
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+    },
+  },
+])
+
+
+lifinity/web/index.html -
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>web</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+
+
+lifinity/web/package-lock.json -
+Tem 4800+ linhas, não vou enviar porque veio com a instalação de algo.6
+
+
+lifinity/web/package.json -
+{
+  "name": "web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.1.17",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.9.6",
+    "recharts": "^3.5.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "autoprefixer": "^10.4.22",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "vite": "^7.2.4"
+  }
+}
+
+
+lifinity/web/postcss.config.js -
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+
+lifinity/web/tailwind.fig.js -
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+
+
+lifinity/web/vite.config.js -
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react()],
+})
+
+falta fazer o seguinte
+melhorar o chatbot, notificações push, conquistas badge, melhorias visuais
+
+Nota: Eu instalei várias coisas de Node.js, NPM e não sei que mais, no terminal, é por isso que apareceram vários ficheiros. Mas foi uma IA que me mandou fazer isso também, para o meu projeto. Diz-me se entendes ou se precisas de mais algum ficheiro.

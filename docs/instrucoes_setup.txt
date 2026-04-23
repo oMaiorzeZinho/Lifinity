@@ -1,0 +1,70 @@
+# Na pasta backend:
+npm init -y
+npm install express mysql2 dotenv bcryptjs jsonwebtoken cors nodemon
+npm install node-gyp --save-dev
+
+# Na pasta frontend:
+npm create vite@latest . -- --template react
+npm install
+npm install tailwindcss @tailwindcss/vite axios react-router-dom
+
+
+# Instalar ferramentas globais (PowerShell como Administrador)
+npm install --global node-gyp
+
+# Compilar o módulo C (Na pasta backend)
+npx node-gyp configure
+npx node-gyp build
+
+
+# Terminal 1 (Backend)
+cd backend
+npx nodemon index.js
+
+# Terminal 2 (Frontend)
+cd frontend
+npm run dev
+
+
+Passo 1: Preparar o ngrok (O Executável)
+Como já tens o ngrok.exe na pasta docs, vamos mantê-lo lá.
+Garante que o ficheiro ngrok.exe está dentro da pasta: D:\Lifinity\docs\ngrok-v3-stable-windows-amd64\.
+Não precisas de instalar nada, o executável é o programa em si.
+Passo 2: Configurar o Código do Frontend (O mais importante)
+Para que o projeto funcione perfeitamente no teu PC (mesmo abrindo pelo link do ngrok), o código React tem de apontar para o teu servidor local.
+No VS Code, prime Ctrl + Shift + F.
+Procura por qualquer link de internet que tenhamos colocado antes (como https://...ngrok-free.app ou https://...loca.lt ).
+Substitui todos por: http://localhost:3000.
+Garante que o teu ficheiro frontend/vite.config.js tem esta configuração (para o ngrok não ser bloqueado ):
+JavaScript
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    allowedHosts: true // Isto permite que o link do ngrok abra o site
+  }
+})
+Passo 3: Iniciar o Projeto (No dia da PAP ou para testar)
+Tens de ter sempre 3 terminais abertos no VS Code:
+Terminal 1 (Backend): Entra na pasta backend e corre npm start ou node index.js.
+Terminal 2 (Frontend): Entra na pasta frontend e corre npm run dev.
+Terminal 3 (ngrok): Este terminal vai criar o link para a tua apresentação. Escreve:
+powershell
+D:\Lifinity\docs\ngrok-v3-stable-windows-amd64\ngrok.exe http 5173 --domain=wrinkle-basically-payphone.ngrok-free.dev
+Passo 4: O Botão "Explorar" no PowerPoint
+No teu slide da Solução, seleciona o botão/texto "Explorar".
+Insere uma hiperligação para: https://wrinkle-basically-payphone.ngrok-free.dev.
+🤔 Porquê fazer assim?
+Funciona sempre: Como o browser está a correr no teu PC, ele consegue aceder ao localhost:3000 (Backend ) mesmo que o site tenha sido aberto pelo link do ngrok.
+Profissionalismo: O link é personalizado e bonito.
+Simplicidade: Não precisas de te preocupar com IPs, telemóveis ou segundos links aleatórios.
+🚀 O que deves fazer agora:
+Faz a limpeza do código (voltar para localhost:3000).
+Tenta correr os 3 terminais como expliquei.
+Clica no link do ngrok que aparecer no terminal.
+Se o site abrir e o login funcionar no teu PC através desse link, o teu "Power Move" para a apresentação está pronto! Queres que te ajude a verificar se ainda restam links antigos no teu código? 🚀🏁🏆🥇
+
+
+O que PRECISAS de refazer (em cada computador novo):
+npm install: Nunca leves a pasta node_modules na pendrive (é pesada e contém ficheiros específicos para o teu Windows atual). No novo computador, abres o terminal e escreves npm install. O Node lê o teu package.json e descarrega tudo automaticamente.
+Módulo C (node-gyp build): Como o C é compilado para o processador e sistema operativo específico, se mudares de computador (especialmente se um for Intel e outro AMD, ou Windows/Mac), tens de correr o npx node-gyp build novamente.
+Ferramentas de Compilação: Se o computador da escola não tiver o Python e o Visual Studio Build Tools instalados, o módulo C não vai compilar.

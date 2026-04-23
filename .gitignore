@@ -1,0 +1,27 @@
+# Node
+node_modules/
+
+# Environment variables
+.env
+.env.*
+
+# Build
+dist/
+build/
+
+# Logs
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vite
+.vite/
+
+# Native builds
+*.node
+build/Release/
+
+# VS Code (opcional)
+.vscode/
