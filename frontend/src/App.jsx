@@ -7,6 +7,7 @@ import Tasks from './pages/Tasks';
 import Ranking from './pages/Ranking';
 import Community from './pages/Community';
 import Inspiration from './pages/Inspiration';
+import Statistics from './pages/Statistics';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="ranking" element={<Ranking />} />
           <Route path="community" element={<Community />} />
           <Route path="inspiration" element={<Inspiration />} />
+          <Route path="statistics" element={<Statistics />} />
         </Route>
 
         {/* Redirecionar qualquer rota desconhecida para a Home */}

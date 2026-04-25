@@ -76,14 +76,81 @@ napi_value GetLevelData(napi_env env, napi_callback_info info) {
     return result;
 }
 
-napi_value init(napi_env env, napi_value exports) {
-    napi_value fn_level, fn_reward;
-    napi_create_function(env, NULL, 0, GetLevelData, NULL, &fn_level);
-    napi_create_function(env, NULL, 0, CalcularRecompensa, NULL, &fn_reward);
-    
-    napi_set_named_property(env, exports, "getLevelData", fn_level);
-    napi_set_named_property(env, exports, "calcularRecompensa", fn_reward);
-    return exports;
+// Calcula estatísticas gerais para a página de estatísticas
+napi_value CalculateStats(napi_env env, napi_callback_info info) {
+    size_t argc = 5;
+    napi_value args[5];
+    napi_get_cb_info(env, info, &argc, args, NULL, NULL);
+
+    int32_t totalTasks = 0;
+    int32_t completedTasks = 0;
+    int32_t pendingTasks = 0;
+    int32_t lostTasks = 0;
+    int32_t totalXP = 0;
+
+    napi_get_value_int32(env, args[0], &totalTasks);
+    napi_get_value_int32(env, args[1], &completedTasks);
+    napi_get_value_int32(env, args[2], &pendingTasks);
+    napi_get_value_int32(env, args[3], &lostTasks);
+    napi_get_value_int32(env, args[4], &totalXP);
+
+    double completionRate = 0.0;
+    if (totalTasks > 0) {
+        completionRate = ((double)completedTasks / (double)totalTasks) * 100.0;
+    }
+
+    double productivityScore = completionRate;
+
+    if (lostTasks > 0) {
+        productivityScore -= lostTasks * 5.0;
+    }
+
+    if (productivityScore < 0.0) {
+        productivityScore = 0.0;
+    }
+
+    if (productivityScore > 100.0) {
+        productivityScore = 100.0;
+    }
+
+    napi_value result;
+    napi_create_object(env, &result);
+
+    napi_value nTotalTasks, nCompletedTasks, nPendingTasks, nLostTasks, nTotalXP;
+    napi_value nCompletionRate, nProductivityScore;
+
+    napi_create_int32(env, totalTasks, &nTotalTasks);
+    napi_create_int32(env, completedTasks, &nCompletedTasks);
+    napi_create_int32(env, pendingTasks, &nPendingTasks);
+    napi_create_int32(env, lostTasks, &nLostTasks);
+    napi_create_int32(env, totalXP, &nTotalXP);
+    napi_create_double(env, completionRate, &nCompletionRate);
+    napi_create_double(env, productivityScore, &nProductivityScore);
+
+    napi_set_named_property(env, result, "totalTasks", nTotalTasks);
+    napi_set_named_property(env, result, "completedTasks", nCompletedTasks);
+    napi_set_named_property(env, result, "pendingTasks", nPendingTasks);
+    napi_set_named_property(env, result, "lostTasks", nLostTasks);
+    napi_set_named_property(env, result, "totalXP", nTotalXP);
+    napi_set_named_property(env, result, "completionRate", nCompletionRate);
+    napi_set_named_property(env, result, "productivityScore", nProductivityScore);
+
+    return result;
 }
+
+    napi_value init(napi_env env, napi_value exports) {
+        napi_value fn_level, fn_reward, fn_stats;
+
+        napi_create_function(env, NULL, 0, GetLevelData, NULL, &fn_level);
+        napi_create_function(env, NULL, 0, CalcularRecompensa, NULL, &fn_reward);
+        napi_create_function(env, NULL, 0, CalculateStats, NULL, &fn_stats);
+        
+        napi_set_named_property(env, exports, "getLevelData", fn_level);
+        napi_set_named_property(env, exports, "calcularRecompensa", fn_reward);
+        napi_set_named_property(env, exports, "calculateStats", fn_stats);
+
+        return exports;
+    }
+
 
 NAPI_MODULE(NODE_GYP_MODULE_NAME, init)

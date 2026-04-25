@@ -6,11 +6,12 @@ const gamification = require('../../build/Release/gamification');
 exports.getTasks = async (req, res) => {
     try {
         const iduser = req.user.iduser;
-        // Ordenamos por idtask DESC para as mais recentes aparecerem primeiro
+
         const [results] = await db.query(
-            "SELECT * FROM TASK WHERE iduser = ? ORDER BY idtask DESC", 
+            "SELECT * FROM TASK WHERE iduser = ? AND archived_at IS NULL ORDER BY idtask DESC",
             [iduser]
         );
+
         res.json(results);
     } catch (err) {
         console.error("Erro ao procurar tarefas:", err);
@@ -55,6 +56,9 @@ exports.completeTask = async (req, res) => {
         if (tasks.length === 0) return res.status(404).json({ message: "Tarefa não encontrada." });
 
         const task = tasks[0];
+        if (task.status === 'concluida') {
+            return res.status(400).json({ message: "Esta tarefa já foi concluída." });
+        }
 
         // 2. Lógica de Bónus de Velocidade (Mesmo dia?)
         const today = new Date().toISOString().split('T')[0];
@@ -66,20 +70,29 @@ exports.completeTask = async (req, res) => {
         const XP_REWARD = gamification.calcularRecompensa(task.priority, isSameDay, currentStreak);
 
         // 4. Marcar como concluída
-        await db.query("UPDATE TASK SET status = 'concluida' WHERE idtask = ?", [idtask]);
+        await db.query("UPDATE TASK SET status = 'concluida', completed_at = NOW() WHERE idtask = ? AND iduser = ?", [idtask, iduser]);
 
         // 5. Atualizar utilizador (XP e Nível)
-        const [userStats] = await db.query("SELECT xp FROM USER WHERE iduser = ?", [iduser]);
-        const currentXP = userStats[0].xp + XP_REWARD;
-        const levelData = gamification.getLevelData(currentXP);
+            const [userStats] = await db.query("SELECT xp FROM USER WHERE iduser = ?", [iduser]);
+            const currentXP = userStats[0].xp + XP_REWARD;
+            const levelData = gamification.getLevelData(currentXP);
 
-        await db.query("UPDATE USER SET xp = ?, level = ? WHERE iduser = ?", [currentXP, levelData.level, iduser]);
+            await db.query(
+                "UPDATE USER SET xp = ?, level = ? WHERE iduser = ?",
+                [currentXP, levelData.level, iduser]
+            );
 
-        res.json({ 
-            message: `Tarefa concluída! Ganhaste ${XP_REWARD} XP${isSameDay ? ' (Bónus de Velocidade incluído!)' : ''}.`,
-            newXP: currentXP,
-            newLevel: levelData.level
-        });
+            // 6. Registar histórico de XP para estatísticas
+            await db.query(
+                "INSERT INTO XP_HISTORY (iduser, idtask, amount, reason) VALUES (?, ?, ?, ?)",
+                [iduser, idtask, XP_REWARD, "task_completed"]
+            );
+
+            res.json({ 
+                message: `Tarefa concluída! Ganhaste ${XP_REWARD} XP${isSameDay ? ' (Bónus de Velocidade incluído!)' : ''}.`,
+                newXP: currentXP,
+                newLevel: levelData.level
+            });
     } catch (err) {
         console.error("Erro no módulo de XP:", err);
         res.status(500).json({ error: "Erro ao processar recompensa." });
@@ -91,11 +104,32 @@ exports.deleteTask = async (req, res) => {
         const { idtask } = req.params;
         const iduser = req.user.iduser;
 
-        const [result] = await db.query("DELETE FROM TASK WHERE idtask = ? AND iduser = ?", [idtask, iduser]);
+        const [tasks] = await db.query(
+            "SELECT status FROM TASK WHERE idtask = ? AND iduser = ?",
+            [idtask, iduser]
+        );
 
-        if (result.affectedRows === 0) {
+        if (tasks.length === 0) {
             return res.status(404).json({ message: "Tarefa não encontrada." });
         }
+
+        const task = tasks[0];
+
+        if (task.status === 'concluida') {
+            await db.query(
+                "UPDATE TASK SET archived_at = NOW() WHERE idtask = ? AND iduser = ?",
+                [idtask, iduser]
+            );
+
+            return res.json({
+                message: "Tarefa concluída ocultada com sucesso."
+            });
+        }
+
+        await db.query(
+            "DELETE FROM TASK WHERE idtask = ? AND iduser = ?",
+            [idtask, iduser]
+        );
 
         res.json({ message: "Tarefa eliminada com sucesso." });
     } catch (err) {
@@ -107,12 +141,53 @@ exports.clearCompletedTasks = async (req, res) => {
     try {
         const iduser = req.user.iduser;
         // Apaga apenas as tarefas concluídas deste utilizador
-        await db.query("DELETE FROM TASK WHERE iduser = ? AND status = 'concluida'", [iduser]);
-        res.json({ message: "Histórico limpo com sucesso." });
+        await db.query(
+            "UPDATE TASK SET archived_at = NOW() WHERE iduser = ? AND status = 'concluida' AND archived_at IS NULL",
+            [iduser]
+        );
+
+res.json({ message: "Tarefas concluídas ocultadas com sucesso." });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
 
+
+// 7. Resumo das tarefas do utilizador
+// Esta função conta também tarefas arquivadas, porque serve para estatísticas/resumo.
+exports.getTaskSummary = async (req, res) => {
+    try {
+        const iduser = req.user.iduser;
+
+        const [rows] = await db.query(
+            `SELECT 
+                COUNT(*) AS totalTasks,
+                SUM(CASE WHEN status = 'concluida' THEN 1 ELSE 0 END) AS completedTasks,
+                SUM(CASE WHEN status != 'concluida' AND archived_at IS NULL THEN 1 ELSE 0 END) AS pendingTasks
+             FROM TASK
+             WHERE iduser = ?`,
+            [iduser]
+        );
+
+        const summary = rows[0];
+
+        const totalTasks = Number(summary.totalTasks || 0);
+        const completedTasks = Number(summary.completedTasks || 0);
+        const pendingTasks = Number(summary.pendingTasks || 0);
+
+        const completionRate =
+            totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+        res.json({
+            totalTasks,
+            completedTasks,
+            pendingTasks,
+            completionRate
+        });
+    } catch (err) {
+        console.error("Erro ao carregar resumo das tarefas:", err);
+        res.status(500).json({ error: "Erro ao carregar resumo das tarefas." });
+    }
+};
 
 

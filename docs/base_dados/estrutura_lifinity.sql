@@ -45,6 +45,8 @@ CREATE TABLE TASK (
     priority ENUM('baixa', 'media', 'alta') DEFAULT 'media',
     due_date DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at DATETIME DEFAULT NULL,
+    archived_at DATETIME DEFAULT NULL,
     FOREIGN KEY (iduser) REFERENCES USER(iduser) ON DELETE CASCADE,
     FOREIGN KEY (idcategory) REFERENCES CATEGORY(idcategory) ON DELETE SET NULL
 );
@@ -83,6 +85,16 @@ CREATE TABLE FAVORITE_VERSE (
   UNIQUE (iduser, idverse)
 );
 
+CREATE TABLE XP_HISTORY (
+    idxp INT AUTO_INCREMENT PRIMARY KEY,
+    iduser INT NOT NULL,
+    idtask INT DEFAULT NULL,
+    amount INT NOT NULL,
+    reason VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (iduser) REFERENCES USER(iduser) ON DELETE CASCADE,
+    FOREIGN KEY (idtask) REFERENCES TASK(idtask) ON DELETE SET NULL
+);
 
 -- Tabelas de Ligação (Relacionamentos N:M)
 -- Membros de um Grupo

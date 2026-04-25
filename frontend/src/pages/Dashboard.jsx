@@ -46,6 +46,7 @@ const DashboardLayout = () => {
   const isRankingPage = location.pathname === '/dashboard/ranking';
   const isCommunityPage = location.pathname === '/dashboard/community';
   const isInspirationPage = location.pathname === '/dashboard/inspiration';
+  const isStatisticsPage = location.pathname === '/dashboard/statistics';
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
@@ -86,6 +87,17 @@ const DashboardLayout = () => {
             >
               Ranking
             </Link>
+
+              <Link
+                to="/dashboard/statistics"
+                className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                  isStatisticsPage
+                    ? 'bg-white text-blue-600 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-600'
+                }`}
+              >
+                Estatísticas
+              </Link>
 
             <Link
               to="/dashboard/inspiration"
