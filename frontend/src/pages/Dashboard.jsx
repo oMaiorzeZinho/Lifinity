@@ -52,10 +52,13 @@ const DashboardLayout = () => {
       {/* HEADER */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 min-h-20 py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-blue-200">
-              L
-            </div>
+          <div className="flex items-center gap-3">
+            <img
+              src="/images/lifinity-logo.png"
+              alt="Logotipo Lifinity"
+              className="w-10 h-10 object-contain rounded-xl"
+            />
+
             <h1 className="text-xl font-black tracking-tighter text-slate-800">
               LIFINITY
             </h1>
