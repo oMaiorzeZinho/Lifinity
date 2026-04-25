@@ -1,152 +1,45 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Outlet, Link, useLocation } from 'react-router-dom';
-import axios from 'axios';
-
-// URL base da API vinda do .env do frontend
-const API_URL = import.meta.env.VITE_API_URL;
-
-// --- MOTOR DE GAMIFICAÇÃO (FRONTEND) ---
-const getLevelData = (xp) => {
-  if (!xp) xp = 0;
-
-  let level = 1;
-  const calculateXPForLevel = (lvl) => Math.floor(100 * Math.pow(lvl - 1, 1.5));
-
-  while (xp >= calculateXPForLevel(level + 1)) {
-    level++;
-  }
-
-  const xpStartOfLevel = calculateXPForLevel(level);
-  const xpForNextLevel = calculateXPForLevel(level + 1);
-  const progress = ((xp - xpStartOfLevel) / (xpForNextLevel - xpStartOfLevel)) * 100;
-
-  return {
-    level,
-    progress: Math.min(Math.max(progress, 0), 100),
-    xpRemaining: Math.max(xpForNextLevel - xp, 0),
-  };
-};
 
 const DashboardLayout = () => {
-  const [user, setUser] = useState(null);
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    // Função que sincroniza os dados do utilizador e das tarefas
-    const loadDashboardData = async () => {
-      const savedUser = localStorage.getItem('user');
-      const token = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
 
-      if (!savedUser || !token) {
-        navigate('/login');
-        return;
-      }
+    if (!savedUser || !token) {
+      navigate('/login');
+      return;
+    }
 
-      try {
-        setUser(JSON.parse(savedUser));
-
-        const response = await axios.get(`${API_URL}/tasks`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        setTasks(response.data);
-      } catch (error) {
-        console.error('Erro ao carregar dados do dashboard:', error);
-      } finally {
-        setLoading(false);
+    const handleUserUpdated = () => {
+      const refreshedUser = localStorage.getItem('user');
+      if (refreshedUser) {
+        setUser(JSON.parse(refreshedUser));
       }
     };
 
-    loadDashboardData();
-
-    // Estes eventos vão permitir atualizar o dashboard
-    // quando uma tarefa for criada/concluída/apagada
-    window.addEventListener('lifinity-user-updated', loadDashboardData);
-    window.addEventListener('lifinity-tasks-updated', loadDashboardData);
+    window.addEventListener('lifinity-user-updated', handleUserUpdated);
 
     return () => {
-      window.removeEventListener('lifinity-user-updated', loadDashboardData);
-      window.removeEventListener('lifinity-tasks-updated', loadDashboardData);
+      window.removeEventListener('lifinity-user-updated', handleUserUpdated);
     };
   }, [navigate]);
 
-  const stats = useMemo(() => {
-    const total = tasks.length;
-    const completed = tasks.filter((task) => task.status === 'concluida').length;
-    const pending = tasks.filter((task) => task.status !== 'concluida').length;
-    const highPriority = tasks.filter(
-      (task) => task.priority === 'alta' && task.status !== 'concluida'
-    ).length;
-
-    const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-    return {
-      total,
-      completed,
-      pending,
-      highPriority,
-      completionRate,
-    };
-  }, [tasks]);
-
-  const weeklyData = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const data = Array.from({ length: 7 }, (_, index) => {
-      const date = new Date(today);
-      date.setDate(today.getDate() - (6 - index));
-
-      return {
-        key: date.toISOString().split('T')[0],
-        label: date
-          .toLocaleDateString('pt-PT', { weekday: 'short' })
-          .replace('.', ''),
-        total: 0,
-        completed: 0,
-      };
-    });
-
-    tasks.forEach((task) => {
-      if (!task.created_at) return;
-
-      const createdKey = new Date(task.created_at).toISOString().split('T')[0];
-      const day = data.find((item) => item.key === createdKey);
-
-      if (day) {
-        day.total += 1;
-
-        if (task.status === 'concluida') {
-          day.completed += 1;
-        }
-      }
-    });
-
-    return data;
-  }, [tasks]);
-
-  const maxBarValue = useMemo(() => {
-    return Math.max(
-      ...weeklyData.map((day) => Math.max(day.total, day.completed)),
-      1
-    );
-  }, [weeklyData]);
-
-  if (loading && !user) {
+  if (!user) {
     return (
       <div className="p-10 text-slate-400 font-bold uppercase tracking-widest text-center">
         A carregar...
       </div>
     );
   }
-
-  if (!user) return null;
-
-  const levelData = getLevelData(user.xp);
 
   const isTasksPage = location.pathname === '/dashboard/tasks';
   const isRankingPage = location.pathname === '/dashboard/ranking';
@@ -207,7 +100,7 @@ const DashboardLayout = () => {
                 {user.username}
               </p>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                Nível {levelData.level}
+                Nível {user.level}
               </p>
             </div>
 
@@ -238,140 +131,7 @@ const DashboardLayout = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto p-6 space-y-8">
-        {/* CARDS DE RESUMO */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1 italic">
-              Nível {levelData.level}
-            </p>
-            <p className="text-3xl font-black text-blue-600 tracking-tighter">
-              {user.xp} XP
-            </p>
-
-            <div className="w-full bg-slate-100 h-3 rounded-full mt-4 overflow-hidden">
-              <div
-                className="bg-blue-600 h-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(37,99,235,0.3)]"
-                style={{ width: `${levelData.progress}%` }}
-              />
-            </div>
-
-            <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase italic tracking-widest">
-              Faltam {Math.round(levelData.xpRemaining)} XP para o Nível{' '}
-              {levelData.level + 1}
-            </p>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-center">
-            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1 italic">
-              Total de Tarefas
-            </p>
-            <p className="text-3xl font-black text-slate-800 tracking-tighter">
-              {stats.total}
-            </p>
-            <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-widest">
-              Criadas até agora
-            </p>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-center">
-            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1 italic">
-              Pendentes
-            </p>
-            <p className="text-3xl font-black text-orange-500 tracking-tighter">
-              {stats.pending}
-            </p>
-            <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-widest">
-              Alta prioridade: {stats.highPriority}
-            </p>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1 italic">
-              Taxa de Conclusão
-            </p>
-            <p className="text-3xl font-black text-emerald-600 tracking-tighter">
-              {stats.completionRate}%
-            </p>
-
-            <div className="w-full bg-slate-100 h-3 rounded-full mt-4 overflow-hidden">
-              <div
-                className="bg-emerald-500 h-full transition-all duration-1000"
-                style={{ width: `${stats.completionRate}%` }}
-              />
-            </div>
-
-            <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-widest">
-              {stats.completed} concluídas / {stats.total} totais
-            </p>
-          </div>
-        </div>
-
-        {/* MINI GRÁFICO */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-black tracking-tighter text-slate-800">
-                Atividade dos Últimos 7 Dias
-              </h2>
-              <p className="text-slate-500 text-sm font-medium">
-                Comparação entre tarefas criadas e concluídas.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest">
-              <div className="flex items-center gap-2 text-slate-400">
-                <span className="w-3 h-3 rounded-full bg-slate-300 block" />
-                Criadas
-              </div>
-              <div className="flex items-center gap-2 text-slate-400">
-                <span className="w-3 h-3 rounded-full bg-blue-600 block" />
-                Concluídas
-              </div>
-            </div>
-          </div>
-
-          {stats.total === 0 ? (
-            <div className="p-16 text-center text-slate-300 font-bold italic uppercase text-xs tracking-widest">
-              Ainda não tens tarefas suficientes para mostrar atividade.
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4">
-              {weeklyData.map((day) => (
-                <div
-                  key={day.key}
-                  className="bg-slate-50 border border-slate-100 rounded-2xl p-4"
-                >
-                  <div className="h-32 flex items-end justify-center gap-2 mb-3">
-                    <div
-                      className="w-5 bg-slate-300 rounded-t-xl transition-all"
-                      style={{
-                        height: `${(day.total / maxBarValue) * 100}%`,
-                        minHeight: day.total > 0 ? '10px' : '0px',
-                      }}
-                    />
-                    <div
-                      className="w-5 bg-blue-600 rounded-t-xl transition-all"
-                      style={{
-                        height: `${(day.completed / maxBarValue) * 100}%`,
-                        minHeight: day.completed > 0 ? '10px' : '0px',
-                      }}
-                    />
-                  </div>
-
-                  <p className="text-center text-[10px] font-black uppercase tracking-widest text-slate-500">
-                    {day.label}
-                  </p>
-                  <p className="text-center text-xs font-bold text-slate-400 mt-1">
-                    {day.completed}/{day.total}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* CONTEÚDO DAS PÁGINAS FILHAS */}
+      <main className="max-w-7xl mx-auto p-6">
         <Outlet />
       </main>
     </div>

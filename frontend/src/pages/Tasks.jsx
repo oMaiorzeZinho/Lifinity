@@ -146,22 +146,54 @@ const Tasks = () => {
   return (
     <div className="space-y-8">
       {/* CARDS DE RESUMO - Agora específicos da página de tarefas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* CARD NÍVEL */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1 italic">Nível {levelData.level}</p>
-          <p className="text-3xl font-black text-blue-600 tracking-tighter">{user.xp} XP</p>
+          <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1 italic">
+            Nível {levelData.level}
+          </p>
+          <p className="text-3xl font-black text-blue-600 tracking-tighter">
+            {user.xp} XP
+          </p>
+
           <div className="w-full bg-slate-100 h-3 rounded-full mt-4 overflow-hidden">
-            <div className="bg-blue-600 h-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(37,99,235,0.3)]" style={{ width: `${levelData.progress}%` }}></div>
+            <div
+              className="bg-blue-600 h-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(37,99,235,0.3)]"
+              style={{ width: `${levelData.progress}%` }}
+            ></div>
           </div>
-          <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase italic tracking-widest">Faltam {Math.round(levelData.xpRemaining)} XP para o Nível {levelData.level + 1}</p>
+
+          <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase italic tracking-widest">
+            Faltam {Math.round(levelData.xpRemaining)} XP para o Nível {levelData.level + 1}
+          </p>
         </div>
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-center">
-          <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1 italic">Tarefas Ativas</p>
-          <p className="text-3xl font-black text-slate-800 tracking-tighter">{tasks.filter(t => t.status !== 'concluida').length}</p>
-        </div>
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-center">
-          <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1 italic">Produtividade Diária</p>
-          <p className="text-3xl font-black text-teal-600 tracking-tighter">--%</p> { /* Placeholder */ }
+
+        {/* CARD PRODUTIVIDADE DIÁRIA */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1 italic">
+            Produtividade Diária
+          </p>
+
+          <p className="text-3xl font-black text-emerald-600 tracking-tighter">
+            {tasks.length > 0
+              ? Math.round((tasks.filter(t => t.status === 'concluida').length / tasks.length) * 100)
+              : 0}%
+          </p>
+
+          <div className="w-full bg-slate-100 h-3 rounded-full mt-4 overflow-hidden">
+            <div
+              className="bg-emerald-500 h-full transition-all duration-1000"
+              style={{
+                width: `${tasks.length > 0
+                  ? Math.round((tasks.filter(t => t.status === 'concluida').length / tasks.length) * 100)
+                  : 0}%`
+              }}
+            ></div>
+          </div>
+
+          <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-widest">
+            {tasks.filter(t => t.status !== 'concluida').length} pendentes • {tasks.filter(t => t.status === 'concluida').length} concluídas
+          </p>
         </div>
       </div>
 
