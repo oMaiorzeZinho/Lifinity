@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Outlet, Link, useLocation } from 'react-router-dom';
+import DailyVerseWidget from '../components/DailyVerseWidget';
 
 const DashboardLayout = () => {
   const [user, setUser] = useState(() => {
@@ -44,12 +45,13 @@ const DashboardLayout = () => {
   const isTasksPage = location.pathname === '/dashboard/tasks';
   const isRankingPage = location.pathname === '/dashboard/ranking';
   const isCommunityPage = location.pathname === '/dashboard/community';
+  const isInspirationPage = location.pathname === '/dashboard/inspiration';
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       {/* HEADER */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 min-h-20 py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-blue-200">
               L
@@ -59,7 +61,7 @@ const DashboardLayout = () => {
             </h1>
           </div>
 
-          <nav className="flex gap-1 bg-slate-100 p-1 rounded-2xl">
+          <nav className="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-2xl">
             <Link
               to="/dashboard/tasks"
               className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
@@ -80,6 +82,17 @@ const DashboardLayout = () => {
               }`}
             >
               Ranking
+            </Link>
+
+            <Link
+              to="/dashboard/inspiration"
+              className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                isInspirationPage
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              Inspiração
             </Link>
 
             <Link
@@ -110,6 +123,7 @@ const DashboardLayout = () => {
                 navigate('/login');
               }}
               className="w-10 h-10 rounded-xl border-2 border-slate-100 flex items-center justify-center text-slate-400 hover:text-red-500 hover:border-red-100 transition-all"
+              title="Terminar sessão"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -131,9 +145,15 @@ const DashboardLayout = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto p-6">
+      <main
+        className={`mx-auto p-6 transition-all ${
+          isInspirationPage ? '' : 'max-w-7xl'
+        }`}
+        style={isInspirationPage ? { maxWidth: 2000 } : undefined}
+      >
         <Outlet />
       </main>
+      {!isInspirationPage && <DailyVerseWidget />}
     </div>
   );
 };
