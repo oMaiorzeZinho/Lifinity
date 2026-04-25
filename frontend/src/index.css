@@ -1,1 +1,7 @@
 @import "tailwindcss";
+
+@media (min-width: 64rem) {
+  .inspiration-verse-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr);
+  }
+}

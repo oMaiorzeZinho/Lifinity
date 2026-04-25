@@ -52,15 +52,19 @@ const Tasks = () => {
   }, []);
   
   useEffect(() => {
-  const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token');
 
-  if (!user || !token) {
-    navigate('/login');
-    return;
-  }
+    if (!user || !token) {
+      navigate('/login');
+      return;
+    }
 
-  fetchTasks(token);
-}, [navigate, user, fetchTasks]);
+    const loadTasks = async () => {
+      await fetchTasks(token);
+    };
+
+    loadTasks();
+  }, [navigate, user, fetchTasks]);
 
   
 

@@ -5,6 +5,7 @@ require('dotenv').config();
 const authRoutes = require('./src/routes/authRoutes');
 const taskRoutes = require('./src/routes/taskRoutes');
 const userRoutes = require('./src/routes/userRoutes');
+const inspirationRoutes = require('./src/routes/inspirationRoutes');
 
 //Criação de uma instância do Express (a aplicação)
 const app = express();
@@ -26,6 +27,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 // Usar as rotas de utilizadores
 app.use('/api/users', userRoutes);
+// Usar as rotas de inspiração
+app.use('/api/inspiration', inspirationRoutes);
+
 
 //Mandar o servidor começar a "ouvir" os pedidos
 app.listen(PORT, () => {

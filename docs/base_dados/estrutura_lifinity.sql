@@ -64,6 +64,25 @@ CREATE TABLE BADGE (
     requirements INT NOT NULL
 );
 
+CREATE TABLE BIBLE_VERSE (
+  idverse INT AUTO_INCREMENT PRIMARY KEY,
+  book VARCHAR(100) NOT NULL,
+  chapter INT NOT NULL,
+  verse INT NOT NULL,
+  text TEXT NOT NULL,
+  theme VARCHAR(100) DEFAULT NULL
+);
+
+CREATE TABLE FAVORITE_VERSE (
+  idfavorite INT AUTO_INCREMENT PRIMARY KEY,
+  iduser INT NOT NULL,
+  idverse INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (iduser) REFERENCES USER(iduser) ON DELETE CASCADE,
+  FOREIGN KEY (idverse) REFERENCES BIBLE_VERSE(idverse) ON DELETE CASCADE,
+  UNIQUE (iduser, idverse)
+);
+
 
 -- Tabelas de Ligação (Relacionamentos N:M)
 -- Membros de um Grupo
