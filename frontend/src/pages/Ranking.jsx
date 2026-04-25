@@ -136,7 +136,6 @@ const Ranking = () => {
   }, [ranking]);
 
   const topThree = ranking.slice(0, 3);
-  const remainingUsers = ranking.slice(3);
 
   if (loading) {
     return (
@@ -151,9 +150,21 @@ const Ranking = () => {
   return (
     <div className="space-y-8">
       {/* HERO */}
-      <div className="relative overflow-hidden rounded-4xl border border-slate-200 shadow-sm bg-slate-900">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-950 via-slate-900 to-slate-800"></div>
-        <div className="absolute right-0 top-0 h-full w-1/2 opacity-20 bg-[radial-gradient(circle_at_center,_white,_transparent_60%)]"></div>
+      <div
+        className="relative overflow-hidden border border-slate-200 bg-slate-900 shadow-sm"
+        style={{
+          borderRadius: '2rem',
+          backgroundImage:
+            'linear-gradient(to right, var(--color-blue-950), var(--color-slate-900), var(--color-slate-800))',
+        }}
+      >
+        <div
+          className="absolute top-0 right-0 h-full w-1/2 opacity-20"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at center, white, transparent 60%)',
+          }}
+        />
 
         <div className="relative z-10 p-8 md:p-10 text-white">
           <p className="text-[10px] font-black uppercase tracking-[0.25em] mb-3 text-blue-200">
@@ -171,7 +182,7 @@ const Ranking = () => {
               </p>
             </div>
 
-            <div className="bg-white/10 border border-white/10 rounded-3xl p-5 backdrop-blur-md min-w-[230px]">
+            <div className="min-w-57.5 rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur-md">
               <p className="text-[10px] font-black uppercase tracking-widest text-blue-200 mb-1">
                 A tua posição
               </p>
@@ -318,7 +329,7 @@ const Ranking = () => {
                     <div
                       className="bg-blue-600 h-full transition-all duration-1000"
                       style={{ width: `${progress}%` }}
-                    ></div>
+                    />
                   </div>
                 </div>
               );
@@ -430,20 +441,20 @@ const Ranking = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-5 md:min-w-[360px]">
+                    <div className="flex items-center gap-5 md:min-w-90">
                       <div className="flex-1">
                         <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
                           <div
                             className="bg-blue-600 h-full transition-all duration-1000"
                             style={{ width: `${progress}%` }}
-                          ></div>
+                          />
                         </div>
                         <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-2">
                           Progresso relativo ao líder
                         </p>
                       </div>
 
-                      <div className="text-right min-w-[90px]">
+                      <div className="min-w-22.5 text-right">
                         <p className="text-2xl font-black text-blue-600 tracking-tighter">
                           {user.xp}
                         </p>
