@@ -2,79 +2,238 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const Register = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
   const [message, setMessage] = useState('');
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, {
+      await axios.post(`${API_URL}/auth/register`, {
         username,
         email,
-        password,
+        password
       });
 
-      setMessage('Conta criada com sucesso! A redirecionar para o login...');
+      setMessage('Conta criada com sucesso. A redirecionar para o login...');
 
       setTimeout(() => {
         navigate('/login');
-      }, 2000);
+      }, 1800);
     } catch (error) {
-      setMessage(error.response?.data?.message || 'Erro ao registar.');
+      setMessage(error.response?.data?.message || 'Erro ao criar conta.');
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 font-sans">
-      <div className="bg-white w-full max-w-md p-10 rounded-3xl shadow-xl border border-slate-100">
-        <Link to="/" className="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-blue-600 transition block mb-8">
-          ← Voltar à Home
-        </Link>
+    <div
+      className="min-h-screen text-white relative overflow-hidden"
+      style={{ backgroundColor: '#070b0a' }}
+    >
+      {/* BACKGROUND */}
+      <div
+        className="fixed inset-0 bg-cover bg-center opacity-45"
+        style={{ backgroundImage: "url('/images/auth-bg-2.png')" }}
+      ></div>
 
-        <h2 className="text-3xl font-black text-slate-800 mb-2 tracking-tight">Criar Conta</h2>
-        <p className="text-slate-500 mb-8 font-medium">Junta-te à comunidade Lifinity.</p>
+      <div
+        className="fixed inset-0"
+        style={{
+          background:
+            'radial-gradient(circle at top, rgba(155, 180, 165, 0.2), transparent 35%), linear-gradient(to bottom, rgba(7, 11, 10, 0.35), #070b0a 80%)'
+        }}
+      ></div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <input
-            type="text"
-            placeholder="Nome de Utilizador"
-            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition font-bold"
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-          <input
-            type="email"
-            placeholder="E-mail"
-            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition font-bold"
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Palavra-passe"
-            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition font-bold"
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <button className="w-full bg-blue-600 text-white p-5 rounded-2xl font-black uppercase tracking-widest hover:bg-blue-700 transition shadow-lg shadow-blue-100">
-            Registar
-          </button>
-        </form>
+      <div className="relative z-10 min-h-screen flex flex-col">
+        {/* HEADER */}
+        <header className="max-w-screen-2xl mx-auto w-full px-6 h-20 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-3">
+            <img
+              src="/images/lifinity-logo.png"
+              alt="Logotipo Lifinity"
+              className="h-9 w-auto object-contain"
+            />
 
-        {message && (
-          <p className={`mt-6 text-center font-bold text-sm ${message.includes('sucesso') ? 'text-green-600' : 'text-red-500'}`}>
-            {message}
-          </p>
-        )}
+            <span className="text-xl font-black tracking-tight text-white">
+              Lifinity
+            </span>
+          </Link>
 
-        <p className="mt-8 text-center text-sm font-bold text-slate-400">
-          Já tens conta? <Link to="/login" className="text-blue-600 hover:underline">Entrar aqui</Link>
-        </p>
+          <Link
+            to="/login"
+            className="px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-black hover:bg-white/10 transition-all"
+          >
+            Entrar
+          </Link>
+        </header>
+
+        {/* CONTENT */}
+        <main className="flex-1 flex items-center justify-center px-6 py-12">
+          <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            {/* TEXTO LATERAL */}
+            <section className="hidden lg:block">
+              <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl mb-8">
+                <span
+                  className="w-2 h-2 rounded-full bg-emerald-300"
+                  style={{ boxShadow: '0 0 18px rgba(110, 231, 183, 0.8)' }}
+                ></span>
+                <p className="text-xs font-black uppercase tracking-widest text-slate-300">
+                  Começa a tua jornada
+                </p>
+              </div>
+
+              <h1 className="text-5xl xl:text-6xl font-black tracking-tighter leading-none max-w-2xl">
+                Cria uma rotina mais organizada, motivadora e inteligente.
+              </h1>
+
+              <p className="mt-6 text-lg text-slate-300 leading-relaxed max-w-xl">
+                Junta-te ao Lifinity para gerir tarefas, ganhar XP, acompanhar
+                progresso, guardar inspiração diária e colaborar com amigos e
+                grupos.
+              </p>
+
+              <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 max-w-xl">
+                <p className="text-xs font-black uppercase tracking-widest text-emerald-200 mb-4">
+                  O que vais encontrar
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
+                    <p className="font-black text-white">Tarefas e prioridades</p>
+                    <p className="text-sm text-slate-400 mt-2">
+                      Organiza o dia com clareza.
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
+                    <p className="font-black text-white">Níveis e XP</p>
+                    <p className="text-sm text-slate-400 mt-2">
+                      Evolui ao concluir objetivos.
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
+                    <p className="font-black text-white">Estatísticas</p>
+                    <p className="text-sm text-slate-400 mt-2">
+                      Acompanha progresso visual.
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
+                    <p className="font-black text-white">Comunidade</p>
+                    <p className="text-sm text-slate-400 mt-2">
+                      Liga-te a amigos e grupos.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* FORM */}
+            <section
+              className="rounded-3xl border border-white/10 backdrop-blur-2xl shadow-2xl p-8 md:p-10"
+              style={{ backgroundColor: 'rgba(13, 18, 16, 0.8)' }}
+            >
+              <div className="mb-8">
+                <p className="text-xs font-black uppercase tracking-widest text-emerald-200 mb-3">
+                  Nova conta
+                </p>
+
+                <h2 className="text-4xl font-black tracking-tighter text-white">
+                  Criar conta
+                </h2>
+
+                <p className="text-slate-400 mt-3 font-medium">
+                  Começa a organizar a tua evolução diária.
+                </p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-2 ml-1">
+                    Nome de utilizador
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="O teu nome"
+                    className="w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-slate-600 outline-none focus:border-emerald-200/60 focus:bg-white/10 transition-all font-bold"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-2 ml-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="exemplo@email.com"
+                    className="w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-slate-600 outline-none focus:border-emerald-200/60 focus:bg-white/10 transition-all font-bold"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-2 ml-1">
+                    Palavra-passe
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="Escolhe uma palavra-passe"
+                    className="w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-slate-600 outline-none focus:border-emerald-200/60 focus:bg-white/10 transition-all font-bold"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full px-6 py-5 rounded-2xl bg-white text-slate-950 font-black uppercase tracking-widest text-xs hover:bg-slate-200 transition-all shadow-xl shadow-white/10"
+                >
+                  Criar conta
+                </button>
+              </form>
+
+              {message && (
+                <div
+                  className={`mt-6 p-4 rounded-2xl border text-sm font-bold text-center ${
+                    message.includes('sucesso')
+                      ? 'bg-emerald-300/10 border-emerald-200/20 text-emerald-200'
+                      : 'bg-red-500/10 border-red-400/20 text-red-200'
+                  }`}
+                >
+                  {message}
+                </div>
+              )}
+
+              <div className="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <p className="text-sm text-slate-400 font-medium">
+                  Já tens conta?
+                </p>
+
+                <Link
+                  to="/login"
+                  className="text-sm font-black text-emerald-200 hover:text-white transition-colors"
+                >
+                  Entrar na conta
+                </Link>
+              </div>
+            </section>
+          </div>
+        </main>
       </div>
     </div>
   );
