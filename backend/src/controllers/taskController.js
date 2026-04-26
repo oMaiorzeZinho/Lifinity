@@ -155,15 +155,28 @@ res.json({ message: "Tarefas concluídas ocultadas com sucesso." });
 
 // 7. Resumo das tarefas do utilizador
 // Esta função conta também tarefas arquivadas, porque serve para estatísticas/resumo.
+// 7. Resumo diário das tarefas do utilizador
+// Esta função é usada no card "Produtividade de Hoje" da página de tarefas.
+// Conta tarefas de hoje, incluindo concluídas que já foram ocultadas.
 exports.getTaskSummary = async (req, res) => {
     try {
         const iduser = req.user.iduser;
 
         const [rows] = await db.query(
             `SELECT 
-                COUNT(*) AS totalTasks,
-                SUM(CASE WHEN status = 'concluida' THEN 1 ELSE 0 END) AS completedTasks,
-                SUM(CASE WHEN status != 'concluida' AND archived_at IS NULL THEN 1 ELSE 0 END) AS pendingTasks
+                SUM(CASE 
+                    WHEN status != 'concluida'
+                    AND archived_at IS NULL
+                    AND DATE(created_at) = CURDATE()
+                    THEN 1 ELSE 0 
+                END) AS pendingToday,
+
+                SUM(CASE 
+                    WHEN status = 'concluida'
+                    AND completed_at IS NOT NULL
+                    AND DATE(completed_at) = CURDATE()
+                    THEN 1 ELSE 0 
+                END) AS completedToday
              FROM TASK
              WHERE iduser = ?`,
             [iduser]
@@ -171,9 +184,9 @@ exports.getTaskSummary = async (req, res) => {
 
         const summary = rows[0];
 
-        const totalTasks = Number(summary.totalTasks || 0);
-        const completedTasks = Number(summary.completedTasks || 0);
-        const pendingTasks = Number(summary.pendingTasks || 0);
+        const pendingTasks = Number(summary.pendingToday || 0);
+        const completedTasks = Number(summary.completedToday || 0);
+        const totalTasks = pendingTasks + completedTasks;
 
         const completionRate =
             totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
@@ -185,8 +198,8 @@ exports.getTaskSummary = async (req, res) => {
             completionRate
         });
     } catch (err) {
-        console.error("Erro ao carregar resumo das tarefas:", err);
-        res.status(500).json({ error: "Erro ao carregar resumo das tarefas." });
+        console.error("Erro ao carregar resumo diário das tarefas:", err);
+        res.status(500).json({ error: "Erro ao carregar resumo diário das tarefas." });
     }
 };
 

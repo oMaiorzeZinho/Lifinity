@@ -4,6 +4,16 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// Classes reutilizáveis para manter a interface consistente
+const cardClass =
+  'bg-slate-950/80 border border-white/10 backdrop-blur-xl shadow-2xl';
+
+const inputClass =
+  'bg-white/5 border border-white/10 text-slate-100 placeholder:text-slate-500 outline-none focus:border-emerald-300/40 focus:bg-white/10 transition-all';
+
+const selectClass =
+  'bg-white/5 border border-white/10 text-slate-200 outline-none cursor-pointer hover:bg-white/10 transition-all';
+
 // --- MOTOR DE GAMIFICAÇÃO (FRONTEND) ---
 // Esta função calcula o nível e o progresso visual com base no XP do utilizador.
 const getLevelData = (xp) => {
@@ -28,6 +38,7 @@ const getLevelData = (xp) => {
   };
 };
 
+// Pedido à API para carregar tarefas visíveis
 const requestTasks = async (token) => {
   const res = await axios.get(`${API_URL}/tasks`, {
     headers: { Authorization: `Bearer ${token}` }
@@ -36,6 +47,7 @@ const requestTasks = async (token) => {
   return res.data;
 };
 
+// Pedido à API para carregar resumo diário das tarefas
 const requestTaskSummary = async (token) => {
   const res = await axios.get(`${API_URL}/tasks/summary`, {
     headers: { Authorization: `Bearer ${token}` }
@@ -65,7 +77,7 @@ const Tasks = () => {
     priority: 'media'
   });
 
-  // Estados para filtros
+  // Estados dos filtros
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterPriority, setFilterPriority] = useState('all');
   const [searchTask, setSearchTask] = useState('');
@@ -81,7 +93,7 @@ const Tasks = () => {
     }
   }, []);
 
-  // Carrega o resumo histórico, incluindo tarefas concluídas que foram ocultadas.
+  // Carrega o resumo diário, incluindo tarefas concluídas que foram ocultadas.
   const fetchTaskSummary = useCallback(async (token) => {
     try {
       setTaskSummary(await requestTaskSummary(token));
@@ -113,10 +125,7 @@ const Tasks = () => {
         if (summaryResult.status === 'fulfilled') {
           setTaskSummary(summaryResult.value);
         } else {
-          console.error(
-            'Erro ao carregar resumo das tarefas:',
-            summaryResult.reason
-          );
+          console.error('Erro ao carregar resumo das tarefas:', summaryResult.reason);
         }
       }
     );
@@ -139,6 +148,7 @@ const Tasks = () => {
       );
 
       const localUser = JSON.parse(localStorage.getItem('user') || '{}');
+
       const updatedUser = {
         ...localUser,
         xp: res.data.newXP,
@@ -160,13 +170,19 @@ const Tasks = () => {
     }
   };
 
-  const handleDeleteTask = async (idtask) => {
-    if (!window.confirm('Tens a certeza que queres eliminar esta tarefa?')) return;
+  const handleDeleteTask = async (task) => {
+    const isCompleted = task.status === 'concluida';
+
+    const confirmMessage = isCompleted
+      ? 'Tens a certeza que queres ocultar esta tarefa concluída da lista?'
+      : 'Tens a certeza que queres eliminar esta tarefa?';
+
+    if (!window.confirm(confirmMessage)) return;
 
     try {
       const token = localStorage.getItem('token');
 
-      await axios.delete(`${API_URL}/tasks/${idtask}`, {
+      await axios.delete(`${API_URL}/tasks/${task.idtask}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -175,8 +191,12 @@ const Tasks = () => {
 
       window.dispatchEvent(new Event('lifinity-tasks-updated'));
     } catch (err) {
-      console.error('Erro ao eliminar tarefa:', err);
-      alert('Erro ao eliminar tarefa.');
+      console.error(
+        isCompleted ? 'Erro ao ocultar tarefa concluída:' : 'Erro ao eliminar tarefa:',
+        err
+      );
+
+      alert(isCompleted ? 'Erro ao ocultar tarefa concluída.' : 'Erro ao eliminar tarefa.');
     }
   };
 
@@ -259,51 +279,53 @@ const Tasks = () => {
     return matchesStatus && matchesPriority && matchesSearch;
   });
 
+  const completedVisibleTasks = tasks.filter((task) => task.status === 'concluida');
+
   return (
     <div className="space-y-8">
       {/* CARDS DE RESUMO */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* CARD NÍVEL */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1 italic">
+        <div className={`${cardClass} p-6 rounded-2xl`}>
+          <p className="text-slate-300 text-xs font-black uppercase tracking-widest mb-1 italic">
             Nível {levelData.level}
           </p>
 
-          <p className="text-3xl font-black text-blue-600 tracking-tighter">
+          <p className="text-3xl font-black text-blue-500 tracking-tighter">
             {user.xp} XP
           </p>
 
-          <div className="w-full bg-slate-100 h-3 rounded-full mt-4 overflow-hidden">
+          <div className="w-full bg-white/10 h-3 rounded-full mt-4 overflow-hidden">
             <div
-              className="bg-blue-600 h-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(37,99,235,0.3)]"
+              className="bg-blue-500 h-full transition-all duration-1000 ease-out shadow-lg shadow-blue-500/30"
               style={{ width: `${levelData.progress}%` }}
             ></div>
           </div>
 
-          <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase italic tracking-widest">
+          <p className="text-xs text-slate-400 mt-2 font-bold uppercase italic tracking-widest">
             Faltam {Math.round(levelData.xpRemaining)} XP para o Nível{' '}
             {levelData.level + 1}
           </p>
         </div>
 
-        {/* CARD PRODUTIVIDADE DIÁRIA */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1 italic">
-            Produtividade Diária
+        {/* CARD PRODUTIVIDADE DE HOJE */}
+        <div className={`${cardClass} p-6 rounded-2xl`}>
+          <p className="text-slate-300 text-xs font-black uppercase tracking-widest mb-1 italic">
+            Produtividade de Hoje
           </p>
 
-          <p className="text-3xl font-black text-emerald-600 tracking-tighter">
+          <p className="text-3xl font-black text-emerald-400 tracking-tighter">
             {taskSummary.completionRate}%
           </p>
 
-          <div className="w-full bg-slate-100 h-3 rounded-full mt-4 overflow-hidden">
+          <div className="w-full bg-white/10 h-3 rounded-full mt-4 overflow-hidden">
             <div
-              className="bg-emerald-500 h-full transition-all duration-1000"
+              className="bg-emerald-400 h-full transition-all duration-1000 shadow-lg shadow-emerald-400/25"
               style={{ width: `${taskSummary.completionRate}%` }}
             ></div>
           </div>
 
-          <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-widest">
+          <p className="text-xs text-slate-400 mt-2 font-bold uppercase tracking-widest">
             {taskSummary.pendingTasks} pendentes • {taskSummary.completedTasks} concluídas
           </p>
         </div>
@@ -311,19 +333,20 @@ const Tasks = () => {
 
       <div className="space-y-6">
         {/* BARRA DE FILTROS E PESQUISA */}
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap gap-4 items-center justify-between">
+        <div className={`${cardClass} p-4 rounded-2xl flex flex-wrap gap-4 items-center justify-between`}>
           <div className="flex flex-wrap gap-2 items-center">
             <div className="relative">
               <input
+                aria-label="Procurar tarefa"
                 type="text"
                 placeholder="Procurar tarefa..."
-                className="pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-blue-600 focus:bg-white transition-all w-64 shadow-inner"
+                className={`pl-10 pr-4 py-3 rounded-xl text-xs font-bold w-64 ${inputClass}`}
                 value={searchTask}
                 onChange={(e) => setSearchTask(e.target.value)}
               />
 
               <svg
-                className="absolute left-3 top-3 text-slate-400"
+                className="absolute left-3 top-3 text-slate-500"
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
                 height="18"
@@ -341,7 +364,8 @@ const Tasks = () => {
             </div>
 
             <select
-              className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 outline-none cursor-pointer hover:bg-white transition-all"
+              aria-label="Filtrar por estado"
+              className={`rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest ${selectClass}`}
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
             >
@@ -351,7 +375,8 @@ const Tasks = () => {
             </select>
 
             <select
-              className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 outline-none cursor-pointer hover:bg-white transition-all"
+              aria-label="Filtrar por prioridade"
+              className={`rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest ${selectClass}`}
               value={filterPriority}
               onChange={(e) => setFilterPriority(e.target.value)}
             >
@@ -363,10 +388,10 @@ const Tasks = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            {tasks.filter((task) => task.status === 'concluida').length > 0 && (
+            {completedVisibleTasks.length > 0 && (
               <button
                 onClick={handleClearCompleted}
-                className="text-[10px] font-black text-red-400 uppercase tracking-widest hover:text-red-600 transition-colors mr-2"
+                className="text-xs font-black text-red-300 uppercase tracking-widest hover:text-red-200 transition-colors mr-2"
               >
                 Ocultar Concluídas
               </button>
@@ -374,7 +399,7 @@ const Tasks = () => {
 
             <button
               onClick={() => setIsModalOpen(true)}
-              className="bg-blue-600 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-100"
+              className="bg-blue-600 text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-500 transition-all shadow-xl shadow-blue-950/40"
             >
               Nova Tarefa
             </button>
@@ -382,10 +407,10 @@ const Tasks = () => {
         </div>
 
         {/* LISTAGEM FILTRADA */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className={`${cardClass} rounded-2xl overflow-hidden`}>
           <div className="p-4 space-y-3">
             {filteredTasks.length === 0 ? (
-              <div className="p-20 text-center text-slate-300 font-bold italic uppercase text-xs tracking-widest">
+              <div className="p-20 text-center text-slate-500 font-bold italic uppercase text-xs tracking-widest">
                 Nenhuma tarefa encontrada com estes filtros.
               </div>
             ) : (
@@ -394,16 +419,16 @@ const Tasks = () => {
                   key={task.idtask}
                   className={`flex items-center justify-between p-6 rounded-2xl transition-all border ${
                     task.status === 'concluida'
-                      ? 'bg-slate-50/50 opacity-70 border-transparent'
-                      : 'bg-white border-slate-100 hover:border-blue-100 shadow-sm hover:shadow-md'
+                      ? 'bg-white/5 opacity-55 border-white/5'
+                      : 'bg-white/5 border-white/10 hover:border-emerald-300/25 hover:bg-white/10 shadow-sm'
                   }`}
                 >
                   <div className="flex flex-col gap-1">
                     <span
                       className={`font-black text-lg tracking-tight leading-tight ${
                         task.status === 'concluida'
-                          ? 'text-slate-400 line-through italic'
-                          : 'text-slate-800'
+                          ? 'text-slate-500 line-through italic'
+                          : 'text-white'
                       }`}
                     >
                       {task.title}
@@ -412,8 +437,8 @@ const Tasks = () => {
                     <span
                       className={`text-sm font-medium ${
                         task.status === 'concluida'
-                          ? 'text-slate-300 line-through italic'
-                          : 'text-slate-500'
+                          ? 'text-slate-500 line-through italic'
+                          : 'text-slate-300'
                       }`}
                     >
                       {task.description || 'Sem descrição detalhada.'}
@@ -422,14 +447,14 @@ const Tasks = () => {
 
                   <div className="flex items-center gap-6">
                     <span
-                      className={`text-[10px] font-black uppercase px-4 py-2 rounded-xl tracking-widest shadow-sm ${
+                       className={`text-xs font-black uppercase px-4 py-2 rounded-xl tracking-widest border ${
                         task.status === 'concluida'
-                          ? 'bg-slate-100 text-slate-400'
+                          ? 'bg-white/10 text-slate-300 border-white/10'
                           : task.priority === 'alta'
-                            ? 'bg-red-50 text-red-500'
+                            ? 'bg-red-500/10 text-red-300 border-red-400/20'
                             : task.priority === 'media'
-                              ? 'bg-orange-50 text-orange-500'
-                              : 'bg-blue-50 text-blue-500'
+                              ? 'bg-orange-500/10 text-orange-300 border-orange-400/20'
+                              : 'bg-blue-500/10 text-blue-300 border-blue-400/20'
                       }`}
                     >
                       {task.status === 'concluida' ? 'Finalizado' : task.priority}
@@ -438,15 +463,16 @@ const Tasks = () => {
                     {task.status !== 'concluida' && (
                       <button
                         onClick={() => handleCompleteTask(task.idtask)}
-                        className="bg-white border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                        className="bg-blue-600/10 border border-blue-400/40 text-blue-300 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-sm"
                       >
                         Concluir
                       </button>
                     )}
 
                     <button
-                      onClick={() => handleDeleteTask(task.idtask)}
-                      className="text-slate-200 hover:text-red-500 transition-all p-2"
+                      onClick={() => handleDeleteTask(task)}
+                      className="text-slate-500 hover:text-red-300 transition-all p-2"
+                      title={task.status === 'concluida' ? 'Ocultar tarefa' : 'Eliminar tarefa'}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -474,26 +500,33 @@ const Tasks = () => {
 
       {/* MODAL NOVA TAREFA */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-6 animate-in fade-in duration-300">
-          <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-10 space-y-8 border border-white/20 animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <div
+            className="bg-slate-950 w-full max-w-md rounded-3xl shadow-2xl p-10 space-y-8 border border-white/10"
+            style={{ backgroundColor: '#111916' }}
+          >
             <div className="space-y-2 text-center">
-              <h2 className="text-4xl font-black tracking-tighter text-slate-800">
+              <h2 className="text-4xl font-black tracking-tighter text-white">
                 Nova Tarefa
               </h2>
-              <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] italic">
+              <p className="text-slate-400 text-xs font-black uppercase tracking-widest italic">
                 Define o teu próximo desafio.
               </p>
             </div>
 
             <form onSubmit={handleCreateTask} className="space-y-6">
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">
+                <label
+                  htmlFor="task-title"
+                  className="text-xs font-black text-slate-400 uppercase tracking-widest ml-2"
+                >
                   Título da Tarefa
                 </label>
                 <input
+                  id="task-title"
                   type="text"
                   placeholder="Ex: Estudar Matemática"
-                  className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-blue-600 focus:bg-white outline-none transition-all font-bold text-slate-700 text-lg"
+                  className={`w-full p-6 rounded-2xl font-bold text-slate-100 text-lg ${inputClass}`}
                   value={newTask.title}
                   onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                   required
@@ -501,12 +534,16 @@ const Tasks = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">
+                <label
+                  htmlFor="task-description"
+                  className="text-xs font-black text-slate-400 uppercase tracking-widest ml-2"
+                >
                   Descrição (Opcional)
                 </label>
                 <textarea
+                  id="task-description"
                   placeholder="Algum detalhe extra para te ajudar?"
-                  className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-blue-600 focus:bg-white outline-none transition-all font-bold text-slate-700 h-32 resize-none"
+                  className={`w-full p-6 rounded-2xl font-bold text-slate-100 h-32 resize-none ${inputClass}`}
                   value={newTask.description}
                   onChange={(e) =>
                     setNewTask({ ...newTask, description: e.target.value })
@@ -515,22 +552,20 @@ const Tasks = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest ml-2">
                   Prioridade do Desafio
-                </label>
+                </p>
 
                 <div className="grid grid-cols-3 gap-3">
                   {['baixa', 'media', 'alta'].map((priority) => (
                     <button
                       key={priority}
                       type="button"
-                      onClick={() =>
-                        setNewTask({ ...newTask, priority })
-                      }
-                      className={`py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${
+                      onClick={() => setNewTask({ ...newTask, priority })}
+                      className={`py-4 rounded-2xl text-xs font-black uppercase tracking-widest border transition-all ${
                         newTask.priority === priority
-                          ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-100'
-                          : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
+                          ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-950/40'
+                          : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-slate-200'
                       }`}
                     >
                       {priority}
@@ -543,14 +578,14 @@ const Tasks = () => {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 px-6 py-5 bg-slate-100 text-slate-600 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all"
+                  className="flex-1 px-6 py-5 bg-white/10 text-slate-300 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/15 transition-all"
                 >
                   Cancelar
                 </button>
 
                 <button
                   type="submit"
-                  className="flex-1 px-6 py-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-200"
+                  className="flex-1 px-6 py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-500 transition-all shadow-xl shadow-blue-950/40"
                 >
                   Criar Agora
                 </button>

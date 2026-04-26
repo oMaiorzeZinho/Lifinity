@@ -1,145 +1,91 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const getRankStyle = (position) => {
-  if (position === 0) {
-    return {
-      label: '1.º Lugar',
-      short: '1',
-      border: 'border-amber-200',
-      bg: 'bg-amber-50',
-      text: 'text-amber-600',
-      badge: 'bg-amber-500 text-white',
-    };
-  }
+const cardClass =
+  'bg-slate-950/80 border border-white/10 backdrop-blur-xl shadow-2xl';
 
-  if (position === 1) {
-    return {
-      label: '2.º Lugar',
-      short: '2',
-      border: 'border-slate-300',
-      bg: 'bg-slate-100',
-      text: 'text-slate-600',
-      badge: 'bg-slate-500 text-white',
-    };
-  }
-
-  if (position === 2) {
-    return {
-      label: '3.º Lugar',
-      short: '3',
-      border: 'border-orange-200',
-      bg: 'bg-orange-50',
-      text: 'text-orange-600',
-      badge: 'bg-orange-500 text-white',
-    };
-  }
-
-  return {
-    label: `${position + 1}.º Lugar`,
-    short: String(position + 1),
-    border: 'border-slate-100',
-    bg: 'bg-white',
-    text: 'text-slate-500',
-    badge: 'bg-slate-100 text-slate-500',
-  };
+const getProgressWidth = (xp, maxXP) => {
+  if (!maxXP || maxXP <= 0) return 0;
+  return Math.max(8, Math.round((xp / maxXP) * 100));
 };
 
 const Ranking = () => {
   const [ranking, setRanking] = useState([]);
-  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
 
-  const fetchRanking = useCallback(async (token) => {
-    try {
-      setError('');
-
-      const response = await axios.get(`${API_URL}/users/ranking`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setRanking(response.data);
-    } catch (err) {
-      console.error('Erro ao carregar ranking:', err);
-      setError('Não foi possível carregar o ranking.');
-    } finally {
-      setLoading(false);
-    }
+  const user = useMemo(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
   }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
 
-    if (!token || !savedUser) {
+    if (!token || !user) {
       navigate('/login');
       return;
     }
 
-    const parsedUser = JSON.parse(savedUser);
-    setCurrentUser(parsedUser);
+    const fetchRanking = async () => {
+      try {
+        setLoading(true);
 
-    fetchRanking(token);
+        const response = await axios.get(`${API_URL}/users/ranking`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
 
-    const handleRankingRefresh = () => {
-      const refreshedToken = localStorage.getItem('token');
-      const refreshedUser = localStorage.getItem('user');
+        const rankingData = Array.isArray(response.data)
+          ? response.data
+          : response.data.ranking || [];
 
-      if (refreshedToken) {
-        fetchRanking(refreshedToken);
+        setRanking(rankingData);
+      } catch (err) {
+        console.error('Erro ao carregar ranking:', err);
+        setError('Não foi possível carregar o ranking.');
+      } finally {
+        setLoading(false);
       }
-
-      if (refreshedUser) {
-        setCurrentUser(JSON.parse(refreshedUser));
-      }
     };
 
-    window.addEventListener('lifinity-user-updated', handleRankingRefresh);
-    window.addEventListener('lifinity-tasks-updated', handleRankingRefresh);
-
-    return () => {
-      window.removeEventListener('lifinity-user-updated', handleRankingRefresh);
-      window.removeEventListener('lifinity-tasks-updated', handleRankingRefresh);
-    };
-  }, [navigate, fetchRanking]);
-
-  const stats = useMemo(() => {
-    const totalUsers = ranking.length;
-    const topUser = ranking[0] || null;
-    const totalXP = ranking.reduce((sum, user) => sum + Number(user.xp || 0), 0);
-    const averageXP = totalUsers > 0 ? Math.round(totalXP / totalUsers) : 0;
-
-    const currentUserIndex = ranking.findIndex(
-      (user) => user.username === currentUser?.username
-    );
-
-    const currentUserRank =
-      currentUserIndex >= 0 ? currentUserIndex + 1 : null;
-
-    return {
-      totalUsers,
-      topUser,
-      totalXP,
-      averageXP,
-      currentUserRank,
-    };
-  }, [ranking, currentUser]);
+    fetchRanking();
+  }, [navigate, user]);
 
   const maxXP = useMemo(() => {
-    return Math.max(...ranking.map((user) => Number(user.xp || 0)), 1);
+    return Math.max(...ranking.map((item) => Number(item.xp || 0)), 1);
   }, [ranking]);
 
-  const topThree = ranking.slice(0, 3);
+  const topUsers = ranking.slice(0, 3);
+
+  const currentUserPosition = useMemo(() => {
+    if (!user) return null;
+
+    const index = ranking.findIndex(
+      (item) => Number(item.iduser) === Number(user.iduser)
+    );
+
+    return index >= 0 ? index + 1 : null;
+  }, [ranking, user]);
+
+  const totalXP = useMemo(() => {
+    return ranking.reduce((sum, item) => sum + Number(item.xp || 0), 0);
+  }, [ranking]);
+
+  const averageXP = useMemo(() => {
+    if (ranking.length === 0) return 0;
+    return Math.round(totalXP / ranking.length);
+  }, [ranking, totalXP]);
+
+  const leader = ranking[0];
 
   if (loading) {
     return (
-      <div className="bg-white p-10 rounded-2xl shadow-sm border border-slate-200 text-center">
+      <div className={`${cardClass} p-10 rounded-3xl text-center`}>
         <p className="text-slate-400 font-black uppercase tracking-widest text-xs">
           A carregar ranking...
         </p>
@@ -151,185 +97,211 @@ const Ranking = () => {
     <div className="space-y-8">
       {/* HERO */}
       <div
-        className="relative overflow-hidden border border-slate-200 bg-slate-900 shadow-sm"
+        className="relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl"
         style={{
-          borderRadius: '2rem',
-          backgroundImage:
-            'linear-gradient(to right, var(--color-blue-950), var(--color-slate-900), var(--color-slate-800))',
+          backgroundImage: "url('/images/ranking-bg.jpg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          minHeight: 230
         }}
       >
         <div
-          className="absolute top-0 right-0 h-full w-1/2 opacity-20"
+          className="absolute inset-0"
           style={{
-            backgroundImage:
-              'radial-gradient(circle at center, white, transparent 60%)',
+            background:
+              'linear-gradient(to right, rgba(16, 23, 19, 0.95), rgba(16, 23, 19, 0.7), rgba(16, 23, 19, 0.35))'
           }}
-        />
+        ></div>
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(circle at top right, rgba(251, 191, 36, 0.2), transparent 35%)'
+          }}
+        ></div>
 
-        <div className="relative z-10 p-8 md:p-10 text-white">
-          <p className="text-[10px] font-black uppercase tracking-[0.25em] mb-3 text-blue-200">
-            Gamificação Lifinity
-          </p>
+        <div className="relative z-10 p-8 md:p-10 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+          <div>
+            <p className="text-xs font-black uppercase tracking-widest text-amber-200 mb-4">
+              Gamificação Lifinity
+            </p>
 
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-            <div>
-              <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-none mb-4">
-                Ranking Global
-              </h2>
-              <p className="text-slate-200 max-w-2xl font-medium leading-relaxed">
-                Compara o teu progresso com outros utilizadores, acompanha o teu XP
-                e mantém a motivação para concluir tarefas diariamente.
-              </p>
-            </div>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-white">
+              Ranking Global
+            </h2>
 
-            <div className="min-w-57.5 rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur-md">
-              <p className="text-[10px] font-black uppercase tracking-widest text-blue-200 mb-1">
-                A tua posição
-              </p>
-              <p className="text-4xl font-black tracking-tighter">
-                {stats.currentUserRank ? `${stats.currentUserRank}.º` : '--'}
-              </p>
-              <p className="text-xs text-slate-300 font-bold mt-2">
-                {currentUser?.username || 'Utilizador'}
-              </p>
-            </div>
+            <p className="text-slate-300 max-w-2xl font-medium mt-4 leading-relaxed">
+              Compara o teu progresso com outros utilizadores, acompanha o teu XP
+              e mantém a motivação para concluir tarefas diariamente.
+            </p>
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-3xl p-6 min-w-52 backdrop-blur-xl">
+            <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2">
+              A tua posição
+            </p>
+
+            <p className="text-4xl font-black tracking-tighter text-white">
+              {currentUserPosition ? `${currentUserPosition}.º` : '--'}
+            </p>
+
+            <p className="text-xs text-slate-400 font-bold mt-2">
+              {user?.username || 'Utilizador'}
+            </p>
           </div>
         </div>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-100 text-red-500 p-5 rounded-2xl font-bold text-sm">
+        <div className="bg-red-500/10 border border-red-400/20 text-red-200 p-5 rounded-2xl font-bold text-sm">
           {error}
         </div>
       )}
 
-      {/* CARDS DE ESTATÍSTICA */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-          <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">
-            Utilizadores no Top
+      {/* STATS */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+        <div className={`${cardClass} p-6 rounded-3xl`}>
+          <p className="text-slate-400 text-xs font-black uppercase tracking-widest mb-2">
+            Utilizadores no top
           </p>
-          <p className="text-3xl font-black text-slate-800 tracking-tighter">
-            {stats.totalUsers}
+          <p className="text-3xl font-black text-white tracking-tighter">
+            {ranking.length}
           </p>
-          <p className="text-xs text-slate-400 font-bold mt-2">
+          <p className="text-xs text-slate-500 font-bold mt-2">
             Lista dos melhores utilizadores por XP.
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-          <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">
-            Líder Atual
+        <div className={`${cardClass} p-6 rounded-3xl`}>
+          <p className="text-slate-400 text-xs font-black uppercase tracking-widest mb-2">
+            Líder atual
           </p>
-          <p className="text-3xl font-black text-blue-600 tracking-tighter truncate">
-            {stats.topUser?.username || '--'}
+          <p className="text-3xl font-black text-amber-300 tracking-tighter">
+            {leader?.username || '--'}
           </p>
-          <p className="text-xs text-slate-400 font-bold mt-2">
-            {stats.topUser ? `${stats.topUser.xp} XP acumulados.` : 'Sem dados.'}
+          <p className="text-xs text-slate-500 font-bold mt-2">
+            {leader ? `${leader.xp} XP acumulados.` : 'Sem dados suficientes.'}
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-          <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">
-            XP Total
+        <div className={`${cardClass} p-6 rounded-3xl`}>
+          <p className="text-slate-400 text-xs font-black uppercase tracking-widest mb-2">
+            XP total
           </p>
-          <p className="text-3xl font-black text-emerald-600 tracking-tighter">
-            {stats.totalXP}
+          <p className="text-3xl font-black text-emerald-300 tracking-tighter">
+            {totalXP}
           </p>
-          <p className="text-xs text-slate-400 font-bold mt-2">
+          <p className="text-xs text-slate-500 font-bold mt-2">
             XP somado dos utilizadores listados.
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-          <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">
+        <div className={`${cardClass} p-6 rounded-3xl`}>
+          <p className="text-slate-400 text-xs font-black uppercase tracking-widest mb-2">
             Média de XP
           </p>
-          <p className="text-3xl font-black text-purple-600 tracking-tighter">
-            {stats.averageXP}
+          <p className="text-3xl font-black text-purple-300 tracking-tighter">
+            {averageXP}
           </p>
-          <p className="text-xs text-slate-400 font-bold mt-2">
+          <p className="text-xs text-slate-500 font-bold mt-2">
             Média entre os utilizadores do ranking.
           </p>
         </div>
       </div>
 
       {/* TOP 3 */}
-      <div className="bg-white rounded-4xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 md:p-8 border-b border-slate-100 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+      <div className={`${cardClass} rounded-3xl overflow-hidden`}>
+        <div className="p-6 md:p-8 border-b border-white/10 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
           <div>
-            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-2 italic">
+            <p className="text-slate-400 text-xs font-black uppercase tracking-widest mb-2 italic">
               Pódio
             </p>
-            <h3 className="text-3xl font-black tracking-tighter text-slate-800">
+
+            <h3 className="text-3xl font-black tracking-tighter text-white">
               Top 3 Utilizadores
             </h3>
-            <p className="text-slate-500 font-medium mt-2">
+
+            <p className="text-slate-400 font-medium mt-2">
               Os utilizadores com mais XP acumulado na plataforma.
             </p>
           </div>
 
-          <div className="bg-blue-50 border border-blue-100 rounded-2xl px-5 py-3">
-            <p className="text-blue-600 text-[10px] font-black uppercase tracking-widest">
-              XP ganho ao concluir tarefas
-            </p>
-          </div>
+          <button
+            onClick={() => navigate('/dashboard/tasks')}
+            className="px-5 py-3 rounded-2xl bg-white text-slate-950 text-xs font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+          >
+            Ganhar XP ao concluir tarefas
+          </button>
         </div>
 
-        {topThree.length === 0 ? (
-          <div className="p-16 text-center text-slate-300 font-bold italic uppercase text-xs tracking-widest">
-            Ainda não existem utilizadores suficientes para formar o pódio.
+        {topUsers.length === 0 ? (
+          <div className="p-16 text-center text-slate-500 font-bold italic uppercase text-xs tracking-widest">
+            Ainda não existem dados suficientes para mostrar o ranking.
           </div>
         ) : (
-          <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {topThree.map((user, index) => {
-              const rank = getRankStyle(index);
-              const isCurrentUser = currentUser?.username === user.username;
-              const progress = Math.round((Number(user.xp || 0) / maxXP) * 100);
+          <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-5">
+            {topUsers.map((item, index) => {
+              const isCurrentUser = Number(item.iduser) === Number(user?.iduser);
+              const position = index + 1;
 
               return (
                 <div
-                  key={`${user.username}-${index}`}
-                  className={`relative overflow-hidden p-6 rounded-3xl border ${rank.border} ${rank.bg}`}
+                  key={item.iduser}
+                  className={`relative overflow-hidden rounded-3xl border p-6 transition-all ${
+                    position === 1
+                      ? 'bg-amber-300/10 border-amber-300/30'
+                      : position === 2
+                        ? 'bg-slate-300/10 border-slate-300/20'
+                        : 'bg-orange-400/10 border-orange-300/20'
+                  }`}
                 >
-                  <div className="flex items-start justify-between gap-4 mb-8">
+                  <div className="flex items-start justify-between mb-8">
                     <div
-                      className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black ${rank.badge}`}
+                      className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black ${
+                        position === 1
+                          ? 'bg-amber-300 text-slate-950'
+                          : position === 2
+                            ? 'bg-slate-300 text-slate-950'
+                            : 'bg-orange-300 text-slate-950'
+                      }`}
                     >
-                      {rank.short}
+                      {position}
                     </div>
 
                     {isCurrentUser && (
-                      <span className="text-[10px] font-black uppercase tracking-widest px-3 py-2 rounded-xl bg-blue-600 text-white">
+                      <span className="px-3 py-1 rounded-full bg-blue-500 text-white text-xs font-black uppercase tracking-widest">
                         Tu
                       </span>
                     )}
                   </div>
 
-                  <p className={`text-[10px] font-black uppercase tracking-widest ${rank.text}`}>
-                    {rank.label}
+                  <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2">
+                    {position}.º lugar
                   </p>
 
-                  <h4 className="text-2xl font-black tracking-tight text-slate-800 mt-2 truncate">
-                    {user.username}
+                  <h4 className="text-2xl font-black tracking-tight text-white">
+                    {item.username}
                   </h4>
 
-                  <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-2">
-                    Nível {user.level}
+                  <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-2">
+                    Nível {item.level || 1}
                   </p>
 
-                  <p className="text-4xl font-black text-blue-600 tracking-tighter mt-6">
-                    {user.xp}
-                  </p>
-                  <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
-                    Pontos XP
+                  <p className="text-4xl font-black text-blue-400 tracking-tighter mt-6">
+                    {item.xp || 0}
                   </p>
 
-                  <div className="w-full bg-white/70 h-3 rounded-full mt-6 overflow-hidden border border-white">
+                  <p className="text-xs font-black uppercase tracking-widest text-slate-500">
+                    pontos XP
+                  </p>
+
+                  <div className="w-full bg-white/10 h-2 rounded-full mt-5 overflow-hidden">
                     <div
-                      className="bg-blue-600 h-full transition-all duration-1000"
-                      style={{ width: `${progress}%` }}
-                    />
+                      className="bg-blue-500 h-full rounded-full"
+                      style={{
+                        width: `${getProgressWidth(Number(item.xp || 0), maxXP)}%`
+                      }}
+                    ></div>
                   </div>
                 </div>
               );
@@ -338,130 +310,150 @@ const Ranking = () => {
         )}
       </div>
 
-      {/* SISTEMA DE XP */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 bg-white p-6 rounded-4xl border border-slate-200 shadow-sm">
-          <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-2 italic">
+      {/* EXPLICAÇÃO */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+        <div className={`${cardClass} p-6 rounded-3xl`}>
+          <p className="text-slate-400 text-xs font-black uppercase tracking-widest mb-3">
             Como funciona?
           </p>
-          <h3 className="text-2xl font-black tracking-tight text-slate-800 mb-4">
+          <h4 className="text-2xl font-black text-white tracking-tight">
             Sistema de XP
-          </h3>
-          <p className="text-slate-500 font-medium leading-relaxed text-sm">
+          </h4>
+          <p className="text-slate-400 text-sm font-medium mt-3 leading-relaxed">
             O Lifinity recompensa os utilizadores à medida que concluem tarefas.
             A gamificação ajuda a manter consistência, motivação e progresso diário.
           </p>
         </div>
 
-        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-            <p className="text-blue-600 text-[10px] font-black uppercase tracking-widest mb-2">
-              Concluir tarefa
-            </p>
-            <p className="text-2xl font-black text-slate-800">+ XP</p>
-            <p className="text-xs text-slate-400 font-bold mt-2">
-              Cada tarefa concluída aumenta a pontuação do utilizador.
-            </p>
-          </div>
+        <div className={`${cardClass} p-6 rounded-3xl`}>
+          <p className="text-blue-300 text-xs font-black uppercase tracking-widest mb-3">
+            Concluir tarefa
+          </p>
+          <h4 className="text-2xl font-black text-white tracking-tight">
+            + XP
+          </h4>
+          <p className="text-slate-400 text-sm font-medium mt-3 leading-relaxed">
+            Cada tarefa concluída aumenta a pontuação do utilizador.
+          </p>
+        </div>
 
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-            <p className="text-emerald-600 text-[10px] font-black uppercase tracking-widest mb-2">
-              Subir nível
-            </p>
-            <p className="text-2xl font-black text-slate-800">Níveis</p>
-            <p className="text-xs text-slate-400 font-bold mt-2">
-              O nível representa a evolução do utilizador ao longo do tempo.
-            </p>
-          </div>
+        <div className={`${cardClass} p-6 rounded-3xl`}>
+          <p className="text-emerald-300 text-xs font-black uppercase tracking-widest mb-3">
+            Subir nível
+          </p>
+          <h4 className="text-2xl font-black text-white tracking-tight">
+            Níveis
+          </h4>
+          <p className="text-slate-400 text-sm font-medium mt-3 leading-relaxed">
+            O nível representa a evolução do utilizador ao longo do tempo.
+          </p>
+        </div>
 
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-            <p className="text-purple-600 text-[10px] font-black uppercase tracking-widest mb-2">
-              Competição saudável
-            </p>
-            <p className="text-2xl font-black text-slate-800">Ranking</p>
-            <p className="text-xs text-slate-400 font-bold mt-2">
-              O ranking aumenta o envolvimento e incentiva a produtividade.
-            </p>
-          </div>
+        <div className={`${cardClass} p-6 rounded-3xl`}>
+          <p className="text-purple-300 text-xs font-black uppercase tracking-widest mb-3">
+            Competição saudável
+          </p>
+          <h4 className="text-2xl font-black text-white tracking-tight">
+            Ranking
+          </h4>
+          <p className="text-slate-400 text-sm font-medium mt-3 leading-relaxed">
+            O ranking aumenta o envolvimento e incentiva a produtividade.
+          </p>
         </div>
       </div>
 
       {/* LISTA COMPLETA */}
-      <div className="bg-white rounded-4xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 md:p-8 border-b border-slate-100 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-          <div>
-            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-2 italic">
-              Classificação
-            </p>
-            <h3 className="text-3xl font-black tracking-tighter text-slate-800">
-              Lista Completa
-            </h3>
-            <p className="text-slate-500 font-medium mt-2">
-              Ranking ordenado por XP acumulado.
-            </p>
-          </div>
+      <div className={`${cardClass} rounded-3xl overflow-hidden`}>
+        <div className="p-6 md:p-8 border-b border-white/10">
+          <p className="text-slate-400 text-xs font-black uppercase tracking-widest mb-2 italic">
+            Classificação
+          </p>
+
+          <h3 className="text-3xl font-black tracking-tighter text-white">
+            Lista Completa
+          </h3>
+
+          <p className="text-slate-400 font-medium mt-2">
+            Ranking ordenado por XP acumulado.
+          </p>
         </div>
 
         {ranking.length === 0 ? (
-          <div className="p-16 text-center text-slate-300 font-bold italic uppercase text-xs tracking-widest">
-            Ainda não existem dados suficientes para mostrar o ranking.
+          <div className="p-16 text-center text-slate-500 font-bold italic uppercase text-xs tracking-widest">
+            Ainda não existem utilizadores suficientes para apresentar.
           </div>
         ) : (
           <div className="p-4 space-y-3">
-            {ranking.map((user, index) => {
-              const rank = getRankStyle(index);
-              const isCurrentUser = currentUser?.username === user.username;
-              const progress = Math.round((Number(user.xp || 0) / maxXP) * 100);
+            {ranking.map((item, index) => {
+              const position = index + 1;
+              const isCurrentUser = Number(item.iduser) === Number(user?.iduser);
 
               return (
                 <div
-                  key={`${user.username}-${index}`}
-                  className={`p-5 rounded-3xl border transition-all ${
+                  key={item.iduser}
+                  className={`flex flex-col md:flex-row md:items-center md:justify-between gap-5 p-5 rounded-2xl border transition-all ${
                     isCurrentUser
-                      ? 'bg-blue-50 border-blue-200'
-                      : 'bg-white border-slate-100 hover:border-slate-200 shadow-sm'
+                      ? 'bg-blue-500/10 border-blue-400/30'
+                      : 'bg-white/5 border-white/10 hover:bg-white/10'
                   }`}
                 >
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-                    <div className="flex items-center gap-4">
-                      <div
-                        className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-lg ${rank.badge}`}
-                      >
-                        {rank.short}
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black ${
+                        position === 1
+                          ? 'bg-amber-300 text-slate-950'
+                          : position === 2
+                            ? 'bg-slate-300 text-slate-950'
+                            : position === 3
+                              ? 'bg-orange-300 text-slate-950'
+                              : 'bg-white/10 text-slate-300'
+                      }`}
+                    >
+                      {position}
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <h4 className="text-lg font-black text-white">
+                          {item.username}
+                        </h4>
+
+                        {isCurrentUser && (
+                          <span className="px-3 py-1 rounded-full bg-blue-500 text-white text-xs font-black uppercase tracking-widest">
+                            Tu
+                          </span>
+                        )}
                       </div>
 
-                      <div>
-                        <p className="text-lg font-black tracking-tight text-slate-800">
-                          {user.username}
-                        </p>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                          Nível {user.level}
-                          {isCurrentUser ? ' • Este és tu' : ''}
-                        </p>
+                      <p className="text-xs font-black uppercase tracking-widest text-slate-500 mt-1">
+                        Nível {item.level || 1}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-6 min-w-72">
+                    <div className="flex-1">
+                      <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-2">
+                        Progresso relativo ao líder
+                      </p>
+
+                      <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+                        <div
+                          className="bg-blue-500 h-full rounded-full"
+                          style={{
+                            width: `${getProgressWidth(Number(item.xp || 0), maxXP)}%`
+                          }}
+                        ></div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-5 md:min-w-90">
-                      <div className="flex-1">
-                        <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
-                          <div
-                            className="bg-blue-600 h-full transition-all duration-1000"
-                            style={{ width: `${progress}%` }}
-                          />
-                        </div>
-                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-2">
-                          Progresso relativo ao líder
-                        </p>
-                      </div>
-
-                      <div className="min-w-22.5 text-right">
-                        <p className="text-2xl font-black text-blue-600 tracking-tighter">
-                          {user.xp}
-                        </p>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                          XP
-                        </p>
-                      </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-black text-blue-400 tracking-tighter">
+                        {item.xp || 0}
+                      </p>
+                      <p className="text-xs font-black uppercase tracking-widest text-slate-500">
+                        XP
+                      </p>
                     </div>
                   </div>
                 </div>

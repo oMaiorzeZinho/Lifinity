@@ -4,6 +4,12 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+const cardClass =
+  'bg-[#111916]/88 border border-white/10 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.25)]';
+
+const buttonSecondaryClass =
+  'px-5 py-3 rounded-2xl bg-white/[0.08] border border-white/10 text-slate-200 text-[10px] font-black uppercase tracking-widest hover:bg-white/[0.12] transition-all';
+
 const Inspiration = () => {
   const [dailyVerse, setDailyVerse] = useState(null);
   const [favorites, setFavorites] = useState([]);
@@ -98,9 +104,7 @@ const Inspiration = () => {
       );
 
       setDailyVerse((prev) =>
-        prev && prev.idverse === idverse
-          ? { ...prev, isFavorite: false }
-          : prev
+        prev && prev.idverse === idverse ? { ...prev, isFavorite: false } : prev
       );
 
       await fetchFavorites(token);
@@ -160,17 +164,19 @@ const Inspiration = () => {
     const uniqueThemes = [
       ...new Set(favorites.map((verse) => verse.theme).filter(Boolean))
     ];
+
     return uniqueThemes.sort();
   }, [favorites]);
 
   const filteredFavorites = useMemo(() => {
     if (selectedTheme === 'all') return favorites;
+
     return favorites.filter((verse) => verse.theme === selectedTheme);
   }, [favorites, selectedTheme]);
 
   if (loading) {
     return (
-      <div className="bg-white p-10 rounded-2xl shadow-sm border border-slate-200 text-center">
+      <div className={`${cardClass} p-10 rounded-3xl text-center`}>
         <p className="text-slate-400 font-black uppercase tracking-widest text-xs">
           A carregar inspiração...
         </p>
@@ -182,23 +188,26 @@ const Inspiration = () => {
     <div className="space-y-8">
       {/* HERO / BANNER */}
       <div
-        className="relative overflow-hidden rounded-4xl shadow-sm border border-slate-200 min-h-70 flex items-end"
+        className="relative overflow-hidden rounded-[2.5rem] shadow-[0_25px_70px_rgba(0,0,0,0.35)] border border-white/10 min-h-72 flex items-end"
         style={{
           backgroundImage: "url('/images/bible-banner.jpg')",
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
       >
-        <div className="absolute inset-0 bg-slate-900/45"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#101713]/95 via-[#101713]/60 to-[#101713]/25"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(245,158,11,0.18),_transparent_35%)]"></div>
 
         <div className="relative z-10 p-8 md:p-10 text-white max-w-3xl">
-          <p className="text-[10px] font-black uppercase tracking-[0.25em] mb-3 text-blue-100">
+          <p className="text-[10px] font-black uppercase tracking-[0.25em] mb-3 text-amber-200">
             Inspiração Diária
           </p>
+
           <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-none mb-4">
             Uma mensagem para fortalecer o teu dia
           </h2>
-          <p className="text-sm md:text-base font-medium text-slate-100 leading-relaxed">
+
+          <p className="text-sm md:text-base font-medium text-slate-200 leading-relaxed">
             Descobre um versículo diário, guarda os teus favoritos e mantém uma
             fonte de motivação espiritual dentro do Lifinity.
           </p>
@@ -206,7 +215,7 @@ const Inspiration = () => {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-100 text-red-500 p-5 rounded-2xl font-bold text-sm">
+        <div className="bg-red-500/10 border border-red-400/20 text-red-200 p-5 rounded-2xl font-bold text-sm">
           {error}
         </div>
       )}
@@ -215,7 +224,7 @@ const Inspiration = () => {
       {dailyVerse && (
         <div className="grid grid-cols-1 inspiration-verse-grid gap-6 items-stretch">
           <div
-            className="rounded-4xl shadow-sm border border-slate-200 overflow-hidden h-full bg-cover bg-center"
+            className="rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.25)] border border-white/10 overflow-hidden h-full bg-cover bg-center"
             style={{
               backgroundImage: "url('/images/daily-verse.jpg')",
               minHeight: 460
@@ -223,16 +232,19 @@ const Inspiration = () => {
           ></div>
 
           <div
-            className="bg-white p-8 rounded-4xl shadow-sm border border-slate-200 h-full flex flex-col justify-between"
+            className={`${cardClass} p-8 rounded-[2rem] h-full flex flex-col justify-between`}
             style={{ minHeight: 460 }}
           >
             <div>
               <div className="flex items-start justify-between gap-4 mb-6">
                 <div>
-                  <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-2 italic">
-                    {cardMode === 'daily' ? 'Versículo do Dia' : 'Versículo Aleatório'}
+                  <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2 italic">
+                    {cardMode === 'daily'
+                      ? 'Versículo do Dia'
+                      : 'Versículo Aleatório'}
                   </p>
-                  <span className="inline-block px-4 py-2 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest">
+
+                  <span className="inline-block px-4 py-2 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-[10px] font-black uppercase tracking-widest">
                     Tema: {dailyVerse.theme || 'Geral'}
                   </span>
                 </div>
@@ -241,8 +253,8 @@ const Inspiration = () => {
                   onClick={() => toggleFavorite(dailyVerse.idverse)}
                   className={`text-3xl transition-all ${
                     dailyVerse.isFavorite
-                      ? 'text-yellow-400 scale-110'
-                      : 'text-slate-300 hover:text-yellow-400'
+                      ? 'text-yellow-300 scale-110 drop-shadow-[0_0_16px_rgba(253,224,71,0.35)]'
+                      : 'text-slate-500 hover:text-yellow-300'
                   }`}
                   title="Adicionar aos favoritos"
                 >
@@ -250,13 +262,13 @@ const Inspiration = () => {
                 </button>
               </div>
 
-              <p className="text-2xl md:text-3xl font-black tracking-tight text-slate-800 leading-relaxed min-h-42.5">
+              <p className="text-2xl md:text-3xl font-black tracking-tight text-white leading-relaxed min-h-42.5">
                 “{dailyVerse.text}”
               </p>
             </div>
 
-            <div className="mt-8 pt-6 border-t border-slate-100 space-y-4">
-              <p className="text-slate-500 text-sm font-bold">
+            <div className="mt-8 pt-6 border-t border-white/10 space-y-4">
+              <p className="text-slate-300 text-sm font-bold">
                 {dailyVerse.book} {dailyVerse.chapter}:{dailyVerse.verse}
               </p>
 
@@ -267,22 +279,19 @@ const Inspiration = () => {
               <div className="flex flex-wrap gap-3">
                 <button
                   onClick={fetchRandomVerse}
-                  className="px-5 py-3 rounded-2xl bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
+                  className="px-5 py-3 rounded-2xl bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-blue-500 transition-all shadow-lg shadow-blue-950/40"
                 >
                   Versículo Aleatório
                 </button>
 
-                <button
-                  onClick={copyVerse}
-                  className="px-5 py-3 rounded-2xl bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
-                >
+                <button onClick={copyVerse} className={buttonSecondaryClass}>
                   Copiar Versículo
                 </button>
 
                 {cardMode === 'random' && (
                   <button
                     onClick={() => fetchDailyVerse(localStorage.getItem('token'))}
-                    className="px-5 py-3 rounded-2xl bg-white border border-slate-200 text-slate-600 text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all"
+                    className={buttonSecondaryClass}
                   >
                     Voltar ao Diário
                   </button>
@@ -290,7 +299,7 @@ const Inspiration = () => {
               </div>
 
               {copyMessage && (
-                <p className="text-emerald-600 text-xs font-bold uppercase tracking-widest">
+                <p className="text-emerald-300 text-xs font-bold uppercase tracking-widest">
                   {copyMessage}
                 </p>
               )}
@@ -300,39 +309,44 @@ const Inspiration = () => {
       )}
 
       {/* FAVORITOS */}
-      <div className="bg-white rounded-4xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className={`${cardClass} rounded-[2.5rem] overflow-hidden`}>
         <div
-          className="relative px-8 py-10 border-b border-slate-100"
+          className="relative px-8 py-14 md:py-20 border-b border-white/10 min-h-[220px] flex items-end"
           style={{
             backgroundImage: "url('/images/favorites-bg.jpg')",
             backgroundSize: 'cover',
             backgroundPosition: 'center'
           }}
         >
-          <div className="absolute inset-0 bg-white/85"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[#111916]/95 via-[#111916]/75 to-[#111916]/45"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(245,158,11,0.16),_transparent_35%)]"></div>
+
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
             <div>
-              <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-2 italic">
+              <p className="text-slate-300 text-[10px] font-black uppercase tracking-widest mb-2 italic">
                 Coleção Pessoal
               </p>
-              <h3 className="text-3xl font-black tracking-tighter text-slate-800">
+
+              <h3 className="text-3xl font-black tracking-tighter text-white">
                 Versículos Favoritos
               </h3>
-              <p className="text-slate-500 font-medium mt-2">
+
+              <p className="text-slate-300 font-medium mt-2">
                 Aqui ficam guardados os versículos que mais te marcaram.
               </p>
             </div>
 
-            
             <div className="relative z-10">
               <select
                 value={selectedTheme}
                 onChange={(e) => setSelectedTheme(e.target.value)}
-                className="bg-white border border-slate-200 rounded-2xl px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 outline-none cursor-pointer hover:bg-slate-50 transition-all"
+                className="bg-white/[0.08] border border-white/10 rounded-2xl px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-200 outline-none cursor-pointer hover:bg-white/[0.12] transition-all"
               >
-                <option value="all">Todos os Temas</option>
+                <option className="bg-[#111916] text-white" value="all">
+                  Todos os Temas
+                </option>
                 {themes.map((theme) => (
-                  <option key={theme} value={theme}>
+                  <option className="bg-[#111916] text-white" key={theme} value={theme}>
                     {theme}
                   </option>
                 ))}
@@ -342,11 +356,11 @@ const Inspiration = () => {
         </div>
 
         {favoritesLoading ? (
-          <div className="p-12 text-center text-slate-300 font-bold italic uppercase text-xs tracking-widest">
+          <div className="p-12 text-center text-slate-500 font-bold italic uppercase text-xs tracking-widest">
             A carregar favoritos...
           </div>
         ) : filteredFavorites.length === 0 ? (
-          <div className="p-12 text-center text-slate-300 font-bold italic uppercase text-xs tracking-widest">
+          <div className="p-12 text-center text-slate-500 font-bold italic uppercase text-xs tracking-widest">
             Ainda não tens versículos favoritos para este filtro.
           </div>
         ) : (
@@ -354,35 +368,45 @@ const Inspiration = () => {
             {filteredFavorites.map((verse) => (
               <div
                 key={verse.idfavorite}
-                className="p-6 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-white hover:shadow-md transition-all"
+                className="group p-6 rounded-3xl border border-white/10 bg-white/[0.045] hover:bg-white/[0.075] hover:border-amber-300/25 transition-all"
               >
                 <div className="flex items-start gap-4">
                   <button
                     onClick={() => removeFavoriteDirectly(verse.idverse)}
-                    className="w-12 h-12 rounded-2xl bg-yellow-100 text-yellow-500 flex items-center justify-center text-xl font-black shrink-0 hover:scale-105 transition-all"
+                    className="w-12 h-12 rounded-2xl bg-yellow-300/15 border border-yellow-300/20 text-yellow-300 flex items-center justify-center text-xl font-black shrink-0 hover:scale-105 hover:bg-yellow-300/20 transition-all"
                     title="Remover dos favoritos"
                   >
                     ★
                   </button>
 
                   <div className="flex-1">
-                    <p className="text-slate-800 font-bold leading-relaxed">
+                    <p className="text-slate-100 font-bold leading-relaxed group-hover:text-white transition-colors">
                       “{verse.text}”
                     </p>
+
                     <p className="text-slate-400 text-sm font-bold mt-4">
                       {verse.book} {verse.chapter}:{verse.verse}
                     </p>
+
                     {verse.theme && (
-                      <p className="text-[10px] font-black uppercase tracking-widest text-blue-500 mt-2">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-blue-300 mt-2">
                         {verse.theme}
                       </p>
                     )}
+
                     <div className="mt-4 flex flex-wrap gap-2">
                       <button
                         onClick={() => openShareModal(verse)}
-                        className="px-4 py-2 rounded-xl bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest hover:bg-blue-100 transition-all"
+                        className="px-4 py-2 rounded-xl bg-blue-500/10 border border-blue-400/20 text-blue-300 text-[10px] font-black uppercase tracking-widest hover:bg-blue-500/20 transition-all"
                       >
                         Partilhar
+                      </button>
+
+                      <button
+                        onClick={() => removeFavoriteDirectly(verse.idverse)}
+                        className="px-4 py-2 rounded-xl bg-red-500/10 border border-red-400/20 text-red-300 text-[10px] font-black uppercase tracking-widest hover:bg-red-500/20 transition-all"
+                      >
+                        Remover
                       </button>
                     </div>
                   </div>
@@ -392,22 +416,25 @@ const Inspiration = () => {
           </div>
         )}
       </div>
+
+      {/* MODAL PARTILHA */}
       {shareModalOpen && selectedVerseToShare && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-          <div className="bg-white w-full max-w-lg rounded-4xl shadow-2xl border border-white/20 overflow-hidden">
-            <div className="p-6 border-b border-slate-100 flex items-start justify-between gap-4">
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <div className="bg-[#111916] w-full max-w-lg rounded-[2.5rem] shadow-2xl border border-white/10 overflow-hidden">
+            <div className="p-6 border-b border-white/10 flex items-start justify-between gap-4">
               <div>
-                <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-2 italic">
+                <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2 italic">
                   Partilhar Versículo
                 </p>
-                <h3 className="text-2xl font-black tracking-tight text-slate-800">
+
+                <h3 className="text-2xl font-black tracking-tight text-white">
                   Enviar inspiração
                 </h3>
               </div>
 
               <button
                 onClick={closeShareModal}
-                className="text-slate-300 hover:text-slate-700 text-2xl font-black transition-all"
+                className="text-slate-500 hover:text-white text-2xl font-black transition-all"
                 title="Fechar"
               >
                 ×
@@ -415,37 +442,41 @@ const Inspiration = () => {
             </div>
 
             <div className="p-6 space-y-6">
-              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100">
-                <p className="text-slate-800 font-bold leading-relaxed">
+              <div className="p-5 rounded-2xl bg-white/[0.05] border border-white/10">
+                <p className="text-white font-bold leading-relaxed">
                   “{selectedVerseToShare.text}”
                 </p>
+
                 <p className="text-slate-400 text-sm font-bold mt-3">
-                  {selectedVerseToShare.book} {selectedVerseToShare.chapter}:{selectedVerseToShare.verse}
+                  {selectedVerseToShare.book} {selectedVerseToShare.chapter}:
+                  {selectedVerseToShare.verse}
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-5 rounded-2xl border border-slate-100 bg-white">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-2">
+                <div className="p-5 rounded-2xl border border-white/10 bg-white/[0.04]">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-blue-300 mb-2">
                     Amigos
                   </p>
+
                   <p className="text-sm text-slate-400 font-medium">
                     Ainda não tens amigos disponíveis para partilhar.
                   </p>
                 </div>
 
-                <div className="p-5 rounded-2xl border border-slate-100 bg-white">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-2">
+                <div className="p-5 rounded-2xl border border-white/10 bg-white/[0.04]">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-blue-300 mb-2">
                     Grupos
                   </p>
+
                   <p className="text-sm text-slate-400 font-medium">
                     Ainda não existem grupos disponíveis para partilhar.
                   </p>
                 </div>
               </div>
 
-              <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl">
-                <p className="text-blue-600 text-xs font-bold leading-relaxed">
+              <div className="bg-blue-500/10 border border-blue-400/20 p-4 rounded-2xl">
+                <p className="text-blue-200 text-xs font-bold leading-relaxed">
                   Esta funcionalidade está preparada para a futura integração com amigos,
                   grupos e notificações da plataforma Lifinity.
                 </p>
@@ -454,15 +485,15 @@ const Inspiration = () => {
               <div className="flex justify-end">
                 <button
                   onClick={closeShareModal}
-                  className="px-6 py-3 rounded-2xl bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+                  className={buttonSecondaryClass}
                 >
                   Fechar
                 </button>
               </div>
             </div>
           </div>
-  </div>
-)}
+        </div>
+      )}
     </div>
   );
 };

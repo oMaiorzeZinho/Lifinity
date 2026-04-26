@@ -37,7 +37,7 @@ const Login = () => {
       {/* BACKGROUND */}
       <div
         className="fixed inset-0 bg-cover bg-center opacity-45"
-        style={{ backgroundImage: "url('/images/auth-bg-1.jpg')" }}
+        style={{ backgroundImage: "url('/images/home-bg.png')" }}
       ></div>
 
       <div
@@ -141,29 +141,39 @@ const Login = () => {
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-2 ml-1">
+                  <label
+                    htmlFor="login-email"
+                    className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-2 ml-1"
+                  >
                     Email
                   </label>
                   <input
+                    id="login-email"
                     type="email"
                     placeholder="exemplo@email.com"
                     className="w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-slate-600 outline-none focus:border-emerald-200/60 focus:bg-white/10 transition-all font-bold"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-2 ml-1">
+                  <label
+                    htmlFor="login-password"
+                    className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-2 ml-1"
+                  >
                     Palavra-passe
                   </label>
                   <input
+                    id="login-password"
                     type="password"
                     placeholder="A tua palavra-passe"
                     className="w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-slate-600 outline-none focus:border-emerald-200/60 focus:bg-white/10 transition-all font-bold"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
                     required
                   />
                 </div>

@@ -57,15 +57,15 @@ const DailyVerseWidget = () => {
       {!isOpen ? (
         <button
           onClick={() => setIsOpen(true)}
-          className="bg-white border border-slate-200 shadow-xl rounded-2xl px-5 py-4 hover:shadow-2xl transition-all"
+          className="bg-[#111916]/88 border border-white/10 shadow-xl rounded-2xl px-5 py-4 hover:shadow-2xl transition-all"
         >
           <p className="text-[10px] font-black uppercase tracking-widest text-blue-600">
             Versículo do Dia
           </p>
         </button>
       ) : (
-        <div className="w-90 bg-white border border-slate-200 shadow-2xl rounded-4xl overflow-hidden">
-          <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+        <div className="w-90 bg-[#111916]/88 border border-white/10 shadow-2xl rounded-4xl overflow-hidden">
+          <div className="p-5 border-b border-white/10 flex items-center justify-between">
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest text-blue-600">
                 Versículo do Dia
@@ -85,7 +85,7 @@ const DailyVerseWidget = () => {
           </div>
 
           <div className="p-5 space-y-4">
-            <p className="text-slate-800 font-bold leading-relaxed text-sm">
+            <p className="text-white font-bold leading-relaxed text-sm">
               “{verse.text}”
             </p>
 

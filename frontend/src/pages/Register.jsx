@@ -41,7 +41,7 @@ const Register = () => {
       {/* BACKGROUND */}
       <div
         className="fixed inset-0 bg-cover bg-center opacity-45"
-        style={{ backgroundImage: "url('/images/auth-bg-2.png')" }}
+        style={{ backgroundImage: "url('/images/home-bg.png')" }}
       ></div>
 
       <div

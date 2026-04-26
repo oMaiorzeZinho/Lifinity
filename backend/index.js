@@ -7,6 +7,8 @@ const taskRoutes = require('./src/routes/taskRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 const inspirationRoutes = require('./src/routes/inspirationRoutes');
 const statisticsRoutes = require('./src/routes/statisticsRoutes');
+const groupRoutes = require('./src/routes/groupRoutes');
+const friendRoutes = require('./src/routes/friendRoutes');
 
 //Criação de uma instância do Express (a aplicação)
 const app = express();
@@ -32,6 +34,10 @@ app.use('/api/users', userRoutes);
 app.use('/api/inspiration', inspirationRoutes);
 // Usar as rotas de estatísticas
 app.use('/api/statistics', statisticsRoutes);
+// Usar as rotas de grupos
+app.use('/api/groups', groupRoutes);
+// Usar as rotas de amigos
+app.use('/api/friends', friendRoutes); 
 
 //Mandar o servidor começar a "ouvir" os pedidos
 app.listen(PORT, () => {
