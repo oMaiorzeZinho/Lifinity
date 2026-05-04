@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -15,6 +15,8 @@ const buttonPrimaryClass =
 
 const buttonSecondaryClass =
   'px-5 py-3 rounded-2xl bg-white/[0.08] border border-white/10 text-slate-200 text-[10px] font-black uppercase tracking-widest hover:bg-white/[0.12] transition-all';
+
+const getToken = () => localStorage.getItem('token');
 
 const Community = () => {
   const [groups, setGroups] = useState([]);
@@ -33,18 +35,30 @@ const Community = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const messageTimeoutRef = useRef(null);
 
   const navigate = useNavigate();
 
-  const getToken = () => localStorage.getItem('token');
+  const showMessage = useCallback((text) => {
+    if (messageTimeoutRef.current) {
+      clearTimeout(messageTimeoutRef.current);
+    }
 
-  const showMessage = (text) => {
     setMessage(text);
 
-    setTimeout(() => {
+    messageTimeoutRef.current = setTimeout(() => {
       setMessage('');
+      messageTimeoutRef.current = null;
     }, 3000);
-  };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (messageTimeoutRef.current) {
+        clearTimeout(messageTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const fetchGroups = useCallback(async () => {
     try {
@@ -88,7 +102,7 @@ const Community = () => {
     }
   }, []);
 
-  const fetchGroupMembers = async (group) => {
+  const fetchGroupMembers = useCallback(async (group) => {
     try {
       const token = getToken();
 
@@ -102,7 +116,7 @@ const Community = () => {
       console.error('Erro ao carregar membros do grupo:', err);
       showMessage('Não foi possível carregar os membros do grupo.');
     }
-  };
+  }, [showMessage]);
 
   useEffect(() => {
     const token = getToken();
@@ -315,7 +329,11 @@ const Community = () => {
       </div>
 
       {message && (
-        <div className="bg-blue-500/10 border border-blue-400/20 text-blue-200 p-5 rounded-2xl font-bold text-sm">
+        <div
+          className="bg-blue-500/10 border border-blue-400/20 text-blue-200 p-5 rounded-2xl font-bold text-sm"
+          role="status"
+          aria-live="polite"
+        >
           {message}
         </div>
       )}
@@ -337,7 +355,11 @@ const Community = () => {
           </p>
 
           <form onSubmit={handleCreateGroup} className="space-y-4">
+            <label htmlFor="community-group-name" className="sr-only">
+              Nome do grupo
+            </label>
             <input
+              id="community-group-name"
               type="text"
               placeholder="Nome do grupo"
               value={newGroup.name}
@@ -346,7 +368,11 @@ const Community = () => {
               required
             />
 
+            <label htmlFor="community-group-description" className="sr-only">
+              Descricao do grupo
+            </label>
             <textarea
+              id="community-group-description"
               placeholder="Descrição do grupo"
               value={newGroup.description}
               onChange={(e) =>
@@ -376,7 +402,11 @@ const Community = () => {
           </p>
 
           <form onSubmit={handleJoinGroup} className="space-y-4">
+            <label htmlFor="community-invite-code" className="sr-only">
+              Codigo do grupo
+            </label>
             <input
+              id="community-invite-code"
               type="text"
               placeholder="Código do grupo"
               value={inviteCode}
@@ -421,6 +451,7 @@ const Community = () => {
 
           {selectedGroup && (
             <button
+              type="button"
               onClick={() => {
                 setSelectedGroup(null);
                 setGroupMembers([]);
@@ -472,6 +503,7 @@ const Community = () => {
                     </p>
 
                     <button
+                      type="button"
                       onClick={() => copyInviteCode(group.invite_code)}
                       className="mt-3 w-full px-4 py-2 rounded-xl bg-blue-500/10 border border-blue-400/20 text-blue-300 text-[10px] font-black uppercase tracking-widest hover:bg-blue-500/20 transition-all"
                     >
@@ -481,6 +513,7 @@ const Community = () => {
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => fetchGroupMembers(group)}
                   className={`${buttonSecondaryClass} mt-5`}
                 >
@@ -544,7 +577,11 @@ const Community = () => {
           </h3>
 
           <form onSubmit={handleSearchUsers} className="space-y-4">
+            <label htmlFor="community-user-search" className="sr-only">
+              Pesquisar username
+            </label>
             <input
+              id="community-user-search"
               type="text"
               placeholder="Pesquisar username..."
               value={searchQuery}
@@ -577,6 +614,7 @@ const Community = () => {
                   </p>
 
                   <button
+                    type="button"
                     onClick={() => handleSendFriendRequest(user.iduser)}
                     className="mt-3 px-4 py-2 rounded-xl bg-blue-500/10 border border-blue-400/20 text-blue-300 text-[10px] font-black uppercase tracking-widest hover:bg-blue-500/20 transition-all"
                   >
@@ -621,6 +659,7 @@ const Community = () => {
                     </p>
 
                     <button
+                      type="button"
                       onClick={() => handleAcceptFriendRequest(request.idfriendship)}
                       className="mt-4 px-5 py-3 rounded-2xl bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest hover:bg-emerald-400 transition-all"
                     >

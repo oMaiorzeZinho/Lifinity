@@ -90,7 +90,6 @@ const Statistics = () => {
   const [period, setPeriod] = useState('30d');
   const [metric, setMetric] = useState('xpGained');
   const [comparisonMode, setComparisonMode] = useState('me');
-  const [comparisonTarget, setComparisonTarget] = useState('');
   const [statistics, setStatistics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [chartType, setChartType] = useState('area');
@@ -275,7 +274,10 @@ const Statistics = () => {
       </div>
 
       {error && (
-        <div className="bg-red-500/10 border border-red-400/20 text-red-200 p-5 rounded-2xl font-bold text-sm">
+        <div
+          className="bg-red-500/10 border border-red-400/20 text-red-200 p-5 rounded-2xl font-bold text-sm"
+          role="alert"
+        >
           {error}
         </div>
       )}
@@ -314,10 +316,14 @@ const Statistics = () => {
 
           <div className="space-y-5">
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+              <label
+                htmlFor="statistics-metric"
+                className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2"
+              >
                 Tema do gráfico
               </label>
               <select
+                id="statistics-metric"
                 value={metric}
                 onChange={(e) => setMetric(e.target.value)}
                 className={selectClass}
@@ -338,10 +344,14 @@ const Statistics = () => {
             </div>
 
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+              <label
+                htmlFor="statistics-period"
+                className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2"
+              >
                 Período
               </label>
               <select
+                id="statistics-period"
                 value={period}
                 onChange={(e) => setPeriod(e.target.value)}
                 className={selectClass}
@@ -359,10 +369,14 @@ const Statistics = () => {
             </div>
 
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+              <label
+                htmlFor="statistics-chart-type"
+                className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2"
+              >
                 Tipo de gráfico
               </label>
               <select
+                id="statistics-chart-type"
                 value={chartType}
                 onChange={(e) => setChartType(e.target.value)}
                 className={selectClass}
@@ -377,11 +391,15 @@ const Statistics = () => {
             </div>
 
             <div className="pt-5 border-t border-white/10">
-              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+              <label
+                htmlFor="statistics-comparison-mode"
+                className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2"
+              >
                 Comparação
               </label>
 
               <select
+                id="statistics-comparison-mode"
                 value={comparisonMode}
                 onChange={(e) => setComparisonMode(e.target.value)}
                 className={selectClass}
@@ -399,17 +417,21 @@ const Statistics = () => {
 
               {(comparisonMode === 'friend' || comparisonMode === 'group') && (
                 <div className="mt-4">
+                  <label htmlFor="statistics-comparison-target" className="sr-only">
+                    Destino da comparacao
+                  </label>
                   <input
+                    id="statistics-comparison-target"
                     type="text"
                     placeholder={
                       comparisonMode === 'friend'
                         ? 'Nome do amigo...'
                         : 'Nome do grupo...'
                     }
-                    value={comparisonTarget}
-                    onChange={(e) => setComparisonTarget(e.target.value)}
+                    value=""
                     className={`${inputClass} opacity-70 cursor-not-allowed`}
                     disabled
+                    readOnly
                   />
 
                   <p className="text-xs text-slate-400 font-bold mt-3 leading-relaxed">

@@ -340,6 +340,7 @@ const Profile = () => {
 
           <div className="space-y-3">
             <button
+              type="button"
               onClick={() => navigate('/dashboard/tasks')}
               className="w-full px-5 py-4 rounded-2xl bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-blue-500 transition-all shadow-lg shadow-blue-950/40"
             >
@@ -347,6 +348,7 @@ const Profile = () => {
             </button>
 
             <button
+              type="button"
               onClick={() => navigate('/dashboard/statistics')}
               className={buttonSecondaryClass}
             >
@@ -354,6 +356,7 @@ const Profile = () => {
             </button>
 
             <button
+              type="button"
               onClick={handleLogout}
               className="w-full px-5 py-4 rounded-2xl bg-red-500/10 border border-red-400/20 text-red-300 text-[10px] font-black uppercase tracking-widest hover:bg-red-500/20 transition-all"
             >

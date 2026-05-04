@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -21,8 +21,30 @@ const Inspiration = () => {
   const [copyMessage, setCopyMessage] = useState('');
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedVerseToShare, setSelectedVerseToShare] = useState(null);
+  const copyMessageTimeoutRef = useRef(null);
 
   const navigate = useNavigate();
+
+  const showCopyMessage = useCallback((text) => {
+    if (copyMessageTimeoutRef.current) {
+      clearTimeout(copyMessageTimeoutRef.current);
+    }
+
+    setCopyMessage(text);
+
+    copyMessageTimeoutRef.current = setTimeout(() => {
+      setCopyMessage('');
+      copyMessageTimeoutRef.current = null;
+    }, 2000);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (copyMessageTimeoutRef.current) {
+        clearTimeout(copyMessageTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const fetchDailyVerse = useCallback(async (token) => {
     try {
@@ -38,7 +60,7 @@ const Inspiration = () => {
     }
   }, []);
 
-  const fetchRandomVerse = async () => {
+  const fetchRandomVerse = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
 
@@ -51,7 +73,7 @@ const Inspiration = () => {
     } catch (err) {
       console.error('Erro ao carregar versículo aleatório:', err);
     }
-  };
+  }, []);
 
   const fetchFavorites = useCallback(async (token) => {
     try {
@@ -67,7 +89,7 @@ const Inspiration = () => {
     }
   }, []);
 
-  const toggleFavorite = async (idverse) => {
+  const toggleFavorite = useCallback(async (idverse) => {
     try {
       const token = localStorage.getItem('token');
 
@@ -89,9 +111,9 @@ const Inspiration = () => {
     } catch (err) {
       console.error('Erro ao atualizar favorito:', err);
     }
-  };
+  }, [fetchFavorites]);
 
-  const removeFavoriteDirectly = async (idverse) => {
+  const removeFavoriteDirectly = useCallback(async (idverse) => {
     try {
       const token = localStorage.getItem('token');
 
@@ -111,35 +133,32 @@ const Inspiration = () => {
     } catch (err) {
       console.error('Erro ao remover favorito:', err);
     }
-  };
+  }, [fetchFavorites]);
 
-  const copyVerse = async () => {
+  const copyVerse = useCallback(async () => {
     if (!dailyVerse) return;
 
     const textToCopy = `“${dailyVerse.text}” — ${dailyVerse.book} ${dailyVerse.chapter}:${dailyVerse.verse}`;
 
     try {
       await navigator.clipboard.writeText(textToCopy);
-      setCopyMessage('Versículo copiado com sucesso.');
+      showCopyMessage('Versículo copiado com sucesso.');
 
-      setTimeout(() => {
-        setCopyMessage('');
-      }, 2000);
     } catch (err) {
       console.error('Erro ao copiar versículo:', err);
-      setCopyMessage('Não foi possível copiar o versículo.');
+      showCopyMessage('Não foi possível copiar o versículo.');
     }
-  };
+  }, [dailyVerse, showCopyMessage]);
 
-  const openShareModal = (verse) => {
+  const openShareModal = useCallback((verse) => {
     setSelectedVerseToShare(verse);
     setShareModalOpen(true);
-  };
+  }, []);
 
-  const closeShareModal = () => {
+  const closeShareModal = useCallback(() => {
     setSelectedVerseToShare(null);
     setShareModalOpen(false);
-  };
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -150,14 +169,22 @@ const Inspiration = () => {
       return;
     }
 
+    let isActive = true;
+
     const loadData = async () => {
       setLoading(true);
       await fetchDailyVerse(token);
       await fetchFavorites(token);
-      setLoading(false);
+      if (isActive) {
+        setLoading(false);
+      }
     };
 
     loadData();
+
+    return () => {
+      isActive = false;
+    };
   }, [navigate, fetchDailyVerse, fetchFavorites]);
 
   const themes = useMemo(() => {
@@ -250,6 +277,7 @@ const Inspiration = () => {
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => toggleFavorite(dailyVerse.idverse)}
                   className={`text-3xl transition-all ${
                     dailyVerse.isFavorite
@@ -257,12 +285,13 @@ const Inspiration = () => {
                       : 'text-slate-500 hover:text-yellow-300'
                   }`}
                   title="Adicionar aos favoritos"
+                  aria-label="Adicionar aos favoritos"
                 >
                   ★
                 </button>
               </div>
 
-              <p className="text-2xl md:text-3xl font-black tracking-tight text-white leading-relaxed min-h-42.5">
+              <p className="text-2xl md:text-3xl font-black tracking-tight text-white leading-relaxed min-h-[10.625rem]">
                 “{dailyVerse.text}”
               </p>
             </div>
@@ -278,18 +307,20 @@ const Inspiration = () => {
 
               <div className="flex flex-wrap gap-3">
                 <button
+                  type="button"
                   onClick={fetchRandomVerse}
                   className="px-5 py-3 rounded-2xl bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-blue-500 transition-all shadow-lg shadow-blue-950/40"
                 >
                   Versículo Aleatório
                 </button>
 
-                <button onClick={copyVerse} className={buttonSecondaryClass}>
+                <button type="button" onClick={copyVerse} className={buttonSecondaryClass}>
                   Copiar Versículo
                 </button>
 
                 {cardMode === 'random' && (
                   <button
+                    type="button"
                     onClick={() => fetchDailyVerse(localStorage.getItem('token'))}
                     className={buttonSecondaryClass}
                   >
@@ -299,7 +330,11 @@ const Inspiration = () => {
               </div>
 
               {copyMessage && (
-                <p className="text-emerald-300 text-xs font-bold uppercase tracking-widest">
+                <p
+                  className="text-emerald-300 text-xs font-bold uppercase tracking-widest"
+                  role="status"
+                  aria-live="polite"
+                >
                   {copyMessage}
                 </p>
               )}
@@ -337,7 +372,11 @@ const Inspiration = () => {
             </div>
 
             <div className="relative z-10">
+              <label htmlFor="inspiration-theme-filter" className="sr-only">
+                Filtrar favoritos por tema
+              </label>
               <select
+                id="inspiration-theme-filter"
                 value={selectedTheme}
                 onChange={(e) => setSelectedTheme(e.target.value)}
                 className="bg-white/[0.08] border border-white/10 rounded-2xl px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-200 outline-none cursor-pointer hover:bg-white/[0.12] transition-all"
@@ -372,9 +411,11 @@ const Inspiration = () => {
               >
                 <div className="flex items-start gap-4">
                   <button
+                    type="button"
                     onClick={() => removeFavoriteDirectly(verse.idverse)}
                     className="w-12 h-12 rounded-2xl bg-yellow-300/15 border border-yellow-300/20 text-yellow-300 flex items-center justify-center text-xl font-black shrink-0 hover:scale-105 hover:bg-yellow-300/20 transition-all"
                     title="Remover dos favoritos"
+                    aria-label="Remover dos favoritos"
                   >
                     ★
                   </button>
@@ -396,6 +437,7 @@ const Inspiration = () => {
 
                     <div className="mt-4 flex flex-wrap gap-2">
                       <button
+                        type="button"
                         onClick={() => openShareModal(verse)}
                         className="px-4 py-2 rounded-xl bg-blue-500/10 border border-blue-400/20 text-blue-300 text-[10px] font-black uppercase tracking-widest hover:bg-blue-500/20 transition-all"
                       >
@@ -403,6 +445,7 @@ const Inspiration = () => {
                       </button>
 
                       <button
+                        type="button"
                         onClick={() => removeFavoriteDirectly(verse.idverse)}
                         className="px-4 py-2 rounded-xl bg-red-500/10 border border-red-400/20 text-red-300 text-[10px] font-black uppercase tracking-widest hover:bg-red-500/20 transition-all"
                       >
@@ -433,9 +476,11 @@ const Inspiration = () => {
               </div>
 
               <button
+                type="button"
                 onClick={closeShareModal}
                 className="text-slate-500 hover:text-white text-2xl font-black transition-all"
                 title="Fechar"
+                aria-label="Fechar modal de partilha"
               >
                 ×
               </button>
@@ -484,6 +529,7 @@ const Inspiration = () => {
 
               <div className="flex justify-end">
                 <button
+                  type="button"
                   onClick={closeShareModal}
                   className={buttonSecondaryClass}
                 >

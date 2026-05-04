@@ -37,7 +37,7 @@ const Login = () => {
       {/* BACKGROUND */}
       <div
         className="fixed inset-0 bg-cover bg-center opacity-45"
-        style={{ backgroundImage: "url('/images/home-bg.png')" }}
+        style={{ backgroundImage: "url('/images/auth-bg-2.png')" }}
       ></div>
 
       <div
