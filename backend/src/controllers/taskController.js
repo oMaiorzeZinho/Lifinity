@@ -20,27 +20,58 @@ exports.getTasks = async (req, res) => {
 };
 
 // 2. Criar uma nova tarefa
+// 2. Criar uma nova tarefa
 exports.createTask = async (req, res) => {
     try {
-        const { title, description, priority, idcategory } = req.body;
+        const { title, description, priority, idcategory, due_date } = req.body;
         const iduser = req.user.iduser;
 
+        if (!title || title.trim().length === 0) {
+            return res.status(400).json({
+                message: "O título da tarefa é obrigatório."
+            });
+        }
+
+        const validPriorities = ["baixa", "media", "alta"];
+
+        if (priority && !validPriorities.includes(priority)) {
+            return res.status(400).json({
+                message: "Prioridade inválida."
+            });
+        }
+
+        const normalizedDueDate =
+            due_date && String(due_date).trim() !== ""
+                ? due_date
+                : null;
+
         console.log("--- A Inserir Nova Tarefa na BD ---");
-        
+
         const [result] = await db.query(
-            "INSERT INTO TASK (iduser, title, description, priority, idcategory) VALUES (?, ?, ?, ?, ?)",
-            [iduser, title, description, priority, idcategory || null]
+            `INSERT INTO TASK 
+             (iduser, title, description, priority, idcategory, due_date) 
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [
+                iduser,
+                title.trim(),
+                description || null,
+                priority || "media",
+                idcategory || null,
+                normalizedDueDate
+            ]
         );
 
         console.log("Sucesso! ID da tarefa criada:", result.insertId);
-        
-        res.status(201).json({ 
-            message: "Tarefa criada com sucesso!", 
-            idtask: result.insertId 
+
+        res.status(201).json({
+            message: "Tarefa criada com sucesso!",
+            idtask: result.insertId
         });
     } catch (err) {
         console.error("ERRO FATAL NO MYSQL AO CRIAR TAREFA:", err.message);
-        res.status(500).json({ error: "Erro na base de dados ao criar tarefa." });
+        res.status(500).json({
+            error: "Erro na base de dados ao criar tarefa."
+        });
     }
 };
 
@@ -58,6 +89,19 @@ exports.completeTask = async (req, res) => {
         const task = tasks[0];
         if (task.status === 'concluida') {
             return res.status(400).json({ message: "Esta tarefa já foi concluída." });
+        }
+
+        if (task.status === "concluida") {
+            return res.status(400).json({
+                message: "Esta tarefa já foi concluída."
+            });
+        }
+
+        // Verificar se a tarefa já passou do prazo
+        if (task.due_date && new Date(task.due_date) < new Date()) {
+            return res.status(403).json({
+                message: "Esta tarefa já passou do prazo e foi marcada como perdida."
+            });
         }
 
         // 2. Lógica de Bónus de Velocidade (Mesmo dia?)
@@ -96,6 +140,104 @@ exports.completeTask = async (req, res) => {
     } catch (err) {
         console.error("Erro no módulo de XP:", err);
         res.status(500).json({ error: "Erro ao processar recompensa." });
+    }
+};
+
+// 4. Editar tarefa
+// Regras:
+// - só o criador da tarefa pode editar;
+// - só pode editar até 1 hora depois da criação;
+// - tarefas concluídas não podem ser editadas.
+exports.updateTask = async (req, res) => {
+    try {
+        const { idtask } = req.params;
+        const iduser = req.user.iduser;
+
+        const {
+            title,
+            description,
+            priority,
+            due_date,
+            idcategory
+        } = req.body;
+
+        if (!title || title.trim().length === 0) {
+            return res.status(400).json({
+                message: "O título da tarefa é obrigatório."
+            });
+        }
+
+        const validPriorities = ["baixa", "media", "alta"];
+
+        if (priority && !validPriorities.includes(priority)) {
+            return res.status(400).json({
+                message: "Prioridade inválida."
+            });
+        }
+
+        // Procurar tarefa e confirmar se pertence ao utilizador autenticado
+        const [tasks] = await db.query(
+            "SELECT * FROM TASK WHERE idtask = ? AND iduser = ?",
+            [idtask, iduser]
+        );
+
+        if (tasks.length === 0) {
+            return res.status(404).json({
+                message: "Tarefa não encontrada ou sem permissão para editar."
+            });
+        }
+
+        const task = tasks[0];
+
+        if (task.status === "concluida") {
+            return res.status(403).json({
+                message: "Não é possível editar uma tarefa já concluída."
+            });
+        }
+
+        // Regra: só pode editar até 1 hora depois da criação
+        const createdAt = new Date(task.created_at);
+        const now = new Date();
+        const diffInMs = now.getTime() - createdAt.getTime();
+        const oneHourInMs = 60 * 60 * 1000;
+
+        if (diffInMs > oneHourInMs) {
+            return res.status(403).json({
+                message: "Esta tarefa já não pode ser editada porque passou mais de 1 hora desde a criação."
+            });
+        }
+
+        const normalizedDueDate = due_date && due_date.trim() !== ""
+            ? due_date
+            : null;
+
+        await db.query(
+            `UPDATE TASK
+             SET title = ?,
+                 description = ?,
+                 priority = ?,
+                 due_date = ?,
+                 idcategory = ?
+             WHERE idtask = ? AND iduser = ?`,
+            [
+                title.trim(),
+                description || null,
+                priority || "media",
+                normalizedDueDate,
+                idcategory || null,
+                idtask,
+                iduser
+            ]
+        );
+
+        res.json({
+            message: "Tarefa atualizada com sucesso."
+        });
+    } catch (err) {
+        console.error("Erro ao editar tarefa:", err);
+        res.status(500).json({
+            error: "Erro ao editar tarefa."
+        });
     }
 };
 

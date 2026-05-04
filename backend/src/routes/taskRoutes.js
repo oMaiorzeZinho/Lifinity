@@ -9,5 +9,6 @@ router.post('/', verifyToken, taskController.createTask);
 router.put('/complete/:idtask', verifyToken, taskController.completeTask);
 router.delete('/completed/all', verifyToken, taskController.clearCompletedTasks);
 router.delete('/:idtask', verifyToken, taskController.deleteTask);
+router.put('/:idtask', verifyToken, taskController.updateTask);
 
 module.exports = router;

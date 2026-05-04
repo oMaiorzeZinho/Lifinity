@@ -14,6 +14,13 @@ const inputClass =
 const selectClass =
   'bg-white/5 border border-white/10 text-slate-200 outline-none cursor-pointer hover:bg-white/10 transition-all';
 
+const emptyTaskForm = {
+  title: '',
+  description: '',
+  priority: 'media',
+  due_date: ''
+};
+
 // --- MOTOR DE GAMIFICAÇÃO (FRONTEND) ---
 // Esta função calcula o nível e o progresso visual com base no XP do utilizador.
 const getLevelData = (xp) => {
@@ -29,7 +36,8 @@ const getLevelData = (xp) => {
 
   const xpStartOfLevel = calculateXPForLevel(level);
   const xpForNextLevel = calculateXPForLevel(level + 1);
-  const progress = ((xp - xpStartOfLevel) / (xpForNextLevel - xpStartOfLevel)) * 100;
+  const progress =
+    ((xp - xpStartOfLevel) / (xpForNextLevel - xpStartOfLevel)) * 100;
 
   return {
     level,
@@ -56,6 +64,54 @@ const requestTaskSummary = async (token) => {
   return res.data;
 };
 
+const canEditTask = (task) => {
+  if (task.status === 'concluida') return false;
+  if (!task.created_at) return false;
+
+  const createdAt = new Date(task.created_at);
+  const now = new Date();
+
+  const diffInMs = now.getTime() - createdAt.getTime();
+  const oneHourInMs = 60 * 60 * 1000;
+
+  return diffInMs <= oneHourInMs;
+};
+
+const isTaskOverdue = (task) => {
+  if (!task.due_date) return false;
+  if (task.status === 'concluida') return false;
+
+  const dueDate = new Date(task.due_date);
+  const now = new Date();
+
+  return dueDate.getTime() < now.getTime();
+};
+
+const formatDueDate = (date) => {
+  if (!date) return null;
+
+  return new Date(date).toLocaleString('pt-PT', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+const formatDateForInput = (date) => {
+  if (!date) return '';
+
+  const parsedDate = new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) return '';
+
+  const offset = parsedDate.getTimezoneOffset();
+  const localDate = new Date(parsedDate.getTime() - offset * 60 * 1000);
+
+  return localDate.toISOString().slice(0, 16);
+};
+
 const Tasks = () => {
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user');
@@ -71,11 +127,8 @@ const Tasks = () => {
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newTask, setNewTask] = useState({
-    title: '',
-    description: '',
-    priority: 'media'
-  });
+  const [taskForm, setTaskForm] = useState(emptyTaskForm);
+  const [editingTask, setEditingTask] = useState(null);
 
   // Estados dos filtros
   const [filterStatus, setFilterStatus] = useState('all');
@@ -135,6 +188,31 @@ const Tasks = () => {
     };
   }, [navigate, user]);
 
+  const openCreateModal = () => {
+    setEditingTask(null);
+    setTaskForm(emptyTaskForm);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (task) => {
+    setEditingTask(task);
+
+    setTaskForm({
+      title: task.title || '',
+      description: task.description || '',
+      priority: task.priority || 'media',
+      due_date: formatDateForInput(task.due_date)
+    });
+
+    setIsModalOpen(true);
+  };
+
+  const closeTaskModal = () => {
+    setIsModalOpen(false);
+    setEditingTask(null);
+    setTaskForm(emptyTaskForm);
+  };
+
   const handleCompleteTask = async (idtask) => {
     try {
       const token = localStorage.getItem('token');
@@ -166,7 +244,7 @@ const Tasks = () => {
       window.dispatchEvent(new Event('lifinity-tasks-updated'));
     } catch (err) {
       console.error('Erro ao concluir tarefa:', err);
-      alert('Erro ao concluir tarefa.');
+      alert(err.response?.data?.message || 'Erro ao concluir tarefa.');
     }
   };
 
@@ -222,31 +300,38 @@ const Tasks = () => {
     }
   };
 
-  const handleCreateTask = async (e) => {
+  const handleSubmitTask = async (e) => {
     e.preventDefault();
 
     try {
       const token = localStorage.getItem('token');
 
-      await axios.post(`${API_URL}/tasks`, newTask, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const payload = {
+        title: taskForm.title,
+        description: taskForm.description,
+        priority: taskForm.priority,
+        due_date: taskForm.due_date || null
+      };
 
-      setNewTask({
-        title: '',
-        description: '',
-        priority: 'media'
-      });
+      if (editingTask) {
+        await axios.put(`${API_URL}/tasks/${editingTask.idtask}`, payload, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } else {
+        await axios.post(`${API_URL}/tasks`, payload, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
 
-      setIsModalOpen(false);
+      closeTaskModal();
 
       await fetchTasks(token);
       await fetchTaskSummary(token);
 
       window.dispatchEvent(new Event('lifinity-tasks-updated'));
     } catch (err) {
-      console.error('Erro ao criar tarefa:', err);
-      alert('Erro ao criar tarefa.');
+      console.error('Erro ao guardar tarefa:', err);
+      alert(err.response?.data?.message || 'Erro ao guardar tarefa.');
     }
   };
 
@@ -262,12 +347,16 @@ const Tasks = () => {
 
   // Filtragem das tarefas visíveis.
   const filteredTasks = tasks.filter((task) => {
+    const taskOverdue = isTaskOverdue(task);
+
     const matchesStatus =
       filterStatus === 'all'
         ? true
         : filterStatus === 'completed'
           ? task.status === 'concluida'
-          : task.status !== 'concluida';
+          : filterStatus === 'lost'
+            ? taskOverdue
+            : task.status !== 'concluida' && !taskOverdue;
 
     const matchesPriority =
       filterPriority === 'all' ? true : task.priority === filterPriority;
@@ -333,7 +422,9 @@ const Tasks = () => {
 
       <div className="space-y-6">
         {/* BARRA DE FILTROS E PESQUISA */}
-        <div className={`${cardClass} p-4 rounded-2xl flex flex-wrap gap-4 items-center justify-between`}>
+        <div
+          className={`${cardClass} p-4 rounded-2xl flex flex-wrap gap-4 items-center justify-between`}
+        >
           <div className="flex flex-wrap gap-2 items-center">
             <div className="relative">
               <input
@@ -369,9 +460,18 @@ const Tasks = () => {
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
             >
-              <option value="all">Todos os Estados</option>
-              <option value="pending">Pendentes</option>
-              <option value="completed">Concluídas</option>
+              <option className="bg-slate-950 text-white" value="all">
+                Todos os Estados
+              </option>
+              <option className="bg-slate-950 text-white" value="pending">
+                Pendentes
+              </option>
+              <option className="bg-slate-950 text-white" value="completed">
+                Concluídas
+              </option>
+              <option className="bg-slate-950 text-white" value="lost">
+                Perdidas
+              </option>
             </select>
 
             <select
@@ -380,10 +480,18 @@ const Tasks = () => {
               value={filterPriority}
               onChange={(e) => setFilterPriority(e.target.value)}
             >
-              <option value="all">Todas as Prioridades</option>
-              <option value="alta">Prioridade Alta</option>
-              <option value="media">Prioridade Média</option>
-              <option value="baixa">Prioridade Baixa</option>
+              <option className="bg-slate-950 text-white" value="all">
+                Todas as Prioridades
+              </option>
+              <option className="bg-slate-950 text-white" value="alta">
+                Prioridade Alta
+              </option>
+              <option className="bg-slate-950 text-white" value="media">
+                Prioridade Média
+              </option>
+              <option className="bg-slate-950 text-white" value="baixa">
+                Prioridade Baixa
+              </option>
             </select>
           </div>
 
@@ -398,7 +506,7 @@ const Tasks = () => {
             )}
 
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={openCreateModal}
               className="bg-blue-600 text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-500 transition-all shadow-xl shadow-blue-950/40"
             >
               Nova Tarefa
@@ -414,91 +522,142 @@ const Tasks = () => {
                 Nenhuma tarefa encontrada com estes filtros.
               </div>
             ) : (
-              filteredTasks.map((task) => (
-                <div
-                  key={task.idtask}
-                  className={`flex items-center justify-between p-6 rounded-2xl transition-all border ${
-                    task.status === 'concluida'
-                      ? 'bg-white/5 opacity-55 border-white/5'
-                      : 'bg-white/5 border-white/10 hover:border-emerald-300/25 hover:bg-white/10 shadow-sm'
-                  }`}
-                >
-                  <div className="flex flex-col gap-1">
-                    <span
-                      className={`font-black text-lg tracking-tight leading-tight ${
-                        task.status === 'concluida'
-                          ? 'text-slate-500 line-through italic'
-                          : 'text-white'
-                      }`}
-                    >
-                      {task.title}
-                    </span>
+              filteredTasks.map((task) => {
+                const taskOverdue = isTaskOverdue(task);
+                const taskCanBeEdited = canEditTask(task);
+                const dueDateLabel = formatDueDate(task.due_date);
 
-                    <span
-                      className={`text-sm font-medium ${
-                        task.status === 'concluida'
-                          ? 'text-slate-500 line-through italic'
-                          : 'text-slate-300'
-                      }`}
-                    >
-                      {task.description || 'Sem descrição detalhada.'}
-                    </span>
-                  </div>
+                return (
+                  <div
+                    key={task.idtask}
+                    className={`flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5 p-6 rounded-2xl transition-all border ${
+                      task.status === 'concluida'
+                        ? 'bg-white/5 opacity-55 border-white/5'
+                        : taskOverdue
+                          ? 'bg-red-500/10 border-red-400/25 hover:bg-red-500/15'
+                          : 'bg-white/5 border-white/10 hover:border-emerald-300/25 hover:bg-white/10 shadow-sm'
+                    }`}
+                  >
+                    <div className="flex flex-col gap-2">
+                      <span
+                        className={`font-black text-lg tracking-tight leading-tight ${
+                          task.status === 'concluida'
+                            ? 'text-slate-500 line-through italic'
+                            : taskOverdue
+                              ? 'text-red-200'
+                              : 'text-white'
+                        }`}
+                      >
+                        {task.title}
+                      </span>
 
-                  <div className="flex items-center gap-6">
-                    <span
-                       className={`text-xs font-black uppercase px-4 py-2 rounded-xl tracking-widest border ${
-                        task.status === 'concluida'
-                          ? 'bg-white/10 text-slate-300 border-white/10'
-                          : task.priority === 'alta'
-                            ? 'bg-red-500/10 text-red-300 border-red-400/20'
-                            : task.priority === 'media'
-                              ? 'bg-orange-500/10 text-orange-300 border-orange-400/20'
-                              : 'bg-blue-500/10 text-blue-300 border-blue-400/20'
-                      }`}
-                    >
-                      {task.status === 'concluida' ? 'Finalizado' : task.priority}
-                    </span>
+                      <span
+                        className={`text-sm font-medium ${
+                          task.status === 'concluida'
+                            ? 'text-slate-500 line-through italic'
+                            : 'text-slate-300'
+                        }`}
+                      >
+                        {task.description || 'Sem descrição detalhada.'}
+                      </span>
 
-                    {task.status !== 'concluida' && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {dueDateLabel && (
+                          <span
+                            className={`text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border ${
+                              taskOverdue
+                                ? 'bg-red-500/10 text-red-300 border-red-400/20'
+                                : 'bg-white/5 text-slate-300 border-white/10'
+                            }`}
+                          >
+                            Prazo: {dueDateLabel}
+                          </span>
+                        )}
+
+                        {taskCanBeEdited && (
+                          <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-emerald-500/10 text-emerald-300 border-emerald-400/20">
+                            Editável
+                          </span>
+                        )}
+
+                        {!taskCanBeEdited && task.status !== 'concluida' && (
+                          <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-white/5 text-slate-500 border-white/10">
+                            Edição bloqueada
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3 xl:justify-end">
+                      <span
+                        className={`text-xs font-black uppercase px-4 py-2 rounded-xl tracking-widest border ${
+                          task.status === 'concluida'
+                            ? 'bg-white/10 text-slate-300 border-white/10'
+                            : taskOverdue
+                              ? 'bg-red-500/10 text-red-300 border-red-400/20'
+                              : task.priority === 'alta'
+                                ? 'bg-red-500/10 text-red-300 border-red-400/20'
+                                : task.priority === 'media'
+                                  ? 'bg-orange-500/10 text-orange-300 border-orange-400/20'
+                                  : 'bg-blue-500/10 text-blue-300 border-blue-400/20'
+                        }`}
+                      >
+                        {task.status === 'concluida'
+                          ? 'Finalizado'
+                          : taskOverdue
+                            ? 'Perdida'
+                            : task.priority}
+                      </span>
+
+                      {taskCanBeEdited && (
+                        <button
+                          onClick={() => openEditModal(task)}
+                          className="bg-white/5 border border-white/10 text-slate-300 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all shadow-sm"
+                        >
+                          Editar
+                        </button>
+                      )}
+
+                      {task.status !== 'concluida' && !taskOverdue && (
+                        <button
+                          onClick={() => handleCompleteTask(task.idtask)}
+                          className="bg-blue-600/10 border border-blue-400/40 text-blue-300 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                        >
+                          Concluir
+                        </button>
+                      )}
+
                       <button
-                        onClick={() => handleCompleteTask(task.idtask)}
-                        className="bg-blue-600/10 border border-blue-400/40 text-blue-300 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                        onClick={() => handleDeleteTask(task)}
+                        className="text-slate-500 hover:text-red-300 transition-all p-2"
+                        title={task.status === 'concluida' ? 'Ocultar tarefa' : 'Eliminar tarefa'}
                       >
-                        Concluir
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="20"
+                          height="20"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
                       </button>
-                    )}
-
-                    <button
-                      onClick={() => handleDeleteTask(task)}
-                      className="text-slate-500 hover:text-red-300 transition-all p-2"
-                      title={task.status === 'concluida' ? 'Ocultar tarefa' : 'Eliminar tarefa'}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    </button>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
       </div>
 
-      {/* MODAL NOVA TAREFA */}
+      {/* MODAL CRIAR / EDITAR TAREFA */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-6">
           <div
@@ -507,14 +666,16 @@ const Tasks = () => {
           >
             <div className="space-y-2 text-center">
               <h2 className="text-4xl font-black tracking-tighter text-white">
-                Nova Tarefa
+                {editingTask ? 'Editar Tarefa' : 'Nova Tarefa'}
               </h2>
               <p className="text-slate-400 text-xs font-black uppercase tracking-widest italic">
-                Define o teu próximo desafio.
+                {editingTask
+                  ? 'Só podes editar tarefas recentes ainda não concluídas.'
+                  : 'Define o teu próximo desafio.'}
               </p>
             </div>
 
-            <form onSubmit={handleCreateTask} className="space-y-6">
+            <form onSubmit={handleSubmitTask} className="space-y-6">
               <div className="space-y-2">
                 <label
                   htmlFor="task-title"
@@ -527,8 +688,10 @@ const Tasks = () => {
                   type="text"
                   placeholder="Ex: Estudar Matemática"
                   className={`w-full p-6 rounded-2xl font-bold text-slate-100 text-lg ${inputClass}`}
-                  value={newTask.title}
-                  onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                  value={taskForm.title}
+                  onChange={(e) =>
+                    setTaskForm({ ...taskForm, title: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -544,11 +707,32 @@ const Tasks = () => {
                   id="task-description"
                   placeholder="Algum detalhe extra para te ajudar?"
                   className={`w-full p-6 rounded-2xl font-bold text-slate-100 h-32 resize-none ${inputClass}`}
-                  value={newTask.description}
+                  value={taskForm.description}
                   onChange={(e) =>
-                    setNewTask({ ...newTask, description: e.target.value })
+                    setTaskForm({ ...taskForm, description: e.target.value })
                   }
                 />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="task-due-date"
+                  className="text-xs font-black text-slate-400 uppercase tracking-widest ml-2"
+                >
+                  Data limite
+                </label>
+                <input
+                  id="task-due-date"
+                  type="datetime-local"
+                  className={`w-full p-6 rounded-2xl font-bold text-slate-100 text-lg ${inputClass}`}
+                  value={taskForm.due_date}
+                  onChange={(e) =>
+                    setTaskForm({ ...taskForm, due_date: e.target.value })
+                  }
+                />
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest ml-2">
+                  Se deixares em branco, a tarefa fica sem prazo definido.
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -561,9 +745,9 @@ const Tasks = () => {
                     <button
                       key={priority}
                       type="button"
-                      onClick={() => setNewTask({ ...newTask, priority })}
+                      onClick={() => setTaskForm({ ...taskForm, priority })}
                       className={`py-4 rounded-2xl text-xs font-black uppercase tracking-widest border transition-all ${
-                        newTask.priority === priority
+                        taskForm.priority === priority
                           ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-950/40'
                           : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-slate-200'
                       }`}
@@ -577,7 +761,7 @@ const Tasks = () => {
               <div className="flex gap-4 pt-6">
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={closeTaskModal}
                   className="flex-1 px-6 py-5 bg-white/10 text-slate-300 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/15 transition-all"
                 >
                   Cancelar
@@ -587,7 +771,7 @@ const Tasks = () => {
                   type="submit"
                   className="flex-1 px-6 py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-500 transition-all shadow-xl shadow-blue-950/40"
                 >
-                  Criar Agora
+                  {editingTask ? 'Guardar' : 'Criar Agora'}
                 </button>
               </div>
             </form>
