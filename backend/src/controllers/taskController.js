@@ -22,9 +22,33 @@ exports.getTasks = async (req, res) => {
 // 2. Criar uma nova tarefa
 // 2. Criar uma nova tarefa
 exports.createTask = async (req, res) => {
+    let connection;
+
     try {
         const { title, description, priority, idcategory, due_date } = req.body;
         const iduser = req.user.iduser;
+
+        const normalizeIdList = (value) => {
+            if (value === undefined || value === null) return [];
+            if (!Array.isArray(value)) return null;
+
+            const ids = value.map((id) => Number(id));
+
+            if (ids.some((id) => !Number.isInteger(id) || id <= 0)) {
+                return null;
+            }
+
+            return [...new Set(ids)];
+        };
+
+        const assigneeIds = normalizeIdList(req.body.assignees);
+        const groupIds = normalizeIdList(req.body.groups);
+
+        if (!assigneeIds || !groupIds) {
+            return res.status(400).json({
+                message: "Destinos invalidos."
+            });
+        }
 
         if (!title || title.trim().length === 0) {
             return res.status(400).json({
@@ -47,7 +71,62 @@ exports.createTask = async (req, res) => {
 
         console.log("--- A Inserir Nova Tarefa na BD ---");
 
-        const [result] = await db.query(
+        if (assigneeIds.length > 0) {
+            const placeholders = assigneeIds.map(() => '?').join(', ');
+            const [friends] = await db.query(
+                `SELECT DISTINCT
+                    CASE
+                        WHEN iduser_requester = ? THEN iduser_receiver
+                        ELSE iduser_requester
+                    END AS iduser
+                 FROM FRIENDSHIP
+                 WHERE status = 'aceite'
+                 AND (
+                    (iduser_requester = ? AND iduser_receiver IN (${placeholders}))
+                    OR
+                    (iduser_receiver = ? AND iduser_requester IN (${placeholders}))
+                 )`,
+                [iduser, iduser, ...assigneeIds, iduser, ...assigneeIds]
+            );
+
+            const validFriendIds = new Set(friends.map((friend) => Number(friend.iduser)));
+            const invalidAssignees = assigneeIds.filter((assigneeId) => {
+                return !validFriendIds.has(assigneeId);
+            });
+
+            if (invalidAssignees.length > 0) {
+                return res.status(403).json({
+                    message: "So podes atribuir tarefas a amigos aceites."
+                });
+            }
+        }
+
+        if (groupIds.length > 0) {
+            const placeholders = groupIds.map(() => '?').join(', ');
+            const [groups] = await db.query(
+                `SELECT DISTINCT idgroup
+                 FROM GROUP_MEMBER
+                 WHERE iduser = ?
+                 AND idgroup IN (${placeholders})`,
+                [iduser, ...groupIds]
+            );
+
+            const validGroupIds = new Set(groups.map((group) => Number(group.idgroup)));
+            const invalidGroups = groupIds.filter((groupId) => {
+                return !validGroupIds.has(groupId);
+            });
+
+            if (invalidGroups.length > 0) {
+                return res.status(403).json({
+                    message: "So podes enviar tarefas para grupos aos quais pertences."
+                });
+            }
+        }
+
+        connection = await db.getConnection();
+        await connection.beginTransaction();
+
+        const [result] = await connection.query(
             `INSERT INTO TASK 
              (iduser, title, description, priority, idcategory, due_date) 
              VALUES (?, ?, ?, ?, ?, ?)`,
@@ -61,17 +140,51 @@ exports.createTask = async (req, res) => {
             ]
         );
 
-        console.log("Sucesso! ID da tarefa criada:", result.insertId);
+        const idtask = result.insertId;
+
+        if (assigneeIds.length > 0) {
+            const placeholders = assigneeIds.map(() => '(?, ?, ?)').join(', ');
+            const values = assigneeIds.flatMap((assigneeId) => [idtask, assigneeId, iduser]);
+
+            await connection.query(
+                `INSERT INTO TASK_ASSIGNEE (idtask, iduser, assigned_by)
+                 VALUES ${placeholders}`,
+                values
+            );
+        }
+
+        if (groupIds.length > 0) {
+            const placeholders = groupIds.map(() => '(?, ?)').join(', ');
+            const values = groupIds.flatMap((groupId) => [idtask, groupId]);
+
+            await connection.query(
+                `INSERT INTO GROUP_TASK (idtask, idgroup)
+                 VALUES ${placeholders}`,
+                values
+            );
+        }
+
+        await connection.commit();
+
+        console.log("Sucesso! ID da tarefa criada:", idtask);
 
         res.status(201).json({
             message: "Tarefa criada com sucesso!",
-            idtask: result.insertId
+            idtask
         });
     } catch (err) {
+        if (connection) {
+            await connection.rollback();
+        }
+
         console.error("ERRO FATAL NO MYSQL AO CRIAR TAREFA:", err.message);
         res.status(500).json({
             error: "Erro na base de dados ao criar tarefa."
         });
+    } finally {
+        if (connection) {
+            connection.release();
+        }
     }
 };
 

@@ -18,7 +18,9 @@ const emptyTaskForm = {
   title: '',
   description: '',
   priority: 'media',
-  due_date: ''
+  due_date: '',
+  assignees: [],
+  groups: []
 };
 
 // --- MOTOR DE GAMIFICAÇÃO (FRONTEND) ---
@@ -58,6 +60,22 @@ const requestTasks = async (token) => {
 // Pedido à API para carregar o resumo diário das tarefas
 const requestTaskSummary = async (token) => {
   const res = await axios.get(`${API_URL}/tasks/summary`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  return res.data;
+};
+
+const requestFriends = async (token) => {
+  const res = await axios.get(`${API_URL}/friends`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  return res.data;
+};
+
+const requestGroups = async (token) => {
+  const res = await axios.get(`${API_URL}/groups`, {
     headers: { Authorization: `Bearer ${token}` }
   });
 
@@ -126,6 +144,8 @@ const Tasks = () => {
   });
 
   const [tasks, setTasks] = useState([]);
+  const [friends, setFriends] = useState([]);
+  const [groups, setGroups] = useState([]);
   const [taskSummary, setTaskSummary] = useState({
     totalTasks: 0,
     completedTasks: 0,
@@ -173,8 +193,13 @@ const Tasks = () => {
 
     let ignore = false;
 
-    void Promise.allSettled([requestTasks(token), requestTaskSummary(token)]).then(
-      ([tasksResult, summaryResult]) => {
+    void Promise.allSettled([
+      requestTasks(token),
+      requestTaskSummary(token),
+      requestFriends(token),
+      requestGroups(token)
+    ]).then(
+      ([tasksResult, summaryResult, friendsResult, groupsResult]) => {
         if (ignore) return;
 
         if (tasksResult.status === 'fulfilled') {
@@ -187,6 +212,18 @@ const Tasks = () => {
           setTaskSummary(summaryResult.value);
         } else {
           console.error('Erro ao carregar resumo das tarefas:', summaryResult.reason);
+        }
+
+        if (friendsResult.status === 'fulfilled') {
+          setFriends(friendsResult.value);
+        } else {
+          console.error('Erro ao carregar amigos:', friendsResult.reason);
+        }
+
+        if (groupsResult.status === 'fulfilled') {
+          setGroups(groupsResult.value);
+        } else {
+          console.error('Erro ao carregar grupos:', groupsResult.reason);
         }
       }
     );
@@ -224,6 +261,20 @@ const Tasks = () => {
     setIsModalOpen(false);
     setEditingTask(null);
     setTaskForm(emptyTaskForm);
+  };
+
+  const toggleDestination = (field, value) => {
+    setTaskForm((currentForm) => {
+      const currentValues = currentForm[field] || [];
+      const isSelected = currentValues.includes(value);
+
+      return {
+        ...currentForm,
+        [field]: isSelected
+          ? currentValues.filter((item) => item !== value)
+          : [...currentValues, value]
+      };
+    });
   };
 
   const handleCompleteTask = async (idtask) => {
@@ -337,6 +388,11 @@ const Tasks = () => {
         priority: taskForm.priority,
         due_date: taskForm.due_date || null
       };
+
+      if (!editingTask) {
+        payload.assignees = taskForm.assignees || [];
+        payload.groups = taskForm.groups || [];
+      }
 
       if (editingTask) {
         await axios.put(`${API_URL}/tasks/${editingTask.idtask}`, payload, {
@@ -773,6 +829,86 @@ const Tasks = () => {
                   Se deixares em branco, a tarefa fica sem prazo definido.
                 </p>
               </div>
+
+              {!editingTask && (
+                <div className="space-y-4">
+                  <p className="text-xs font-black text-slate-400 uppercase tracking-widest ml-2">
+                    Destino
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setTaskForm({ ...taskForm, assignees: [], groups: [] })
+                    }
+                    className={`w-full py-4 rounded-2xl text-xs font-black uppercase tracking-widest border transition-all ${
+                      taskForm.assignees.length === 0 && taskForm.groups.length === 0
+                        ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-950/40'
+                        : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-slate-200'
+                    }`}
+                  >
+                    Só para mim
+                  </button>
+
+                  <div className="space-y-2">
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest ml-2">
+                      Amigos
+                    </p>
+
+                    {friends.length === 0 ? (
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest ml-2">
+                        Ainda não tens amigos disponíveis.
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {friends.map((friend) => (
+                          <button
+                            key={friend.iduser}
+                            type="button"
+                            onClick={() => toggleDestination('assignees', friend.iduser)}
+                            className={`py-4 rounded-2xl text-xs font-black uppercase tracking-widest border transition-all ${
+                              taskForm.assignees.includes(friend.iduser)
+                                ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-950/40'
+                                : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-slate-200'
+                            }`}
+                          >
+                            {friend.username}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest ml-2">
+                      Grupos
+                    </p>
+
+                    {groups.length === 0 ? (
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest ml-2">
+                        Ainda não pertences a nenhum grupo.
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {groups.map((group) => (
+                          <button
+                            key={group.idgroup}
+                            type="button"
+                            onClick={() => toggleDestination('groups', group.idgroup)}
+                            className={`py-4 rounded-2xl text-xs font-black uppercase tracking-widest border transition-all ${
+                              taskForm.groups.includes(group.idgroup)
+                                ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-950/40'
+                                : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-slate-200'
+                            }`}
+                          >
+                            {group.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <p className="text-xs font-black text-slate-400 uppercase tracking-widest ml-2">
