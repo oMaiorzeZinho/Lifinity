@@ -217,7 +217,7 @@ const DashboardLayout = () => {
         </div>
       </header>
 
-      <main className="mx-auto p-6 transition-all" style={{ maxWidth: 1800 }}>
+      <main className="mx-auto p-6 transition-all" style={{ maxWidth: 1300 }}>
         <Outlet />
       </main>
 

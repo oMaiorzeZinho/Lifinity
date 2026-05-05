@@ -55,7 +55,7 @@ const requestTasks = async (token) => {
   return res.data;
 };
 
-// Pedido à API para carregar resumo diário das tarefas
+// Pedido à API para carregar o resumo diário das tarefas
 const requestTaskSummary = async (token) => {
   const res = await axios.get(`${API_URL}/tasks/summary`, {
     headers: { Authorization: `Bearer ${token}` }
@@ -66,6 +66,7 @@ const requestTaskSummary = async (token) => {
 
 const canEditTask = (task) => {
   if (task.status === 'concluida') return false;
+  if (isTaskOverdue(task)) return false;
   if (!task.created_at) return false;
 
   const createdAt = new Date(task.created_at);
@@ -85,6 +86,12 @@ const isTaskOverdue = (task) => {
   const now = new Date();
 
   return dueDate.getTime() < now.getTime();
+};
+
+const getTaskStatusOrder = (task) => {
+  if (task.status === 'concluida') return 3;
+  if (isTaskOverdue(task)) return 2;
+  return 1;
 };
 
 const formatDueDate = (date) => {
@@ -123,6 +130,7 @@ const Tasks = () => {
     totalTasks: 0,
     completedTasks: 0,
     pendingTasks: 0,
+    lostTasks: 0,
     completionRate: 0
   });
 
@@ -146,7 +154,7 @@ const Tasks = () => {
     }
   }, []);
 
-  // Carrega o resumo diário, incluindo tarefas concluídas que foram ocultadas.
+  // Carrega o resumo diário separado por pendentes, concluídas e perdidas.
   const fetchTaskSummary = useCallback(async (token) => {
     try {
       setTaskSummary(await requestTaskSummary(token));
@@ -195,6 +203,11 @@ const Tasks = () => {
   };
 
   const openEditModal = (task) => {
+    if (!canEditTask(task)) {
+      alert('Esta tarefa ja nao pode ser editada.');
+      return;
+    }
+
     setEditingTask(task);
 
     setTaskForm({
@@ -250,9 +263,13 @@ const Tasks = () => {
 
   const handleDeleteTask = async (task) => {
     const isCompleted = task.status === 'concluida';
+    const isLost = isTaskOverdue(task);
+    const shouldHide = isCompleted || isLost;
 
-    const confirmMessage = isCompleted
-      ? 'Tens a certeza que queres ocultar esta tarefa concluída da lista?'
+    const confirmMessage = shouldHide
+      ? `Tens a certeza que queres ocultar esta tarefa ${
+          isLost ? 'perdida' : 'concluída'
+        } da lista?`
       : 'Tens a certeza que queres eliminar esta tarefa?';
 
     if (!window.confirm(confirmMessage)) return;
@@ -270,11 +287,11 @@ const Tasks = () => {
       window.dispatchEvent(new Event('lifinity-tasks-updated'));
     } catch (err) {
       console.error(
-        isCompleted ? 'Erro ao ocultar tarefa concluída:' : 'Erro ao eliminar tarefa:',
+        shouldHide ? 'Erro ao ocultar tarefa:' : 'Erro ao eliminar tarefa:',
         err
       );
 
-      alert(isCompleted ? 'Erro ao ocultar tarefa concluída.' : 'Erro ao eliminar tarefa.');
+      alert(shouldHide ? 'Erro ao ocultar tarefa.' : 'Erro ao eliminar tarefa.');
     }
   };
 
@@ -305,6 +322,14 @@ const Tasks = () => {
 
     try {
       const token = localStorage.getItem('token');
+
+      if (editingTask && !canEditTask(editingTask)) {
+        alert('Esta tarefa ja nao pode ser editada.');
+        closeTaskModal();
+        await fetchTasks(token);
+        await fetchTaskSummary(token);
+        return;
+      }
 
       const payload = {
         title: taskForm.title,
@@ -346,27 +371,35 @@ const Tasks = () => {
   const levelData = getLevelData(user.xp);
 
   // Filtragem das tarefas visíveis.
-  const filteredTasks = tasks.filter((task) => {
-    const taskOverdue = isTaskOverdue(task);
+  const filteredTasks = tasks
+    .filter((task) => {
+      const taskOverdue = isTaskOverdue(task);
 
-    const matchesStatus =
-      filterStatus === 'all'
-        ? true
-        : filterStatus === 'completed'
-          ? task.status === 'concluida'
-          : filterStatus === 'lost'
-            ? taskOverdue
-            : task.status !== 'concluida' && !taskOverdue;
+      const matchesStatus =
+        filterStatus === 'all'
+          ? true
+          : filterStatus === 'completed'
+            ? task.status === 'concluida'
+            : filterStatus === 'lost'
+              ? taskOverdue
+              : task.status !== 'concluida' && !taskOverdue;
 
-    const matchesPriority =
-      filterPriority === 'all' ? true : task.priority === filterPriority;
+      const matchesPriority =
+        filterPriority === 'all' ? true : task.priority === filterPriority;
 
-    const matchesSearch = (task.title || '')
-      .toLowerCase()
-      .includes(searchTask.toLowerCase());
+      const matchesSearch = (task.title || '')
+        .toLowerCase()
+        .includes(searchTask.toLowerCase());
 
-    return matchesStatus && matchesPriority && matchesSearch;
-  });
+      return matchesStatus && matchesPriority && matchesSearch;
+    })
+    .sort((a, b) => {
+      const statusOrderDiff = getTaskStatusOrder(a) - getTaskStatusOrder(b);
+
+      if (statusOrderDiff !== 0) return statusOrderDiff;
+
+      return Number(b.idtask || 0) - Number(a.idtask || 0);
+    });
 
   const completedVisibleTasks = tasks.filter((task) => task.status === 'concluida');
 
@@ -400,7 +433,7 @@ const Tasks = () => {
         {/* CARD PRODUTIVIDADE DE HOJE */}
         <div className={`${cardClass} p-6 rounded-2xl`}>
           <p className="text-slate-300 text-xs font-black uppercase tracking-widest mb-1 italic">
-            Produtividade de Hoje
+            Resumo de Hoje
           </p>
 
           <p className="text-3xl font-black text-emerald-400 tracking-tighter">
@@ -415,7 +448,9 @@ const Tasks = () => {
           </div>
 
           <p className="text-xs text-slate-400 mt-2 font-bold uppercase tracking-widest">
-            {taskSummary.pendingTasks} pendentes • {taskSummary.completedTasks} concluídas
+            {taskSummary.pendingTasks} pendentes {' \u2022 '}
+            {taskSummary.completedTasks} concluídas {' \u2022 '}
+            {taskSummary.lostTasks || 0} perdidas
           </p>
         </div>
       </div>
@@ -630,7 +665,11 @@ const Tasks = () => {
                       <button
                         onClick={() => handleDeleteTask(task)}
                         className="text-slate-500 hover:text-red-300 transition-all p-2"
-                        title={task.status === 'concluida' ? 'Ocultar tarefa' : 'Eliminar tarefa'}
+                        title={
+                          task.status === 'concluida' || taskOverdue
+                            ? 'Ocultar tarefa'
+                            : 'Eliminar tarefa'
+                        }
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"

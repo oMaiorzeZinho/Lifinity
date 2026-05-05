@@ -177,7 +177,10 @@ exports.updateTask = async (req, res) => {
 
         // Procurar tarefa e confirmar se pertence ao utilizador autenticado
         const [tasks] = await db.query(
-            "SELECT * FROM TASK WHERE idtask = ? AND iduser = ?",
+            `SELECT *,
+                    (due_date IS NOT NULL AND due_date < NOW() AND status != 'concluida') AS is_lost
+             FROM TASK
+             WHERE idtask = ? AND iduser = ?`,
             [idtask, iduser]
         );
 
@@ -195,7 +198,14 @@ exports.updateTask = async (req, res) => {
             });
         }
 
-        // Regra: só pode editar até 1 hora depois da criação
+        // Regra: tarefas perdidas nao podem ser editadas.
+        if (Number(task.is_lost) === 1) {
+            return res.status(403).json({
+                message: "Nao e possivel editar uma tarefa perdida."
+            });
+        }
+
+        // Regra: so pode editar ate 1 hora depois da criacao.
         const createdAt = new Date(task.created_at);
         const now = new Date();
         const diffInMs = now.getTime() - createdAt.getTime();
@@ -247,7 +257,10 @@ exports.deleteTask = async (req, res) => {
         const iduser = req.user.iduser;
 
         const [tasks] = await db.query(
-            "SELECT status FROM TASK WHERE idtask = ? AND iduser = ?",
+            `SELECT status,
+                    (due_date IS NOT NULL AND due_date < NOW() AND status != 'concluida') AS is_lost
+             FROM TASK
+             WHERE idtask = ? AND iduser = ?`,
             [idtask, iduser]
         );
 
@@ -257,14 +270,17 @@ exports.deleteTask = async (req, res) => {
 
         const task = tasks[0];
 
-        if (task.status === 'concluida') {
+        if (task.status === 'concluida' || Number(task.is_lost) === 1) {
             await db.query(
                 "UPDATE TASK SET archived_at = NOW() WHERE idtask = ? AND iduser = ?",
                 [idtask, iduser]
             );
 
             return res.json({
-                message: "Tarefa concluída ocultada com sucesso."
+                message:
+                    task.status === 'concluida'
+                        ? "Tarefa concluída ocultada com sucesso."
+                        : "Tarefa perdida ocultada com sucesso."
             });
         }
 
@@ -294,12 +310,8 @@ res.json({ message: "Tarefas concluídas ocultadas com sucesso." });
     }
 };
 
-
-// 7. Resumo das tarefas do utilizador
-// Esta função conta também tarefas arquivadas, porque serve para estatísticas/resumo.
-// 7. Resumo diário das tarefas do utilizador
-// Esta função é usada no card "Produtividade de Hoje" da página de tarefas.
-// Conta tarefas de hoje, incluindo concluídas que já foram ocultadas.
+// 7. Resumo diario das tarefas do utilizador.
+// Tarefas ocultadas continuam a contar no dia em que foram concluidas/perdidas.
 exports.getTaskSummary = async (req, res) => {
     try {
         const iduser = req.user.iduser;
@@ -309,16 +321,25 @@ exports.getTaskSummary = async (req, res) => {
                 SUM(CASE 
                     WHEN status != 'concluida'
                     AND archived_at IS NULL
+                    AND (due_date IS NULL OR due_date >= NOW())
                     AND DATE(created_at) = CURDATE()
                     THEN 1 ELSE 0 
-                END) AS pendingToday,
+                END) AS pendingTasks,
 
                 SUM(CASE 
                     WHEN status = 'concluida'
                     AND completed_at IS NOT NULL
                     AND DATE(completed_at) = CURDATE()
                     THEN 1 ELSE 0 
-                END) AS completedToday
+                END) AS completedTasks,
+
+                SUM(CASE
+                    WHEN status != 'concluida'
+                    AND due_date IS NOT NULL
+                    AND due_date < NOW()
+                    AND DATE(due_date) = CURDATE()
+                    THEN 1 ELSE 0
+                END) AS lostTasks
              FROM TASK
              WHERE iduser = ?`,
             [iduser]
@@ -326,9 +347,10 @@ exports.getTaskSummary = async (req, res) => {
 
         const summary = rows[0];
 
-        const pendingTasks = Number(summary.pendingToday || 0);
-        const completedTasks = Number(summary.completedToday || 0);
-        const totalTasks = pendingTasks + completedTasks;
+        const pendingTasks = Number(summary.pendingTasks || 0);
+        const completedTasks = Number(summary.completedTasks || 0);
+        const lostTasks = Number(summary.lostTasks || 0);
+        const totalTasks = pendingTasks + completedTasks + lostTasks;
 
         const completionRate =
             totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
@@ -337,11 +359,12 @@ exports.getTaskSummary = async (req, res) => {
             totalTasks,
             completedTasks,
             pendingTasks,
+            lostTasks,
             completionRate
         });
     } catch (err) {
-        console.error("Erro ao carregar resumo diário das tarefas:", err);
-        res.status(500).json({ error: "Erro ao carregar resumo diário das tarefas." });
+        console.error("Erro ao carregar resumo diario das tarefas:", err);
+        res.status(500).json({ error: "Erro ao carregar resumo diario das tarefas." });
     }
 };
 

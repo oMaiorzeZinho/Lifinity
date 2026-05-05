@@ -17,7 +17,14 @@ exports.getMyStatistics = async (req, res) => {
 
         // Buscar tarefas dentro do período
         const [tasks] = await db.query(
-            `SELECT idtask, title, status, priority, due_date, created_at, completed_at
+            `SELECT idtask,
+                    title,
+                    status,
+                    priority,
+                    due_date,
+                    created_at,
+                    completed_at,
+                    (due_date IS NOT NULL AND due_date < NOW() AND status != 'concluida') AS is_lost
              FROM TASK
              WHERE iduser = ?
              AND created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)`,
@@ -33,17 +40,13 @@ exports.getMyStatistics = async (req, res) => {
             [iduser, days]
         );
 
+        const isLostTask = (task) => Number(task.is_lost) === 1;
+
         const totalTasks = tasks.length;
         const completedTasks = tasks.filter((task) => task.status === 'concluida').length;
-        const pendingTasks = tasks.filter((task) => task.status !== 'concluida').length;
-
-        const now = new Date();
-        const lostTasks = tasks.filter((task) => {
-            return (
-                task.status !== 'concluida' &&
-                task.due_date &&
-                new Date(task.due_date) < now
-            );
+        const lostTasks = tasks.filter(isLostTask).length;
+        const pendingTasks = tasks.filter((task) => {
+            return task.status !== 'concluida' && !isLostTask(task);
         }).length;
 
         const totalXP = xpRows.reduce((sum, row) => sum + Number(row.amount || 0), 0);
@@ -96,11 +99,7 @@ exports.getMyStatistics = async (req, res) => {
                 }
             }
 
-            if (
-                task.status !== 'concluida' &&
-                task.due_date &&
-                new Date(task.due_date) < now
-            ) {
+            if (isLostTask(task)) {
                 const lostKey = new Date(task.due_date).toISOString().split('T')[0];
                 const lostDay = chartData.find((day) => day.date === lostKey);
 
