@@ -8,8 +8,65 @@ exports.getTasks = async (req, res) => {
         const iduser = req.user.iduser;
 
         const [results] = await db.query(
-            "SELECT * FROM TASK WHERE iduser = ? AND archived_at IS NULL ORDER BY idtask DESC",
-            [iduser]
+            `SELECT
+                t.*,
+                creator.username AS creator_username,
+
+                CASE
+                    WHEN t.iduser = ? THEN 'created_by_me'
+                    WHEN EXISTS (
+                        SELECT 1
+                        FROM TASK_ASSIGNEE ta
+                        WHERE ta.idtask = t.idtask
+                          AND ta.iduser = ?
+                    ) THEN 'assigned_to_me'
+                    WHEN EXISTS (
+                        SELECT 1
+                        FROM GROUP_TASK gt
+                        INNER JOIN GROUP_MEMBER gm
+                            ON gm.idgroup = gt.idgroup
+                        WHERE gt.idtask = t.idtask
+                          AND gm.iduser = ?
+                    ) THEN 'group_task'
+                    ELSE 'unknown'
+                END AS task_origin,
+
+                (
+                    SELECT GROUP_CONCAT(DISTINCT ge.name SEPARATOR ', ')
+                    FROM GROUP_TASK gt
+                    INNER JOIN GROUP_ENTITY ge
+                        ON ge.idgroup = gt.idgroup
+                    INNER JOIN GROUP_MEMBER gm
+                        ON gm.idgroup = gt.idgroup
+                    WHERE gt.idtask = t.idtask
+                      AND gm.iduser = ?
+                ) AS group_names
+
+             FROM TASK t
+             INNER JOIN USER creator
+                ON creator.iduser = t.iduser
+
+             WHERE t.archived_at IS NULL
+               AND (
+                    t.iduser = ?
+                    OR EXISTS (
+                        SELECT 1
+                        FROM TASK_ASSIGNEE ta
+                        WHERE ta.idtask = t.idtask
+                          AND ta.iduser = ?
+                    )
+                    OR EXISTS (
+                        SELECT 1
+                        FROM GROUP_TASK gt
+                        INNER JOIN GROUP_MEMBER gm
+                            ON gm.idgroup = gt.idgroup
+                        WHERE gt.idtask = t.idtask
+                          AND gm.iduser = ?
+                    )
+               )
+
+             ORDER BY t.idtask DESC`,
+            [iduser, iduser, iduser, iduser, iduser, iduser, iduser]
         );
 
         res.json(results);
@@ -189,20 +246,43 @@ exports.createTask = async (req, res) => {
 };
 
 // 3. Concluir tarefa e ganhar XP (Aqui é onde o C entra em ação!)
+// 3. Concluir tarefa e ganhar XP
 exports.completeTask = async (req, res) => {
     try {
         const { idtask } = req.params;
         const iduser = req.user.iduser;
 
-        // 1. Obter dados da tarefa (prioridade e data de criação)
-        const [tasks] = await db.query("SELECT * FROM TASK WHERE idtask = ? AND iduser = ?", [idtask, iduser]);
-        
-        if (tasks.length === 0) return res.status(404).json({ message: "Tarefa não encontrada." });
+        const [tasks] = await db.query(
+            `SELECT t.*
+             FROM TASK t
+             WHERE t.idtask = ?
+               AND (
+                    t.iduser = ?
+                    OR EXISTS (
+                        SELECT 1
+                        FROM TASK_ASSIGNEE ta
+                        WHERE ta.idtask = t.idtask
+                          AND ta.iduser = ?
+                    )
+                    OR EXISTS (
+                        SELECT 1
+                        FROM GROUP_TASK gt
+                        INNER JOIN GROUP_MEMBER gm
+                            ON gm.idgroup = gt.idgroup
+                        WHERE gt.idtask = t.idtask
+                          AND gm.iduser = ?
+                    )
+               )`,
+            [idtask, iduser, iduser, iduser]
+        );
+
+        if (tasks.length === 0) {
+            return res.status(404).json({
+                message: "Tarefa não encontrada."
+            });
+        }
 
         const task = tasks[0];
-        if (task.status === 'concluida') {
-            return res.status(400).json({ message: "Esta tarefa já foi concluída." });
-        }
 
         if (task.status === "concluida") {
             return res.status(400).json({
@@ -210,49 +290,58 @@ exports.completeTask = async (req, res) => {
             });
         }
 
-        // Verificar se a tarefa já passou do prazo
         if (task.due_date && new Date(task.due_date) < new Date()) {
             return res.status(403).json({
                 message: "Esta tarefa já passou do prazo e foi marcada como perdida."
             });
         }
 
-        // 2. Lógica de Bónus de Velocidade (Mesmo dia?)
         const today = new Date().toISOString().split('T')[0];
         const createdAt = new Date(task.created_at).toISOString().split('T')[0];
-        const isSameDay = (today === createdAt);
+        const isSameDay = today === createdAt;
 
-        // 3. CHAMADA AO MÓDULO C: Passamos a prioridade e o bónus (true/false)
-        const currentStreak = 3; // Placeholder: No futuro vira da BD
-        const XP_REWARD = gamification.calcularRecompensa(task.priority, isSameDay, currentStreak);
+        const currentStreak = 3;
+        const XP_REWARD = gamification.calcularRecompensa(
+            task.priority,
+            isSameDay,
+            currentStreak
+        );
 
-        // 4. Marcar como concluída
-        await db.query("UPDATE TASK SET status = 'concluida', completed_at = NOW() WHERE idtask = ? AND iduser = ?", [idtask, iduser]);
+        await db.query(
+            "UPDATE TASK SET status = 'concluida', completed_at = NOW() WHERE idtask = ?",
+            [idtask]
+        );
 
-        // 5. Atualizar utilizador (XP e Nível)
-            const [userStats] = await db.query("SELECT xp FROM USER WHERE iduser = ?", [iduser]);
-            const currentXP = userStats[0].xp + XP_REWARD;
-            const levelData = gamification.getLevelData(currentXP);
+        const [userStats] = await db.query(
+            "SELECT xp FROM USER WHERE iduser = ?",
+            [iduser]
+        );
 
-            await db.query(
-                "UPDATE USER SET xp = ?, level = ? WHERE iduser = ?",
-                [currentXP, levelData.level, iduser]
-            );
+        const currentXP = userStats[0].xp + XP_REWARD;
+        const levelData = gamification.getLevelData(currentXP);
 
-            // 6. Registar histórico de XP para estatísticas
-            await db.query(
-                "INSERT INTO XP_HISTORY (iduser, idtask, amount, reason) VALUES (?, ?, ?, ?)",
-                [iduser, idtask, XP_REWARD, "task_completed"]
-            );
+        await db.query(
+            "UPDATE USER SET xp = ?, level = ? WHERE iduser = ?",
+            [currentXP, levelData.level, iduser]
+        );
 
-            res.json({ 
-                message: `Tarefa concluída! Ganhaste ${XP_REWARD} XP${isSameDay ? ' (Bónus de Velocidade incluído!)' : ''}.`,
-                newXP: currentXP,
-                newLevel: levelData.level
-            });
+        await db.query(
+            "INSERT INTO XP_HISTORY (iduser, idtask, amount, reason) VALUES (?, ?, ?, ?)",
+            [iduser, idtask, XP_REWARD, "task_completed"]
+        );
+
+        res.json({
+            message: `Tarefa concluída! Ganhaste ${XP_REWARD} XP${
+                isSameDay ? " (Bónus de Velocidade incluído!)" : ""
+            }.`,
+            newXP: currentXP,
+            newLevel: levelData.level
+        });
     } catch (err) {
         console.error("Erro no módulo de XP:", err);
-        res.status(500).json({ error: "Erro ao processar recompensa." });
+        res.status(500).json({
+            error: "Erro ao processar recompensa."
+        });
     }
 };
 
@@ -425,6 +514,8 @@ res.json({ message: "Tarefas concluídas ocultadas com sucesso." });
 
 // 7. Resumo diario das tarefas do utilizador.
 // Tarefas ocultadas continuam a contar no dia em que foram concluidas/perdidas.
+// 7. Resumo diario das tarefas do utilizador.
+// Conta tarefas criadas pelo utilizador, atribuídas diretamente e tarefas de grupos.
 exports.getTaskSummary = async (req, res) => {
     try {
         const iduser = req.user.iduser;
@@ -432,30 +523,47 @@ exports.getTaskSummary = async (req, res) => {
         const [rows] = await db.query(
             `SELECT 
                 SUM(CASE 
-                    WHEN status != 'concluida'
-                    AND archived_at IS NULL
-                    AND (due_date IS NULL OR due_date >= NOW())
-                    AND DATE(created_at) = CURDATE()
+                    WHEN t.status != 'concluida'
+                    AND t.archived_at IS NULL
+                    AND (t.due_date IS NULL OR t.due_date >= NOW())
+                    AND DATE(t.created_at) = CURDATE()
                     THEN 1 ELSE 0 
                 END) AS pendingTasks,
 
                 SUM(CASE 
-                    WHEN status = 'concluida'
-                    AND completed_at IS NOT NULL
-                    AND DATE(completed_at) = CURDATE()
+                    WHEN t.status = 'concluida'
+                    AND t.completed_at IS NOT NULL
+                    AND DATE(t.completed_at) = CURDATE()
                     THEN 1 ELSE 0 
                 END) AS completedTasks,
 
                 SUM(CASE
-                    WHEN status != 'concluida'
-                    AND due_date IS NOT NULL
-                    AND due_date < NOW()
-                    AND DATE(due_date) = CURDATE()
+                    WHEN t.status != 'concluida'
+                    AND t.due_date IS NOT NULL
+                    AND t.due_date < NOW()
+                    AND DATE(t.due_date) = CURDATE()
                     THEN 1 ELSE 0
                 END) AS lostTasks
-             FROM TASK
-             WHERE iduser = ?`,
-            [iduser]
+
+             FROM TASK t
+             WHERE (
+                    t.iduser = ?
+                    OR EXISTS (
+                        SELECT 1
+                        FROM TASK_ASSIGNEE ta
+                        WHERE ta.idtask = t.idtask
+                          AND ta.iduser = ?
+                    )
+                    OR EXISTS (
+                        SELECT 1
+                        FROM GROUP_TASK gt
+                        INNER JOIN GROUP_MEMBER gm
+                            ON gm.idgroup = gt.idgroup
+                        WHERE gt.idtask = t.idtask
+                          AND gm.iduser = ?
+                    )
+             )`,
+            [iduser, iduser, iduser]
         );
 
         const summary = rows[0];
@@ -477,7 +585,9 @@ exports.getTaskSummary = async (req, res) => {
         });
     } catch (err) {
         console.error("Erro ao carregar resumo diario das tarefas:", err);
-        res.status(500).json({ error: "Erro ao carregar resumo diario das tarefas." });
+        res.status(500).json({
+            error: "Erro ao carregar resumo diario das tarefas."
+        });
     }
 };
 

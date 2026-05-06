@@ -157,6 +157,8 @@ const Tasks = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [taskForm, setTaskForm] = useState(emptyTaskForm);
   const [editingTask, setEditingTask] = useState(null);
+  const [showFriendsPicker, setShowFriendsPicker] = useState(false);
+  const [showGroupsPicker, setShowGroupsPicker] = useState(false);  
 
   // Estados dos filtros
   const [filterStatus, setFilterStatus] = useState('all');
@@ -236,8 +238,10 @@ const Tasks = () => {
   const openCreateModal = () => {
     setEditingTask(null);
     setTaskForm(emptyTaskForm);
+    setShowFriendsPicker(false);
+    setShowGroupsPicker(false);
     setIsModalOpen(true);
-  };
+};
 
   const openEditModal = (task) => {
     if (!canEditTask(task)) {
@@ -251,7 +255,9 @@ const Tasks = () => {
       title: task.title || '',
       description: task.description || '',
       priority: task.priority || 'media',
-      due_date: formatDateForInput(task.due_date)
+      due_date: formatDateForInput(task.due_date),
+      assignees: [],
+      groups: []
     });
 
     setIsModalOpen(true);
@@ -261,6 +267,8 @@ const Tasks = () => {
     setIsModalOpen(false);
     setEditingTask(null);
     setTaskForm(emptyTaskForm);
+    setShowFriendsPicker(false);
+    setShowGroupsPicker(false);
   };
 
   const toggleDestination = (field, value) => {
@@ -457,6 +465,9 @@ const Tasks = () => {
       return Number(b.idtask || 0) - Number(a.idtask || 0);
     });
 
+    const isTaskOwner = (task) => {
+      return Number(task.iduser) === Number(user.iduser);
+    };
   const completedVisibleTasks = tasks.filter((task) => task.status === 'concluida');
 
   return (
@@ -615,7 +626,8 @@ const Tasks = () => {
             ) : (
               filteredTasks.map((task) => {
                 const taskOverdue = isTaskOverdue(task);
-                const taskCanBeEdited = canEditTask(task);
+                const taskIsOwner = isTaskOwner(task);
+                const taskCanBeEdited = taskIsOwner && canEditTask(task);
                 const dueDateLabel = formatDueDate(task.due_date);
 
                 return (
@@ -653,6 +665,17 @@ const Tasks = () => {
                       </span>
 
                       <div className="flex flex-wrap gap-2 mt-2">
+                        {task.task_origin && (
+                          <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-white/5 text-slate-300 border-white/10">
+                            {task.task_origin === 'created_by_me'
+                              ? 'Criada por mim'
+                              : task.task_origin === 'assigned_to_me'
+                                ? `Recebida de ${task.creator_username || 'utilizador'}`
+                                : task.task_origin === 'group_task'
+                                  ? `Grupo: ${task.group_names || 'grupo'}`
+                                  : 'Tarefa'}
+                          </span>
+                        )}
                         {dueDateLabel && (
                           <span
                             className={`text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border ${
@@ -718,31 +741,33 @@ const Tasks = () => {
                         </button>
                       )}
 
-                      <button
-                        onClick={() => handleDeleteTask(task)}
-                        className="text-slate-500 hover:text-red-300 transition-all p-2"
-                        title={
-                          task.status === 'concluida' || taskOverdue
-                            ? 'Ocultar tarefa'
-                            : 'Eliminar tarefa'
-                        }
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="20"
-                          height="20"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          />
-                        </svg>
-                      </button>
+                      {taskIsOwner && (
+                          <button
+                            onClick={() => handleDeleteTask(task)}
+                            className="text-slate-500 hover:text-red-300 transition-all p-2"
+                            title={
+                              task.status === 'concluida' || taskOverdue
+                                ? 'Ocultar tarefa'
+                                : 'Eliminar tarefa'
+                            }
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="20"
+                              height="20"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
+                            </svg>
+                          </button>
+                        )}
                     </div>
                   </div>
                 );
@@ -756,7 +781,7 @@ const Tasks = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-6">
           <div
-            className="bg-slate-950 w-full max-w-md rounded-3xl shadow-2xl p-10 space-y-8 border border-white/10"
+            className="bg-slate-950 w-full max-w-md max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl p-10 space-y-8 border border-white/10"
             style={{ backgroundColor: '#111916' }}
           >
             <div className="space-y-2 text-center">
@@ -851,59 +876,79 @@ const Tasks = () => {
                   </button>
 
                   <div className="space-y-2">
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest ml-2">
-                      Amigos
-                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setShowFriendsPicker((current) => !current)}
+                      className="w-full px-5 py-4 rounded-2xl border border-white/10 bg-white/5 text-slate-300 text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-between"
+                    >
+                      <span>
+                        Amigos
+                        {taskForm.assignees.length > 0 && ` (${taskForm.assignees.length})`}
+                      </span>
+                      <span>{showFriendsPicker ? '▲' : '▼'}</span>
+                    </button>
 
-                    {friends.length === 0 ? (
-                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest ml-2">
-                        Ainda não tens amigos disponíveis.
-                      </p>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {friends.map((friend) => (
-                          <button
-                            key={friend.iduser}
-                            type="button"
-                            onClick={() => toggleDestination('assignees', friend.iduser)}
-                            className={`py-4 rounded-2xl text-xs font-black uppercase tracking-widest border transition-all ${
-                              taskForm.assignees.includes(friend.iduser)
-                                ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-950/40'
-                                : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-slate-200'
-                            }`}
-                          >
-                            {friend.username}
-                          </button>
-                        ))}
+                    {showFriendsPicker && (
+                      <div className="max-h-48 overflow-y-auto rounded-2xl border border-white/10 bg-white/5 p-3 space-y-2">
+                        {friends.length === 0 ? (
+                          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest text-center py-4">
+                            Ainda não tens amigos disponíveis.
+                          </p>
+                        ) : (
+                          friends.map((friend) => (
+                            <button
+                              key={friend.iduser}
+                              type="button"
+                              onClick={() => toggleDestination('assignees', friend.iduser)}
+                              className={`w-full px-4 py-3 rounded-xl text-left text-xs font-black uppercase tracking-widest border transition-all ${
+                                taskForm.assignees.includes(friend.iduser)
+                                  ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-950/40'
+                                  : 'bg-slate-950/50 border-white/10 text-slate-300 hover:bg-white/10'
+                              }`}
+                            >
+                              {friend.username}
+                            </button>
+                          ))
+                        )}
                       </div>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest ml-2">
-                      Grupos
-                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setShowGroupsPicker((current) => !current)}
+                      className="w-full px-5 py-4 rounded-2xl border border-white/10 bg-white/5 text-slate-300 text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-between"
+                    >
+                      <span>
+                        Grupos
+                        {taskForm.groups.length > 0 && ` (${taskForm.groups.length})`}
+                      </span>
+                      <span>{showGroupsPicker ? '▲' : '▼'}</span>
+                    </button>
 
-                    {groups.length === 0 ? (
-                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest ml-2">
-                        Ainda não pertences a nenhum grupo.
-                      </p>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {groups.map((group) => (
-                          <button
-                            key={group.idgroup}
-                            type="button"
-                            onClick={() => toggleDestination('groups', group.idgroup)}
-                            className={`py-4 rounded-2xl text-xs font-black uppercase tracking-widest border transition-all ${
-                              taskForm.groups.includes(group.idgroup)
-                                ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-950/40'
-                                : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-slate-200'
-                            }`}
-                          >
-                            {group.name}
-                          </button>
-                        ))}
+                    {showGroupsPicker && (
+                      <div className="max-h-48 overflow-y-auto rounded-2xl border border-white/10 bg-white/5 p-3 space-y-2">
+                        {groups.length === 0 ? (
+                          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest text-center py-4">
+                            Ainda não pertences a nenhum grupo.
+                          </p>
+                        ) : (
+                          groups.map((group) => (
+                            <button
+                              key={group.idgroup}
+                              type="button"
+                              onClick={() => toggleDestination('groups', group.idgroup)}
+                              className={`w-full px-4 py-3 rounded-xl text-left text-xs font-black uppercase tracking-widest border transition-all ${
+                                taskForm.groups.includes(group.idgroup)
+                                  ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-950/40'
+                                  : 'bg-slate-950/50 border-white/10 text-slate-300 hover:bg-white/10'
+                              }`}
+                            >
+                              {group.name}
+                            </button>
+                          ))
+                        )}
                       </div>
                     )}
                   </div>
