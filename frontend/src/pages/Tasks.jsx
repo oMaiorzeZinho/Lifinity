@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -22,6 +22,110 @@ const emptyTaskForm = {
   assignees: [],
   groups: []
 };
+
+const validCsvPriorities = ['baixa', 'media', 'alta'];
+
+const normalizeCsvValue = (value) => {
+  if (value === undefined || value === null) return '';
+
+  return String(value).replace(/^\uFEFF/, '').trim();
+};
+
+const getCsvLookupKey = (value) =>
+  normalizeCsvValue(value).toLowerCase().replace(/\s+/g, '');
+
+const parseCsv = (csvText) => {
+  const rows = [];
+  let row = [];
+  let field = '';
+  let inQuotes = false;
+  const text = String(csvText || '');
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+
+    if (inQuotes) {
+      if (char === '"') {
+        if (text[i + 1] === '"') {
+          field += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        field += char;
+      }
+
+      continue;
+    }
+
+    if (char === '"') {
+      inQuotes = true;
+      continue;
+    }
+
+    if (char === ',') {
+      row.push(field);
+      field = '';
+      continue;
+    }
+
+    if (char === '\n') {
+      row.push(field);
+      rows.push(row);
+      row = [];
+      field = '';
+      continue;
+    }
+
+    if (char !== '\r') {
+      field += char;
+    }
+  }
+
+  if (inQuotes) {
+    throw new Error('CSV invalido: aspas nao fechadas.');
+  }
+
+  row.push(field);
+  rows.push(row);
+
+  const headerRow = rows[0] || [];
+
+  if (headerRow.every((cell) => normalizeCsvValue(cell) === '')) {
+    throw new Error('O ficheiro CSV precisa de header na primeira linha.');
+  }
+
+  const headers = headerRow.map((header) =>
+    normalizeCsvValue(header).toLowerCase()
+  );
+
+  if (!headers.includes('title')) {
+    throw new Error('O header do CSV deve incluir a coluna title.');
+  }
+
+  return rows
+    .slice(1)
+    .filter((csvRow) => csvRow.some((cell) => normalizeCsvValue(cell) !== ''))
+    .map((values) =>
+      headers.reduce((task, header, index) => {
+        if (header) {
+          task[header] = normalizeCsvValue(values[index]);
+        }
+
+        return task;
+      }, {})
+    );
+};
+
+const readFileAsText = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('Nao foi possivel ler o ficheiro CSV.'));
+    reader.readAsText(file);
+  });
 
 // --- MOTOR DE GAMIFICAÇÃO (FRONTEND) ---
 // Esta função calcula o nível e o progresso visual com base no XP do utilizador.
@@ -164,6 +268,7 @@ const Tasks = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterPriority, setFilterPriority] = useState('all');
   const [searchTask, setSearchTask] = useState('');
+  const csvFileInputRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -374,6 +479,194 @@ const Tasks = () => {
       console.error('Erro ao ocultar tarefas concluídas:', err);
       alert('Erro ao ocultar tarefas concluídas.');
     }
+  };
+
+  const findFriendIdByUsername = (username) => {
+    const usernameKey = getCsvLookupKey(username);
+
+    if (!usernameKey) return null;
+
+    const friend = friends.find((currentFriend) => {
+      return getCsvLookupKey(currentFriend.username) === usernameKey;
+    });
+
+    return friend?.iduser || null;
+  };
+
+  const findGroupIdByName = (groupName) => {
+    const groupKey = getCsvLookupKey(groupName);
+
+    if (!groupKey) return null;
+
+    const group = groups.find((currentGroup) => {
+      return getCsvLookupKey(currentGroup.name) === groupKey;
+    });
+
+    return group?.idgroup || null;
+  };
+
+  const handleImportCsv = async (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    let importedCount = 0;
+    let ignoredCount = 0;
+    const errors = [];
+
+    try {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        alert('Sessao expirada. Inicia sessao novamente.');
+        return;
+      }
+
+      const csvText = await readFileAsText(file);
+      const csvTasks = parseCsv(csvText);
+
+      for (const [index, csvTask] of csvTasks.entries()) {
+        const lineNumber = index + 2;
+        const title = normalizeCsvValue(csvTask.title);
+
+        if (!title) {
+          ignoredCount++;
+          errors.push(`Linha ${lineNumber}: title em falta.`);
+          continue;
+        }
+
+        const rawPriority = normalizeCsvValue(csvTask.priority).toLowerCase();
+        const priority = validCsvPriorities.includes(rawPriority)
+          ? rawPriority
+          : 'media';
+        const assigneeNames = normalizeCsvValue(csvTask.assignees)
+          .split(';')
+          .map(normalizeCsvValue)
+          .filter(Boolean);
+        const groupNames = normalizeCsvValue(csvTask.groups)
+          .split(';')
+          .map(normalizeCsvValue)
+          .filter(Boolean);
+        const assignees = [];
+        const groupIds = [];
+        const missingDestinations = [];
+
+        assigneeNames.forEach((username) => {
+          const friendId = findFriendIdByUsername(username);
+
+          if (friendId) {
+            assignees.push(friendId);
+          } else {
+            missingDestinations.push(`username "${username}"`);
+          }
+        });
+
+        groupNames.forEach((groupName) => {
+          const groupId = findGroupIdByName(groupName);
+
+          if (groupId) {
+            groupIds.push(groupId);
+          } else {
+            missingDestinations.push(`grupo "${groupName}"`);
+          }
+        });
+
+        if (missingDestinations.length > 0) {
+          ignoredCount++;
+          errors.push(
+            `Linha ${lineNumber}: ${missingDestinations.join(', ')} nao encontrado.`
+          );
+          continue;
+        }
+
+        const payload = {
+          title,
+          description: normalizeCsvValue(csvTask.description),
+          priority,
+          due_date: normalizeCsvValue(csvTask.due_date) || null,
+          assignees: [...new Set(assignees)],
+          groups: [...new Set(groupIds)]
+        };
+
+        try {
+          await axios.post(`${API_URL}/tasks`, payload, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+
+          importedCount++;
+        } catch (err) {
+          ignoredCount++;
+          errors.push(
+            `Linha ${lineNumber}: ${
+              err.response?.data?.message ||
+              err.response?.data?.error ||
+              'erro ao criar tarefa.'
+            }`
+          );
+        }
+      }
+
+      await fetchTasks(token);
+      await fetchTaskSummary(token);
+
+      window.dispatchEvent(new Event('lifinity-tasks-updated'));
+
+      const shortErrors = errors.slice(0, 5);
+      const extraErrors = errors.length - shortErrors.length;
+      const alertLines = [
+        `${importedCount} tarefas importadas`,
+        `${ignoredCount} linhas ignoradas`
+      ];
+
+      if (shortErrors.length > 0) {
+        alertLines.push('', 'Erros:', ...shortErrors);
+
+        if (extraErrors > 0) {
+          alertLines.push(`... e mais ${extraErrors} erro(s).`);
+        }
+      }
+
+      alert(alertLines.join('\n'));
+    } catch (err) {
+      console.error('Erro ao importar CSV:', err);
+      alert(
+        [
+          `${importedCount} tarefas importadas`,
+          `${ignoredCount} linhas ignoradas`,
+          '',
+          'Erros:',
+          err.message || 'Erro ao importar CSV.'
+        ].join('\n')
+      );
+    } finally {
+      e.target.value = '';
+    }
+  };
+
+  const handleDownloadCsvTemplate = () => {
+    const csvTemplate = [
+      'title,description,priority,due_date,assignees,groups',
+      'Estudar Matemática,Rever capítulo 4,alta,2026-05-10T18:00,,',
+      'Tarefa para amigo,Enviar tarefa para um amigo,media,2026-05-11T18:00,cliente,',
+      'Tarefa para grupo,Enviar tarefa para um grupo,baixa,2026-05-12T18:00,,Grupo Sigma',
+      'Descrição com vírgula,"Preparar notas, slides e perguntas",media,,,',
+      'Amigo e grupo,Exemplo com vários destinos,alta,2026-05-13T20:00,cliente,Grupo Sigma'
+    ].join('\n');
+
+    const blob = new Blob([csvTemplate], {
+      type: 'text/csv;charset=utf-8;'
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = 'modelo_tarefas_lifinity.csv';
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handleSubmitTask = async (e) => {
@@ -606,6 +899,30 @@ const Tasks = () => {
                 Ocultar Concluídas
               </button>
             )}
+
+            <input
+              ref={csvFileInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              onChange={handleImportCsv}
+            />
+
+            <button
+              type="button"
+              onClick={() => csvFileInputRef.current?.click()}
+              className="bg-white/5 border border-white/10 text-slate-300 px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all shadow-sm"
+            >
+              Importar CSV
+            </button>
+
+            <button
+              type="button"
+              onClick={handleDownloadCsvTemplate}
+              className="bg-white/5 border border-white/10 text-slate-300 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all"
+            >
+              Modelo CSV
+            </button>
 
             <button
               onClick={openCreateModal}
