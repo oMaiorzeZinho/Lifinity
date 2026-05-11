@@ -262,7 +262,8 @@ const Tasks = () => {
   const [taskForm, setTaskForm] = useState(emptyTaskForm);
   const [editingTask, setEditingTask] = useState(null);
   const [showFriendsPicker, setShowFriendsPicker] = useState(false);
-  const [showGroupsPicker, setShowGroupsPicker] = useState(false);  
+  const [showGroupsPicker, setShowGroupsPicker] = useState(false);
+  const [taskToComplete, setTaskToComplete] = useState(null);  
 
   // Estados dos filtros
   const [filterStatus, setFilterStatus] = useState('all');
@@ -390,12 +391,22 @@ const Tasks = () => {
     });
   };
 
-  const handleCompleteTask = async (idtask) => {
+const openCompleteConfirmation = (task) => {
+    setTaskToComplete(task);
+  };
+
+  const closeCompleteConfirmation = () => {
+    setTaskToComplete(null);
+  };
+
+  const confirmCompleteTask = async () => {
+    if (!taskToComplete) return;
+
     try {
       const token = localStorage.getItem('token');
 
       const res = await axios.put(
-        `${API_URL}/tasks/complete/${idtask}`,
+        `${API_URL}/tasks/complete/${taskToComplete.idtask}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -414,6 +425,8 @@ const Tasks = () => {
       localStorage.setItem('user', JSON.stringify(updatedUser));
 
       window.dispatchEvent(new Event('lifinity-user-updated'));
+
+      setTaskToComplete(null);
 
       await fetchTasks(token);
       await fetchTaskSummary(token);
@@ -1049,13 +1062,38 @@ const Tasks = () => {
                         </button>
                       )}
 
+
                       {task.status !== 'concluida' && !taskOverdue && (
-                        <button
-                          onClick={() => handleCompleteTask(task.idtask)}
-                          className="bg-blue-600/10 border border-blue-400/40 text-blue-300 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-sm"
-                        >
-                          Concluir
-                        </button>
+                        taskToComplete?.idtask === task.idtask ? (
+                          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-3 py-2">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-300">
+                              Concluir?
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={closeCompleteConfirmation}
+                              className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all"
+                            >
+                              Cancelar
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={confirmCompleteTask}
+                              className="px-4 py-2 rounded-xl bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-950/30"
+                            >
+                              Confirmar
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => openCompleteConfirmation(task)}
+                            className="bg-blue-600/10 border border-blue-400/40 text-blue-300 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                          >
+                            Concluir
+                          </button>
+                        )
                       )}
 
                       {taskIsOwner && (
