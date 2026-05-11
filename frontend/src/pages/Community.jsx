@@ -344,9 +344,25 @@ const Community = () => {
     }
   };
 
-  const handleChatSoon = () => {
+  const handleOpenPrivateChat = async (friend) => {
     setOpenActionMenu(null);
-    showMessage('Chat em breve.');
+
+    try {
+      const token = getToken();
+
+      const response = await axios.post(
+        `${API_URL}/chat/conversations/private`,
+        { idfriend: friend.iduser },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      navigate(`/dashboard/chat?conversation=${response.data.idconversation}`);
+    } catch (err) {
+      console.error('Erro ao abrir conversa:', err);
+      showMessage(err.response?.data?.message || 'Erro ao abrir conversa.');
+    }
   };
 
   const handleShareVerse = () => {
@@ -976,7 +992,7 @@ const Community = () => {
                           <div className={menuPanelClass}>
                             <button
                               type="button"
-                              onClick={handleChatSoon}
+                              onClick={() => handleOpenPrivateChat(friend)}
                               className={menuItemClass}
                             >
                               Conversar com este amigo

@@ -56,6 +56,7 @@ const DashboardLayout = () => {
   const isInspirationPage = location.pathname === '/dashboard/inspiration';
   const isStatisticsPage = location.pathname === '/dashboard/statistics';
   const isProfilePage = location.pathname === '/dashboard/profile';
+  const isChatPage = location.pathname === '/dashboard/chat';
   const isLightTheme = theme === 'light';
 
   const toggleTheme = () => {
@@ -76,6 +77,8 @@ const DashboardLayout = () => {
             ? `radial-gradient(circle at top left, rgba(20, 184, 166, ${accentOpacity}), transparent 38%)`
             : isProfilePage
               ? `radial-gradient(circle at top, rgba(148, 163, 184, ${secondaryAccentOpacity}), transparent 38%)`
+              : isChatPage
+                ? `radial-gradient(circle at top right, rgba(59, 130, 246, ${secondaryAccentOpacity}), transparent 38%)`
               : `radial-gradient(circle at top, rgba(110, 231, 183, ${secondaryAccentOpacity}), transparent 38%)`;
 
   const backgroundOverlay = isLightTheme
@@ -196,6 +199,13 @@ const DashboardLayout = () => {
               className={navLinkClass(isProfilePage)}
             >
               Perfil
+            </Link>
+
+            <Link
+              to="/dashboard/chat"
+              className={navLinkClass(isChatPage)}
+            >
+              Chat
             </Link>
           </nav>
 

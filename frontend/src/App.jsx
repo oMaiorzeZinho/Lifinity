@@ -11,6 +11,7 @@ const Community = lazy(() => import('./pages/Community'));
 const Inspiration = lazy(() => import('./pages/Inspiration'));
 const Statistics = lazy(() => import('./pages/Statistics'));
 const Profile = lazy(() => import('./pages/Profile'));
+const Chat = lazy(() => import('./pages/Chat'));
 
 const PageLoader = () => (
   <div className="min-h-screen bg-[#101713] p-10 text-center text-xs font-black uppercase tracking-widest text-slate-400">
@@ -35,6 +36,7 @@ function App() {
             <Route path="inspiration" element={<Inspiration />} />
             <Route path="statistics" element={<Statistics />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="chat" element={<Chat />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" />} />
