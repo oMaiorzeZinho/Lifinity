@@ -16,6 +16,18 @@ const buttonPrimaryClass =
 const buttonSecondaryClass =
   'px-5 py-3 rounded-2xl bg-white/[0.08] border border-white/10 text-slate-200 text-[10px] font-black uppercase tracking-widest hover:bg-white/[0.12] transition-all';
 
+const menuButtonClass =
+  'w-10 h-10 rounded-xl bg-white/[0.06] border border-white/10 text-slate-300 flex items-center justify-center hover:bg-white/[0.12] hover:text-white transition-all';
+
+const menuPanelClass =
+  'absolute right-0 top-12 z-30 w-56 overflow-hidden rounded-2xl border border-white/10 bg-[#111916] shadow-2xl shadow-black/30 backdrop-blur-xl';
+
+const menuItemClass =
+  'w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-300 hover:bg-white/[0.08] hover:text-white transition-all';
+
+const dangerMenuItemClass =
+  'w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-red-300 hover:bg-red-500/10 transition-all';
+
 const getToken = () => localStorage.getItem('token');
 
 const Community = () => {
@@ -35,9 +47,19 @@ const Community = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [openActionMenu, setOpenActionMenu] = useState(null);
   const messageTimeoutRef = useRef(null);
 
   const navigate = useNavigate();
+
+  const currentUserId = (() => {
+    try {
+      const savedUser = localStorage.getItem('user');
+      return savedUser ? JSON.parse(savedUser).iduser : null;
+    } catch {
+      return null;
+    }
+  })();
 
   const showMessage = useCallback((text) => {
     if (messageTimeoutRef.current) {
@@ -57,6 +79,16 @@ const Community = () => {
       if (messageTimeoutRef.current) {
         clearTimeout(messageTimeoutRef.current);
       }
+    };
+  }, []);
+
+  useEffect(() => {
+    const closeActionMenu = () => setOpenActionMenu(null);
+
+    document.addEventListener('click', closeActionMenu);
+
+    return () => {
+      document.removeEventListener('click', closeActionMenu);
     };
   }, []);
 
@@ -102,6 +134,14 @@ const Community = () => {
     }
   }, []);
 
+  const refreshCommunityData = useCallback(async () => {
+    await Promise.all([
+      fetchGroups(),
+      fetchFriends(),
+      fetchFriendRequests()
+    ]);
+  }, [fetchGroups, fetchFriends, fetchFriendRequests]);
+
   const fetchGroupMembers = useCallback(async (group) => {
     try {
       const token = getToken();
@@ -130,17 +170,24 @@ const Community = () => {
     const loadCommunityData = async () => {
       setLoading(true);
 
-      await Promise.all([
-        fetchGroups(),
-        fetchFriends(),
-        fetchFriendRequests()
-      ]);
+      await refreshCommunityData();
 
       setLoading(false);
     };
 
     loadCommunityData();
-  }, [navigate, fetchGroups, fetchFriends, fetchFriendRequests]);
+  }, [navigate, refreshCommunityData]);
+
+  const toggleActionMenu = (menuKey) => {
+    setOpenActionMenu((currentMenu) => (
+      currentMenu === menuKey ? null : menuKey
+    ));
+  };
+
+  const handleMenuClick = (e, menuKey) => {
+    e.stopPropagation();
+    toggleActionMenu(menuKey);
+  };
 
   const handleCreateGroup = async (e) => {
     e.preventDefault();
@@ -157,7 +204,7 @@ const Community = () => {
         description: ''
       });
 
-      await fetchGroups();
+      await refreshCommunityData();
       showMessage('Grupo criado com sucesso.');
     } catch (err) {
       console.error('Erro ao criar grupo:', err);
@@ -180,7 +227,7 @@ const Community = () => {
       );
 
       setInviteCode('');
-      await fetchGroups();
+      await refreshCommunityData();
       showMessage('Entraste no grupo com sucesso.');
     } catch (err) {
       console.error('Erro ao entrar no grupo:', err);
@@ -224,6 +271,7 @@ const Community = () => {
         }
       );
 
+      await refreshCommunityData();
       showMessage('Pedido de amizade enviado.');
     } catch (err) {
       console.error('Erro ao enviar pedido:', err);
@@ -243,13 +291,124 @@ const Community = () => {
         }
       );
 
-      await fetchFriendRequests();
-      await fetchFriends();
+      await refreshCommunityData();
 
       showMessage('Pedido de amizade aceite.');
     } catch (err) {
       console.error('Erro ao aceitar pedido:', err);
       showMessage('Erro ao aceitar pedido de amizade.');
+    }
+  };
+
+  const handleDeclineFriendRequest = async (request) => {
+    setOpenActionMenu(null);
+
+    if (!window.confirm(`Recusar o pedido de amizade de ${request.username}?`)) {
+      return;
+    }
+
+    try {
+      const token = getToken();
+
+      await axios.delete(`${API_URL}/friends/requests/${request.idfriendship}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      await refreshCommunityData();
+      showMessage('Pedido de amizade recusado.');
+    } catch (err) {
+      console.error('Erro ao recusar pedido:', err);
+      showMessage(err.response?.data?.message || 'Erro ao recusar pedido de amizade.');
+    }
+  };
+
+  const handleRemoveFriend = async (friend) => {
+    setOpenActionMenu(null);
+
+    if (!window.confirm(`Remover ${friend.username} da tua lista de amigos?`)) {
+      return;
+    }
+
+    try {
+      const token = getToken();
+
+      await axios.delete(`${API_URL}/friends/${friend.iduser}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      await refreshCommunityData();
+      showMessage('Amigo removido.');
+    } catch (err) {
+      console.error('Erro ao remover amigo:', err);
+      showMessage(err.response?.data?.message || 'Erro ao remover amigo.');
+    }
+  };
+
+  const handleChatSoon = () => {
+    setOpenActionMenu(null);
+    showMessage('Chat em breve.');
+  };
+
+  const handleShareVerse = () => {
+    setOpenActionMenu(null);
+    navigate('/dashboard/inspiration');
+  };
+
+  const handleViewGroupMembers = async (group) => {
+    setOpenActionMenu(null);
+    await fetchGroupMembers(group);
+  };
+
+  const handleLeaveGroup = async (group) => {
+    setOpenActionMenu(null);
+
+    if (Number(group.idowner) === Number(currentUserId)) {
+      showMessage('O dono do grupo nÃ£o pode sair. Apaga o grupo ou transfere a propriedade futuramente.');
+      return;
+    }
+
+    if (!window.confirm(`Sair do grupo "${group.name}"?`)) {
+      return;
+    }
+
+    try {
+      const token = getToken();
+
+      await axios.delete(`${API_URL}/groups/${group.idgroup}/leave`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setSelectedGroup(null);
+      setGroupMembers([]);
+      await refreshCommunityData();
+      showMessage('SaÃ­ste do grupo.');
+    } catch (err) {
+      console.error('Erro ao sair do grupo:', err);
+      showMessage(err.response?.data?.message || 'Erro ao sair do grupo.');
+    }
+  };
+
+  const handleDeleteGroup = async (group) => {
+    setOpenActionMenu(null);
+
+    if (!window.confirm(`Apagar definitivamente o grupo "${group.name}"?`)) {
+      return;
+    }
+
+    try {
+      const token = getToken();
+
+      await axios.delete(`${API_URL}/groups/${group.idgroup}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setSelectedGroup(null);
+      setGroupMembers([]);
+      await refreshCommunityData();
+      showMessage('Grupo apagado.');
+    } catch (err) {
+      console.error('Erro ao apagar grupo:', err);
+      showMessage(err.response?.data?.message || 'Erro ao apagar grupo.');
     }
   };
 
@@ -493,7 +652,8 @@ const Community = () => {
                     </p>
                   </div>
 
-                  <div className="bg-white/[0.05] border border-white/10 rounded-2xl p-4 min-w-40">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-white/[0.05] border border-white/10 rounded-2xl p-4 min-w-40">
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
                       Código
                     </p>
@@ -509,16 +669,64 @@ const Community = () => {
                     >
                       Copiar
                     </button>
+                    </div>
+
+                    <div className="relative" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        type="button"
+                        onClick={(e) => handleMenuClick(e, `group-${group.idgroup}`)}
+                        className={menuButtonClass}
+                        title="Acoes do grupo"
+                        aria-label="Acoes do grupo"
+                        aria-expanded={openActionMenu === `group-${group.idgroup}`}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="18"
+                          height="18"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle cx="5" cy="12" r="2" />
+                          <circle cx="12" cy="12" r="2" />
+                          <circle cx="19" cy="12" r="2" />
+                        </svg>
+                      </button>
+
+                      {openActionMenu === `group-${group.idgroup}` && (
+                        <div className={menuPanelClass}>
+                          <button
+                            type="button"
+                            onClick={() => handleViewGroupMembers(group)}
+                            className={menuItemClass}
+                          >
+                            Ver membros
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleLeaveGroup(group)}
+                            className={dangerMenuItemClass}
+                          >
+                            Sair do grupo
+                          </button>
+
+                          {(group.role === 'admin' ||
+                            Number(group.idowner) === Number(currentUserId)) && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteGroup(group)}
+                              className={dangerMenuItemClass}
+                            >
+                              Apagar grupo
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => fetchGroupMembers(group)}
-                  className={`${buttonSecondaryClass} mt-5`}
-                >
-                  Ver membros
-                </button>
               </div>
             ))}
           </div>
@@ -658,13 +866,50 @@ const Community = () => {
                       Nível {request.level} • {request.xp} XP
                     </p>
 
-                    <button
-                      type="button"
-                      onClick={() => handleAcceptFriendRequest(request.idfriendship)}
-                      className="mt-4 px-5 py-3 rounded-2xl bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest hover:bg-emerald-400 transition-all"
-                    >
-                      Aceitar
-                    </button>
+                    <div className="mt-4 flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => handleAcceptFriendRequest(request.idfriendship)}
+                        className="px-5 py-3 rounded-2xl bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest hover:bg-emerald-400 transition-all"
+                      >
+                        Aceitar
+                      </button>
+
+                      <div className="relative" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          type="button"
+                          onClick={(e) => handleMenuClick(e, `request-${request.idfriendship}`)}
+                          className={menuButtonClass}
+                          title="Acoes do pedido"
+                          aria-label="Acoes do pedido"
+                          aria-expanded={openActionMenu === `request-${request.idfriendship}`}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle cx="5" cy="12" r="2" />
+                            <circle cx="12" cy="12" r="2" />
+                            <circle cx="19" cy="12" r="2" />
+                          </svg>
+                        </button>
+
+                        {openActionMenu === `request-${request.idfriendship}` && (
+                          <div className={menuPanelClass}>
+                            <button
+                              type="button"
+                              onClick={() => handleDeclineFriendRequest(request)}
+                              className={dangerMenuItemClass}
+                            >
+                              Recusar pedido
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -693,13 +938,69 @@ const Community = () => {
                     key={friend.iduser}
                     className="p-5 rounded-2xl border border-white/10 bg-white/[0.045]"
                   >
-                    <p className="text-lg font-black text-white">
-                      {friend.username}
-                    </p>
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-lg font-black text-white">
+                          {friend.username}
+                        </p>
 
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">
                       Nível {friend.level} • {friend.xp} XP
                     </p>
+
+                      </div>
+
+                      <div className="relative" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          type="button"
+                          onClick={(e) => handleMenuClick(e, `friend-${friend.iduser}`)}
+                          className={menuButtonClass}
+                          title="Acoes do amigo"
+                          aria-label="Acoes do amigo"
+                          aria-expanded={openActionMenu === `friend-${friend.iduser}`}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle cx="5" cy="12" r="2" />
+                            <circle cx="12" cy="12" r="2" />
+                            <circle cx="19" cy="12" r="2" />
+                          </svg>
+                        </button>
+
+                        {openActionMenu === `friend-${friend.iduser}` && (
+                          <div className={menuPanelClass}>
+                            <button
+                              type="button"
+                              onClick={handleChatSoon}
+                              className={menuItemClass}
+                            >
+                              Conversar com este amigo
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={handleShareVerse}
+                              className={menuItemClass}
+                            >
+                              Partilhar versiculo
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveFriend(friend)}
+                              className={dangerMenuItemClass}
+                            >
+                              Remover amigo
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
 
                     <div className="mt-4 flex flex-wrap gap-2">
                       <span className="px-3 py-2 rounded-xl bg-blue-500/10 border border-blue-400/20 text-blue-300 text-[10px] font-black uppercase tracking-widest">

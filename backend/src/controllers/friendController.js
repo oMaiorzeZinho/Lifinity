@@ -115,6 +115,31 @@ exports.acceptFriendRequest = async (req, res) => {
     }
 };
 
+// Recusar pedido de amizade
+exports.declineFriendRequest = async (req, res) => {
+    try {
+        const iduser = req.user.iduser;
+        const { idfriendship } = req.params;
+
+        const [result] = await db.query(
+            `DELETE FROM FRIENDSHIP
+             WHERE idfriendship = ?
+             AND iduser_receiver = ?
+             AND status = 'pendente'`,
+            [idfriendship, iduser]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Pedido pendente nÃ£o encontrado.' });
+        }
+
+        res.json({ message: 'Pedido de amizade recusado.' });
+    } catch (err) {
+        console.error('Erro ao recusar pedido:', err);
+        res.status(500).json({ message: 'Erro ao recusar pedido de amizade.' });
+    }
+};
+
 // Listar amigos
 exports.getFriends = async (req, res) => {
     try {
@@ -142,5 +167,37 @@ exports.getFriends = async (req, res) => {
     } catch (err) {
         console.error('Erro ao listar amigos:', err);
         res.status(500).json({ message: 'Erro ao listar amigos.' });
+    }
+};
+
+// Remover amigo
+exports.removeFriend = async (req, res) => {
+    try {
+        const iduser = req.user.iduser;
+        const { idfriend } = req.params;
+
+        if (!idfriend || Number(idfriend) === Number(iduser)) {
+            return res.status(400).json({ message: 'Amigo invÃ¡lido.' });
+        }
+
+        const [result] = await db.query(
+            `DELETE FROM FRIENDSHIP
+             WHERE status = 'aceite'
+             AND (
+                (iduser_requester = ? AND iduser_receiver = ?)
+                OR
+                (iduser_requester = ? AND iduser_receiver = ?)
+             )`,
+            [iduser, idfriend, idfriend, iduser]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Amizade nÃ£o encontrada.' });
+        }
+
+        res.json({ message: 'Amigo removido.' });
+    } catch (err) {
+        console.error('Erro ao remover amigo:', err);
+        res.status(500).json({ message: 'Erro ao remover amigo.' });
     }
 };

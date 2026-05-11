@@ -168,3 +168,82 @@ exports.getGroupMembers = async (req, res) => {
         res.status(500).json({ message: 'Erro ao listar membros.' });
     }
 };
+
+// Sair de um grupo
+exports.leaveGroup = async (req, res) => {
+    try {
+        const iduser = req.user.iduser;
+        const { idgroup } = req.params;
+
+        const [groups] = await db.query(
+            'SELECT idgroup, idowner FROM GROUP_ENTITY WHERE idgroup = ?',
+            [idgroup]
+        );
+
+        if (groups.length === 0) {
+            return res.status(404).json({ message: 'Grupo nÃ£o encontrado.' });
+        }
+
+        const group = groups[0];
+
+        if (Number(group.idowner) === Number(iduser)) {
+            return res.status(400).json({
+                message: 'O dono do grupo nÃ£o pode sair. Apaga o grupo ou transfere a propriedade futuramente.'
+            });
+        }
+
+        const [result] = await db.query(
+            'DELETE FROM GROUP_MEMBER WHERE iduser = ? AND idgroup = ?',
+            [iduser, idgroup]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(403).json({ message: 'NÃ£o pertences a este grupo.' });
+        }
+
+        res.json({ message: 'SaÃ­ste do grupo.' });
+    } catch (err) {
+        console.error('Erro ao sair do grupo:', err);
+        res.status(500).json({ message: 'Erro ao sair do grupo.' });
+    }
+};
+
+// Apagar grupo
+exports.deleteGroup = async (req, res) => {
+    try {
+        const iduser = req.user.iduser;
+        const { idgroup } = req.params;
+
+        const [permissions] = await db.query(
+            `SELECT
+                g.idgroup,
+                g.idowner,
+                gm.role
+             FROM GROUP_ENTITY g
+             LEFT JOIN GROUP_MEMBER gm
+                ON gm.idgroup = g.idgroup
+                AND gm.iduser = ?
+             WHERE g.idgroup = ?`,
+            [iduser, idgroup]
+        );
+
+        if (permissions.length === 0) {
+            return res.status(404).json({ message: 'Grupo nÃ£o encontrado.' });
+        }
+
+        const group = permissions[0];
+        const canDelete =
+            Number(group.idowner) === Number(iduser) || group.role === 'admin';
+
+        if (!canDelete) {
+            return res.status(403).json({ message: 'Apenas o dono ou um administrador pode apagar este grupo.' });
+        }
+
+        await db.query('DELETE FROM GROUP_ENTITY WHERE idgroup = ?', [idgroup]);
+
+        res.json({ message: 'Grupo apagado.' });
+    } catch (err) {
+        console.error('Erro ao apagar grupo:', err);
+        res.status(500).json({ message: 'Erro ao apagar grupo.' });
+    }
+};
