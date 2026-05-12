@@ -230,9 +230,14 @@ exports.sendMessage = async (req, res) => {
         const iduser = Number(req.user.iduser);
         const { idconversation } = req.params;
         const content = String(req.body.content || '').trim();
+        const messageType = req.body.message_type || 'text';
 
         if (!content) {
             return res.status(400).json({ message: 'A mensagem nÃ£o pode estar vazia.' });
+        }
+
+        if (!['text', 'verse'].includes(messageType)) {
+            return res.status(400).json({ message: 'Tipo de mensagem invalido.' });
         }
 
         const belongsToConversation = await userBelongsToConversation(idconversation, iduser);
@@ -256,8 +261,8 @@ exports.sendMessage = async (req, res) => {
 
         const [result] = await db.query(
             `INSERT INTO MESSAGE (idconversation, idsender, content, message_type)
-             VALUES (?, ?, ?, 'text')`,
-            [idconversation, iduser, content]
+             VALUES (?, ?, ?, ?)`,
+            [idconversation, iduser, content, messageType]
         );
 
         await db.query(

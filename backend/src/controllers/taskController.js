@@ -246,7 +246,6 @@ exports.createTask = async (req, res) => {
 };
 
 // 3. Concluir tarefa e ganhar XP (Aqui é onde o C entra em ação!)
-// 3. Concluir tarefa e ganhar XP
 exports.completeTask = async (req, res) => {
     try {
         const { idtask } = req.params;

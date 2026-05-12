@@ -19,9 +19,15 @@ const Inspiration = () => {
   const [selectedTheme, setSelectedTheme] = useState('all');
   const [cardMode, setCardMode] = useState('daily');
   const [copyMessage, setCopyMessage] = useState('');
+  const [friends, setFriends] = useState([]);
+  const [friendsLoading, setFriendsLoading] = useState(true);
+  const [friendsError, setFriendsError] = useState('');
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedVerseToShare, setSelectedVerseToShare] = useState(null);
+  const [shareError, setShareError] = useState('');
+  const [sharingFriendId, setSharingFriendId] = useState(null);
   const copyMessageTimeoutRef = useRef(null);
+  const sharingInProgressRef = useRef(false);
 
   const navigate = useNavigate();
 
@@ -89,6 +95,25 @@ const Inspiration = () => {
     }
   }, []);
 
+  const fetchFriends = useCallback(async (token) => {
+    try {
+      setFriendsLoading(true);
+      setFriendsError('');
+
+      const response = await axios.get(`${API_URL}/friends`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setFriends(response.data);
+    } catch (err) {
+      console.error('Erro ao carregar amigos:', err);
+      setFriends([]);
+      setFriendsError('Nao foi possivel carregar a lista de amigos.');
+    } finally {
+      setFriendsLoading(false);
+    }
+  }, []);
+
   const toggleFavorite = useCallback(async (idverse) => {
     try {
       const token = localStorage.getItem('token');
@@ -152,13 +177,56 @@ const Inspiration = () => {
 
   const openShareModal = useCallback((verse) => {
     setSelectedVerseToShare(verse);
+    setShareError('');
     setShareModalOpen(true);
   }, []);
 
   const closeShareModal = useCallback(() => {
     setSelectedVerseToShare(null);
+    setShareError('');
+    setSharingFriendId(null);
+    sharingInProgressRef.current = false;
     setShareModalOpen(false);
   }, []);
+
+  const shareVerseWithFriend = useCallback(async (friend) => {
+    if (!selectedVerseToShare || sharingInProgressRef.current) return;
+
+    try {
+      sharingInProgressRef.current = true;
+      setShareError('');
+      setSharingFriendId(friend.iduser);
+
+      const token = localStorage.getItem('token');
+
+      const conversationResponse = await axios.post(
+        `${API_URL}/chat/conversations/private`,
+        { idfriend: friend.iduser },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      const idconversation = conversationResponse.data.idconversation;
+      const content = `“${selectedVerseToShare.text}” — ${selectedVerseToShare.book} ${selectedVerseToShare.chapter}:${selectedVerseToShare.verse}`;
+
+      await axios.post(
+        `${API_URL}/chat/conversations/${idconversation}/messages`,
+        { content, message_type: 'verse' },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      closeShareModal();
+      navigate(`/dashboard/chat?conversation=${idconversation}`);
+    } catch (err) {
+      console.error('Erro ao partilhar versiculo:', err);
+      setShareError(err.response?.data?.message || 'Nao foi possivel partilhar o versiculo.');
+      setSharingFriendId(null);
+      sharingInProgressRef.current = false;
+    }
+  }, [closeShareModal, navigate, selectedVerseToShare]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -175,6 +243,7 @@ const Inspiration = () => {
       setLoading(true);
       await fetchDailyVerse(token);
       await fetchFavorites(token);
+      await fetchFriends(token);
       if (isActive) {
         setLoading(false);
       }
@@ -185,7 +254,7 @@ const Inspiration = () => {
     return () => {
       isActive = false;
     };
-  }, [navigate, fetchDailyVerse, fetchFavorites]);
+  }, [navigate, fetchDailyVerse, fetchFavorites, fetchFriends]);
 
   const themes = useMemo(() => {
     const uniqueThemes = [
@@ -498,34 +567,56 @@ const Inspiration = () => {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-5 rounded-2xl border border-white/10 bg-white/[0.04]">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-blue-300 mb-2">
-                    Amigos
-                  </p>
-
-                  <p className="text-sm text-slate-400 font-medium">
-                    Ainda não tens amigos disponíveis para partilhar.
-                  </p>
-                </div>
-
-                <div className="p-5 rounded-2xl border border-white/10 bg-white/[0.04]">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-blue-300 mb-2">
-                    Grupos
-                  </p>
-
-                  <p className="text-sm text-slate-400 font-medium">
-                    Ainda não existem grupos disponíveis para partilhar.
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-blue-500/10 border border-blue-400/20 p-4 rounded-2xl">
-                <p className="text-blue-200 text-xs font-bold leading-relaxed">
-                  Esta funcionalidade está preparada para a futura integração com amigos,
-                  grupos e notificações da plataforma Lifinity.
+              <div className="p-5 rounded-2xl border border-white/10 bg-white/[0.04]">
+                <p className="text-[10px] font-black uppercase tracking-widest text-blue-300 mb-4">
+                  Amigos
                 </p>
+
+                {friendsLoading ? (
+                  <p className="text-sm text-slate-400 font-medium">
+                    A carregar amigos...
+                  </p>
+                ) : friendsError ? (
+                  <p className="text-sm text-red-200 font-medium">
+                    {friendsError}
+                  </p>
+                ) : friends.length === 0 ? (
+                  <p className="text-sm text-slate-400 font-medium">
+                    Ainda nao tens amigos aceites para partilhar este versiculo.
+                  </p>
+                ) : (
+                  <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+                    {friends.map((friend) => {
+                      const isSending = Number(sharingFriendId) === Number(friend.iduser);
+
+                      return (
+                        <button
+                          key={friend.iduser}
+                          type="button"
+                          onClick={() => shareVerseWithFriend(friend)}
+                          disabled={sharingFriendId !== null}
+                          className="w-full p-4 rounded-2xl border border-white/10 bg-white/[0.04] text-left hover:bg-white/[0.08] hover:border-blue-400/30 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                          <span className="block text-white font-black">
+                            {friend.username}
+                          </span>
+                          <span className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mt-1">
+                            {isSending ? 'A enviar...' : `Nivel ${friend.level || 1}`}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
+
+              {shareError && (
+                <div className="bg-red-500/10 border border-red-400/20 p-4 rounded-2xl">
+                  <p className="text-red-200 text-xs font-bold leading-relaxed">
+                    {shareError}
+                  </p>
+                </div>
+              )}
 
               <div className="flex justify-end">
                 <button
