@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { createNotifications } = require('./notificationController');
 
 const normalizePrivatePair = (iduser, idfriend) => {
     const firstUser = Number(iduser);
@@ -288,7 +289,19 @@ exports.sendMessage = async (req, res) => {
             [result.insertId]
         );
 
-        res.status(201).json(messages[0]);
+        const sentMessage = messages[0];
+        const notificationMessage = messageType === 'verse'
+            ? `${sentMessage.sender_username} enviou-te um versiculo.`
+            : `${sentMessage.sender_username} enviou-te uma mensagem.`;
+
+        await createNotifications({
+            recipients: memberIds,
+            type: 'sistema',
+            message: notificationMessage,
+            excludeUserId: iduser
+        });
+
+        res.status(201).json(sentMessage);
     } catch (err) {
         console.error('Erro ao enviar mensagem:', err);
         res.status(500).json({ message: 'Erro ao enviar mensagem.' });

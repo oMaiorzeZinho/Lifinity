@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, Outlet, Link, useLocation } from 'react-router-dom';
+import axios from 'axios';
 import DailyVerseWidget from '../components/DailyVerseWidget';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const DashboardLayout = () => {
   const [user, setUser] = useState(() => {
@@ -11,13 +14,128 @@ const DashboardLayout = () => {
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('lifinity-theme') === 'light' ? 'light' : 'dark';
   });
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [notificationError, setNotificationError] = useState('');
 
   const navigate = useNavigate();
   const location = useLocation();
 
+  const getAuthHeaders = useCallback(() => {
+    const token = localStorage.getItem('token');
+
+    if (!token) return null;
+
+    return { Authorization: `Bearer ${token}` };
+  }, []);
+
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const headers = getAuthHeaders();
+
+      if (!headers) return;
+
+      const response = await axios.get(`${API_URL}/notifications/unread-count`, {
+        headers
+      });
+
+      setUnreadCount(Number(response.data?.unreadCount || 0));
+    } catch (err) {
+      console.error('Erro ao carregar contador de notificacoes:', err);
+    }
+  }, [getAuthHeaders]);
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const headers = getAuthHeaders();
+
+      if (!headers) return;
+
+      setNotificationsLoading(true);
+      setNotificationError('');
+
+      const response = await axios.get(`${API_URL}/notifications`, {
+        headers
+      });
+
+      setNotifications(Array.isArray(response.data) ? response.data : []);
+    } catch (err) {
+      console.error('Erro ao carregar notificacoes:', err);
+      setNotificationError('Nao foi possivel carregar notificacoes.');
+    } finally {
+      setNotificationsLoading(false);
+    }
+  }, [getAuthHeaders]);
+
+  const toggleNotifications = async () => {
+    const nextOpen = !notificationsOpen;
+    setNotificationsOpen(nextOpen);
+
+    if (nextOpen) {
+      await fetchNotifications();
+      await fetchUnreadCount();
+    }
+  };
+
+  const markNotificationAsRead = async (notification) => {
+    if (Number(notification.is_read) === 1) return;
+
+    try {
+      const headers = getAuthHeaders();
+
+      if (!headers) return;
+
+      await axios.put(
+        `${API_URL}/notifications/${notification.idnotification}/read`,
+        {},
+        { headers }
+      );
+
+      setNotifications((currentNotifications) => {
+        return currentNotifications.map((item) => {
+          if (item.idnotification !== notification.idnotification) return item;
+          return { ...item, is_read: 1 };
+        });
+      });
+
+      await fetchUnreadCount();
+    } catch (err) {
+      console.error('Erro ao marcar notificacao como lida:', err);
+      setNotificationError('Nao foi possivel marcar a notificacao como lida.');
+    }
+  };
+
+  const markAllNotificationsAsRead = async () => {
+    try {
+      const headers = getAuthHeaders();
+
+      if (!headers) return;
+
+      await axios.put(`${API_URL}/notifications/read-all`, {}, { headers });
+
+      setNotifications((currentNotifications) => {
+        return currentNotifications.map((notification) => ({
+          ...notification,
+          is_read: 1
+        }));
+      });
+
+      setUnreadCount(0);
+    } catch (err) {
+      console.error('Erro ao marcar todas as notificacoes como lidas:', err);
+      setNotificationError('Nao foi possivel marcar todas como lidas.');
+    }
+  };
+
   useEffect(() => {
     localStorage.setItem('lifinity-theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    fetchUnreadCount();
+  }, [fetchUnreadCount]);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
@@ -224,6 +342,138 @@ const DashboardLayout = () => {
                 Nível {user.level}
               </p>
             </Link>
+
+            <div className="relative">
+              <button
+                onClick={toggleNotifications}
+                className={`relative w-10 h-10 rounded-xl border flex items-center justify-center transition-all ${
+                  isLightTheme
+                    ? 'border-slate-200 bg-white/85 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 hover:border-emerald-200'
+                    : 'border-white/10 bg-white/5 text-slate-400 hover:text-emerald-200 hover:bg-white/10'
+                }`}
+                title="Notificacoes"
+                aria-label="Notificacoes"
+                aria-expanded={notificationsOpen}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022 23.848 23.848 0 005.455 1.31m5.714 0a3 3 0 01-5.714 0"
+                  />
+                </svg>
+
+                {unreadCount > 0 && (
+                  <span className="absolute -right-1.5 -top-1.5 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center border border-white/80">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {notificationsOpen && (
+                <div
+                  className={`absolute right-0 mt-3 w-80 rounded-2xl border shadow-2xl overflow-hidden ${
+                    isLightTheme
+                      ? 'bg-white border-slate-200 text-slate-950'
+                      : 'bg-[#111916] border-white/10 text-white'
+                  }`}
+                >
+                  <div
+                    className={`px-4 py-3 border-b flex items-center justify-between gap-3 ${
+                      isLightTheme ? 'border-slate-200' : 'border-white/10'
+                    }`}
+                  >
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                        Notificacoes
+                      </p>
+                      <p className="text-sm font-black">
+                        {unreadCount} por ler
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={markAllNotificationsAsRead}
+                      className={`text-[10px] font-black uppercase tracking-widest transition-colors ${
+                        isLightTheme
+                          ? 'text-emerald-700 hover:text-emerald-900'
+                          : 'text-emerald-200 hover:text-white'
+                      }`}
+                    >
+                      Ler todas
+                    </button>
+                  </div>
+
+                  <div className="max-h-96 overflow-y-auto">
+                    {notificationsLoading && (
+                      <p className="px-4 py-6 text-center text-xs font-bold uppercase tracking-widest text-slate-500">
+                        A carregar...
+                      </p>
+                    )}
+
+                    {!notificationsLoading && notificationError && (
+                      <p className="px-4 py-4 text-xs font-bold text-red-300">
+                        {notificationError}
+                      </p>
+                    )}
+
+                    {!notificationsLoading && !notificationError && notifications.length === 0 && (
+                      <p className="px-4 py-6 text-center text-xs font-bold uppercase tracking-widest text-slate-500">
+                        Sem notificacoes.
+                      </p>
+                    )}
+
+                    {!notificationsLoading && !notificationError && notifications.map((notification) => {
+                      const isUnread = Number(notification.is_read) === 0;
+
+                      return (
+                        <button
+                          key={notification.idnotification}
+                          onClick={() => markNotificationAsRead(notification)}
+                          className={`w-full text-left px-4 py-3 border-b transition-colors ${
+                            isLightTheme
+                              ? 'border-slate-100 hover:bg-slate-50'
+                              : 'border-white/10 hover:bg-white/5'
+                          } ${isUnread ? '' : 'opacity-65'}`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <span
+                              className={`mt-1.5 h-2.5 w-2.5 rounded-full flex-none ${
+                                isUnread ? 'bg-emerald-400' : 'bg-slate-500'
+                              }`}
+                            ></span>
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                                {notification.type}
+                              </p>
+                              <p className="text-sm font-bold leading-snug">
+                                {notification.message}
+                              </p>
+                              <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                                {new Date(notification.created_at).toLocaleString('pt-PT', {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
 
             <button
               onClick={toggleTheme}

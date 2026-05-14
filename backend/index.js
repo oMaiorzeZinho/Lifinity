@@ -10,6 +10,7 @@ const statisticsRoutes = require('./src/routes/statisticsRoutes');
 const groupRoutes = require('./src/routes/groupRoutes');
 const friendRoutes = require('./src/routes/friendRoutes');
 const chatRoutes = require('./src/routes/chatRoutes');
+const notificationRoutes = require('./src/routes/notificationRoutes');
 
 //Criação de uma instância do Express (a aplicação)
 const app = express();
@@ -41,6 +42,7 @@ app.use('/api/groups', groupRoutes);
 app.use('/api/friends', friendRoutes);
 // Usar as rotas de chat
 app.use('/api/chat', chatRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 //Mandar o servidor começar a "ouvir" os pedidos
 app.listen(PORT, () => {

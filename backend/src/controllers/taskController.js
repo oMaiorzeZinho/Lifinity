@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { createNotifications } = require('./notificationController');
 // IMPORTANTE: Este require aponta para o binário que acabaste de compilar em C
 const gamification = require('../../build/Release/gamification'); 
 
@@ -100,6 +101,7 @@ exports.createTask = async (req, res) => {
 
         const assigneeIds = normalizeIdList(req.body.assignees);
         const groupIds = normalizeIdList(req.body.groups);
+        const taskNotificationRecipients = new Set(assigneeIds || []);
 
         if (!assigneeIds || !groupIds) {
             return res.status(400).json({
@@ -178,6 +180,17 @@ exports.createTask = async (req, res) => {
                     message: "So podes enviar tarefas para grupos aos quais pertences."
                 });
             }
+
+            const [groupMembers] = await db.query(
+                `SELECT DISTINCT iduser
+                 FROM GROUP_MEMBER
+                 WHERE idgroup IN (${placeholders})`,
+                groupIds
+            );
+
+            groupMembers.forEach((member) => {
+                taskNotificationRecipients.add(Number(member.iduser));
+            });
         }
 
         connection = await db.getConnection();
@@ -220,6 +233,14 @@ exports.createTask = async (req, res) => {
                 values
             );
         }
+
+        await createNotifications({
+            recipients: [...taskNotificationRecipients],
+            type: 'tarefa',
+            message: `Recebeste uma nova tarefa: ${title.trim()}.`,
+            excludeUserId: iduser,
+            executor: connection
+        });
 
         await connection.commit();
 

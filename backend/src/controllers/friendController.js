@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { createNotifications } = require('./notificationController');
 
 // Pesquisar utilizadores por username
 exports.searchUsers = async (req, res) => {
@@ -55,6 +56,18 @@ exports.sendFriendRequest = async (req, res) => {
             [requester, iduser_receiver]
         );
 
+        const [requesters] = await db.query(
+            'SELECT username FROM USER WHERE iduser = ?',
+            [requester]
+        );
+
+        await createNotifications({
+            recipients: [iduser_receiver],
+            type: 'amizade',
+            message: `${requesters[0]?.username || 'Um utilizador'} enviou-te um pedido de amizade.`,
+            excludeUserId: requester
+        });
+
         res.status(201).json({ message: 'Pedido de amizade enviado.' });
     } catch (err) {
         console.error('Erro ao enviar pedido:', err);
@@ -96,6 +109,22 @@ exports.acceptFriendRequest = async (req, res) => {
         const iduser = req.user.iduser;
         const { idfriendship } = req.params;
 
+        const [requests] = await db.query(
+            `SELECT
+                f.iduser_requester,
+                receiver.username AS receiver_username
+             FROM FRIENDSHIP f
+             INNER JOIN USER receiver ON receiver.iduser = f.iduser_receiver
+             WHERE f.idfriendship = ?
+             AND f.iduser_receiver = ?
+             AND f.status = 'pendente'`,
+            [idfriendship, iduser]
+        );
+
+        if (requests.length === 0) {
+            return res.status(404).json({ message: 'Pedido nao encontrado.' });
+        }
+
         const [result] = await db.query(
             `UPDATE FRIENDSHIP
              SET status = 'aceite'
@@ -107,6 +136,13 @@ exports.acceptFriendRequest = async (req, res) => {
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Pedido não encontrado.' });
         }
+
+        await createNotifications({
+            recipients: [requests[0].iduser_requester],
+            type: 'amizade',
+            message: `${requests[0].receiver_username} aceitou o teu pedido de amizade.`,
+            excludeUserId: iduser
+        });
 
         res.json({ message: 'Pedido de amizade aceite.' });
     } catch (err) {
