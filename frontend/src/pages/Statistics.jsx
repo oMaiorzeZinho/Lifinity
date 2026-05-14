@@ -21,9 +21,6 @@ const cardClass =
 const selectClass =
   'w-full bg-white/[0.06] border border-white/10 text-slate-200 rounded-2xl px-5 py-4 text-xs font-black uppercase tracking-widest outline-none cursor-pointer hover:bg-white/[0.09] focus:border-emerald-300/40 transition-all';
 
-const inputClass =
-  'w-full bg-white/[0.06] border border-white/10 text-slate-200 placeholder:text-slate-500 rounded-2xl px-5 py-4 text-xs font-bold outline-none focus:border-emerald-300/40 transition-all';
-
 const metricOptions = {
   xpGained: {
     label: 'XP ganho',
@@ -71,6 +68,16 @@ const defaultSummary = {
   productivityScore: 0
 };
 
+const formatMetricValue = (value) => {
+  const numericValue = Number(value || 0);
+
+  if (Number.isInteger(numericValue)) {
+    return numericValue;
+  }
+
+  return numericValue.toFixed(1);
+};
+
 const CustomTooltip = ({ active, payload, label, selectedMetric }) => {
   if (!active || !payload || payload.length === 0) return null;
 
@@ -79,9 +86,20 @@ const CustomTooltip = ({ active, payload, label, selectedMetric }) => {
       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
         {label}
       </p>
-      <p className="text-sm font-black text-white">
-        {selectedMetric.label}: {payload[0].value}
-      </p>
+      <div className="space-y-1">
+        {payload.map((item) => (
+          <p
+            key={item.dataKey}
+            className="text-sm font-black text-white flex items-center gap-2"
+          >
+            <span
+              className="h-2.5 w-2.5 rounded-full"
+              style={{ backgroundColor: item.color || item.fill }}
+            ></span>
+            {item.name || selectedMetric.label}: {formatMetricValue(item.value)}
+          </p>
+        ))}
+      </div>
     </div>
   );
 };
@@ -94,8 +112,43 @@ const Statistics = () => {
   const [loading, setLoading] = useState(true);
   const [chartType, setChartType] = useState('area');
   const [error, setError] = useState('');
+  const [friends, setFriends] = useState([]);
+  const [groups, setGroups] = useState([]);
+  const [selectedFriendId, setSelectedFriendId] = useState('');
+  const [selectedGroupId, setSelectedGroupId] = useState('');
+  const [optionsLoading, setOptionsLoading] = useState(true);
+  const [optionsError, setOptionsError] = useState('');
 
   const navigate = useNavigate();
+
+  const fetchComparisonOptions = useCallback(async () => {
+    try {
+      setOptionsLoading(true);
+      setOptionsError('');
+
+      const token = localStorage.getItem('token');
+      const savedUser = localStorage.getItem('user');
+
+      if (!token || !savedUser) {
+        navigate('/login');
+        return;
+      }
+
+      const headers = { Authorization: `Bearer ${token}` };
+      const [friendsResponse, groupsResponse] = await Promise.all([
+        axios.get(`${API_URL}/friends`, { headers }),
+        axios.get(`${API_URL}/groups`, { headers })
+      ]);
+
+      setFriends(Array.isArray(friendsResponse.data) ? friendsResponse.data : []);
+      setGroups(Array.isArray(groupsResponse.data) ? groupsResponse.data : []);
+    } catch (err) {
+      console.error('Erro ao carregar amigos e grupos:', err);
+      setOptionsError('Nao foi possivel carregar amigos e grupos.');
+    } finally {
+      setOptionsLoading(false);
+    }
+  }, [navigate]);
 
   const fetchStatistics = useCallback(async () => {
     try {
@@ -110,7 +163,17 @@ const Statistics = () => {
         return;
       }
 
-      const response = await axios.get(`${API_URL}/statistics/me`, {
+      let endpoint = `${API_URL}/statistics/me`;
+
+      if (comparisonMode === 'friend' && selectedFriendId) {
+        endpoint = `${API_URL}/statistics/compare/friend/${selectedFriendId}`;
+      }
+
+      if (comparisonMode === 'group' && selectedGroupId) {
+        endpoint = `${API_URL}/statistics/compare/group/${selectedGroupId}`;
+      }
+
+      const response = await axios.get(endpoint, {
         params: { period },
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -118,15 +181,49 @@ const Statistics = () => {
       setStatistics(response.data);
     } catch (err) {
       console.error('Erro ao carregar estatísticas:', err);
-      setError('Não foi possível carregar as estatísticas.');
+      setError(err.response?.data?.message || 'Nao foi possivel carregar as estatisticas.');
     } finally {
       setLoading(false);
     }
-  }, [period, navigate]);
+  }, [period, comparisonMode, selectedFriendId, selectedGroupId, navigate]);
 
   useEffect(() => {
     fetchStatistics();
   }, [fetchStatistics]);
+
+  useEffect(() => {
+    fetchComparisonOptions();
+  }, [fetchComparisonOptions]);
+
+  useEffect(() => {
+    if (comparisonMode === 'friend') {
+      const hasSelectedFriend = friends.some((friend) => {
+        return String(friend.iduser) === String(selectedFriendId);
+      });
+
+      if (friends.length > 0 && !hasSelectedFriend) {
+        setSelectedFriendId(String(friends[0].iduser));
+      }
+
+      if (friends.length === 0 && selectedFriendId) {
+        setSelectedFriendId('');
+      }
+    }
+
+    if (comparisonMode === 'group') {
+      const hasSelectedGroup = groups.some((group) => {
+        return String(group.idgroup) === String(selectedGroupId);
+      });
+
+      if (groups.length > 0 && !hasSelectedGroup) {
+        setSelectedGroupId(String(groups[0].idgroup));
+      }
+
+      if (groups.length === 0 && selectedGroupId) {
+        setSelectedGroupId('');
+      }
+    }
+  }, [comparisonMode, friends, groups, selectedFriendId, selectedGroupId]);
 
   const chartData = useMemo(() => statistics?.chartData ?? [], [statistics]);
 
@@ -136,22 +233,51 @@ const Statistics = () => {
   );
 
   const selectedMetric = metricOptions[metric];
+  const hasComparison =
+    statistics?.comparisonMode === 'friend' || statistics?.comparisonMode === 'group';
+
+  const comparisonLabel = useMemo(() => {
+    if (!hasComparison) return '';
+    if (statistics?.comparisonMode === 'group') return 'Media do grupo';
+    return statistics?.target?.name || 'Amigo';
+  }, [hasComparison, statistics]);
+
+  const getChartMetricValue = useCallback(
+    (item, source = 'me') => {
+      if (hasComparison) {
+        return Number(item?.[source]?.[metric] || 0);
+      }
+
+      return Number(item?.[metric] || 0);
+    },
+    [hasComparison, metric]
+  );
 
   const totalMetricValue = useMemo(() => {
-    return chartData.reduce((sum, item) => sum + Number(item[metric] || 0), 0);
-  }, [chartData, metric]);
+    return chartData.reduce(
+      (totals, item) => {
+        totals.me += getChartMetricValue(item, 'me');
+        totals.comparison += hasComparison
+          ? getChartMetricValue(item, 'comparison')
+          : 0;
+
+        return totals;
+      },
+      { me: 0, comparison: 0 }
+    );
+  }, [chartData, getChartMetricValue, hasComparison]);
 
   const bestDay = useMemo(() => {
     if (chartData.length === 0) return null;
 
     return chartData.reduce((best, item) => {
-      if (!best || Number(item[metric] || 0) > Number(best[metric] || 0)) {
+      if (!best || getChartMetricValue(item, 'me') > getChartMetricValue(best, 'me')) {
         return item;
       }
 
       return best;
     }, null);
-  }, [chartData, metric]);
+  }, [chartData, getChartMetricValue]);
 
   const renderChart = () => {
     if (chartData.length === 0) {
@@ -161,6 +287,11 @@ const Statistics = () => {
         </div>
       );
     }
+
+    const ownMetricKey = hasComparison ? `me.${metric}` : metric;
+    const comparisonMetricKey = `comparison.${metric}`;
+    const comparisonStroke = '#fbbf24';
+    const comparisonFill = '#f59e0b';
 
     if (chartType === 'bar') {
       return (
@@ -181,17 +312,26 @@ const Statistics = () => {
               tick={{ fontSize: 11, fill: '#94a3b8' }}
               axisLine={{ stroke: 'rgba(255,255,255,0.12)' }}
               tickLine={false}
-              allowDecimals={false}
+              allowDecimals={hasComparison}
             />
             <Tooltip
               content={<CustomTooltip selectedMetric={selectedMetric} />}
               cursor={{ fill: 'rgba(255,255,255,0.04)' }}
             />
             <Bar
-              dataKey={metric}
+              dataKey={ownMetricKey}
+              name="Eu"
               radius={[10, 10, 0, 0]}
               fill={selectedMetric.fill}
             />
+            {hasComparison && (
+              <Bar
+                dataKey={comparisonMetricKey}
+                name={comparisonLabel}
+                radius={[10, 10, 0, 0]}
+                fill={comparisonFill}
+              />
+            )}
           </BarChart>
         </ResponsiveContainer>
       );
@@ -215,7 +355,7 @@ const Statistics = () => {
             tick={{ fontSize: 11, fill: '#94a3b8' }}
             axisLine={{ stroke: 'rgba(255,255,255,0.12)' }}
             tickLine={false}
-            allowDecimals={false}
+            allowDecimals={hasComparison}
           />
           <Tooltip
             content={<CustomTooltip selectedMetric={selectedMetric} />}
@@ -223,12 +363,24 @@ const Statistics = () => {
           />
           <Area
             type="monotone"
-            dataKey={metric}
+            dataKey={ownMetricKey}
+            name="Eu"
             stroke={selectedMetric.stroke}
             fill={selectedMetric.fill}
             strokeWidth={3}
             fillOpacity={0.18}
           />
+          {hasComparison && (
+            <Area
+              type="monotone"
+              dataKey={comparisonMetricKey}
+              name={comparisonLabel}
+              stroke={comparisonStroke}
+              fill={comparisonFill}
+              strokeWidth={3}
+              fillOpacity={0.12}
+            />
+          )}
         </AreaChart>
       </ResponsiveContainer>
     );
@@ -417,27 +569,80 @@ const Statistics = () => {
 
               {(comparisonMode === 'friend' || comparisonMode === 'group') && (
                 <div className="mt-4">
-                  <label htmlFor="statistics-comparison-target" className="sr-only">
-                    Destino da comparacao
+                  <label
+                    htmlFor="statistics-comparison-target"
+                    className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2"
+                  >
+                    {comparisonMode === 'friend' ? 'Amigo' : 'Grupo'}
                   </label>
-                  <input
-                    id="statistics-comparison-target"
-                    type="text"
-                    placeholder={
-                      comparisonMode === 'friend'
-                        ? 'Nome do amigo...'
-                        : 'Nome do grupo...'
-                    }
-                    value=""
-                    className={`${inputClass} opacity-70 cursor-not-allowed`}
-                    disabled
-                    readOnly
-                  />
 
-                  <p className="text-xs text-slate-400 font-bold mt-3 leading-relaxed">
-                    Esta opção será ativada quando o módulo de amigos e grupos
-                    estiver completo.
-                  </p>
+                  {comparisonMode === 'friend' && (
+                    <>
+                      <select
+                        id="statistics-comparison-target"
+                        value={selectedFriendId}
+                        onChange={(e) => setSelectedFriendId(e.target.value)}
+                        className={selectClass}
+                        disabled={optionsLoading || friends.length === 0}
+                      >
+                        {friends.map((friend) => (
+                          <option
+                            className="bg-[#111916] text-white"
+                            key={friend.iduser}
+                            value={friend.iduser}
+                          >
+                            {friend.username}
+                          </option>
+                        ))}
+                      </select>
+
+                      {friends.length === 0 && !optionsLoading && (
+                        <p className="text-xs text-slate-400 font-bold mt-3 leading-relaxed">
+                          Ainda nao tens amigos aceites para comparar.
+                        </p>
+                      )}
+                    </>
+                  )}
+
+                  {comparisonMode === 'group' && (
+                    <>
+                      <select
+                        id="statistics-comparison-target"
+                        value={selectedGroupId}
+                        onChange={(e) => setSelectedGroupId(e.target.value)}
+                        className={selectClass}
+                        disabled={optionsLoading || groups.length === 0}
+                      >
+                        {groups.map((group) => (
+                          <option
+                            className="bg-[#111916] text-white"
+                            key={group.idgroup}
+                            value={group.idgroup}
+                          >
+                            {group.name}
+                          </option>
+                        ))}
+                      </select>
+
+                      {groups.length === 0 && !optionsLoading && (
+                        <p className="text-xs text-slate-400 font-bold mt-3 leading-relaxed">
+                          Ainda nao pertences a nenhum grupo para comparar.
+                        </p>
+                      )}
+                    </>
+                  )}
+
+                  {optionsLoading && (
+                    <p className="text-xs text-slate-400 font-bold mt-3 leading-relaxed">
+                      A carregar opcoes de comparacao...
+                    </p>
+                  )}
+
+                  {optionsError && (
+                    <p className="text-xs text-red-300 font-bold mt-3 leading-relaxed">
+                      {optionsError}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -465,9 +670,20 @@ const Statistics = () => {
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                 Total no período
               </p>
-              <p className="text-3xl font-black text-white tracking-tighter mt-1">
-                {totalMetricValue}
-              </p>
+              {hasComparison ? (
+                <div className="mt-2 space-y-1">
+                  <p className="text-2xl font-black text-white tracking-tighter">
+                    Eu: {formatMetricValue(totalMetricValue.me)}
+                  </p>
+                  <p className="text-sm font-black text-amber-200 tracking-tight">
+                    {comparisonLabel}: {formatMetricValue(totalMetricValue.comparison)}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-3xl font-black text-white tracking-tighter mt-1">
+                  {formatMetricValue(totalMetricValue.me)}
+                </p>
+              )}
             </div>
           </div>
 
@@ -503,14 +719,14 @@ const Statistics = () => {
 
         <div className={`${cardClass} p-6 rounded-[2rem]`}>
           <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2 italic">
-            Comparações futuras
+            Comparacoes
           </p>
           <h3 className="text-2xl font-black tracking-tight text-white">
             Amigos e grupos
           </h3>
           <p className="text-slate-300 font-medium mt-3">
-            A estrutura já está preparada para comparar estatísticas individuais
-            com amigos ou médias de grupos.
+            Compara o teu progresso com amigos aceites ou com a media dos teus
+            grupos.
           </p>
         </div>
       </div>
