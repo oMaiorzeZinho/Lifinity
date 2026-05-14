@@ -7,6 +7,8 @@ const API_URL = import.meta.env.VITE_API_URL;
 const cardClass =
   'bg-[#111916]/88 border border-white/10 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.25)]';
 
+const ASSISTANT_CONVERSATION_ID = 'assistant';
+
 const getToken = () => localStorage.getItem('token');
 
 const formatMessageTime = (date) => {
@@ -31,6 +33,7 @@ const Chat = () => {
 
   const navigate = useNavigate();
   const selectedConversationId = searchParams.get('conversation');
+  const isAssistantSelected = selectedConversationId === ASSISTANT_CONVERSATION_ID;
 
   const currentUser = useMemo(() => {
     const savedUser = localStorage.getItem('user');
@@ -70,18 +73,19 @@ const Chat = () => {
       setError('');
 
       const token = getToken();
+      const endpoint =
+        idconversation === ASSISTANT_CONVERSATION_ID
+          ? `${API_URL}/assistant/messages`
+          : `${API_URL}/chat/conversations/${idconversation}/messages`;
 
-      const response = await axios.get(
-        `${API_URL}/chat/conversations/${idconversation}/messages`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      const response = await axios.get(endpoint, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
       setMessages(response.data);
     } catch (err) {
       console.error('Erro ao carregar mensagens:', err);
-      setError(err.response?.data?.message || 'Nao foi possivel carregar as mensagens.');
+      setError(err.response?.data?.message || 'Nao foi possivel carregar esta conversa.');
     } finally {
       setMessagesLoading(false);
     }
@@ -95,13 +99,19 @@ const Chat = () => {
     fetchMessages(selectedConversationId);
   }, [fetchMessages, selectedConversationId]);
 
-  const selectedConversation = conversations.find(
-    (conversation) =>
-      Number(conversation.idconversation) === Number(selectedConversationId)
-  );
+  const selectedConversation = isAssistantSelected
+    ? null
+    : conversations.find(
+        (conversation) =>
+          Number(conversation.idconversation) === Number(selectedConversationId)
+      );
 
   const openConversation = (idconversation) => {
     setSearchParams({ conversation: String(idconversation) });
+  };
+
+  const openAssistantConversation = () => {
+    setSearchParams({ conversation: ASSISTANT_CONVERSATION_ID });
   };
 
   const handleSendMessage = async (e) => {
@@ -113,6 +123,23 @@ const Chat = () => {
 
     try {
       const token = getToken();
+
+      if (isAssistantSelected) {
+        const response = await axios.post(
+          `${API_URL}/assistant/messages`,
+          { content },
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+
+        setMessages((currentMessages) => [
+          ...currentMessages,
+          ...(response.data.messages || [])
+        ]);
+        setMessageText('');
+        return;
+      }
 
       const response = await axios.post(
         `${API_URL}/chat/conversations/${selectedConversationId}/messages`,
@@ -172,16 +199,36 @@ const Chat = () => {
             </h3>
           </div>
 
-          {conversations.length === 0 ? (
-            <div className="p-10 text-center text-slate-500 font-bold italic uppercase text-xs tracking-widest">
-              Ainda nao tens conversas privadas.
-            </div>
-          ) : (
-            <div className="p-4 space-y-3">
-              {conversations.map((conversation) => {
+          <div className="p-4 space-y-3">
+            <button
+              type="button"
+              onClick={openAssistantConversation}
+              className={`w-full p-5 rounded-2xl border text-left transition-all ${
+                isAssistantSelected
+                  ? 'bg-emerald-500/10 border-emerald-300/30'
+                  : 'bg-white/[0.045] border-white/10 hover:bg-white/[0.075]'
+              }`}
+            >
+              <p className="text-lg font-black text-white">
+                Assistente Lifinity
+              </p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-emerald-300/80 mt-1">
+                Sempre disponivel
+              </p>
+              <p className="text-sm text-slate-400 font-medium mt-4 line-clamp-2">
+                Tarefas, produtividade, motivacao e organizacao.
+              </p>
+            </button>
+
+            {conversations.length === 0 ? (
+              <div className="p-6 text-center text-slate-500 font-bold italic uppercase text-xs tracking-widest">
+                Ainda nao tens conversas privadas.
+              </div>
+            ) : (
+              conversations.map((conversation) => {
                 const isSelected =
                   Number(conversation.idconversation) ===
-                  Number(selectedConversationId);
+                    Number(selectedConversationId) && !isAssistantSelected;
 
                 return (
                   <button
@@ -205,9 +252,9 @@ const Chat = () => {
                     </p>
                   </button>
                 );
-              })}
-            </div>
-          )}
+              })
+            )}
+          </div>
         </aside>
 
         <section className={`${cardClass} rounded-[2rem] overflow-hidden min-h-[640px] flex flex-col`}>
@@ -216,7 +263,9 @@ const Chat = () => {
               Conversa ativa
             </p>
             <h3 className="text-2xl font-black tracking-tight text-white">
-              {selectedConversation?.other_username || 'Seleciona uma conversa'}
+              {isAssistantSelected
+                ? 'Assistente Lifinity'
+                : selectedConversation?.other_username || 'Seleciona uma conversa'}
             </h3>
           </div>
 
@@ -231,15 +280,19 @@ const Chat = () => {
               </div>
             ) : messages.length === 0 ? (
               <div className="h-full min-h-96 flex items-center justify-center text-center text-slate-500 font-bold italic uppercase text-xs tracking-widest">
-                Ainda nao ha mensagens nesta conversa.
+                {isAssistantSelected
+                  ? 'Ainda nao falaste com o assistente.'
+                  : 'Ainda nao ha mensagens nesta conversa.'}
               </div>
             ) : (
               messages.map((message) => {
-                const isMine = Number(message.idsender) === Number(currentUser?.iduser);
+                const isMine = isAssistantSelected
+                  ? message.sender === 'user'
+                  : Number(message.idsender) === Number(currentUser?.iduser);
 
                 return (
                   <div
-                    key={message.idmessage}
+                    key={`${isAssistantSelected ? message.sender : message.idsender}-${message.idmessage}`}
                     className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
@@ -278,7 +331,7 @@ const Chat = () => {
               type="text"
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}
-              placeholder="Escreve uma mensagem..."
+              placeholder={isAssistantSelected ? 'Pergunta ao Assistente Lifinity...' : 'Escreve uma mensagem...'}
               disabled={!selectedConversationId}
               className="flex-1 bg-white/[0.06] border border-white/10 text-slate-100 placeholder:text-slate-500 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-emerald-300/40 focus:bg-white/[0.09] transition-all disabled:opacity-50"
             />
