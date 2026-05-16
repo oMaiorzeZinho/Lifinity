@@ -1,8 +1,112 @@
 const db = require('../config/db');
 
-// Gera um código simples para convite de grupo
+// Gera um codigo simples para convite de grupo
 const generateInviteCode = () => {
     return Math.random().toString(36).substring(2, 10).toUpperCase();
+};
+
+const buildPlaceholders = (rows, columnsPerRow) => (
+    rows.map(() => `(${Array(columnsPerRow).fill('?').join(', ')})`).join(', ')
+);
+
+const syncGroupConversationMembers = async (connection, conversation, group) => {
+    const [members] = await connection.query(
+        `SELECT iduser
+         FROM GROUP_MEMBER
+         WHERE idgroup = ?
+         ORDER BY iduser ASC`,
+        [group.idgroup]
+    );
+
+    const memberRows = members.map((member) => [
+        conversation.idconversation,
+        Number(member.iduser),
+        Number(member.iduser) === Number(group.idowner) ? 'admin' : 'membro'
+    ]);
+
+    await connection.query(
+        `DELETE FROM CONVERSATION_MEMBER
+         WHERE idconversation = ?
+           AND iduser NOT IN (
+                SELECT iduser
+                FROM GROUP_MEMBER
+                WHERE idgroup = ?
+           )`,
+        [conversation.idconversation, group.idgroup]
+    );
+
+    if (memberRows.length === 0) return;
+
+    await connection.query(
+        `INSERT INTO CONVERSATION_MEMBER (idconversation, iduser, role)
+         VALUES ${buildPlaceholders(memberRows, 3)}
+         ON DUPLICATE KEY UPDATE role = VALUES(role)`,
+        memberRows.flat()
+    );
+};
+
+const getOrCreateGroupConversation = async (idgroup) => {
+    const connection = await db.getConnection();
+
+    try {
+        await connection.beginTransaction();
+
+        const [groups] = await connection.query(
+            `SELECT idgroup, idowner, name
+             FROM GROUP_ENTITY
+             WHERE idgroup = ?
+             LIMIT 1`,
+            [idgroup]
+        );
+
+        if (groups.length === 0) {
+            await connection.rollback();
+            connection.release();
+            return null;
+        }
+
+        const group = groups[0];
+
+        const [existingConversations] = await connection.query(
+            `SELECT idconversation
+             FROM CONVERSATION
+             WHERE idgroup = ?
+             LIMIT 1`,
+            [idgroup]
+        );
+
+        let conversation = existingConversations[0] || null;
+
+        if (!conversation) {
+            const [result] = await connection.query(
+                `INSERT INTO CONVERSATION (type, name, idgroup, idcreated_by)
+                 VALUES ('group', ?, ?, ?)`,
+                [group.name, group.idgroup, group.idowner]
+            );
+
+            conversation = { idconversation: result.insertId };
+        } else {
+            await connection.query(
+                `UPDATE CONVERSATION
+                 SET type = 'group',
+                     name = ?,
+                     idcreated_by = ?
+                 WHERE idconversation = ?`,
+                [group.name, group.idowner, conversation.idconversation]
+            );
+        }
+
+        await syncGroupConversationMembers(connection, conversation, group);
+
+        await connection.commit();
+        connection.release();
+
+        return conversation;
+    } catch (err) {
+        await connection.rollback();
+        connection.release();
+        throw err;
+    }
 };
 
 // Listar grupos do utilizador
@@ -36,6 +140,41 @@ exports.getMyGroups = async (req, res) => {
     }
 };
 
+// Criar ou obter conversa associada a um grupo Lifinity
+exports.getOrCreateConversationForGroup = async (req, res) => {
+    try {
+        const iduser = req.user.iduser;
+        const { idgroup } = req.params;
+
+        const [membership] = await db.query(
+            `SELECT idgroup
+             FROM GROUP_MEMBER
+             WHERE iduser = ?
+               AND idgroup = ?
+             LIMIT 1`,
+            [iduser, idgroup]
+        );
+
+        if (membership.length === 0) {
+            return res.status(403).json({ message: 'Nao tens acesso a este grupo.' });
+        }
+
+        const conversation = await getOrCreateGroupConversation(idgroup);
+
+        if (!conversation) {
+            return res.status(404).json({ message: 'Grupo nao encontrado.' });
+        }
+
+        res.json({
+            idconversation: conversation.idconversation,
+            message: 'Conversa do grupo pronta.'
+        });
+    } catch (err) {
+        console.error('Erro ao criar ou obter conversa do grupo:', err);
+        res.status(500).json({ message: 'Erro ao abrir conversa do grupo.' });
+    }
+};
+
 // Criar grupo
 exports.createGroup = async (req, res) => {
     try {
@@ -43,12 +182,11 @@ exports.createGroup = async (req, res) => {
         const { name, description } = req.body;
 
         if (!name || name.trim().length < 2) {
-            return res.status(400).json({ message: 'O nome do grupo é obrigatório.' });
+            return res.status(400).json({ message: 'O nome do grupo e obrigatorio.' });
         }
 
         let inviteCode = generateInviteCode();
 
-        // Tenta evitar colisões de código
         let exists = true;
         while (exists) {
             const [rows] = await db.query(
@@ -88,14 +226,14 @@ exports.createGroup = async (req, res) => {
     }
 };
 
-// Entrar num grupo por código
+// Entrar num grupo por codigo
 exports.joinGroupByCode = async (req, res) => {
     try {
         const iduser = req.user.iduser;
         const { inviteCode } = req.body;
 
         if (!inviteCode) {
-            return res.status(400).json({ message: 'Código de convite obrigatório.' });
+            return res.status(400).json({ message: 'Codigo de convite obrigatorio.' });
         }
 
         const [groups] = await db.query(
@@ -104,7 +242,7 @@ exports.joinGroupByCode = async (req, res) => {
         );
 
         if (groups.length === 0) {
-            return res.status(404).json({ message: 'Código de grupo inválido.' });
+            return res.status(404).json({ message: 'Codigo de grupo invalido.' });
         }
 
         const group = groups[0];
@@ -115,7 +253,7 @@ exports.joinGroupByCode = async (req, res) => {
         );
 
         if (alreadyMember.length > 0) {
-            return res.status(400).json({ message: 'Já pertences a este grupo.' });
+            return res.status(400).json({ message: 'Ja pertences a este grupo.' });
         }
 
         await db.query(
@@ -123,6 +261,23 @@ exports.joinGroupByCode = async (req, res) => {
              VALUES (?, ?, 'membro')`,
             [iduser, group.idgroup]
         );
+
+        const [conversations] = await db.query(
+            `SELECT idconversation
+             FROM CONVERSATION
+             WHERE idgroup = ?
+             LIMIT 1`,
+            [group.idgroup]
+        );
+
+        if (conversations.length > 0) {
+            await db.query(
+                `INSERT INTO CONVERSATION_MEMBER (idconversation, iduser, role)
+                 VALUES (?, ?, 'membro')
+                 ON DUPLICATE KEY UPDATE role = VALUES(role)`,
+                [conversations[0].idconversation, iduser]
+            );
+        }
 
         res.json({
             message: `Entraste no grupo ${group.name}.`
@@ -145,7 +300,7 @@ exports.getGroupMembers = async (req, res) => {
         );
 
         if (membership.length === 0) {
-            return res.status(403).json({ message: 'Não tens acesso a este grupo.' });
+            return res.status(403).json({ message: 'Nao tens acesso a este grupo.' });
         }
 
         const [members] = await db.query(
@@ -181,14 +336,14 @@ exports.leaveGroup = async (req, res) => {
         );
 
         if (groups.length === 0) {
-            return res.status(404).json({ message: 'Grupo nÃ£o encontrado.' });
+            return res.status(404).json({ message: 'Grupo nao encontrado.' });
         }
 
         const group = groups[0];
 
         if (Number(group.idowner) === Number(iduser)) {
             return res.status(400).json({
-                message: 'O dono do grupo nÃ£o pode sair. Apaga o grupo ou transfere a propriedade futuramente.'
+                message: 'O dono do grupo nao pode sair. Apaga o grupo ou transfere a propriedade futuramente.'
             });
         }
 
@@ -198,10 +353,20 @@ exports.leaveGroup = async (req, res) => {
         );
 
         if (result.affectedRows === 0) {
-            return res.status(403).json({ message: 'NÃ£o pertences a este grupo.' });
+            return res.status(403).json({ message: 'Nao pertences a este grupo.' });
         }
 
-        res.json({ message: 'SaÃ­ste do grupo.' });
+        await db.query(
+            `DELETE cm
+             FROM CONVERSATION_MEMBER cm
+             INNER JOIN CONVERSATION c
+                ON c.idconversation = cm.idconversation
+             WHERE c.idgroup = ?
+               AND cm.iduser = ?`,
+            [idgroup, iduser]
+        );
+
+        res.json({ message: 'Saiste do grupo.' });
     } catch (err) {
         console.error('Erro ao sair do grupo:', err);
         res.status(500).json({ message: 'Erro ao sair do grupo.' });
@@ -228,7 +393,7 @@ exports.deleteGroup = async (req, res) => {
         );
 
         if (permissions.length === 0) {
-            return res.status(404).json({ message: 'Grupo nÃ£o encontrado.' });
+            return res.status(404).json({ message: 'Grupo nao encontrado.' });
         }
 
         const group = permissions[0];

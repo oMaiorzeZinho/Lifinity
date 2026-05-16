@@ -92,6 +92,7 @@ const Chat = () => {
 
   const isGroupSelected = selectedConversation?.type === 'group';
   const isSelectedGroupAdmin = selectedConversation?.current_user_role === 'admin';
+  const isLifinityGroupSelected = Boolean(selectedConversation?.idgroup);
 
   const existingMemberIds = useMemo(
     () => new Set(conversationMembers.map((member) => Number(member.iduser))),
@@ -562,7 +563,10 @@ const Chat = () => {
                     {conversationMembers.map((member) => {
                       const isCurrentUser = Number(member.iduser) === Number(currentUser?.iduser);
                       const canRemove =
-                        isSelectedGroupAdmin && !isCurrentUser && conversationMembers.length > 1;
+                        !isLifinityGroupSelected &&
+                        isSelectedGroupAdmin &&
+                        !isCurrentUser &&
+                        conversationMembers.length > 1;
 
                       return (
                         <div
@@ -595,42 +599,50 @@ const Chat = () => {
                 )}
               </div>
 
-              <form onSubmit={handleAddMembers} className="space-y-3">
-                <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
-                  Adicionar amigos
-                </p>
-
-                {friendsAvailableToAdd.length === 0 ? (
-                  <p className="text-slate-500 font-bold italic uppercase text-xs tracking-widest">
-                    Nao ha amigos disponiveis para adicionar.
+              {isLifinityGroupSelected ? (
+                <div className="rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-4">
+                  <p className="text-emerald-200 text-xs font-bold leading-relaxed">
+                    Os membros deste chat sao geridos pelo grupo Lifinity.
                   </p>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {friendsAvailableToAdd.map((friend) => (
-                      <label
-                        key={friend.iduser}
-                        className="rounded-2xl border border-white/10 bg-white/[0.045] p-4 flex items-center gap-3 text-slate-200 font-bold text-sm cursor-pointer hover:bg-white/[0.08] transition-all"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={addMemberIds.includes(friend.iduser)}
-                          onChange={() => toggleAddMember(friend.iduser)}
-                          className="h-4 w-4 accent-emerald-500"
-                        />
-                        {friend.username}
-                      </label>
-                    ))}
-                  </div>
-                )}
+                </div>
+              ) : (
+                <form onSubmit={handleAddMembers} className="space-y-3">
+                  <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                    Adicionar amigos
+                  </p>
 
-                <button
-                  type="submit"
-                  disabled={addMemberIds.length === 0 || memberSubmitting}
-                  className="px-5 py-3 rounded-2xl bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {memberSubmitting ? 'A adicionar...' : 'Adicionar'}
-                </button>
-              </form>
+                  {friendsAvailableToAdd.length === 0 ? (
+                    <p className="text-slate-500 font-bold italic uppercase text-xs tracking-widest">
+                      Nao ha amigos disponiveis para adicionar.
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {friendsAvailableToAdd.map((friend) => (
+                        <label
+                          key={friend.iduser}
+                          className="rounded-2xl border border-white/10 bg-white/[0.045] p-4 flex items-center gap-3 text-slate-200 font-bold text-sm cursor-pointer hover:bg-white/[0.08] transition-all"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={addMemberIds.includes(friend.iduser)}
+                            onChange={() => toggleAddMember(friend.iduser)}
+                            className="h-4 w-4 accent-emerald-500"
+                          />
+                          {friend.username}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={addMemberIds.length === 0 || memberSubmitting}
+                    className="px-5 py-3 rounded-2xl bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {memberSubmitting ? 'A adicionar...' : 'Adicionar'}
+                  </button>
+                </form>
+              )}
             </div>
           )}
 

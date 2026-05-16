@@ -375,6 +375,27 @@ const Community = () => {
     await fetchGroupMembers(group);
   };
 
+  const handleOpenGroupChat = async (group) => {
+    setOpenActionMenu(null);
+
+    try {
+      const token = getToken();
+
+      const response = await axios.post(
+        `${API_URL}/groups/${group.idgroup}/conversation`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      navigate(`/dashboard/chat?conversation=${response.data.idconversation}`);
+    } catch (err) {
+      console.error('Erro ao abrir chat do grupo:', err);
+      showMessage(err.response?.data?.message || 'Erro ao abrir chat do grupo.');
+    }
+  };
+
   const handleLeaveGroup = async (group) => {
     setOpenActionMenu(null);
 
@@ -711,6 +732,14 @@ const Community = () => {
 
                       {openActionMenu === `group-${group.idgroup}` && (
                         <div className={menuPanelClass}>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenGroupChat(group)}
+                            className={menuItemClass}
+                          >
+                            Abrir chat
+                          </button>
+
                           <button
                             type="button"
                             onClick={() => handleViewGroupMembers(group)}

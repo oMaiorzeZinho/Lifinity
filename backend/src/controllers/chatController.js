@@ -118,6 +118,7 @@ const getConversationMembership = async (idconversation, iduser) => {
             c.idconversation,
             c.type,
             c.name,
+            c.idgroup,
             c.idcreated_by,
             cm.role
          FROM CONVERSATION c
@@ -418,6 +419,11 @@ exports.addConversationMembers = async (req, res) => {
             return res.status(400).json({ message: 'So podes adicionar membros a conversas de grupo.' });
         }
 
+        if (membership.idgroup) {
+            connection.release();
+            return res.status(400).json({ message: 'Os membros deste chat são geridos pelo grupo Lifinity.' });
+        }
+
         if (requestedMemberIds.length === 0) {
             connection.release();
             return res.status(400).json({ message: 'Escolhe pelo menos um amigo para adicionar.' });
@@ -498,6 +504,10 @@ exports.removeConversationMember = async (req, res) => {
 
         if (membership.type !== 'group') {
             return res.status(400).json({ message: 'So podes remover membros de conversas de grupo.' });
+        }
+
+        if (membership.idgroup) {
+            return res.status(400).json({ message: 'Os membros deste chat são geridos pelo grupo Lifinity.' });
         }
 
         if (membership.role !== 'admin') {

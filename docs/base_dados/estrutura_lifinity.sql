@@ -161,6 +161,7 @@ CREATE TABLE CONVERSATION (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY idx_conversation_type (type),
     KEY idx_conversation_group (idgroup),
+    UNIQUE KEY unique_conversation_group (idgroup),
     KEY idx_conversation_created_by (idcreated_by),
     FOREIGN KEY (idgroup) REFERENCES GROUP_ENTITY(idgroup) ON DELETE CASCADE,
     FOREIGN KEY (idcreated_by) REFERENCES USER(iduser) ON DELETE SET NULL

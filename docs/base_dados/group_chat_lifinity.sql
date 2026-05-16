@@ -13,3 +13,5 @@ ALTER TABLE CONVERSATION
 ALTER TABLE CONVERSATION_MEMBER
     ADD COLUMN role ENUM('admin', 'membro') DEFAULT 'membro' AFTER iduser;
 
+ALTER TABLE CONVERSATION
+    ADD UNIQUE KEY unique_conversation_group (idgroup);
