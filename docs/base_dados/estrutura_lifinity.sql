@@ -154,17 +154,22 @@ CREATE TABLE IF NOT EXISTS NOTIFICATION (
 CREATE TABLE CONVERSATION (
     idconversation INT AUTO_INCREMENT PRIMARY KEY,
     type ENUM('private', 'group') DEFAULT 'private',
+    name VARCHAR(100) DEFAULT NULL,
     idgroup INT DEFAULT NULL,
+    idcreated_by INT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY idx_conversation_type (type),
     KEY idx_conversation_group (idgroup),
-    FOREIGN KEY (idgroup) REFERENCES GROUP_ENTITY(idgroup) ON DELETE CASCADE
+    KEY idx_conversation_created_by (idcreated_by),
+    FOREIGN KEY (idgroup) REFERENCES GROUP_ENTITY(idgroup) ON DELETE CASCADE,
+    FOREIGN KEY (idcreated_by) REFERENCES USER(iduser) ON DELETE SET NULL
 );
 
 CREATE TABLE CONVERSATION_MEMBER (
     idconversation INT,
     iduser INT,
+    role ENUM('admin', 'membro') DEFAULT 'membro',
     joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (idconversation, iduser),
     KEY idx_conversation_member_user (iduser),
@@ -208,5 +213,5 @@ CREATE TABLE IF NOT EXISTS ASSISTANT_MESSAGE (
     FOREIGN KEY (iduser) REFERENCES USER(iduser) ON DELETE CASCADE
 );
 
--- Última Atualização: 14-04 às 23:10
+-- Última Atualização: 16-05 às 22:28
 

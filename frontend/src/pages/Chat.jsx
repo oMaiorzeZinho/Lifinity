@@ -22,14 +22,55 @@ const formatMessageTime = (date) => {
   });
 };
 
+const getConversationTitle = (conversation) => {
+  if (!conversation) return 'Seleciona uma conversa';
+
+  if (conversation.type === 'group') {
+    return conversation.name || 'Grupo sem nome';
+  }
+
+  return conversation.other_username || 'Utilizador';
+};
+
+const getConversationSubtitle = (conversation) => {
+  if (!conversation) return '';
+
+  if (conversation.type === 'group') {
+    const memberCount = Number(conversation.member_count || 0);
+    return `${memberCount} membro${memberCount === 1 ? '' : 's'}`;
+  }
+
+  return `Nivel ${conversation.other_level || 1}`;
+};
+
+const getConversationPreview = (conversation) => {
+  if (!conversation?.last_message) return 'Sem mensagens ainda.';
+
+  if (conversation.type === 'group' && conversation.last_sender_username) {
+    return `${conversation.last_sender_username}: ${conversation.last_message}`;
+  }
+
+  return conversation.last_message;
+};
+
 const Chat = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [friends, setFriends] = useState([]);
+  const [conversationMembers, setConversationMembers] = useState([]);
   const [messageText, setMessageText] = useState('');
+  const [groupName, setGroupName] = useState('');
+  const [selectedFriendIds, setSelectedFriendIds] = useState([]);
+  const [addMemberIds, setAddMemberIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [messagesLoading, setMessagesLoading] = useState(false);
+  const [membersLoading, setMembersLoading] = useState(false);
   const [assistantSending, setAssistantSending] = useState(false);
+  const [groupSubmitting, setGroupSubmitting] = useState(false);
+  const [memberSubmitting, setMemberSubmitting] = useState(false);
+  const [showGroupModal, setShowGroupModal] = useState(false);
+  const [showMembers, setShowMembers] = useState(false);
   const [error, setError] = useState('');
   const assistantSendingRef = useRef(false);
 
@@ -40,6 +81,41 @@ const Chat = () => {
   const currentUser = useMemo(() => {
     const savedUser = localStorage.getItem('user');
     return savedUser ? JSON.parse(savedUser) : null;
+  }, []);
+
+  const selectedConversation = isAssistantSelected
+    ? null
+    : conversations.find(
+        (conversation) =>
+          Number(conversation.idconversation) === Number(selectedConversationId)
+      );
+
+  const isGroupSelected = selectedConversation?.type === 'group';
+  const isSelectedGroupAdmin = selectedConversation?.current_user_role === 'admin';
+
+  const existingMemberIds = useMemo(
+    () => new Set(conversationMembers.map((member) => Number(member.iduser))),
+    [conversationMembers]
+  );
+
+  const friendsAvailableToAdd = useMemo(
+    () => friends.filter((friend) => !existingMemberIds.has(Number(friend.iduser))),
+    [existingMemberIds, friends]
+  );
+
+  const fetchFriends = useCallback(async () => {
+    try {
+      const token = getToken();
+
+      const response = await axios.get(`${API_URL}/friends`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setFriends(response.data);
+    } catch (err) {
+      console.error('Erro ao carregar amigos:', err);
+      setError('Nao foi possivel carregar os amigos.');
+    }
   }, []);
 
   const fetchConversations = useCallback(async () => {
@@ -93,20 +169,49 @@ const Chat = () => {
     }
   }, []);
 
+  const fetchConversationMembers = useCallback(async (idconversation) => {
+    if (!idconversation || idconversation === ASSISTANT_CONVERSATION_ID) {
+      setConversationMembers([]);
+      return;
+    }
+
+    try {
+      setMembersLoading(true);
+      setError('');
+
+      const token = getToken();
+      const response = await axios.get(
+        `${API_URL}/chat/conversations/${idconversation}/members`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      setConversationMembers(response.data);
+    } catch (err) {
+      console.error('Erro ao carregar membros:', err);
+      setError(err.response?.data?.message || 'Nao foi possivel carregar os membros.');
+    } finally {
+      setMembersLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchConversations();
-  }, [fetchConversations]);
+    fetchFriends();
+  }, [fetchConversations, fetchFriends]);
 
   useEffect(() => {
     fetchMessages(selectedConversationId);
+    setShowMembers(false);
+    setAddMemberIds([]);
   }, [fetchMessages, selectedConversationId]);
 
-  const selectedConversation = isAssistantSelected
-    ? null
-    : conversations.find(
-        (conversation) =>
-          Number(conversation.idconversation) === Number(selectedConversationId)
-      );
+  useEffect(() => {
+    if (showMembers && isGroupSelected) {
+      fetchConversationMembers(selectedConversationId);
+    }
+  }, [fetchConversationMembers, isGroupSelected, selectedConversationId, showMembers]);
 
   const openConversation = (idconversation) => {
     setSearchParams({ conversation: String(idconversation) });
@@ -114,6 +219,128 @@ const Chat = () => {
 
   const openAssistantConversation = () => {
     setSearchParams({ conversation: ASSISTANT_CONVERSATION_ID });
+  };
+
+  const toggleSelectedFriend = (iduser) => {
+    setSelectedFriendIds((currentIds) => (
+      currentIds.includes(iduser)
+        ? currentIds.filter((currentId) => currentId !== iduser)
+        : [...currentIds, iduser]
+    ));
+  };
+
+  const toggleAddMember = (iduser) => {
+    setAddMemberIds((currentIds) => (
+      currentIds.includes(iduser)
+        ? currentIds.filter((currentId) => currentId !== iduser)
+        : [...currentIds, iduser]
+    ));
+  };
+
+  const openGroupModal = async () => {
+    setError('');
+    setShowGroupModal(true);
+    await fetchFriends();
+  };
+
+  const closeGroupModal = () => {
+    setShowGroupModal(false);
+    setGroupName('');
+    setSelectedFriendIds([]);
+  };
+
+  const handleCreateGroup = async (e) => {
+    e.preventDefault();
+
+    if (!groupName.trim() || selectedFriendIds.length === 0) return;
+
+    try {
+      setGroupSubmitting(true);
+      setError('');
+
+      const token = getToken();
+      const response = await axios.post(
+        `${API_URL}/chat/conversations/group`,
+        {
+          name: groupName.trim(),
+          memberIds: selectedFriendIds
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      closeGroupModal();
+      await fetchConversations();
+      setSearchParams({ conversation: String(response.data.idconversation) });
+    } catch (err) {
+      console.error('Erro ao criar grupo:', err);
+      setError(err.response?.data?.message || 'Nao foi possivel criar o grupo.');
+    } finally {
+      setGroupSubmitting(false);
+    }
+  };
+
+  const handleAddMembers = async (e) => {
+    e.preventDefault();
+
+    if (!selectedConversationId || addMemberIds.length === 0) return;
+
+    try {
+      setMemberSubmitting(true);
+      setError('');
+
+      const token = getToken();
+      await axios.post(
+        `${API_URL}/chat/conversations/${selectedConversationId}/members`,
+        { memberIds: addMemberIds },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      setAddMemberIds([]);
+      await Promise.all([
+        fetchConversationMembers(selectedConversationId),
+        fetchConversations()
+      ]);
+    } catch (err) {
+      console.error('Erro ao adicionar membros:', err);
+      setError(err.response?.data?.message || 'Nao foi possivel adicionar membros.');
+    } finally {
+      setMemberSubmitting(false);
+    }
+  };
+
+  const handleRemoveMember = async (member) => {
+    if (!selectedConversationId) return;
+
+    if (!window.confirm(`Remover ${member.username} deste grupo?`)) {
+      return;
+    }
+
+    try {
+      setMemberSubmitting(true);
+      setError('');
+
+      const token = getToken();
+      await axios.delete(
+        `${API_URL}/chat/conversations/${selectedConversationId}/members/${member.iduser}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      await Promise.all([
+        fetchConversationMembers(selectedConversationId),
+        fetchConversations()
+      ]);
+    } catch (err) {
+      console.error('Erro ao remover membro:', err);
+      setError(err.response?.data?.message || 'Nao foi possivel remover o membro.');
+    } finally {
+      setMemberSubmitting(false);
+    }
   };
 
   const handleSendMessage = async (e) => {
@@ -183,15 +410,27 @@ const Chat = () => {
   return (
     <div className="space-y-8">
       <div className={`${cardClass} p-8 rounded-[2rem]`}>
-        <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2 italic">
-          Conversas
-        </p>
-        <h2 className="text-4xl font-black tracking-tighter text-white">
-          Chat privado
-        </h2>
-        <p className="text-slate-300 font-medium mt-3">
-          Conversas diretas com amigos aceites no Lifinity.
-        </p>
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-5">
+          <div>
+            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2 italic">
+              Conversas
+            </p>
+            <h2 className="text-4xl font-black tracking-tighter text-white">
+              Chat
+            </h2>
+            <p className="text-slate-300 font-medium mt-3">
+              Conversas diretas, grupos de chat e Assistente Lifinity.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={openGroupModal}
+            className="px-6 py-4 rounded-2xl bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition-all"
+          >
+            Novo grupo
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -234,7 +473,7 @@ const Chat = () => {
 
             {conversations.length === 0 ? (
               <div className="p-6 text-center text-slate-500 font-bold italic uppercase text-xs tracking-widest">
-                Ainda nao tens conversas privadas.
+                Ainda nao tens conversas.
               </div>
             ) : (
               conversations.map((conversation) => {
@@ -253,14 +492,21 @@ const Chat = () => {
                         : 'bg-white/[0.045] border-white/10 hover:bg-white/[0.075]'
                     }`}
                   >
-                    <p className="text-lg font-black text-white">
-                      {conversation.other_username || 'Utilizador'}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      {conversation.type === 'group' && (
+                        <span className="shrink-0 rounded-lg bg-emerald-400/10 border border-emerald-300/20 px-2 py-1 text-[9px] font-black uppercase tracking-widest text-emerald-300">
+                          Grupo
+                        </span>
+                      )}
+                      <p className="text-lg font-black text-white truncate">
+                        {getConversationTitle(conversation)}
+                      </p>
+                    </div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mt-1">
-                      Nivel {conversation.other_level || 1}
+                      {getConversationSubtitle(conversation)}
                     </p>
                     <p className="text-sm text-slate-400 font-medium mt-4 line-clamp-2">
-                      {conversation.last_message || 'Sem mensagens ainda.'}
+                      {getConversationPreview(conversation)}
                     </p>
                   </button>
                 );
@@ -271,15 +517,122 @@ const Chat = () => {
 
         <section className={`${cardClass} rounded-[2rem] overflow-hidden min-h-[640px] flex flex-col`}>
           <div className="p-6 border-b border-white/10">
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2 italic">
-              Conversa ativa
-            </p>
-            <h3 className="text-2xl font-black tracking-tight text-white">
-              {isAssistantSelected
-                ? 'Assistente Lifinity'
-                : selectedConversation?.other_username || 'Seleciona uma conversa'}
-            </h3>
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+              <div>
+                <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2 italic">
+                  Conversa ativa
+                </p>
+                <h3 className="text-2xl font-black tracking-tight text-white">
+                  {isAssistantSelected
+                    ? 'Assistente Lifinity'
+                    : getConversationTitle(selectedConversation)}
+                </h3>
+                {selectedConversation && (
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mt-2">
+                    {getConversationSubtitle(selectedConversation)}
+                  </p>
+                )}
+              </div>
+
+              {isGroupSelected && (
+                <button
+                  type="button"
+                  onClick={() => setShowMembers((current) => !current)}
+                  className="px-5 py-3 rounded-2xl bg-white/[0.08] border border-white/10 text-slate-200 text-[10px] font-black uppercase tracking-widest hover:bg-white/[0.12] transition-all"
+                >
+                  {showMembers ? 'Fechar membros' : 'Membros'}
+                </button>
+              )}
+            </div>
           </div>
+
+          {showMembers && isGroupSelected && (
+            <div className="border-b border-white/10 bg-white/[0.03] p-5 space-y-5">
+              <div>
+                <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-3">
+                  Membros
+                </p>
+
+                {membersLoading ? (
+                  <p className="text-slate-500 font-bold italic uppercase text-xs tracking-widest">
+                    A carregar membros...
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {conversationMembers.map((member) => {
+                      const isCurrentUser = Number(member.iduser) === Number(currentUser?.iduser);
+                      const canRemove =
+                        isSelectedGroupAdmin && !isCurrentUser && conversationMembers.length > 1;
+
+                      return (
+                        <div
+                          key={member.iduser}
+                          className="rounded-2xl border border-white/10 bg-white/[0.045] p-4 flex items-center justify-between gap-3"
+                        >
+                          <div>
+                            <p className="text-sm font-black text-white">
+                              {member.username}
+                            </p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mt-1">
+                              {member.role} · Nivel {member.level || 1}
+                            </p>
+                          </div>
+
+                          {canRemove && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveMember(member)}
+                              disabled={memberSubmitting}
+                              className="px-3 py-2 rounded-xl bg-red-500/10 border border-red-400/20 text-red-300 text-[10px] font-black uppercase tracking-widest hover:bg-red-500/20 transition-all disabled:opacity-50"
+                            >
+                              Remover
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <form onSubmit={handleAddMembers} className="space-y-3">
+                <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                  Adicionar amigos
+                </p>
+
+                {friendsAvailableToAdd.length === 0 ? (
+                  <p className="text-slate-500 font-bold italic uppercase text-xs tracking-widest">
+                    Nao ha amigos disponiveis para adicionar.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {friendsAvailableToAdd.map((friend) => (
+                      <label
+                        key={friend.iduser}
+                        className="rounded-2xl border border-white/10 bg-white/[0.045] p-4 flex items-center gap-3 text-slate-200 font-bold text-sm cursor-pointer hover:bg-white/[0.08] transition-all"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={addMemberIds.includes(friend.iduser)}
+                          onChange={() => toggleAddMember(friend.iduser)}
+                          className="h-4 w-4 accent-emerald-500"
+                        />
+                        {friend.username}
+                      </label>
+                    ))}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={addMemberIds.length === 0 || memberSubmitting}
+                  className="px-5 py-3 rounded-2xl bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {memberSubmitting ? 'A adicionar...' : 'Adicionar'}
+                </button>
+              </form>
+            </div>
+          )}
 
           <div className="flex-1 p-6 overflow-y-auto space-y-4">
             {!selectedConversationId ? (
@@ -314,6 +667,11 @@ const Chat = () => {
                           : 'bg-white/[0.06] text-slate-100 border-white/10'
                       }`}
                     >
+                      {isGroupSelected && !isMine && (
+                        <p className="text-[10px] font-black uppercase tracking-widest text-emerald-300 mb-2">
+                          {message.sender_username || 'Utilizador'}
+                        </p>
+                      )}
                       <p className="text-sm font-bold leading-relaxed whitespace-pre-wrap">
                         {message.content}
                       </p>
@@ -367,6 +725,87 @@ const Chat = () => {
           </form>
         </section>
       </div>
+
+      {showGroupModal && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className={`${cardClass} w-full max-w-xl rounded-[2rem] overflow-hidden`}>
+            <div className="p-6 border-b border-white/10 flex items-start justify-between gap-4">
+              <div>
+                <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2 italic">
+                  Novo grupo
+                </p>
+                <h3 className="text-2xl font-black tracking-tight text-white">
+                  Criar conversa de grupo
+                </h3>
+              </div>
+
+              <button
+                type="button"
+                onClick={closeGroupModal}
+                className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/10 text-slate-300 hover:bg-white/[0.12] hover:text-white transition-all"
+              >
+                X
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateGroup} className="p-6 space-y-5">
+              <div>
+                <label htmlFor="group-name" className="sr-only">
+                  Nome do grupo
+                </label>
+                <input
+                  id="group-name"
+                  type="text"
+                  value={groupName}
+                  onChange={(e) => setGroupName(e.target.value)}
+                  placeholder="Nome do grupo"
+                  maxLength={100}
+                  className="w-full bg-white/[0.06] border border-white/10 text-slate-100 placeholder:text-slate-500 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-emerald-300/40 focus:bg-white/[0.09] transition-all"
+                />
+              </div>
+
+              <div>
+                <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-3">
+                  Amigos
+                </p>
+
+                {friends.length === 0 ? (
+                  <div className="p-6 text-center text-slate-500 font-bold italic uppercase text-xs tracking-widest rounded-2xl border border-white/10 bg-white/[0.04]">
+                    Ainda nao tens amigos para adicionar.
+                  </div>
+                ) : (
+                  <div className="max-h-72 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-3 pr-1">
+                    {friends.map((friend) => (
+                      <label
+                        key={friend.iduser}
+                        className="rounded-2xl border border-white/10 bg-white/[0.045] p-4 flex items-center gap-3 text-slate-200 font-bold text-sm cursor-pointer hover:bg-white/[0.08] transition-all"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedFriendIds.includes(friend.iduser)}
+                          onChange={() => toggleSelectedFriend(friend.iduser)}
+                          className="h-4 w-4 accent-emerald-500"
+                        />
+                        <span>
+                          {friend.username}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={!groupName.trim() || selectedFriendIds.length === 0 || groupSubmitting}
+                className="w-full px-6 py-4 rounded-2xl bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {groupSubmitting ? 'A criar...' : 'Criar grupo'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
