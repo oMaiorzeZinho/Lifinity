@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 
@@ -29,7 +29,9 @@ const Chat = () => {
   const [messageText, setMessageText] = useState('');
   const [loading, setLoading] = useState(true);
   const [messagesLoading, setMessagesLoading] = useState(false);
+  const [assistantSending, setAssistantSending] = useState(false);
   const [error, setError] = useState('');
+  const assistantSendingRef = useRef(false);
 
   const navigate = useNavigate();
   const selectedConversationId = searchParams.get('conversation');
@@ -125,6 +127,11 @@ const Chat = () => {
       const token = getToken();
 
       if (isAssistantSelected) {
+        if (assistantSendingRef.current) return;
+
+        assistantSendingRef.current = true;
+        setAssistantSending(true);
+
         const response = await axios.post(
           `${API_URL}/assistant/messages`,
           { content },
@@ -155,6 +162,11 @@ const Chat = () => {
     } catch (err) {
       console.error('Erro ao enviar mensagem:', err);
       setError(err.response?.data?.message || 'Nao foi possivel enviar a mensagem.');
+    } finally {
+      if (isAssistantSelected) {
+        assistantSendingRef.current = false;
+        setAssistantSending(false);
+      }
     }
   };
 
@@ -331,16 +343,26 @@ const Chat = () => {
               type="text"
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}
-              placeholder={isAssistantSelected ? 'Pergunta ao Assistente Lifinity...' : 'Escreve uma mensagem...'}
-              disabled={!selectedConversationId}
+              placeholder={
+                isAssistantSelected && assistantSending
+                  ? 'A aguardar resposta do Assistente Lifinity...'
+                  : isAssistantSelected
+                    ? 'Pergunta ao Assistente Lifinity...'
+                    : 'Escreve uma mensagem...'
+              }
+              disabled={!selectedConversationId || (isAssistantSelected && assistantSending)}
               className="flex-1 bg-white/[0.06] border border-white/10 text-slate-100 placeholder:text-slate-500 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-emerald-300/40 focus:bg-white/[0.09] transition-all disabled:opacity-50"
             />
             <button
               type="submit"
-              disabled={!selectedConversationId || !messageText.trim()}
+              disabled={
+                !selectedConversationId ||
+                !messageText.trim() ||
+                (isAssistantSelected && assistantSending)
+              }
               className="px-6 py-4 rounded-2xl bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Enviar
+              {isAssistantSelected && assistantSending ? 'A enviar...' : 'Enviar'}
             </button>
           </form>
         </section>

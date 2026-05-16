@@ -69,33 +69,43 @@ const insertAssistantMessage = async (executor, { iduser, sender, content, actio
 
 const detectIntent = (content) => {
     const text = normalizeText(content);
+    const hasClearCommand = (patterns) => patterns.some((pattern) => pattern.test(text));
+    const commandPrefix = '(?:por favor\\s+|pf\\s+|podes\\s+|pode\\s+|consegues\\s+|consegue\\s+)?';
 
-    if (/^(cria tarefa|criar tarefa|adiciona tarefa|nova tarefa|lembra-me de)\b/.test(text)) {
+    if (
+        hasClearCommand([
+            new RegExp(`^${commandPrefix}(cria tarefa|criar tarefa|adiciona tarefa|nova tarefa|lembra-me de)\\b`)
+        ])
+    ) {
         return 'create_task';
     }
 
     if (
-        text.includes('tarefas pendentes') ||
-        text.includes('o que tenho para fazer') ||
-        text.includes('lista tarefas')
+        hasClearCommand([
+            /\btarefas pendentes\b/,
+            /\blista tarefas\b/,
+            /\bo que tenho para fazer\b/
+        ])
     ) {
         return 'list_pending_tasks';
     }
 
     if (
-        text.includes('produtividade') ||
-        text.includes('resumo') ||
-        text.includes('como estou') ||
-        text.includes('estatisticas')
+        hasClearCommand([
+            /\bresumo de produtividade\b/,
+            /\bprodutividade\b/,
+            /\bestatisticas\b/
+        ])
     ) {
         return 'productivity_summary';
     }
 
     if (
-        text.includes('organiza') ||
-        text.includes('prioriza') ||
-        text.includes('por onde comeco') ||
-        text.includes('sugestao')
+        hasClearCommand([
+            /\borganiza as minhas tarefas\b/,
+            /\bprioriza as minhas tarefas\b/,
+            /\bpor onde comeco nas minhas tarefas\b/
+        ])
     ) {
         return 'organization_suggestion';
     }
@@ -263,6 +273,18 @@ const getRecentAssistantMessages = async (iduser) => {
     return messages.reverse();
 };
 
+const extractGeminiText = (data) => {
+    const parts = data?.candidates?.[0]?.content?.parts;
+
+    if (!Array.isArray(parts)) return '';
+
+    return parts
+        .map((part) => (typeof part?.text === 'string' ? part.text : ''))
+        .filter(Boolean)
+        .join('\n')
+        .trim();
+};
+
 const callGemini = async (iduser, content) => {
     const apiKey = process.env.GEMINI_API_KEY;
 
@@ -274,64 +296,65 @@ const callGemini = async (iduser, content) => {
         return 'A API Gemini precisa de uma versao recente do Node com fetch disponivel. Entretanto, posso ajudar com tarefas, produtividade e organizacao.';
     }
 
-    const recentMessages = (await getRecentAssistantMessages(iduser)).filter((message, index, messages) => {
-        const isCurrentMessage =
-            index === messages.length - 1 &&
-            message.sender === 'user' &&
-            message.content === content;
+    try {
+        const recentMessages = (await getRecentAssistantMessages(iduser)).filter((message, index, messages) => {
+            const isCurrentMessage =
+                index === messages.length - 1 &&
+                message.sender === 'user' &&
+                message.content === content;
 
-        return !isCurrentMessage;
-    });
-    const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+            return !isCurrentMessage;
+        });
+        const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
-    const conversationContext = recentMessages.map((message) => ({
-        role: message.sender === 'assistant' ? 'model' : 'user',
-        parts: [{ text: message.content }]
-    })).filter((message, index, messages) => {
-        if (index === 0) return message.role === 'user';
+        const conversationContext = recentMessages.map((message) => ({
+            role: message.sender === 'assistant' ? 'model' : 'user',
+            parts: [{ text: message.content }]
+        })).filter((message, index, messages) => {
+            if (index === 0) return message.role === 'user';
 
-        return message.role !== messages[index - 1].role;
-    });
+            return message.role !== messages[index - 1].role;
+        });
 
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey
-        },
-        body: JSON.stringify({
-            systemInstruction: {
-                parts: [{ text: SYSTEM_PROMPT }]
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': apiKey
             },
-            contents: [
-                ...conversationContext,
-                {
-                    role: 'user',
-                    parts: [{ text: content }]
+            body: JSON.stringify({
+                systemInstruction: {
+                    parts: [{ text: SYSTEM_PROMPT }]
+                },
+                contents: [
+                    ...conversationContext,
+                    {
+                        role: 'user',
+                        parts: [{ text: content }]
+                    }
+                ],
+                generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 500
                 }
-            ],
-            generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 240
-            }
-        })
-    });
+            })
+        });
 
-    if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Erro na API Gemini:', response.status, errorText);
-        return 'Nao consegui falar com a Gemini agora. Posso continuar a ajudar com tarefas, produtividade e organizacao.';
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Erro na API Gemini:', response.status, errorText);
+            return 'Nao consegui falar com a Gemini agora. Tenta novamente daqui a pouco.';
+        }
+
+        const data = await response.json();
+        const text = extractGeminiText(data);
+
+        return text || 'Nao consegui gerar uma resposta agora. Tenta reformular a mensagem.';
+    } catch (err) {
+        console.error('Erro ao chamar a API Gemini:', err);
+        return 'Nao consegui falar com a Gemini agora. Tenta novamente daqui a pouco.';
     }
-
-    const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts
-        ?.map((part) => part.text)
-        .filter(Boolean)
-        .join('\n')
-        .trim();
-
-    return text || 'Nao consegui gerar uma resposta agora, mas posso ajudar-te a organizar as tarefas.';
 };
 
 const runInternalAction = async (intent, iduser, content) => {
