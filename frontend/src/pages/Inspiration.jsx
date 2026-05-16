@@ -22,10 +22,16 @@ const Inspiration = () => {
   const [friends, setFriends] = useState([]);
   const [friendsLoading, setFriendsLoading] = useState(true);
   const [friendsError, setFriendsError] = useState('');
+  const [conversations, setConversations] = useState([]);
+  const [conversationsLoading, setConversationsLoading] = useState(true);
+  const [conversationsError, setConversationsError] = useState('');
+  const [groups, setGroups] = useState([]);
+  const [groupsLoading, setGroupsLoading] = useState(true);
+  const [groupsError, setGroupsError] = useState('');
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedVerseToShare, setSelectedVerseToShare] = useState(null);
   const [shareError, setShareError] = useState('');
-  const [sharingFriendId, setSharingFriendId] = useState(null);
+  const [sharingTargetKey, setSharingTargetKey] = useState(null);
   const copyMessageTimeoutRef = useRef(null);
   const sharingInProgressRef = useRef(false);
 
@@ -114,6 +120,44 @@ const Inspiration = () => {
     }
   }, []);
 
+  const fetchConversations = useCallback(async (token) => {
+    try {
+      setConversationsLoading(true);
+      setConversationsError('');
+
+      const response = await axios.get(`${API_URL}/chat/conversations`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setConversations(response.data);
+    } catch (err) {
+      console.error('Erro ao carregar conversas:', err);
+      setConversations([]);
+      setConversationsError('Nao foi possivel carregar os grupos de conversa.');
+    } finally {
+      setConversationsLoading(false);
+    }
+  }, []);
+
+  const fetchGroups = useCallback(async (token) => {
+    try {
+      setGroupsLoading(true);
+      setGroupsError('');
+
+      const response = await axios.get(`${API_URL}/groups`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setGroups(response.data);
+    } catch (err) {
+      console.error('Erro ao carregar grupos:', err);
+      setGroups([]);
+      setGroupsError('Nao foi possivel carregar os grupos Lifinity.');
+    } finally {
+      setGroupsLoading(false);
+    }
+  }, []);
+
   const toggleFavorite = useCallback(async (idverse) => {
     try {
       const token = localStorage.getItem('token');
@@ -175,40 +219,71 @@ const Inspiration = () => {
     }
   }, [dailyVerse, showCopyMessage]);
 
+  const formatVerseContent = useCallback((verse) => {
+    return `“${verse.text}” — ${verse.book} ${verse.chapter}:${verse.verse}`;
+  }, []);
+
   const openShareModal = useCallback((verse) => {
     setSelectedVerseToShare(verse);
     setShareError('');
     setShareModalOpen(true);
-  }, []);
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetchFriends(token);
+      fetchConversations(token);
+      fetchGroups(token);
+    }
+  }, [fetchConversations, fetchFriends, fetchGroups]);
 
   const closeShareModal = useCallback(() => {
     setSelectedVerseToShare(null);
     setShareError('');
-    setSharingFriendId(null);
+    setSharingTargetKey(null);
     sharingInProgressRef.current = false;
     setShareModalOpen(false);
   }, []);
 
-  const shareVerseWithFriend = useCallback(async (friend) => {
+  const shareVerseWithTarget = useCallback(async (target) => {
     if (!selectedVerseToShare || sharingInProgressRef.current) return;
 
     try {
       sharingInProgressRef.current = true;
       setShareError('');
-      setSharingFriendId(friend.iduser);
+      setSharingTargetKey(target.key);
 
       const token = localStorage.getItem('token');
+      let idconversation;
 
-      const conversationResponse = await axios.post(
-        `${API_URL}/chat/conversations/private`,
-        { idfriend: friend.iduser },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      if (target.type === 'friend') {
+        const conversationResponse = await axios.post(
+          `${API_URL}/chat/conversations/private`,
+          { idfriend: target.iduser },
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
 
-      const idconversation = conversationResponse.data.idconversation;
-      const content = `“${selectedVerseToShare.text}” — ${selectedVerseToShare.book} ${selectedVerseToShare.chapter}:${selectedVerseToShare.verse}`;
+        idconversation = conversationResponse.data.idconversation;
+      } else if (target.type === 'conversation') {
+        idconversation = target.idconversation;
+      } else if (target.type === 'lifinity-group') {
+        const conversationResponse = await axios.post(
+          `${API_URL}/groups/${target.idgroup}/conversation`,
+          {},
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+
+        idconversation = conversationResponse.data.idconversation;
+      }
+
+      if (!idconversation) {
+        throw new Error('Destino de partilha invalido.');
+      }
+
+      const content = formatVerseContent(selectedVerseToShare);
 
       await axios.post(
         `${API_URL}/chat/conversations/${idconversation}/messages`,
@@ -223,10 +298,10 @@ const Inspiration = () => {
     } catch (err) {
       console.error('Erro ao partilhar versiculo:', err);
       setShareError(err.response?.data?.message || 'Nao foi possivel partilhar o versiculo.');
-      setSharingFriendId(null);
+      setSharingTargetKey(null);
       sharingInProgressRef.current = false;
     }
-  }, [closeShareModal, navigate, selectedVerseToShare]);
+  }, [closeShareModal, formatVerseContent, navigate, selectedVerseToShare]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -244,6 +319,8 @@ const Inspiration = () => {
       await fetchDailyVerse(token);
       await fetchFavorites(token);
       await fetchFriends(token);
+      await fetchConversations(token);
+      await fetchGroups(token);
       if (isActive) {
         setLoading(false);
       }
@@ -254,7 +331,7 @@ const Inspiration = () => {
     return () => {
       isActive = false;
     };
-  }, [navigate, fetchDailyVerse, fetchFavorites, fetchFriends]);
+  }, [navigate, fetchDailyVerse, fetchFavorites, fetchFriends, fetchConversations, fetchGroups]);
 
   const themes = useMemo(() => {
     const uniqueThemes = [
@@ -269,6 +346,12 @@ const Inspiration = () => {
 
     return favorites.filter((verse) => verse.theme === selectedTheme);
   }, [favorites, selectedTheme]);
+
+  const groupConversations = useMemo(() => {
+    return conversations.filter(
+      (conversation) => conversation.type === 'group' && !conversation.idgroup
+    );
+  }, [conversations]);
 
   if (loading) {
     return (
@@ -532,7 +615,7 @@ const Inspiration = () => {
       {/* MODAL PARTILHA */}
       {shareModalOpen && selectedVerseToShare && (
         <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-          <div className="bg-[#111916] w-full max-w-lg rounded-[2.5rem] shadow-2xl border border-white/10 overflow-hidden">
+          <div className="bg-[#111916] w-full max-w-2xl rounded-[2.5rem] shadow-2xl border border-white/10 overflow-hidden">
             <div className="p-6 border-b border-white/10 flex items-start justify-between gap-4">
               <div>
                 <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2 italic">
@@ -585,16 +668,21 @@ const Inspiration = () => {
                     Ainda nao tens amigos aceites para partilhar este versiculo.
                   </p>
                 ) : (
-                  <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+                  <div className="space-y-3 max-h-56 overflow-y-auto pr-1">
                     {friends.map((friend) => {
-                      const isSending = Number(sharingFriendId) === Number(friend.iduser);
+                      const target = {
+                        type: 'friend',
+                        key: `friend-${friend.iduser}`,
+                        iduser: friend.iduser
+                      };
+                      const isSending = sharingTargetKey === target.key;
 
                       return (
                         <button
                           key={friend.iduser}
                           type="button"
-                          onClick={() => shareVerseWithFriend(friend)}
-                          disabled={sharingFriendId !== null}
+                          onClick={() => shareVerseWithTarget(target)}
+                          disabled={sharingTargetKey !== null}
                           className="w-full p-4 rounded-2xl border border-white/10 bg-white/[0.04] text-left hover:bg-white/[0.08] hover:border-blue-400/30 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                           <span className="block text-white font-black">
@@ -602,6 +690,106 @@ const Inspiration = () => {
                           </span>
                           <span className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mt-1">
                             {isSending ? 'A enviar...' : `Nivel ${friend.level || 1}`}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div className="p-5 rounded-2xl border border-white/10 bg-white/[0.04]">
+                <p className="text-[10px] font-black uppercase tracking-widest text-emerald-300 mb-4">
+                  Grupos de conversa
+                </p>
+
+                {conversationsLoading ? (
+                  <p className="text-sm text-slate-400 font-medium">
+                    A carregar grupos de conversa...
+                  </p>
+                ) : conversationsError ? (
+                  <p className="text-sm text-red-200 font-medium">
+                    {conversationsError}
+                  </p>
+                ) : groupConversations.length === 0 ? (
+                  <p className="text-sm text-slate-400 font-medium">
+                    Ainda nao tens grupos de conversa para partilhar este versiculo.
+                  </p>
+                ) : (
+                  <div className="space-y-3 max-h-56 overflow-y-auto pr-1">
+                    {groupConversations.map((conversation) => {
+                      const target = {
+                        type: 'conversation',
+                        key: `conversation-${conversation.idconversation}`,
+                        idconversation: conversation.idconversation
+                      };
+                      const isSending = sharingTargetKey === target.key;
+
+                      return (
+                        <button
+                          key={conversation.idconversation}
+                          type="button"
+                          onClick={() => shareVerseWithTarget(target)}
+                          disabled={sharingTargetKey !== null}
+                          className="w-full p-4 rounded-2xl border border-white/10 bg-white/[0.04] text-left hover:bg-white/[0.08] hover:border-emerald-400/30 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                          <span className="block text-white font-black">
+                            {conversation.name || 'Grupo sem nome'}
+                          </span>
+                          <span className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mt-1">
+                            {isSending
+                              ? 'A enviar...'
+                              : `${conversation.member_count || 0} membro(s)`}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div className="p-5 rounded-2xl border border-white/10 bg-white/[0.04]">
+                <p className="text-[10px] font-black uppercase tracking-widest text-amber-300 mb-4">
+                  Grupos Lifinity
+                </p>
+
+                {groupsLoading ? (
+                  <p className="text-sm text-slate-400 font-medium">
+                    A carregar grupos Lifinity...
+                  </p>
+                ) : groupsError ? (
+                  <p className="text-sm text-red-200 font-medium">
+                    {groupsError}
+                  </p>
+                ) : groups.length === 0 ? (
+                  <p className="text-sm text-slate-400 font-medium">
+                    Ainda nao pertences a grupos Lifinity para partilhar este versiculo.
+                  </p>
+                ) : (
+                  <div className="space-y-3 max-h-56 overflow-y-auto pr-1">
+                    {groups.map((group) => {
+                      const target = {
+                        type: 'lifinity-group',
+                        key: `lifinity-group-${group.idgroup}`,
+                        idgroup: group.idgroup
+                      };
+                      const isSending = sharingTargetKey === target.key;
+
+                      return (
+                        <button
+                          key={group.idgroup}
+                          type="button"
+                          onClick={() => shareVerseWithTarget(target)}
+                          disabled={sharingTargetKey !== null}
+                          className="w-full p-4 rounded-2xl border border-white/10 bg-white/[0.04] text-left hover:bg-white/[0.08] hover:border-amber-400/30 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                          <span className="block text-white font-black">
+                            {group.name}
+                          </span>
+                          <span className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mt-1">
+                            {isSending
+                              ? 'A enviar...'
+                              : `${group.member_count || 0} membro(s)`}
                           </span>
                         </button>
                       );
