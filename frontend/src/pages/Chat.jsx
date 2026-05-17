@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import PublicProfileModal from '../components/PublicProfileModal';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -72,6 +73,7 @@ const Chat = () => {
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
   const [error, setError] = useState('');
+  const [publicProfileUserId, setPublicProfileUserId] = useState(null);
   const assistantSendingRef = useRef(false);
 
   const navigate = useNavigate();
@@ -220,6 +222,10 @@ const Chat = () => {
 
   const openAssistantConversation = () => {
     setSearchParams({ conversation: ASSISTANT_CONVERSATION_ID });
+  };
+
+  const openPublicProfile = (iduser) => {
+    setPublicProfileUserId(iduser);
   };
 
   const toggleSelectedFriend = (iduser) => {
@@ -533,6 +539,16 @@ const Chat = () => {
                     {getConversationSubtitle(selectedConversation)}
                   </p>
                 )}
+                {selectedConversation?.type === 'private' &&
+                  selectedConversation.other_user_id && (
+                    <button
+                      type="button"
+                      onClick={() => openPublicProfile(selectedConversation.other_user_id)}
+                      className="mt-3 text-[10px] font-black uppercase tracking-widest text-blue-300 hover:text-blue-200 transition-colors"
+                    >
+                      Ver perfil publico
+                    </button>
+                  )}
               </div>
 
               {isGroupSelected && (
@@ -574,9 +590,13 @@ const Chat = () => {
                           className="rounded-2xl border border-white/10 bg-white/[0.045] p-4 flex items-center justify-between gap-3"
                         >
                           <div>
-                            <p className="text-sm font-black text-white">
+                            <button
+                              type="button"
+                              onClick={() => openPublicProfile(member.iduser)}
+                              className="text-left text-sm font-black text-white hover:text-emerald-300 transition-colors"
+                            >
                               {member.username}
-                            </p>
+                            </button>
                             <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mt-1">
                               {member.role} · Nivel {member.level || 1}
                             </p>
@@ -818,6 +838,12 @@ const Chat = () => {
           </div>
         </div>
       )}
+
+      <PublicProfileModal
+        iduser={publicProfileUserId}
+        isOpen={Boolean(publicProfileUserId)}
+        onClose={() => setPublicProfileUserId(null)}
+      />
     </div>
   );
 };

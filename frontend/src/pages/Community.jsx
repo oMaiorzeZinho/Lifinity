@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import PublicProfileModal from '../components/PublicProfileModal';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -48,6 +49,7 @@ const Community = () => {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [openActionMenu, setOpenActionMenu] = useState(null);
+  const [publicProfileUserId, setPublicProfileUserId] = useState(null);
   const messageTimeoutRef = useRef(null);
 
   const navigate = useNavigate();
@@ -187,6 +189,11 @@ const Community = () => {
   const handleMenuClick = (e, menuKey) => {
     e.stopPropagation();
     toggleActionMenu(menuKey);
+  };
+
+  const openPublicProfile = (iduser) => {
+    setOpenActionMenu(null);
+    setPublicProfileUserId(iduser);
   };
 
   const handleCreateGroup = async (e) => {
@@ -798,9 +805,13 @@ const Community = () => {
                     key={member.iduser}
                     className="bg-white/[0.045] border border-white/10 rounded-2xl p-5"
                   >
-                    <p className="text-lg font-black text-white">
+                    <button
+                      type="button"
+                      onClick={() => openPublicProfile(member.iduser)}
+                      className="text-left text-lg font-black text-white hover:text-emerald-300 transition-colors"
+                    >
                       {member.username}
-                    </p>
+                    </button>
 
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">
                       Nível {member.level} • {member.xp} XP
@@ -858,9 +869,13 @@ const Community = () => {
                   key={user.iduser}
                   className="p-4 rounded-2xl border border-white/10 bg-white/[0.045]"
                 >
-                  <p className="font-black text-white">
+                  <button
+                    type="button"
+                    onClick={() => openPublicProfile(user.iduser)}
+                    className="text-left font-black text-white hover:text-emerald-300 transition-colors"
+                  >
                     {user.username}
-                  </p>
+                  </button>
 
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">
                     Nível {user.level} • {user.xp} XP
@@ -872,6 +887,14 @@ const Community = () => {
                     className="mt-3 px-4 py-2 rounded-xl bg-blue-500/10 border border-blue-400/20 text-blue-300 text-[10px] font-black uppercase tracking-widest hover:bg-blue-500/20 transition-all"
                   >
                     Enviar pedido
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => openPublicProfile(user.iduser)}
+                    className="mt-3 ml-2 px-4 py-2 rounded-xl bg-white/[0.06] border border-white/10 text-slate-300 text-[10px] font-black uppercase tracking-widest hover:bg-white/[0.1] hover:text-white transition-all"
+                  >
+                    Ver perfil
                   </button>
                 </div>
               ))
@@ -903,9 +926,13 @@ const Community = () => {
                     key={request.idfriendship}
                     className="p-5 rounded-2xl border border-white/10 bg-white/[0.045]"
                   >
-                    <p className="text-lg font-black text-white">
+                    <button
+                      type="button"
+                      onClick={() => openPublicProfile(request.iduser)}
+                      className="text-left text-lg font-black text-white hover:text-emerald-300 transition-colors"
+                    >
                       {request.username}
-                    </p>
+                    </button>
 
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">
                       Nível {request.level} • {request.xp} XP
@@ -944,6 +971,14 @@ const Community = () => {
 
                         {openActionMenu === `request-${request.idfriendship}` && (
                           <div className={menuPanelClass}>
+                            <button
+                              type="button"
+                              onClick={() => openPublicProfile(request.iduser)}
+                              className={menuItemClass}
+                            >
+                              Ver perfil
+                            </button>
+
                             <button
                               type="button"
                               onClick={() => handleDeclineFriendRequest(request)}
@@ -985,9 +1020,13 @@ const Community = () => {
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-lg font-black text-white">
+                        <button
+                          type="button"
+                          onClick={() => openPublicProfile(friend.iduser)}
+                          className="text-left text-lg font-black text-white hover:text-emerald-300 transition-colors"
+                        >
                           {friend.username}
-                        </p>
+                        </button>
 
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">
                       Nível {friend.level} • {friend.xp} XP
@@ -1019,6 +1058,14 @@ const Community = () => {
 
                         {openActionMenu === `friend-${friend.iduser}` && (
                           <div className={menuPanelClass}>
+                            <button
+                              type="button"
+                              onClick={() => openPublicProfile(friend.iduser)}
+                              className={menuItemClass}
+                            >
+                              Ver perfil
+                            </button>
+
                             <button
                               type="button"
                               onClick={() => handleOpenPrivateChat(friend)}
@@ -1112,6 +1159,12 @@ const Community = () => {
           </div>
         </div>
       </div>
+
+      <PublicProfileModal
+        iduser={publicProfileUserId}
+        isOpen={Boolean(publicProfileUserId)}
+        onClose={() => setPublicProfileUserId(null)}
+      />
     </div>
   );
 };
