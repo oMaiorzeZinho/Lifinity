@@ -4,6 +4,35 @@ const { safeUnlockAchievementsForUser } = require('../utils/achievements');
 // IMPORTANTE: Este require aponta para o binário que acabaste de compilar em C
 const gamification = require('../../build/Release/gamification'); 
 
+const taskVisibilityCondition = `
+    (
+        t.iduser = ?
+        OR EXISTS (
+            SELECT 1
+            FROM TASK_ASSIGNEE ta
+            WHERE ta.idtask = t.idtask
+              AND ta.iduser = ?
+        )
+        OR EXISTS (
+            SELECT 1
+            FROM GROUP_TASK gt
+            INNER JOIN GROUP_MEMBER gm
+                ON gm.idgroup = gt.idgroup
+            WHERE gt.idtask = t.idtask
+              AND gm.iduser = ?
+        )
+    )
+`;
+
+const taskHiddenForUserCondition = `
+    NOT EXISTS (
+        SELECT 1
+        FROM TASK_USER_ARCHIVE tua
+        WHERE tua.idtask = t.idtask
+          AND tua.iduser = ?
+    )
+`;
+
 // 1. Listar todas as tarefas do utilizador logado
 exports.getTasks = async (req, res) => {
     try {
@@ -49,26 +78,11 @@ exports.getTasks = async (req, res) => {
                 ON creator.iduser = t.iduser
 
              WHERE t.archived_at IS NULL
-               AND (
-                    t.iduser = ?
-                    OR EXISTS (
-                        SELECT 1
-                        FROM TASK_ASSIGNEE ta
-                        WHERE ta.idtask = t.idtask
-                          AND ta.iduser = ?
-                    )
-                    OR EXISTS (
-                        SELECT 1
-                        FROM GROUP_TASK gt
-                        INNER JOIN GROUP_MEMBER gm
-                            ON gm.idgroup = gt.idgroup
-                        WHERE gt.idtask = t.idtask
-                          AND gm.iduser = ?
-                    )
-               )
+               AND ${taskHiddenForUserCondition}
+               AND ${taskVisibilityCondition}
 
              ORDER BY t.idtask DESC`,
-            [iduser, iduser, iduser, iduser, iduser, iduser, iduser]
+            [iduser, iduser, iduser, iduser, iduser, iduser, iduser, iduser]
         );
 
         res.json(results);
@@ -485,11 +499,27 @@ exports.deleteTask = async (req, res) => {
         const iduser = req.user.iduser;
 
         const [tasks] = await db.query(
-            `SELECT status,
-                    (due_date IS NOT NULL AND due_date < NOW() AND status != 'concluida') AS is_lost
-             FROM TASK
-             WHERE idtask = ? AND iduser = ?`,
-            [idtask, iduser]
+            `SELECT
+                t.idtask,
+                t.iduser,
+                t.status,
+                (t.due_date IS NOT NULL AND t.due_date < NOW() AND t.status != 'concluida') AS is_lost,
+                EXISTS (
+                    SELECT 1
+                    FROM TASK_ASSIGNEE ta
+                    WHERE ta.idtask = t.idtask
+                ) AS has_assignees,
+                EXISTS (
+                    SELECT 1
+                    FROM GROUP_TASK gt
+                    WHERE gt.idtask = t.idtask
+                ) AS has_groups
+             FROM TASK t
+             WHERE t.idtask = ?
+               AND t.archived_at IS NULL
+               AND ${taskHiddenForUserCondition}
+               AND ${taskVisibilityCondition}`,
+            [idtask, iduser, iduser, iduser, iduser]
         );
 
         if (tasks.length === 0) {
@@ -497,12 +527,23 @@ exports.deleteTask = async (req, res) => {
         }
 
         const task = tasks[0];
+        const isOwner = Number(task.iduser) === Number(iduser);
+        const isShared = Number(task.has_assignees) === 1 || Number(task.has_groups) === 1;
 
         if (task.status === 'concluida' || Number(task.is_lost) === 1) {
-            await db.query(
-                "UPDATE TASK SET archived_at = NOW() WHERE idtask = ? AND iduser = ?",
-                [idtask, iduser]
-            );
+            if (isOwner && !isShared) {
+                await db.query(
+                    "UPDATE TASK SET archived_at = NOW() WHERE idtask = ? AND iduser = ?",
+                    [idtask, iduser]
+                );
+            } else {
+                await db.query(
+                    `INSERT INTO TASK_USER_ARCHIVE (idtask, iduser)
+                     VALUES (?, ?)
+                     ON DUPLICATE KEY UPDATE hidden_at = CURRENT_TIMESTAMP`,
+                    [idtask, iduser]
+                );
+            }
 
             return res.json({
                 message:
@@ -510,6 +551,10 @@ exports.deleteTask = async (req, res) => {
                         ? "Tarefa concluída ocultada com sucesso."
                         : "Tarefa perdida ocultada com sucesso."
             });
+        }
+
+        if (!isOwner) {
+            return res.status(403).json({ message: "Nao podes eliminar uma tarefa de outro utilizador." });
         }
 
         await db.query(
@@ -526,13 +571,51 @@ exports.deleteTask = async (req, res) => {
 exports.clearCompletedTasks = async (req, res) => {
     try {
         const iduser = req.user.iduser;
-        // Apaga apenas as tarefas concluídas deste utilizador
         await db.query(
-            "UPDATE TASK SET archived_at = NOW() WHERE iduser = ? AND status = 'concluida' AND archived_at IS NULL",
+            `INSERT INTO TASK_USER_ARCHIVE (idtask, iduser)
+             SELECT t.idtask, ?
+             FROM TASK t
+             WHERE t.status = 'concluida'
+               AND t.archived_at IS NULL
+               AND ${taskHiddenForUserCondition}
+               AND ${taskVisibilityCondition}
+               AND (
+                    t.iduser <> ?
+                    OR EXISTS (
+                        SELECT 1
+                        FROM TASK_ASSIGNEE ta
+                        WHERE ta.idtask = t.idtask
+                    )
+                    OR EXISTS (
+                        SELECT 1
+                        FROM GROUP_TASK gt
+                        WHERE gt.idtask = t.idtask
+                    )
+               )
+             ON DUPLICATE KEY UPDATE hidden_at = CURRENT_TIMESTAMP`,
+            [iduser, iduser, iduser, iduser, iduser, iduser]
+        );
+        // Arquiva globalmente apenas tarefas pessoais; colaborativas ficam ocultas por utilizador.
+        await db.query(
+            `UPDATE TASK t
+             SET t.archived_at = NOW()
+             WHERE t.iduser = ?
+               AND t.status = 'concluida'
+               AND t.archived_at IS NULL
+               AND NOT EXISTS (
+                    SELECT 1
+                    FROM TASK_ASSIGNEE ta
+                    WHERE ta.idtask = t.idtask
+               )
+               AND NOT EXISTS (
+                    SELECT 1
+                    FROM GROUP_TASK gt
+                    WHERE gt.idtask = t.idtask
+               )`,
             [iduser]
         );
 
-res.json({ message: "Tarefas concluídas ocultadas com sucesso." });
+        res.json({ message: "Tarefas concluídas ocultadas com sucesso." });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

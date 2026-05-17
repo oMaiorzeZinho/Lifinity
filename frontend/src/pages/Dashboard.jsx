@@ -195,50 +195,47 @@ const DashboardLayout = () => {
     setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'));
   };
 
-  const accentOpacity = isLightTheme ? 0.16 : 0.09;
-  const secondaryAccentOpacity = isLightTheme ? 0.14 : 0.08;
+  const accentOpacity = isLightTheme ? 0.22 : 0.15;
+  const secondaryAccentOpacity = isLightTheme ? 0.17 : 0.11;
   const pageBackground = isTasksPage
-    ? `radial-gradient(circle at top left, rgba(110, 231, 183, ${accentOpacity}), transparent 38%)`
+    ? `radial-gradient(circle at top left, rgba(47, 111, 79, ${accentOpacity}), transparent 40%)`
     : isRankingPage
-      ? `radial-gradient(circle at top, rgba(251, 191, 36, ${secondaryAccentOpacity}), transparent 38%)`
+      ? `radial-gradient(circle at top, rgba(122, 105, 67, ${secondaryAccentOpacity}), transparent 40%)`
       : isStatisticsPage
-        ? `radial-gradient(circle at top right, rgba(34, 211, 238, ${secondaryAccentOpacity}), transparent 38%)`
+        ? `radial-gradient(circle at top right, rgba(90, 120, 112, ${secondaryAccentOpacity}), transparent 40%)`
         : isInspirationPage
-          ? `radial-gradient(circle at top, rgba(245, 158, 11, ${secondaryAccentOpacity}), transparent 38%)`
+          ? `radial-gradient(circle at top, rgba(111, 143, 123, ${secondaryAccentOpacity}), transparent 40%)`
           : isCommunityPage
-            ? `radial-gradient(circle at top left, rgba(20, 184, 166, ${accentOpacity}), transparent 38%)`
+            ? `radial-gradient(circle at top left, rgba(71, 130, 101, ${accentOpacity}), transparent 40%)`
             : isProfilePage
-              ? `radial-gradient(circle at top, rgba(148, 163, 184, ${secondaryAccentOpacity}), transparent 38%)`
+              ? `radial-gradient(circle at top, rgba(143, 163, 151, ${secondaryAccentOpacity}), transparent 40%)`
               : isChatPage
-                ? `radial-gradient(circle at top right, rgba(59, 130, 246, ${secondaryAccentOpacity}), transparent 38%)`
-              : `radial-gradient(circle at top, rgba(110, 231, 183, ${secondaryAccentOpacity}), transparent 38%)`;
+                ? `radial-gradient(circle at top right, rgba(82, 115, 105, ${secondaryAccentOpacity}), transparent 40%)`
+              : `radial-gradient(circle at top, rgba(111, 143, 123, ${secondaryAccentOpacity}), transparent 40%)`;
 
   const backgroundOverlay = isLightTheme
-    ? 'linear-gradient(to bottom, rgba(248, 250, 252, 0.78), rgba(241, 245, 249, 0.96) 70%)'
-    : 'linear-gradient(to bottom, rgba(16, 23, 19, 0.65), rgba(16, 23, 19, 0.94) 70%)';
+    ? 'linear-gradient(to bottom, rgba(238, 243, 237, 0.68), rgba(223, 232, 223, 0.95) 72%)'
+    : 'linear-gradient(to bottom, rgba(31, 42, 36, 0.48), rgba(31, 42, 36, 0.86) 72%)';
 
   const navLinkClass = (isActive) =>
     `px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${
       isActive
-        ? isLightTheme
-          ? 'bg-slate-950 text-white shadow-sm'
-          : 'bg-white text-slate-950 shadow-sm'
-        : isLightTheme
-          ? 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
-          : 'text-slate-400 hover:text-white hover:bg-white/5'
+        ? 'bg-[var(--lifinity-primary)] text-[#f8faf7] shadow-sm'
+        : '[color:var(--lifinity-text-muted)] hover:[color:var(--lifinity-text)] hover:bg-[var(--lifinity-surface-soft)]'
     }`;
   return (
     <div
-      className={`min-h-screen font-sans relative overflow-hidden transition-colors ${
-        isLightTheme ? 'text-slate-950' : 'text-white'
-      }`}
-      style={{ backgroundColor: isLightTheme ? '#f8fafc' : '#101713' }}
+      className="lifinity-page min-h-screen font-sans relative overflow-hidden transition-colors"
+      data-theme={theme}
     >
       <div
         className={`fixed inset-0 bg-cover bg-center ${
-          isLightTheme ? 'opacity-10' : 'opacity-25'
+          isLightTheme ? 'opacity-[0.18]' : 'opacity-[0.28]'
         }`}
-        style={{ backgroundImage: "url('/images/dashboard-bg.png')" }}
+        style={{
+          backgroundImage: "url('/images/dashboard-bg.png')",
+          filter: isLightTheme ? 'saturate(0.9)' : 'saturate(0.85) brightness(1.08)'
+        }}
       ></div>
 
       <div
@@ -254,13 +251,12 @@ const DashboardLayout = () => {
       <div className="relative z-10">
       {/* HEADER */}
       <header
-        className={`border-b sticky top-0 z-20 backdrop-blur-2xl transition-colors ${
-          isLightTheme ? 'border-slate-200/80' : 'border-white/10'
-        }`}
+        className="border-b sticky top-0 z-20 backdrop-blur-2xl transition-colors"
         style={{
           backgroundColor: isLightTheme
-            ? 'rgba(248, 250, 252, 0.84)'
-            : 'rgba(16, 23, 19, 0.8)'
+            ? 'rgba(246, 249, 245, 0.82)'
+            : 'rgba(37, 50, 42, 0.76)',
+          borderColor: 'var(--lifinity-border)'
         }}
       >
         <div
@@ -275,20 +271,14 @@ const DashboardLayout = () => {
             />
 
             <h1
-              className={`text-xl font-black tracking-tight transition-colors ${
-                isLightTheme ? 'text-slate-950' : 'text-white'
-              }`}
+              className="text-xl font-black tracking-tight transition-colors [color:var(--lifinity-text)]"
             >
               LIFINITY
             </h1>
           </Link>
 
           <nav
-            className={`flex gap-1 p-1 rounded-2xl border overflow-x-auto transition-colors ${
-              isLightTheme
-                ? 'bg-white/85 border-slate-200 shadow-sm'
-                : 'bg-white/5 border-white/10'
-            }`}
+            className="lifinity-card-soft flex gap-1 p-1 rounded-2xl overflow-x-auto transition-colors"
             style={{ maxWidth: 760 }}
           >
             <Link
@@ -325,34 +315,16 @@ const DashboardLayout = () => {
             >
               Comunidade
             </Link>
-
-            <Link
-              to="/dashboard/profile"
-              className={navLinkClass(isProfilePage)}
-            >
-              Perfil
-            </Link>
-
-            <Link
-              to="/dashboard/chat"
-              className={navLinkClass(isChatPage)}
-            >
-              Chat
-            </Link>
           </nav>
 
           <div className="flex items-center gap-4">
             <Link to="/dashboard/profile" className="text-right hidden lg:block group">
               <p
-                className={`text-sm font-black uppercase tracking-tight transition-colors ${
-                  isLightTheme
-                    ? 'text-slate-950 group-hover:text-emerald-700'
-                    : 'text-white group-hover:text-emerald-200'
-                }`}
+                className="text-sm font-black uppercase tracking-tight transition-colors [color:var(--lifinity-text)] group-hover:[color:var(--lifinity-primary-strong)]"
               >
                 {user.username}
               </p>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+              <p className="text-xs font-bold uppercase tracking-widest [color:var(--lifinity-text-muted)]">
                 Nível {user.level}
               </p>
             </Link>
@@ -360,11 +332,7 @@ const DashboardLayout = () => {
             <div className="relative">
               <button
                 onClick={toggleNotifications}
-                className={`relative w-10 h-10 rounded-xl border flex items-center justify-center transition-all ${
-                  isLightTheme
-                    ? 'border-slate-200 bg-white/85 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 hover:border-emerald-200'
-                    : 'border-white/10 bg-white/5 text-slate-400 hover:text-emerald-200 hover:bg-white/10'
-                }`}
+                className="lifinity-button-secondary relative w-10 h-10 rounded-xl flex items-center justify-center hover:[color:var(--lifinity-primary-strong)]"
                 title="Notificacoes"
                 aria-label="Notificacoes"
                 aria-expanded={notificationsOpen}
@@ -394,19 +362,14 @@ const DashboardLayout = () => {
 
               {notificationsOpen && (
                 <div
-                  className={`absolute right-0 mt-3 w-80 rounded-2xl border shadow-2xl overflow-hidden ${
-                    isLightTheme
-                      ? 'bg-white border-slate-200 text-slate-950'
-                      : 'bg-[#111916] border-white/10 text-white'
-                  }`}
+                  className="lifinity-menu absolute right-0 mt-3 w-80 rounded-2xl overflow-hidden"
                 >
                   <div
-                    className={`px-4 py-3 border-b flex items-center justify-between gap-3 ${
-                      isLightTheme ? 'border-slate-200' : 'border-white/10'
-                    }`}
+                    className="px-4 py-3 border-b flex items-center justify-between gap-3"
+                    style={{ borderColor: 'var(--lifinity-border)' }}
                   >
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                      <p className="lifinity-muted-label">
                         Notificacoes
                       </p>
                       <p className="text-sm font-black">
@@ -416,11 +379,7 @@ const DashboardLayout = () => {
 
                     <button
                       onClick={markAllNotificationsAsRead}
-                      className={`text-[10px] font-black uppercase tracking-widest transition-colors ${
-                        isLightTheme
-                          ? 'text-emerald-700 hover:text-emerald-900'
-                          : 'text-emerald-200 hover:text-white'
-                      }`}
+                      className="text-[10px] font-black uppercase tracking-widest transition-colors [color:var(--lifinity-primary)] hover:[color:var(--lifinity-primary-strong)]"
                     >
                       Ler todas
                     </button>
@@ -452,16 +411,15 @@ const DashboardLayout = () => {
                         <button
                           key={notification.idnotification}
                           onClick={() => handleNotificationClick(notification)}
-                          className={`w-full text-left px-4 py-3 border-b transition-colors ${
-                            isLightTheme
-                              ? 'border-slate-100 hover:bg-slate-50'
-                              : 'border-white/10 hover:bg-white/5'
-                          } ${isUnread ? '' : 'opacity-65'}`}
+                          className={`w-full text-left px-4 py-3 border-b transition-colors hover:bg-[var(--lifinity-primary-muted)] ${
+                            isUnread ? '' : 'opacity-65'
+                          }`}
+                          style={{ borderColor: 'var(--lifinity-border)' }}
                         >
                           <div className="flex items-start gap-3">
                             <span
                               className={`mt-1.5 h-2.5 w-2.5 rounded-full flex-none ${
-                                isUnread ? 'bg-emerald-400' : 'bg-slate-500'
+                                isUnread ? 'bg-[var(--lifinity-primary)]' : 'bg-[var(--lifinity-text-muted)]'
                               }`}
                             ></span>
                             <div className="min-w-0">
@@ -491,10 +449,10 @@ const DashboardLayout = () => {
 
             <button
               onClick={toggleTheme}
-              className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all ${
+              className={`lifinity-button-secondary w-10 h-10 rounded-xl flex items-center justify-center ${
                 isLightTheme
-                  ? 'border-slate-200 bg-white/85 text-slate-600 hover:text-blue-600 hover:bg-blue-50 hover:border-blue-200'
-                  : 'border-white/10 bg-white/5 text-slate-400 hover:text-yellow-300 hover:bg-white/10'
+                  ? 'hover:text-[#2f6f4f]'
+                  : 'hover:text-[#d8c990]'
               }`}
               title={isLightTheme ? 'Mudar para modo escuro' : 'Mudar para modo claro'}
               aria-label={isLightTheme ? 'Mudar para modo escuro' : 'Mudar para modo claro'}
@@ -540,11 +498,7 @@ const DashboardLayout = () => {
                 localStorage.clear();
                 navigate('/login');
               }}
-              className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all ${
-                isLightTheme
-                  ? 'border-slate-200 bg-white/85 text-slate-500 hover:text-red-600 hover:bg-red-50 hover:border-red-200'
-                  : 'border-white/10 bg-white/5 text-slate-400 hover:text-red-300 hover:bg-red-500/10 hover:border-red-400/20'
-              }`}
+              className="lifinity-button-secondary w-10 h-10 rounded-xl flex items-center justify-center hover:text-red-500"
               title="Terminar sessão"
             >
               <svg
