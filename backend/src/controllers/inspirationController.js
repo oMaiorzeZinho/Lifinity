@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { safeUnlockAchievementsForUser } = require('../utils/achievements');
 
 // Função auxiliar para obter o dia do ano
 const getDayOfYear = (date) => {
@@ -90,6 +91,8 @@ exports.toggleFavoriteVerse = async (req, res) => {
       'INSERT INTO favorite_verse (iduser, idverse) VALUES (?, ?)',
       [req.user.iduser, idverse]
     );
+
+    await safeUnlockAchievementsForUser(req.user.iduser);
 
     res.json({
       message: 'Versículo adicionado aos favoritos.',

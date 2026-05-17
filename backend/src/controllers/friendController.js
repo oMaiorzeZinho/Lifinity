@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const { createNotifications } = require('./notificationController');
+const { safeUnlockAchievementsForUser } = require('../utils/achievements');
 
 // Pesquisar utilizadores por username
 exports.searchUsers = async (req, res) => {
@@ -143,6 +144,9 @@ exports.acceptFriendRequest = async (req, res) => {
             message: `${requests[0].receiver_username} aceitou o teu pedido de amizade.`,
             excludeUserId: iduser
         });
+
+        await safeUnlockAchievementsForUser(iduser);
+        await safeUnlockAchievementsForUser(requests[0].iduser_requester);
 
         res.json({ message: 'Pedido de amizade aceite.' });
     } catch (err) {

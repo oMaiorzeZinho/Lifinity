@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { safeUnlockAchievementsForUser } = require('../utils/achievements');
 
 // Gera um codigo simples para convite de grupo
 const generateInviteCode = () => {
@@ -215,6 +216,8 @@ exports.createGroup = async (req, res) => {
             [iduser, idgroup]
         );
 
+        await safeUnlockAchievementsForUser(iduser);
+
         res.status(201).json({
             message: 'Grupo criado com sucesso.',
             idgroup,
@@ -278,6 +281,8 @@ exports.joinGroupByCode = async (req, res) => {
                 [conversations[0].idconversation, iduser]
             );
         }
+
+        await safeUnlockAchievementsForUser(iduser);
 
         res.json({
             message: `Entraste no grupo ${group.name}.`

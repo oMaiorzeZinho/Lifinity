@@ -13,6 +13,17 @@ const innerCardClass =
 const buttonSecondaryClass =
   'w-full px-5 py-4 rounded-2xl bg-white/[0.08] border border-white/10 text-slate-200 text-[10px] font-black uppercase tracking-widest hover:bg-white/[0.12] transition-all';
 
+const achievementCategoryLabels = {
+  level: 'Nivel',
+  xp: 'XP',
+  tasks: 'Tarefas',
+  friends: 'Amigos',
+  groups: 'Grupos',
+  chat: 'Chat',
+  verses: 'Versiculos',
+  assistant: 'Assistente'
+};
+
 const getLevelData = (xp) => {
   if (!xp) xp = 0;
 
@@ -52,6 +63,10 @@ const Profile = () => {
 
   const [groups, setGroups] = useState([]);
   const [friends, setFriends] = useState([]);
+  const [achievements, setAchievements] = useState([]);
+  const [selectedHighlightIds, setSelectedHighlightIds] = useState([]);
+  const [achievementError, setAchievementError] = useState('');
+  const [savingHighlights, setSavingHighlights] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
@@ -72,21 +87,47 @@ const Profile = () => {
 
       setUser(JSON.parse(savedUser));
 
+      const headers = { Authorization: `Bearer ${token}` };
+
       const [summaryResponse, groupsResponse, friendsResponse] = await Promise.all([
         axios.get(`${API_URL}/tasks/summary`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers
         }),
         axios.get(`${API_URL}/groups`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers
         }),
         axios.get(`${API_URL}/friends`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers
         })
       ]);
 
       setTaskSummary(summaryResponse.data);
       setGroups(groupsResponse.data);
       setFriends(friendsResponse.data);
+
+      try {
+        await axios.post(`${API_URL}/achievements/check`, {}, { headers });
+
+        const achievementsResponse = await axios.get(`${API_URL}/achievements`, {
+          headers
+        });
+
+        const achievementData = Array.isArray(achievementsResponse.data)
+          ? achievementsResponse.data
+          : [];
+
+        setAchievements(achievementData);
+        setSelectedHighlightIds(
+          achievementData
+            .filter((achievement) => achievement.highlighted)
+            .sort((a, b) => Number(a.position || 0) - Number(b.position || 0))
+            .map((achievement) => Number(achievement.idbadge))
+        );
+        setAchievementError('');
+      } catch (achievementErr) {
+        console.error('Erro ao carregar conquistas:', achievementErr);
+        setAchievementError('Nao foi possivel carregar as conquistas.');
+      }
     } catch (err) {
       console.error('Erro ao carregar perfil:', err);
     } finally {
@@ -117,6 +158,91 @@ const Profile = () => {
   const handleLogout = () => {
     localStorage.clear();
     navigate('/login');
+  };
+
+  const unlockedAchievements = useMemo(() => {
+    return achievements.filter((achievement) => achievement.unlocked);
+  }, [achievements]);
+
+  const lockedAchievements = useMemo(() => {
+    return achievements.filter((achievement) => !achievement.unlocked);
+  }, [achievements]);
+
+  const highlightedAchievements = useMemo(() => {
+    return achievements
+      .filter((achievement) => achievement.highlighted)
+      .sort((a, b) => Number(a.position || 0) - Number(b.position || 0));
+  }, [achievements]);
+
+  const displayedHighlights = useMemo(() => {
+    if (highlightedAchievements.length > 0) return highlightedAchievements;
+
+    return [...unlockedAchievements]
+      .sort((a, b) => new Date(b.earned_at || 0) - new Date(a.earned_at || 0))
+      .slice(0, 3);
+  }, [highlightedAchievements, unlockedAchievements]);
+
+  const toggleHighlightSelection = (achievement) => {
+    if (!achievement.unlocked) return;
+
+    const idbadge = Number(achievement.idbadge);
+
+    setSelectedHighlightIds((currentIds) => {
+      if (currentIds.includes(idbadge)) {
+        return currentIds.filter((currentId) => currentId !== idbadge);
+      }
+
+      if (currentIds.length >= 3) return currentIds;
+
+      return [...currentIds, idbadge];
+    });
+  };
+
+  const saveHighlights = async () => {
+    try {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      setSavingHighlights(true);
+
+      const headers = { Authorization: `Bearer ${token}` };
+      const highlights = selectedHighlightIds.map((idbadge, index) => ({
+        idbadge,
+        position: index + 1
+      }));
+
+      await axios.put(
+        `${API_URL}/achievements/highlights`,
+        { highlights },
+        { headers }
+      );
+
+      const achievementsResponse = await axios.get(`${API_URL}/achievements`, {
+        headers
+      });
+
+      const achievementData = Array.isArray(achievementsResponse.data)
+        ? achievementsResponse.data
+        : [];
+
+      setAchievements(achievementData);
+      setSelectedHighlightIds(
+        achievementData
+          .filter((achievement) => achievement.highlighted)
+          .sort((a, b) => Number(a.position || 0) - Number(b.position || 0))
+          .map((achievement) => Number(achievement.idbadge))
+      );
+      setAchievementError('');
+    } catch (err) {
+      console.error('Erro ao guardar destaques:', err);
+      setAchievementError('Nao foi possivel guardar os destaques.');
+    } finally {
+      setSavingHighlights(false);
+    }
   };
 
   if (loading) {
@@ -272,6 +398,164 @@ const Profile = () => {
           <p className="text-xs text-slate-400 font-bold mt-2">
             Ligações na comunidade.
           </p>
+        </div>
+      </div>
+
+      {/* CONQUISTAS */}
+      <div className={`${cardClass} rounded-[2rem] overflow-hidden`}>
+        <div className="p-6 md:p-8 border-b border-white/10 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
+          <div>
+            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2 italic">
+              Medalhas
+            </p>
+            <h3 className="text-3xl font-black tracking-tighter text-white">
+              Conquistas
+            </h3>
+            <p className="text-slate-300 font-medium mt-2">
+              Escolhe ate 3 conquistas desbloqueadas para destacar no teu perfil.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={saveHighlights}
+            disabled={savingHighlights}
+            className="px-5 py-4 rounded-2xl bg-white text-slate-950 text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {savingHighlights ? 'A guardar...' : 'Guardar destaques'}
+          </button>
+        </div>
+
+        <div className="p-6 md:p-8 space-y-8">
+          {achievementError && (
+            <div className="p-4 rounded-2xl bg-red-500/10 border border-red-400/20 text-red-200 text-sm font-bold">
+              {achievementError}
+            </div>
+          )}
+
+          <div>
+            <div className="flex items-center justify-between gap-4 mb-4">
+              <h4 className="text-xl font-black tracking-tight text-white">
+                Destaques
+              </h4>
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                {selectedHighlightIds.length}/3 selecionadas
+              </p>
+            </div>
+
+            {displayedHighlights.length === 0 ? (
+              <div className="p-5 rounded-2xl bg-white/[0.04] border border-white/10 text-slate-400 text-sm font-bold">
+                Ainda nao tens conquistas desbloqueadas para destacar.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {displayedHighlights.map((achievement, index) => (
+                  <div
+                    key={achievement.idbadge}
+                    className="p-5 rounded-2xl bg-blue-500/10 border border-blue-400/20"
+                  >
+                    <p className="text-[10px] font-black uppercase tracking-widest text-blue-300 mb-3">
+                      Destaque {achievement.position || index + 1}
+                    </p>
+                    <h5 className="text-lg font-black text-white">
+                      {achievement.name}
+                    </h5>
+                    <p className="text-sm text-blue-100/80 font-medium mt-2">
+                      {achievement.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <h4 className="text-xl font-black tracking-tight text-white mb-4">
+              Desbloqueadas
+            </h4>
+
+            {unlockedAchievements.length === 0 ? (
+              <div className="p-5 rounded-2xl bg-white/[0.04] border border-white/10 text-slate-400 text-sm font-bold">
+                Continua a usar o Lifinity para desbloquear as primeiras conquistas.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {unlockedAchievements.map((achievement) => {
+                  const isSelected = selectedHighlightIds.includes(Number(achievement.idbadge));
+                  const selectedPosition = selectedHighlightIds.indexOf(Number(achievement.idbadge)) + 1;
+                  const selectionLimitReached = selectedHighlightIds.length >= 3 && !isSelected;
+
+                  return (
+                    <button
+                      key={achievement.idbadge}
+                      type="button"
+                      onClick={() => toggleHighlightSelection(achievement)}
+                      disabled={selectionLimitReached}
+                      className={`text-left p-5 rounded-2xl border transition-all ${
+                        isSelected
+                          ? 'bg-emerald-500/10 border-emerald-400/30'
+                          : 'bg-white/[0.045] border-white/10 hover:bg-white/[0.07]'
+                      } disabled:opacity-55 disabled:cursor-not-allowed`}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+                            {achievementCategoryLabels[achievement.category] || achievement.category || 'Conquista'}
+                          </p>
+                          <h5 className="text-lg font-black text-white">
+                            {achievement.name}
+                          </h5>
+                        </div>
+
+                        {isSelected && (
+                          <span className="shrink-0 px-3 py-1 rounded-full bg-emerald-400 text-slate-950 text-[10px] font-black uppercase tracking-widest">
+                            #{selectedPosition}
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-sm text-slate-300 font-medium mt-3">
+                        {achievement.description}
+                      </p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mt-4">
+                        Desbloqueada em{' '}
+                        {achievement.earned_at
+                          ? new Date(achievement.earned_at).toLocaleDateString('pt-PT')
+                          : '--'}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {lockedAchievements.length > 0 && (
+            <div>
+              <h4 className="text-xl font-black tracking-tight text-white mb-4">
+                Bloqueadas
+              </h4>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {lockedAchievements.map((achievement) => (
+                  <div
+                    key={achievement.idbadge}
+                    className="p-5 rounded-2xl bg-white/[0.025] border border-white/10 opacity-65"
+                  >
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">
+                      {achievementCategoryLabels[achievement.category] || achievement.category || 'Conquista'}
+                    </p>
+                    <h5 className="text-lg font-black text-slate-300">
+                      {achievement.name}
+                    </h5>
+                    <p className="text-sm text-slate-500 font-medium mt-3">
+                      {achievement.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

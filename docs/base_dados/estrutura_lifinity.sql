@@ -63,9 +63,14 @@ CREATE TABLE GOAL (
 
 CREATE TABLE BADGE (
     idbadge INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
+    code VARCHAR(50) UNIQUE NOT NULL,
+    name VARCHAR(80) NOT NULL,
+    description TEXT,
+    category VARCHAR(50),
     icon_url VARCHAR(255),
-    requirements INT NOT NULL
+    requirements INT NOT NULL,
+    sort_order INT DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE
 );
 
 CREATE TABLE BIBLE_VERSE (
@@ -118,6 +123,47 @@ CREATE TABLE USER_BADGE (
     FOREIGN KEY (iduser) REFERENCES USER(iduser) ON DELETE CASCADE,
     FOREIGN KEY (idbadge) REFERENCES BADGE(idbadge) ON DELETE CASCADE
 );
+
+CREATE TABLE USER_BADGE_HIGHLIGHT (
+    iduser INT NOT NULL,
+    idbadge INT NOT NULL,
+    position INT NOT NULL,
+    PRIMARY KEY (iduser, position),
+    UNIQUE KEY unique_user_badge_highlight (iduser, idbadge),
+    FOREIGN KEY (iduser) REFERENCES USER(iduser) ON DELETE CASCADE,
+    FOREIGN KEY (idbadge) REFERENCES BADGE(idbadge) ON DELETE CASCADE,
+    CHECK (position IN (1, 2, 3))
+);
+
+INSERT INTO BADGE
+    (code, name, description, category, requirements, sort_order, is_active)
+VALUES
+    ('level_2', 'Primeiro Salto', 'Atinge o nivel 2.', 'level', 2, 10, TRUE),
+    ('level_5', 'Ritmo Consistente', 'Atinge o nivel 5.', 'level', 5, 20, TRUE),
+    ('xp_500', '500 XP', 'Acumula 500 XP.', 'xp', 500, 30, TRUE),
+    ('tasks_1', 'Primeira Tarefa', 'Conclui a primeira tarefa.', 'tasks', 1, 40, TRUE),
+    ('tasks_10', 'Dez Feitas', 'Conclui 10 tarefas.', 'tasks', 10, 50, TRUE),
+    ('tasks_50', 'Maratonista', 'Conclui 50 tarefas.', 'tasks', 50, 60, TRUE),
+    ('high_priority_5', 'Prioridade Maxima', 'Conclui 5 tarefas de prioridade alta.', 'tasks', 5, 70, TRUE),
+    ('before_deadline_5', 'Antes do Prazo', 'Conclui 5 tarefas antes do prazo.', 'tasks', 5, 80, TRUE),
+    ('friends_1', 'Primeira Ligacao', 'Tem 1 amigo aceite.', 'friends', 1, 90, TRUE),
+    ('friends_5', 'Circulo Proximo', 'Tem 5 amigos aceites.', 'friends', 5, 100, TRUE),
+    ('groups_1', 'Em Equipa', 'Pertence a 1 grupo.', 'groups', 1, 110, TRUE),
+    ('groups_3', 'Rede Ativa', 'Pertence a 3 grupos.', 'groups', 3, 120, TRUE),
+    ('messages_1', 'Primeira Mensagem', 'Envia a primeira mensagem.', 'chat', 1, 130, TRUE),
+    ('messages_25', 'Conversa Fluida', 'Envia 25 mensagens.', 'chat', 25, 140, TRUE),
+    ('verses_favorite_1', 'Versiculo Guardado', 'Adiciona 1 versiculo aos favoritos.', 'verses', 1, 150, TRUE),
+    ('verses_favorite_5', 'Colecao Inspiradora', 'Adiciona 5 versiculos aos favoritos.', 'verses', 5, 160, TRUE),
+    ('verses_shared_1', 'Inspiracao Partilhada', 'Partilha 1 versiculo no chat.', 'verses', 1, 170, TRUE),
+    ('assistant_1', 'Primeira Ajuda', 'Usa o assistente pela primeira vez.', 'assistant', 1, 180, TRUE),
+    ('assistant_10', 'Assistente Habitual', 'Usa o assistente 10 vezes.', 'assistant', 10, 190, TRUE)
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    description = VALUES(description),
+    category = VALUES(category),
+    requirements = VALUES(requirements),
+    sort_order = VALUES(sort_order),
+    is_active = VALUES(is_active);
 
 -- Tarefas Partilhadas em Grupos
 CREATE TABLE GROUP_TASK (

@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { safeUnlockAchievementsForUser } = require('../utils/achievements');
 
 const GEMINI_FALLBACK_MESSAGE =
     'Ainda nao tenho a API Gemini configurada, mas posso ajudar com tarefas, produtividade e organizacao.';
@@ -435,6 +436,8 @@ exports.sendAssistantMessage = async (req, res) => {
             content: actionResult.content,
             actionType: actionResult.actionType
         });
+
+        await safeUnlockAchievementsForUser(iduser);
 
         res.status(201).json({
             reply: assistantMessage,

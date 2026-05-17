@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const { createNotifications } = require('./notificationController');
+const { safeUnlockAchievementsForUser } = require('../utils/achievements');
 // IMPORTANTE: Este require aponta para o binário que acabaste de compilar em C
 const gamification = require('../../build/Release/gamification'); 
 
@@ -349,6 +350,8 @@ exports.completeTask = async (req, res) => {
             "INSERT INTO XP_HISTORY (iduser, idtask, amount, reason) VALUES (?, ?, ?, ?)",
             [iduser, idtask, XP_REWARD, "task_completed"]
         );
+
+        await safeUnlockAchievementsForUser(iduser);
 
         res.json({
             message: `Tarefa concluída! Ganhaste ${XP_REWARD} XP${

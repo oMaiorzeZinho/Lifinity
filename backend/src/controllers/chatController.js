@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const { createNotifications } = require('./notificationController');
+const { safeUnlockAchievementsForUser } = require('../utils/achievements');
 
 const normalizePrivatePair = (iduser, idfriend) => {
     const firstUser = Number(iduser);
@@ -649,6 +650,8 @@ exports.sendMessage = async (req, res) => {
             message: notificationMessage,
             excludeUserId: iduser
         });
+
+        await safeUnlockAchievementsForUser(iduser);
 
         res.status(201).json(sentMessage);
     } catch (err) {
