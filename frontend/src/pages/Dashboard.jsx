@@ -80,12 +80,12 @@ const DashboardLayout = () => {
   };
 
   const markNotificationAsRead = async (notification) => {
-    if (Number(notification.is_read) === 1) return;
+    if (Number(notification.is_read) === 1) return true;
 
     try {
       const headers = getAuthHeaders();
 
-      if (!headers) return;
+      if (!headers) return false;
 
       await axios.put(
         `${API_URL}/notifications/${notification.idnotification}/read`,
@@ -101,9 +101,23 @@ const DashboardLayout = () => {
       });
 
       await fetchUnreadCount();
+      return true;
     } catch (err) {
       console.error('Erro ao marcar notificacao como lida:', err);
       setNotificationError('Nao foi possivel marcar a notificacao como lida.');
+      return false;
+    }
+  };
+
+  const handleNotificationClick = async (notification) => {
+    const wasMarked = await markNotificationAsRead(notification);
+
+    if (!wasMarked) return;
+
+    setNotificationsOpen(false);
+
+    if (notification.link) {
+      navigate(notification.link);
     }
   };
 
@@ -437,7 +451,7 @@ const DashboardLayout = () => {
                       return (
                         <button
                           key={notification.idnotification}
-                          onClick={() => markNotificationAsRead(notification)}
+                          onClick={() => handleNotificationClick(notification)}
                           className={`w-full text-left px-4 py-3 border-b transition-colors ${
                             isLightTheme
                               ? 'border-slate-100 hover:bg-slate-50'

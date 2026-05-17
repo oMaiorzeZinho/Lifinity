@@ -192,9 +192,13 @@ CREATE TABLE IF NOT EXISTS NOTIFICATION (
     iduser INT,
     type ENUM('amizade', 'tarefa', 'sistema') NOT NULL,
     message TEXT NOT NULL,
+    entity_type VARCHAR(50) NULL,
+    entity_id INT NULL,
+    link VARCHAR(255) NULL,
     is_read BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (iduser) REFERENCES USER(iduser) ON DELETE CASCADE
+    FOREIGN KEY (iduser) REFERENCES USER(iduser) ON DELETE CASCADE,
+    KEY idx_notification_entity (entity_type, entity_id)
 );
 
 CREATE TABLE CONVERSATION (

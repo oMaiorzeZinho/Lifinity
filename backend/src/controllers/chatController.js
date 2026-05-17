@@ -314,6 +314,9 @@ exports.createGroupConversation = async (req, res) => {
             recipients: memberIds,
             type: 'sistema',
             message: `Foste adicionado ao grupo de conversa "${name}".`,
+            entity_type: 'conversation',
+            entity_id: idconversation,
+            link: `/dashboard/chat?conversation=${idconversation}`,
             excludeUserId: iduser
         });
 
@@ -470,6 +473,9 @@ exports.addConversationMembers = async (req, res) => {
             recipients: newMemberIds,
             type: 'sistema',
             message: `Foste adicionado ao grupo de conversa "${membership.name || 'Grupo'}".`,
+            entity_type: 'conversation',
+            entity_id: Number(idconversation),
+            link: `/dashboard/chat?conversation=${idconversation}`,
             excludeUserId: iduser
         });
 
@@ -648,6 +654,9 @@ exports.sendMessage = async (req, res) => {
             recipients: memberIds,
             type: 'sistema',
             message: notificationMessage,
+            entity_type: 'conversation',
+            entity_id: Number(idconversation),
+            link: `/dashboard/chat?conversation=${idconversation}`,
             excludeUserId: iduser
         });
 

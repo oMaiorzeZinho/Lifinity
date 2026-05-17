@@ -297,10 +297,15 @@ const createAchievementNotification = async (iduser, unlockedAchievements) => {
         ? `Conquista desbloqueada: ${unlockedAchievements[0].name}`
         : `Desbloqueaste ${unlockedAchievements.length} novas conquistas`;
 
+    const firstAchievement = unlockedAchievements[0];
+
     await createNotifications({
         recipients: [iduser],
         type: 'sistema',
-        message
+        message,
+        entity_type: 'achievement',
+        entity_id: firstAchievement?.idbadge || null,
+        link: '/dashboard/profile'
     });
 };
 

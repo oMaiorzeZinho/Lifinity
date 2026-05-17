@@ -239,6 +239,9 @@ exports.createTask = async (req, res) => {
             recipients: [...taskNotificationRecipients],
             type: 'tarefa',
             message: `Recebeste uma nova tarefa: ${title.trim()}.`,
+            entity_type: 'task',
+            entity_id: idtask,
+            link: '/dashboard/tasks',
             excludeUserId: iduser,
             executor: connection
         });

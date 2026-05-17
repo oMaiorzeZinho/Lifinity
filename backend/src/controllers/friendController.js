@@ -51,11 +51,13 @@ exports.sendFriendRequest = async (req, res) => {
             return res.status(400).json({ message: 'Já existe uma relação ou pedido com este utilizador.' });
         }
 
-        await db.query(
+        const [result] = await db.query(
             `INSERT INTO FRIENDSHIP (iduser_requester, iduser_receiver, status)
              VALUES (?, ?, 'pendente')`,
             [requester, iduser_receiver]
         );
+
+        const idfriendship = result.insertId;
 
         const [requesters] = await db.query(
             'SELECT username FROM USER WHERE iduser = ?',
@@ -66,6 +68,9 @@ exports.sendFriendRequest = async (req, res) => {
             recipients: [iduser_receiver],
             type: 'amizade',
             message: `${requesters[0]?.username || 'Um utilizador'} enviou-te um pedido de amizade.`,
+            entity_type: 'friendship',
+            entity_id: idfriendship,
+            link: '/dashboard/community',
             excludeUserId: requester
         });
 
@@ -142,6 +147,9 @@ exports.acceptFriendRequest = async (req, res) => {
             recipients: [requests[0].iduser_requester],
             type: 'amizade',
             message: `${requests[0].receiver_username} aceitou o teu pedido de amizade.`,
+            entity_type: 'friendship',
+            entity_id: Number(idfriendship),
+            link: '/dashboard/community',
             excludeUserId: iduser
         });
 

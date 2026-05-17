@@ -20,6 +20,9 @@ const createNotifications = async ({
     recipients,
     type,
     message,
+    entity_type = null,
+    entity_id = null,
+    link = null,
     excludeUserId,
     executor = db
 }) => {
@@ -29,15 +32,18 @@ const createNotifications = async ({
         return 0;
     }
 
-    const placeholders = notificationRecipients.map(() => '(?, ?, ?)').join(', ');
+    const placeholders = notificationRecipients.map(() => '(?, ?, ?, ?, ?, ?)').join(', ');
     const values = notificationRecipients.flatMap((iduser) => [
         iduser,
         type,
-        message
+        message,
+        entity_type,
+        entity_id,
+        link
     ]);
 
     await executor.query(
-        `INSERT INTO NOTIFICATION (iduser, type, message)
+        `INSERT INTO NOTIFICATION (iduser, type, message, entity_type, entity_id, link)
          VALUES ${placeholders}`,
         values
     );
@@ -56,6 +62,9 @@ exports.getNotifications = async (req, res) => {
                     iduser,
                     type,
                     message,
+                    entity_type,
+                    entity_id,
+                    link,
                     is_read,
                     created_at
              FROM NOTIFICATION
