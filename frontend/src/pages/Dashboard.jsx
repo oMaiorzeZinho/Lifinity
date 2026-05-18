@@ -214,13 +214,13 @@ const DashboardLayout = () => {
               : `radial-gradient(circle at top, rgba(111, 143, 123, ${secondaryAccentOpacity}), transparent 40%)`;
 
   const backgroundOverlay = isLightTheme
-    ? 'linear-gradient(to bottom, rgba(238, 243, 237, 0.68), rgba(223, 232, 223, 0.95) 72%)'
+    ? 'linear-gradient(to bottom, rgba(223, 232, 223, 0.5), rgba(212, 222, 212, 0.9) 72%)'
     : 'linear-gradient(to bottom, rgba(31, 42, 36, 0.48), rgba(31, 42, 36, 0.86) 72%)';
 
   const navLinkClass = (isActive) =>
     `px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${
       isActive
-        ? 'bg-[var(--lifinity-primary)] text-[#f8faf7] shadow-sm'
+        ? 'bg-[var(--lifinity-primary)] [color:var(--lifinity-on-primary)] shadow-sm'
         : '[color:var(--lifinity-text-muted)] hover:[color:var(--lifinity-text)] hover:bg-[var(--lifinity-surface-soft)]'
     }`;
   return (
@@ -254,7 +254,7 @@ const DashboardLayout = () => {
         className="border-b sticky top-0 z-20 backdrop-blur-2xl transition-colors"
         style={{
           backgroundColor: isLightTheme
-            ? 'rgba(246, 249, 245, 0.82)'
+            ? 'rgba(244, 247, 240, 0.82)'
             : 'rgba(37, 50, 42, 0.76)',
           borderColor: 'var(--lifinity-border)'
         }}
@@ -354,7 +354,7 @@ const DashboardLayout = () => {
                 </svg>
 
                 {unreadCount > 0 && (
-                  <span className="absolute -right-1.5 -top-1.5 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center border border-white/80">
+                  <span className="absolute -right-1.5 -top-1.5 min-w-5 h-5 px-1 rounded-full bg-[var(--lifinity-danger)] [color:var(--lifinity-on-primary)] text-[10px] font-black flex items-center justify-center border border-[var(--lifinity-border)]">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
@@ -387,19 +387,19 @@ const DashboardLayout = () => {
 
                   <div className="max-h-96 overflow-y-auto">
                     {notificationsLoading && (
-                      <p className="px-4 py-6 text-center text-xs font-bold uppercase tracking-widest text-slate-500">
+                      <p className="px-4 py-6 text-center text-xs font-bold uppercase tracking-widest [color:var(--lifinity-text-muted)]">
                         A carregar...
                       </p>
                     )}
 
                     {!notificationsLoading && notificationError && (
-                      <p className="px-4 py-4 text-xs font-bold text-red-300">
+                      <p className="px-4 py-4 text-xs font-bold [color:var(--lifinity-danger)]">
                         {notificationError}
                       </p>
                     )}
 
                     {!notificationsLoading && !notificationError && notifications.length === 0 && (
-                      <p className="px-4 py-6 text-center text-xs font-bold uppercase tracking-widest text-slate-500">
+                      <p className="px-4 py-6 text-center text-xs font-bold uppercase tracking-widest [color:var(--lifinity-text-muted)]">
                         Sem notificacoes.
                       </p>
                     )}
@@ -411,7 +411,7 @@ const DashboardLayout = () => {
                         <button
                           key={notification.idnotification}
                           onClick={() => handleNotificationClick(notification)}
-                          className={`w-full text-left px-4 py-3 border-b transition-colors hover:bg-[var(--lifinity-primary-muted)] ${
+                          className={`w-full text-left px-4 py-3 border-b transition-colors hover:bg-[var(--lifinity-surface-hover)] ${
                             isUnread ? '' : 'opacity-65'
                           }`}
                           style={{ borderColor: 'var(--lifinity-border)' }}
@@ -423,13 +423,13 @@ const DashboardLayout = () => {
                               }`}
                             ></span>
                             <div className="min-w-0">
-                              <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                              <p className="text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-text-muted)]">
                                 {notification.type}
                               </p>
                               <p className="text-sm font-bold leading-snug">
                                 {notification.message}
                               </p>
-                              <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                              <p className="mt-1 text-[10px] font-bold uppercase tracking-widest [color:var(--lifinity-text-muted)]">
                                 {new Date(notification.created_at).toLocaleString('pt-PT', {
                                   day: '2-digit',
                                   month: '2-digit',
@@ -498,7 +498,7 @@ const DashboardLayout = () => {
                 localStorage.clear();
                 navigate('/login');
               }}
-              className="lifinity-button-secondary w-10 h-10 rounded-xl flex items-center justify-center hover:text-red-500"
+              className="lifinity-button-secondary w-10 h-10 rounded-xl flex items-center justify-center hover:[color:var(--lifinity-danger)]"
               title="Terminar sessão"
             >
               <svg

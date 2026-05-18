@@ -432,7 +432,7 @@ const Statistics = () => {
 
       {error && (
         <div
-          className="lifinity-card-soft border-red-400/30 p-5 rounded-2xl font-bold text-sm [color:var(--lifinity-danger)]"
+          className="lifinity-card-soft lifinity-danger-surface p-5 rounded-2xl font-bold text-sm"
           role="alert"
         >
           {error}
@@ -440,7 +440,7 @@ const Statistics = () => {
       )}
 
       {/* ALERTA DE TAREFAS PERDIDAS */}
-      <div className="lifinity-card-soft border-red-400/30 rounded-3xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="lifinity-card-soft lifinity-danger-surface rounded-3xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <p className="text-[10px] font-black uppercase tracking-widest mb-1 [color:var(--lifinity-danger)]">
             Tarefas perdidas no período

@@ -6,14 +6,27 @@
   --lifinity-surface: rgba(37, 50, 42, 0.72);
   --lifinity-surface-strong: rgba(43, 58, 49, 0.86);
   --lifinity-surface-soft: rgba(246, 249, 245, 0.08);
+  --lifinity-surface-hover: rgba(143, 163, 151, 0.18);
+  --lifinity-surface-selected: rgba(143, 163, 151, 0.26);
   --lifinity-primary: #6f8f7b;
   --lifinity-primary-strong: #9bbca7;
   --lifinity-primary-muted: rgba(143, 163, 151, 0.2);
   --lifinity-text: #f3f7f1;
+  --lifinity-text-secondary: #c4d0c7;
   --lifinity-text-muted: #aab9ae;
   --lifinity-border: rgba(174, 194, 180, 0.2);
   --lifinity-shadow: 0 20px 60px rgba(13, 22, 17, 0.28);
   --lifinity-danger: #fca5a5;
+  --lifinity-danger-surface: rgba(252, 165, 165, 0.12);
+  --lifinity-warning: #facc15;
+  --lifinity-warning-strong: #fde68a;
+  --lifinity-warning-surface: rgba(250, 204, 21, 0.14);
+  --lifinity-success: #86efac;
+  --lifinity-success-surface: rgba(134, 239, 172, 0.12);
+  --lifinity-overlay: rgba(8, 13, 10, 0.56);
+  --lifinity-option-bg: #28352d;
+  --lifinity-option-text: #f3f7f1;
+  --lifinity-on-primary: #f8faf7;
   min-height: 100vh;
   background:
     radial-gradient(circle at top left, rgba(111, 143, 123, 0.16), transparent 34%),
@@ -22,19 +35,32 @@
 }
 
 .lifinity-page[data-theme="light"] {
-  --lifinity-bg: #eef3ed;
-  --lifinity-bg-soft: #dfe8df;
-  --lifinity-surface: rgba(246, 249, 245, 0.78);
-  --lifinity-surface-strong: rgba(255, 255, 255, 0.9);
-  --lifinity-surface-soft: rgba(80, 105, 89, 0.08);
+  --lifinity-bg: #dfe8df;
+  --lifinity-bg-soft: #d4ded4;
+  --lifinity-surface: rgba(244, 247, 240, 0.82);
+  --lifinity-surface-strong: rgba(238, 243, 232, 0.92);
+  --lifinity-surface-soft: rgba(232, 239, 229, 0.72);
+  --lifinity-surface-hover: rgba(214, 226, 213, 0.78);
+  --lifinity-surface-selected: rgba(142, 173, 151, 0.3);
   --lifinity-primary: #2f6f4f;
   --lifinity-primary-strong: #245c40;
-  --lifinity-primary-muted: rgba(47, 111, 79, 0.14);
+  --lifinity-primary-muted: rgba(47, 111, 79, 0.16);
   --lifinity-text: #1e2a23;
-  --lifinity-text-muted: #5f6f65;
-  --lifinity-border: rgba(80, 105, 89, 0.18);
-  --lifinity-shadow: 0 18px 45px rgba(65, 86, 72, 0.14);
-  --lifinity-danger: #b91c1c;
+  --lifinity-text-secondary: #53645a;
+  --lifinity-text-muted: #718176;
+  --lifinity-border: rgba(70, 94, 78, 0.2);
+  --lifinity-shadow: 0 18px 44px rgba(94, 70, 70, 0.14);
+  --lifinity-danger: #9f423f;
+  --lifinity-danger-surface: rgba(151, 84, 70, 0.14);
+  --lifinity-warning: #8a6f2a;
+  --lifinity-warning-strong: #6f581f;
+  --lifinity-warning-surface: rgba(170, 145, 72, 0.2);
+  --lifinity-success: #2f6f4f;
+  --lifinity-success-surface: rgba(47, 111, 79, 0.13);
+  --lifinity-overlay: rgba(31, 42, 36, 0.42);
+  --lifinity-option-bg: #e8efe5;
+  --lifinity-option-text: #1e2a23;
+  --lifinity-on-primary: #f8faf7;
 }
 
 .lifinity-surface,
@@ -80,19 +106,13 @@
 
 .lifinity-select option,
 .lifinity-select optgroup {
-  background-color: #28352d;
-  color: var(--lifinity-text);
-}
-
-.lifinity-page[data-theme="light"] .lifinity-select option,
-.lifinity-page[data-theme="light"] .lifinity-select optgroup {
-  background-color: #f6f9f5;
-  color: var(--lifinity-text);
+  background-color: var(--lifinity-option-bg);
+  color: var(--lifinity-option-text);
 }
 
 .lifinity-select option:checked {
   background-color: var(--lifinity-primary);
-  color: #f8faf7;
+  color: var(--lifinity-on-primary);
 }
 
 .lifinity-input::placeholder {
@@ -118,7 +138,7 @@
 
 .lifinity-button-primary {
   background: var(--lifinity-primary);
-  color: #f8faf7;
+  color: var(--lifinity-on-primary);
   box-shadow: 0 14px 30px rgba(47, 111, 79, 0.22);
 }
 
@@ -134,7 +154,7 @@
 
 .lifinity-button-secondary:hover,
 .lifinity-menu-item:hover {
-  background: var(--lifinity-primary-muted);
+  background: var(--lifinity-surface-hover);
   color: var(--lifinity-text);
 }
 
@@ -154,7 +174,7 @@
 }
 
 .lifinity-danger-item:hover {
-  background: rgba(185, 28, 28, 0.1);
+  background: var(--lifinity-danger-surface);
 }
 
 .lifinity-muted-label {
@@ -165,6 +185,42 @@
   text-transform: uppercase;
 }
 
+.lifinity-selected {
+  border-color: color-mix(in srgb, var(--lifinity-primary) 62%, var(--lifinity-border));
+  background: var(--lifinity-surface-selected);
+  box-shadow: 0 12px 30px rgba(47, 111, 79, 0.13);
+}
+
+.lifinity-badge,
+.lifinity-warning-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid var(--lifinity-border);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.625rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.lifinity-badge {
+  background: var(--lifinity-primary-muted);
+  color: var(--lifinity-primary-strong);
+}
+
+.lifinity-danger-surface {
+  border-color: color-mix(in srgb, var(--lifinity-danger) 34%, var(--lifinity-border));
+  background: var(--lifinity-danger-surface);
+  color: var(--lifinity-danger);
+}
+
+.lifinity-warning-badge {
+  background: var(--lifinity-warning-surface);
+  color: var(--lifinity-warning);
+}
+
 .lifinity-hero-overlay {
   background:
     radial-gradient(circle at top right, var(--lifinity-primary-muted), transparent 38%),
@@ -173,8 +229,8 @@
 
 .lifinity-page[data-theme="light"] .lifinity-hero-overlay {
   background:
-    radial-gradient(circle at top right, rgba(47, 111, 79, 0.12), transparent 38%),
-    linear-gradient(90deg, rgba(238, 243, 237, 0.92), rgba(238, 243, 237, 0.62), rgba(238, 243, 237, 0.28));
+    radial-gradient(circle at top right, rgba(47, 111, 79, 0.14), transparent 38%),
+    linear-gradient(90deg, rgba(223, 232, 223, 0.94), rgba(212, 222, 212, 0.7), rgba(212, 222, 212, 0.34));
 }
 
 @media (min-width: 64rem) {

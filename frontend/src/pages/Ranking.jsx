@@ -155,7 +155,7 @@ const Ranking = () => {
       </div>
 
       {error && (
-        <div className="lifinity-card-soft border-red-400/30 p-5 rounded-2xl font-bold text-sm [color:var(--lifinity-danger)]">
+        <div className="lifinity-card-soft lifinity-danger-surface p-5 rounded-2xl font-bold text-sm">
           {error}
         </div>
       )}
@@ -261,17 +261,17 @@ const Ranking = () => {
                     <div
                       className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black ${
                         position === 1
-                          ? 'bg-amber-300 text-slate-950'
+                          ? 'bg-[var(--lifinity-warning)] [color:var(--lifinity-on-primary)]'
                           : position === 2
-                            ? 'bg-[var(--lifinity-primary-strong)] text-white'
-                            : 'bg-[var(--lifinity-primary)] text-white'
+                            ? 'bg-[var(--lifinity-primary-strong)] [color:var(--lifinity-on-primary)]'
+                            : 'bg-[var(--lifinity-primary)] [color:var(--lifinity-on-primary)]'
                       }`}
                     >
                       {position}
                     </div>
 
                     {isCurrentUser && (
-                      <span className="px-3 py-1 rounded-full bg-[var(--lifinity-primary)] text-white text-xs font-black uppercase tracking-widest">
+                      <span className="lifinity-badge text-xs">
                         Tu
                       </span>
                     )}
@@ -403,11 +403,11 @@ const Ranking = () => {
                     <div
                       className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black ${
                         position === 1
-                          ? 'bg-amber-300 text-slate-950'
+                          ? 'bg-[var(--lifinity-warning)] [color:var(--lifinity-on-primary)]'
                           : position === 2
-                            ? 'bg-slate-300 text-slate-950'
+                            ? 'bg-[var(--lifinity-primary-strong)] [color:var(--lifinity-on-primary)]'
                             : position === 3
-                              ? 'bg-orange-300 text-slate-950'
+                              ? 'bg-[var(--lifinity-primary)] [color:var(--lifinity-on-primary)]'
                               : 'bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border border-[var(--lifinity-border)]'
                       }`}
                     >
@@ -421,7 +421,7 @@ const Ranking = () => {
                         </h4>
 
                         {isCurrentUser && (
-                          <span className="px-3 py-1 rounded-full bg-[var(--lifinity-primary)] text-white text-xs font-black uppercase tracking-widest">
+                          <span className="lifinity-badge text-xs">
                             Tu
                           </span>
                         )}

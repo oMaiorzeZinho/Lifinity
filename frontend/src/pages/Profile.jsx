@@ -433,7 +433,7 @@ const Profile = () => {
 
         <div className="p-6 md:p-8 space-y-8">
           {achievementError && (
-            <div className="lifinity-card-soft p-4 rounded-2xl border-red-400/30 text-sm font-bold [color:var(--lifinity-danger)]">
+            <div className="lifinity-card-soft lifinity-danger-surface p-4 rounded-2xl text-sm font-bold">
               {achievementError}
             </div>
           )}
@@ -513,7 +513,7 @@ const Profile = () => {
                         </div>
 
                         {isSelected && (
-                          <span className="shrink-0 px-3 py-1 rounded-full bg-[var(--lifinity-primary)] text-white text-[10px] font-black uppercase tracking-widest">
+                          <span className="shrink-0 lifinity-badge text-[10px]">
                             #{selectedPosition}
                           </span>
                         )}
@@ -647,7 +647,7 @@ const Profile = () => {
             <button
               type="button"
               onClick={handleLogout}
-              className="lifinity-danger-item w-full px-5 py-4 rounded-2xl border border-red-400/20 text-[10px] font-black uppercase tracking-widest"
+              className="lifinity-danger-item w-full px-5 py-4 rounded-2xl border border-[var(--lifinity-border)] text-[10px] font-black uppercase tracking-widest"
             >
               Terminar sessão
             </button>

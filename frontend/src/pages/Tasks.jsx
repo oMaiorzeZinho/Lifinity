@@ -15,7 +15,7 @@ const selectClass =
   'lifinity-select cursor-pointer';
 
 const optionClass =
-  'bg-[#1f2a24] text-[#f3f7f1]';
+  '';
 
 const labelClass =
   'lifinity-muted-label ml-2';
@@ -744,7 +744,7 @@ const openCompleteConfirmation = (task) => {
 
   if (!user) {
     return (
-      <div className="p-10 text-slate-400 font-bold uppercase tracking-widest text-center">
+      <div className="p-10 font-bold uppercase tracking-widest text-center [color:var(--lifinity-text-muted)]">
         A carregar...
       </div>
     );
@@ -821,13 +821,13 @@ const openCompleteConfirmation = (task) => {
             Resumo de Hoje
           </p>
 
-          <p className="text-3xl font-black text-emerald-400 tracking-tighter">
+          <p className="text-3xl font-black tracking-tighter [color:var(--lifinity-primary)]">
             {taskSummary.completionRate}%
           </p>
 
           <div className="w-full bg-[var(--lifinity-surface-soft)] h-3 rounded-full mt-4 overflow-hidden">
             <div
-              className="bg-emerald-400 h-full transition-all duration-1000"
+              className="bg-[var(--lifinity-primary)] h-full transition-all duration-1000"
               style={{ width: `${taskSummary.completionRate}%` }}
             ></div>
           </div>
@@ -857,7 +857,7 @@ const openCompleteConfirmation = (task) => {
               />
 
               <svg
-                className="absolute left-3 top-3 text-slate-500"
+                className="absolute left-3 top-3 [color:var(--lifinity-text-muted)]"
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
                 height="18"
@@ -919,7 +919,7 @@ const openCompleteConfirmation = (task) => {
             {completedVisibleTasks.length > 0 && (
               <button
                 onClick={handleClearCompleted}
-                className="text-xs font-black text-red-300 uppercase tracking-widest hover:text-red-200 transition-colors mr-2"
+                className="text-xs font-black uppercase tracking-widest transition-colors mr-2 [color:var(--lifinity-danger)] hover:opacity-80"
               >
                 Ocultar Concluídas
               </button>
@@ -962,7 +962,7 @@ const openCompleteConfirmation = (task) => {
         <div className={`${cardClass} rounded-2xl overflow-hidden`}>
           <div className="p-4 space-y-3">
             {filteredTasks.length === 0 ? (
-              <div className="p-20 text-center text-slate-500 font-bold italic uppercase text-xs tracking-widest">
+              <div className="p-20 text-center font-bold italic uppercase text-xs tracking-widest [color:var(--lifinity-text-muted)]">
                 Nenhuma tarefa encontrada com estes filtros.
               </div>
             ) : (
@@ -980,17 +980,17 @@ const openCompleteConfirmation = (task) => {
                       task.status === 'concluida'
                         ? 'bg-[var(--lifinity-surface-soft)] opacity-60 border-[var(--lifinity-border)]'
                         : taskOverdue
-                          ? 'bg-red-500/10 border-red-400/25 hover:bg-red-500/15'
-                          : 'bg-[var(--lifinity-surface-soft)] border-[var(--lifinity-border)] hover:border-emerald-300/30 hover:bg-[var(--lifinity-primary-muted)] shadow-sm'
+                          ? 'lifinity-danger-surface hover:bg-[var(--lifinity-danger-surface)]'
+                          : 'bg-[var(--lifinity-surface-soft)] border-[var(--lifinity-border)] hover:bg-[var(--lifinity-surface-hover)] shadow-sm'
                     }`}
                   >
                     <div className="flex flex-col gap-2">
                       <span
                         className={`font-black text-lg tracking-tight leading-tight ${
                           task.status === 'concluida'
-                            ? 'text-slate-500 line-through italic'
+                            ? '[color:var(--lifinity-text-muted)] line-through italic'
                             : taskOverdue
-                              ? 'text-red-200'
+                              ? '[color:var(--lifinity-danger)]'
                               : '[color:var(--lifinity-text)]'
                         }`}
                       >
@@ -1000,7 +1000,7 @@ const openCompleteConfirmation = (task) => {
                       <span
                         className={`text-sm font-medium ${
                           task.status === 'concluida'
-                            ? 'text-slate-500 line-through italic'
+                            ? '[color:var(--lifinity-text-muted)] line-through italic'
                             : '[color:var(--lifinity-text-muted)]'
                         }`}
                       >
@@ -1023,7 +1023,7 @@ const openCompleteConfirmation = (task) => {
                           <span
                             className={`text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border ${
                               taskOverdue
-                                ? 'bg-red-500/10 text-red-300 border-red-400/20'
+                                ? 'lifinity-danger-surface'
                                 : 'bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)]'
                             }`}
                           >
@@ -1032,7 +1032,7 @@ const openCompleteConfirmation = (task) => {
                         )}
 
                         {taskCanBeEdited && (
-                          <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-emerald-500/10 text-emerald-300 border-emerald-400/20">
+                          <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-[var(--lifinity-success-surface)] [color:var(--lifinity-success)] border-[var(--lifinity-border)]">
                             Editável
                           </span>
                         )}
@@ -1051,11 +1051,11 @@ const openCompleteConfirmation = (task) => {
                           task.status === 'concluida'
                             ? 'bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)]'
                             : taskOverdue
-                              ? 'bg-red-500/10 text-red-300 border-red-400/20'
+                              ? 'lifinity-danger-surface'
                               : task.priority === 'alta'
-                                ? 'bg-red-500/10 text-red-300 border-red-400/20'
+                                ? 'lifinity-danger-surface'
                                 : task.priority === 'media'
-                                  ? 'bg-orange-500/10 text-orange-300 border-orange-400/20'
+                                  ? 'bg-[var(--lifinity-warning-surface)] [color:var(--lifinity-warning)] border-[var(--lifinity-border)]'
                                   : 'bg-[var(--lifinity-primary-muted)] [color:var(--lifinity-primary-strong)] border-[var(--lifinity-border)]'
                         }`}
                       >
@@ -1078,8 +1078,8 @@ const openCompleteConfirmation = (task) => {
 
                       {task.status !== 'concluida' && !taskOverdue && (
                         taskToComplete?.idtask === task.idtask ? (
-                          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-3 py-2">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-300">
+                          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--lifinity-border)] bg-[var(--lifinity-success-surface)] px-3 py-2">
+                            <span className="text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-success)]">
                               Concluir?
                             </span>
 
@@ -1094,7 +1094,7 @@ const openCompleteConfirmation = (task) => {
                             <button
                               type="button"
                               onClick={confirmCompleteTask}
-                              className="px-4 py-2 rounded-xl bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-950/30"
+                              className="lifinity-button-primary px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest"
                             >
                               Confirmar
                             </button>
@@ -1112,7 +1112,7 @@ const openCompleteConfirmation = (task) => {
                       {(taskIsOwner || taskCanBeHidden) && (
                           <button
                             onClick={() => handleDeleteTask(task)}
-                            className="text-slate-500 hover:text-red-300 transition-all p-2"
+                            className="transition-all p-2 [color:var(--lifinity-text-muted)] hover:[color:var(--lifinity-danger)]"
                             title={
                               task.status === 'concluida' || taskOverdue
                                 ? 'Ocultar tarefa'
@@ -1147,7 +1147,7 @@ const openCompleteConfirmation = (task) => {
 
       {/* MODAL CRIAR / EDITAR TAREFA */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-[#1f2a24]/62 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+        <div className="fixed inset-0 bg-[var(--lifinity-overlay)] backdrop-blur-sm z-50 flex items-center justify-center p-6">
           <div
             className="lifinity-card w-full max-w-md max-h-[90vh] overflow-y-auto rounded-3xl p-10 space-y-8"
           >
@@ -1235,7 +1235,7 @@ const openCompleteConfirmation = (task) => {
                     }
                     className={`w-full py-4 rounded-2xl text-xs font-black uppercase tracking-widest border transition-all ${
                       taskForm.assignees.length === 0 && taskForm.groups.length === 0
-                        ? 'bg-[var(--lifinity-primary)] border-[var(--lifinity-primary)] text-white shadow-lg'
+                        ? 'lifinity-selected [color:var(--lifinity-text)] shadow-lg'
                         : 'lifinity-button-secondary'
                     }`}
                   >
@@ -1258,7 +1258,7 @@ const openCompleteConfirmation = (task) => {
                     {showFriendsPicker && (
                       <div className="lifinity-card-soft max-h-48 overflow-y-auto rounded-2xl p-3 space-y-2">
                         {friends.length === 0 ? (
-                          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest text-center py-4">
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-center py-4 [color:var(--lifinity-text-muted)]">
                             Ainda não tens amigos disponíveis.
                           </p>
                         ) : (
@@ -1269,7 +1269,7 @@ const openCompleteConfirmation = (task) => {
                               onClick={() => toggleDestination('assignees', friend.iduser)}
                               className={`w-full px-4 py-3 rounded-xl text-left text-xs font-black uppercase tracking-widest border transition-all ${
                                 taskForm.assignees.includes(friend.iduser)
-                                  ? 'bg-[var(--lifinity-primary)] border-[var(--lifinity-primary)] text-white shadow-lg'
+                                  ? 'lifinity-selected [color:var(--lifinity-text)] shadow-lg'
                                   : 'lifinity-button-secondary'
                               }`}
                             >
@@ -1297,7 +1297,7 @@ const openCompleteConfirmation = (task) => {
                     {showGroupsPicker && (
                       <div className="lifinity-card-soft max-h-48 overflow-y-auto rounded-2xl p-3 space-y-2">
                         {groups.length === 0 ? (
-                          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest text-center py-4">
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-center py-4 [color:var(--lifinity-text-muted)]">
                             Ainda não pertences a nenhum grupo.
                           </p>
                         ) : (
@@ -1308,7 +1308,7 @@ const openCompleteConfirmation = (task) => {
                               onClick={() => toggleDestination('groups', group.idgroup)}
                               className={`w-full px-4 py-3 rounded-xl text-left text-xs font-black uppercase tracking-widest border transition-all ${
                                 taskForm.groups.includes(group.idgroup)
-                                  ? 'bg-[var(--lifinity-primary)] border-[var(--lifinity-primary)] text-white shadow-lg'
+                                  ? 'lifinity-selected [color:var(--lifinity-text)] shadow-lg'
                                   : 'lifinity-button-secondary'
                               }`}
                             >
@@ -1335,7 +1335,7 @@ const openCompleteConfirmation = (task) => {
                       onClick={() => setTaskForm({ ...taskForm, priority })}
                       className={`py-4 rounded-2xl text-xs font-black uppercase tracking-widest border transition-all ${
                         taskForm.priority === priority
-                          ? 'bg-[var(--lifinity-primary)] border-[var(--lifinity-primary)] text-white shadow-lg'
+                          ? 'lifinity-selected [color:var(--lifinity-text)] shadow-lg'
                           : 'lifinity-button-secondary'
                       }`}
                     >

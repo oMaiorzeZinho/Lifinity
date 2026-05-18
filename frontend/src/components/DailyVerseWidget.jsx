@@ -95,8 +95,8 @@ const DailyVerseWidget = () => {
                 onClick={toggleFavorite}
                 className={`text-2xl transition-all ${
                   verse.isFavorite
-                    ? 'text-yellow-400 scale-110'
-                    : '[color:var(--lifinity-text-muted)] hover:text-yellow-400'
+                    ? '[color:var(--lifinity-warning)] scale-110'
+                    : '[color:var(--lifinity-text-muted)] hover:[color:var(--lifinity-warning)]'
                 }`}
                 title="Adicionar aos favoritos"
                 aria-label="Adicionar aos favoritos"

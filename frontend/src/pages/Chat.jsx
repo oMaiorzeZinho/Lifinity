@@ -453,7 +453,7 @@ const Chat = () => {
       </div>
 
       {error && (
-        <div className="lifinity-card-soft border-red-400/30 p-5 rounded-2xl font-bold text-sm [color:var(--lifinity-danger)]">
+        <div className="lifinity-card-soft lifinity-danger-surface p-5 rounded-2xl font-bold text-sm">
           {error}
         </div>
       )}
@@ -619,7 +619,7 @@ const Chat = () => {
                               type="button"
                               onClick={() => handleRemoveMember(member)}
                               disabled={memberSubmitting}
-                              className="lifinity-danger-item px-3 py-2 rounded-xl border border-red-400/20 text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
+                              className="lifinity-danger-item px-3 py-2 rounded-xl border border-[var(--lifinity-border)] text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
                             >
                               Remover
                             </button>
@@ -701,7 +701,7 @@ const Chat = () => {
                 const isAssistantMessage = isAssistantSelected && !isMine;
                 const isVerseMessage = message.message_type === 'verse';
                 const messageBubbleClass = isMine
-                  ? 'bg-[var(--lifinity-primary)] text-white border-[var(--lifinity-primary)] shadow-sm'
+                  ? 'bg-[var(--lifinity-primary)] [color:var(--lifinity-on-primary)] border-[var(--lifinity-primary)] shadow-sm'
                   : isAssistantMessage
                     ? 'bg-[var(--lifinity-primary-muted)] [color:var(--lifinity-text)] border-[var(--lifinity-border)]'
                     : isVerseMessage
@@ -731,7 +731,7 @@ const Chat = () => {
                       </p>
                       <p
                         className={`text-[10px] font-black uppercase tracking-widest mt-3 ${
-                          isMine ? 'text-white/75' : '[color:var(--lifinity-text-muted)]'
+                          isMine ? 'opacity-75 [color:var(--lifinity-on-primary)]' : '[color:var(--lifinity-text-muted)]'
                         }`}
                       >
                         {formatMessageTime(message.created_at)}
@@ -781,7 +781,7 @@ const Chat = () => {
       </div>
 
       {showGroupModal && (
-        <div className="fixed inset-0 z-50 bg-black/55 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-[var(--lifinity-overlay)] backdrop-blur-sm flex items-center justify-center p-4">
           <div className={`${cardClass} w-full max-w-xl rounded-[2rem] overflow-hidden`}>
             <div className="p-6 border-b border-[var(--lifinity-border)] flex items-start justify-between gap-4">
               <div>
