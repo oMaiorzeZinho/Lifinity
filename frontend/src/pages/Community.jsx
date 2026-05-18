@@ -21,7 +21,7 @@ const menuButtonClass =
   'lifinity-button-secondary w-10 h-10 rounded-xl flex items-center justify-center';
 
 const menuPanelClass =
-  'lifinity-menu absolute right-0 top-12 z-30 w-56 overflow-hidden rounded-2xl';
+  'lifinity-menu absolute right-0 top-12 z-[120] w-56 overflow-hidden rounded-2xl';
 
 const menuItemClass =
   'lifinity-menu-item w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest';
@@ -658,7 +658,7 @@ const Community = () => {
       </div>
 
       {/* GRUPOS */}
-      <div className={`${cardClass} rounded-[2.5rem] overflow-hidden`}>
+      <div className={`${cardClass} rounded-[2.5rem] overflow-visible`}>
         <div className="p-6 md:p-8 border-b border-[var(--lifinity-border)] flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
           <div>
             <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2 italic">
@@ -697,7 +697,9 @@ const Community = () => {
             {groups.map((group) => (
               <div
                 key={group.idgroup}
-                className="group lifinity-card-soft p-6 rounded-3xl hover:bg-[var(--lifinity-primary-muted)] transition-all"
+                className={`group lifinity-card-soft relative p-6 rounded-3xl hover:bg-[var(--lifinity-primary-muted)] transition-all ${
+                  openActionMenu === `group-${group.idgroup}` ? 'z-[90]' : 'z-0'
+                }`}
               >
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                   <div>
@@ -926,7 +928,7 @@ const Community = () => {
 
         {/* PEDIDOS E AMIGOS */}
         <div className="xl:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className={`${cardClass} rounded-[2rem] overflow-hidden`}>
+          <div className={`${cardClass} rounded-[2rem] overflow-visible`}>
             <div className="p-6 border-b border-[var(--lifinity-border)]">
               <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2 italic">
                 Pedidos
@@ -946,7 +948,9 @@ const Community = () => {
                 {friendRequests.map((request) => (
                   <div
                     key={request.idfriendship}
-                    className="lifinity-card-soft p-5 rounded-2xl"
+                    className={`lifinity-card-soft relative p-5 rounded-2xl ${
+                      openActionMenu === `request-${request.idfriendship}` ? 'z-[90]' : 'z-0'
+                    }`}
                   >
                     <button
                       type="button"
@@ -1018,7 +1022,7 @@ const Community = () => {
             )}
           </div>
 
-          <div className={`${cardClass} rounded-[2rem] overflow-hidden`}>
+          <div className={`${cardClass} rounded-[2rem] overflow-visible`}>
             <div className="p-6 border-b border-[var(--lifinity-border)]">
               <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2 italic">
                 Rede pessoal
@@ -1038,7 +1042,9 @@ const Community = () => {
                 {friends.map((friend) => (
                   <div
                     key={friend.iduser}
-                    className="lifinity-card-soft p-5 rounded-2xl"
+                    className={`lifinity-card-soft relative p-5 rounded-2xl ${
+                      openActionMenu === `friend-${friend.iduser}` ? 'z-[90]' : 'z-0'
+                    }`}
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>

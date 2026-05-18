@@ -66,11 +66,33 @@
   border: 1px solid var(--lifinity-border);
   background: var(--lifinity-surface-soft);
   color: var(--lifinity-text);
+  color-scheme: dark;
   outline: none;
   transition:
     border-color 180ms ease,
     background-color 180ms ease,
     box-shadow 180ms ease;
+}
+
+.lifinity-page[data-theme="light"] .lifinity-select {
+  color-scheme: light;
+}
+
+.lifinity-select option,
+.lifinity-select optgroup {
+  background-color: #28352d;
+  color: var(--lifinity-text);
+}
+
+.lifinity-page[data-theme="light"] .lifinity-select option,
+.lifinity-page[data-theme="light"] .lifinity-select optgroup {
+  background-color: #f6f9f5;
+  color: var(--lifinity-text);
+}
+
+.lifinity-select option:checked {
+  background-color: var(--lifinity-primary);
+  color: #f8faf7;
 }
 
 .lifinity-input::placeholder {
@@ -120,6 +142,7 @@
   background: var(--lifinity-surface-strong);
   box-shadow: var(--lifinity-shadow);
   color: var(--lifinity-text);
+  z-index: 120;
 }
 
 .lifinity-menu-item {
