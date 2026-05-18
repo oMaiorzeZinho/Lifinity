@@ -16,37 +16,43 @@ import {
 const API_URL = import.meta.env.VITE_API_URL;
 
 const cardClass =
-  'bg-[#111916]/88 border border-white/10 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.25)]';
+  'lifinity-card';
 
 const selectClass =
-  'w-full bg-white/[0.06] border border-white/10 text-slate-200 rounded-2xl px-5 py-4 text-xs font-black uppercase tracking-widest outline-none cursor-pointer hover:bg-white/[0.09] focus:border-emerald-300/40 transition-all';
+  'lifinity-select w-full rounded-2xl px-5 py-4 text-xs font-black uppercase tracking-widest cursor-pointer';
+
+const mutedTextClass =
+  '[color:var(--lifinity-text-muted)]';
+
+const chartAxisColor = 'var(--lifinity-text-muted)';
+const chartGridColor = 'var(--lifinity-border)';
 
 const metricOptions = {
   xpGained: {
     label: 'XP ganho',
     description: 'Mostra a evolução do XP ganho no período escolhido.',
-    colorClass: 'text-blue-400',
-    stroke: '#60a5fa',
-    fill: '#3b82f6'
+    colorClass: '[color:var(--lifinity-primary-strong)]',
+    stroke: '#2f6f4f',
+    fill: '#6f8f7b'
   },
   tasksCompleted: {
     label: 'Tarefas concluídas',
     description: 'Mostra quantas tarefas foram concluídas ao longo do tempo.',
-    colorClass: 'text-emerald-300',
-    stroke: '#34d399',
-    fill: '#10b981'
+    colorClass: '[color:var(--lifinity-primary-strong)]',
+    stroke: '#2f6f4f',
+    fill: '#9bbca7'
   },
   tasksCreated: {
     label: 'Tarefas criadas',
     description: 'Mostra quantas tarefas foram criadas no período escolhido.',
-    colorClass: 'text-slate-200',
-    stroke: '#cbd5e1',
-    fill: '#94a3b8'
+    colorClass: '[color:var(--lifinity-text)]',
+    stroke: '#6f8f7b',
+    fill: '#aab9ae'
   },
   tasksLost: {
     label: 'Tarefas perdidas',
     description: 'Mostra tarefas cujo prazo terminou sem conclusão.',
-    colorClass: 'text-red-300',
+    colorClass: '[color:var(--lifinity-danger)]',
     stroke: '#f87171',
     fill: '#ef4444'
   }
@@ -82,15 +88,15 @@ const CustomTooltip = ({ active, payload, label, selectedMetric }) => {
   if (!active || !payload || payload.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#111916]/95 px-4 py-3 shadow-2xl backdrop-blur-xl">
-      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
+    <div className="lifinity-menu rounded-2xl px-4 py-3">
+      <p className="lifinity-muted-label mb-1">
         {label}
       </p>
       <div className="space-y-1">
         {payload.map((item) => (
           <p
             key={item.dataKey}
-            className="text-sm font-black text-white flex items-center gap-2"
+            className="text-sm font-black flex items-center gap-2 [color:var(--lifinity-text)]"
           >
             <span
               className="h-2.5 w-2.5 rounded-full"
@@ -282,7 +288,7 @@ const Statistics = () => {
   const renderChart = () => {
     if (chartData.length === 0) {
       return (
-        <div className="flex h-[360px] items-center justify-center text-xs font-bold uppercase tracking-widest text-slate-500 text-center px-6">
+        <div className={`flex h-[360px] items-center justify-center text-xs font-bold uppercase tracking-widest text-center px-6 ${mutedTextClass}`}>
           Ainda não existem dados suficientes para mostrar o gráfico.
         </div>
       );
@@ -290,8 +296,8 @@ const Statistics = () => {
 
     const ownMetricKey = hasComparison ? `me.${metric}` : metric;
     const comparisonMetricKey = `comparison.${metric}`;
-    const comparisonStroke = '#fbbf24';
-    const comparisonFill = '#f59e0b';
+    const comparisonStroke = '#7a6943';
+    const comparisonFill = '#bba76f';
 
     if (chartType === 'bar') {
       return (
@@ -300,23 +306,23 @@ const Statistics = () => {
             <CartesianGrid
               strokeDasharray="3 3"
               vertical={false}
-              stroke="rgba(255,255,255,0.10)"
+              stroke={chartGridColor}
             />
             <XAxis
               dataKey="label"
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
-              axisLine={{ stroke: 'rgba(255,255,255,0.12)' }}
+              tick={{ fontSize: 11, fill: chartAxisColor }}
+              axisLine={{ stroke: chartGridColor }}
               tickLine={false}
             />
             <YAxis
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
-              axisLine={{ stroke: 'rgba(255,255,255,0.12)' }}
+              tick={{ fontSize: 11, fill: chartAxisColor }}
+              axisLine={{ stroke: chartGridColor }}
               tickLine={false}
               allowDecimals={hasComparison}
             />
             <Tooltip
               content={<CustomTooltip selectedMetric={selectedMetric} />}
-              cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+              cursor={{ fill: 'var(--lifinity-surface-soft)' }}
             />
             <Bar
               dataKey={ownMetricKey}
@@ -343,23 +349,23 @@ const Statistics = () => {
           <CartesianGrid
             strokeDasharray="3 3"
             vertical={false}
-            stroke="rgba(255,255,255,0.10)"
+            stroke={chartGridColor}
           />
           <XAxis
             dataKey="label"
-            tick={{ fontSize: 11, fill: '#94a3b8' }}
-            axisLine={{ stroke: 'rgba(255,255,255,0.12)' }}
+            tick={{ fontSize: 11, fill: chartAxisColor }}
+            axisLine={{ stroke: chartGridColor }}
             tickLine={false}
           />
           <YAxis
-            tick={{ fontSize: 11, fill: '#94a3b8' }}
-            axisLine={{ stroke: 'rgba(255,255,255,0.12)' }}
+            tick={{ fontSize: 11, fill: chartAxisColor }}
+            axisLine={{ stroke: chartGridColor }}
             tickLine={false}
             allowDecimals={hasComparison}
           />
           <Tooltip
             content={<CustomTooltip selectedMetric={selectedMetric} />}
-            cursor={{ stroke: 'rgba(255,255,255,0.12)' }}
+            cursor={{ stroke: chartGridColor }}
           />
           <Area
             type="monotone"
@@ -389,7 +395,7 @@ const Statistics = () => {
   if (loading) {
     return (
       <div className={`${cardClass} p-10 rounded-3xl text-center`}>
-        <p className="text-slate-400 font-black uppercase tracking-widest text-xs">
+        <p className="lifinity-muted-label">
           A carregar estatísticas...
         </p>
       </div>
@@ -400,24 +406,23 @@ const Statistics = () => {
     <div className="space-y-8">
       {/* HERO */}
       <div
-        className="relative overflow-hidden rounded-[2.5rem] shadow-[0_25px_70px_rgba(0,0,0,0.35)] border border-white/10 min-h-72 flex items-end"
+        className="relative overflow-hidden rounded-[2.5rem] shadow-[var(--lifinity-shadow)] border border-[var(--lifinity-border)] min-h-72 flex items-end"
         style={{
           backgroundImage: "url('/images/statistics-banner.jpg')",
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-[#101713]/95 via-[#101713]/70 to-[#101713]/30"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(34,211,238,0.18),_transparent_35%)]"></div>
+        <div className="absolute inset-0 lifinity-hero-overlay"></div>
 
-        <div className="relative z-10 p-8 md:p-10 text-white max-w-4xl">
-          <p className="text-[10px] font-black uppercase tracking-[0.25em] mb-3 text-cyan-200">
+        <div className="relative z-10 p-8 md:p-10 max-w-4xl [color:var(--lifinity-text)]">
+          <p className="lifinity-muted-label mb-3">
             Produtividade e Evolução
           </p>
           <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-none mb-4">
             Estatísticas do teu progresso
           </h2>
-          <p className="text-sm md:text-base font-medium text-slate-200 leading-relaxed">
+          <p className="text-sm md:text-base font-medium leading-relaxed [color:var(--lifinity-text-muted)]">
             Analisa tarefas concluídas, XP ganho, tarefas perdidas e evolução ao
             longo do tempo. Estes dados ajudam-te a perceber padrões e a melhorar
             a tua organização diária.
@@ -427,7 +432,7 @@ const Statistics = () => {
 
       {error && (
         <div
-          className="bg-red-500/10 border border-red-400/20 text-red-200 p-5 rounded-2xl font-bold text-sm"
+          className="lifinity-card-soft border-red-400/30 p-5 rounded-2xl font-bold text-sm [color:var(--lifinity-danger)]"
           role="alert"
         >
           {error}
@@ -435,21 +440,21 @@ const Statistics = () => {
       )}
 
       {/* ALERTA DE TAREFAS PERDIDAS */}
-      <div className="bg-red-500/10 border border-red-400/20 rounded-3xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 backdrop-blur-xl">
+      <div className="lifinity-card-soft border-red-400/30 rounded-3xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-red-300 mb-1">
+          <p className="text-[10px] font-black uppercase tracking-widest mb-1 [color:var(--lifinity-danger)]">
             Tarefas perdidas no período
           </p>
-          <p className="text-red-100/80 text-sm font-bold">
+          <p className="text-sm font-bold [color:var(--lifinity-text-muted)]">
             Tarefas cujo prazo terminou sem conclusão.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <p className="text-4xl font-black text-red-300 tracking-tighter">
+          <p className="text-4xl font-black tracking-tighter [color:var(--lifinity-danger)]">
             {summary.lostTasks}
           </p>
-          <span className="text-[10px] font-black uppercase tracking-widest text-red-300">
+          <span className="text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-danger)]">
             perdidas
           </span>
         </div>
@@ -459,10 +464,10 @@ const Statistics = () => {
       <div className="grid grid-cols-1 xl:grid-cols-[360px_1fr] gap-6">
         {/* FILTROS */}
         <div className={`${cardClass} p-6 rounded-[2rem] h-fit`}>
-          <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2 italic">
+          <p className="lifinity-muted-label mb-2">
             Filtros
           </p>
-          <h3 className="text-2xl font-black tracking-tight text-white mb-6">
+          <h3 className="text-2xl font-black tracking-tight mb-6 [color:var(--lifinity-text)]">
             Personalizar gráfico
           </h3>
 
@@ -470,7 +475,7 @@ const Statistics = () => {
             <div>
               <label
                 htmlFor="statistics-metric"
-                className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2"
+                className="lifinity-muted-label block mb-2"
               >
                 Tema do gráfico
               </label>
@@ -480,16 +485,16 @@ const Statistics = () => {
                 onChange={(e) => setMetric(e.target.value)}
                 className={selectClass}
               >
-                <option className="bg-[#111916] text-white" value="xpGained">
+                <option value="xpGained">
                   XP ganho
                 </option>
-                <option className="bg-[#111916] text-white" value="tasksCompleted">
+                <option value="tasksCompleted">
                   Tarefas concluídas
                 </option>
-                <option className="bg-[#111916] text-white" value="tasksCreated">
+                <option value="tasksCreated">
                   Tarefas criadas
                 </option>
-                <option className="bg-[#111916] text-white" value="tasksLost">
+                <option value="tasksLost">
                   Tarefas perdidas
                 </option>
               </select>
@@ -498,7 +503,7 @@ const Statistics = () => {
             <div>
               <label
                 htmlFor="statistics-period"
-                className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2"
+                className="lifinity-muted-label block mb-2"
               >
                 Período
               </label>
@@ -509,11 +514,7 @@ const Statistics = () => {
                 className={selectClass}
               >
                 {Object.entries(periodOptions).map(([value, label]) => (
-                  <option
-                    className="bg-[#111916] text-white"
-                    key={value}
-                    value={value}
-                  >
+                  <option key={value} value={value}>
                     {label}
                   </option>
                 ))}
@@ -523,7 +524,7 @@ const Statistics = () => {
             <div>
               <label
                 htmlFor="statistics-chart-type"
-                className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2"
+                className="lifinity-muted-label block mb-2"
               >
                 Tipo de gráfico
               </label>
@@ -533,19 +534,19 @@ const Statistics = () => {
                 onChange={(e) => setChartType(e.target.value)}
                 className={selectClass}
               >
-                <option className="bg-[#111916] text-white" value="area">
+                <option value="area">
                   Área
                 </option>
-                <option className="bg-[#111916] text-white" value="bar">
+                <option value="bar">
                   Barras
                 </option>
               </select>
             </div>
 
-            <div className="pt-5 border-t border-white/10">
+            <div className="pt-5 border-t border-[var(--lifinity-border)]">
               <label
                 htmlFor="statistics-comparison-mode"
-                className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2"
+                className="lifinity-muted-label block mb-2"
               >
                 Comparação
               </label>
@@ -556,13 +557,13 @@ const Statistics = () => {
                 onChange={(e) => setComparisonMode(e.target.value)}
                 className={selectClass}
               >
-                <option className="bg-[#111916] text-white" value="me">
+                <option value="me">
                   Só as minhas estatísticas
                 </option>
-                <option className="bg-[#111916] text-white" value="friend">
+                <option value="friend">
                   Comparar com amigo
                 </option>
-                <option className="bg-[#111916] text-white" value="group">
+                <option value="group">
                   Média de grupo
                 </option>
               </select>
@@ -571,7 +572,7 @@ const Statistics = () => {
                 <div className="mt-4">
                   <label
                     htmlFor="statistics-comparison-target"
-                    className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2"
+                    className="lifinity-muted-label block mb-2"
                   >
                     {comparisonMode === 'friend' ? 'Amigo' : 'Grupo'}
                   </label>
@@ -586,18 +587,14 @@ const Statistics = () => {
                         disabled={optionsLoading || friends.length === 0}
                       >
                         {friends.map((friend) => (
-                          <option
-                            className="bg-[#111916] text-white"
-                            key={friend.iduser}
-                            value={friend.iduser}
-                          >
+                          <option key={friend.iduser} value={friend.iduser}>
                             {friend.username}
                           </option>
                         ))}
                       </select>
 
                       {friends.length === 0 && !optionsLoading && (
-                        <p className="text-xs text-slate-400 font-bold mt-3 leading-relaxed">
+                        <p className={`text-xs font-bold mt-3 leading-relaxed ${mutedTextClass}`}>
                           Ainda nao tens amigos aceites para comparar.
                         </p>
                       )}
@@ -614,18 +611,14 @@ const Statistics = () => {
                         disabled={optionsLoading || groups.length === 0}
                       >
                         {groups.map((group) => (
-                          <option
-                            className="bg-[#111916] text-white"
-                            key={group.idgroup}
-                            value={group.idgroup}
-                          >
+                          <option key={group.idgroup} value={group.idgroup}>
                             {group.name}
                           </option>
                         ))}
                       </select>
 
                       {groups.length === 0 && !optionsLoading && (
-                        <p className="text-xs text-slate-400 font-bold mt-3 leading-relaxed">
+                        <p className={`text-xs font-bold mt-3 leading-relaxed ${mutedTextClass}`}>
                           Ainda nao pertences a nenhum grupo para comparar.
                         </p>
                       )}
@@ -633,13 +626,13 @@ const Statistics = () => {
                   )}
 
                   {optionsLoading && (
-                    <p className="text-xs text-slate-400 font-bold mt-3 leading-relaxed">
+                    <p className={`text-xs font-bold mt-3 leading-relaxed ${mutedTextClass}`}>
                       A carregar opcoes de comparacao...
                     </p>
                   )}
 
                   {optionsError && (
-                    <p className="text-xs text-red-300 font-bold mt-3 leading-relaxed">
+                    <p className="text-xs font-bold mt-3 leading-relaxed [color:var(--lifinity-danger)]">
                       {optionsError}
                     </p>
                   )}
@@ -653,7 +646,7 @@ const Statistics = () => {
         <div className={`${cardClass} p-6 rounded-[2rem] overflow-hidden`}>
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-8">
             <div>
-              <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2 italic">
+              <p className="lifinity-muted-label mb-2">
                 Gráfico Principal
               </p>
               <h3
@@ -661,26 +654,26 @@ const Statistics = () => {
               >
                 {selectedMetric.label}
               </h3>
-              <p className="text-slate-300 font-medium mt-2">
+              <p className={`font-medium mt-2 ${mutedTextClass}`}>
                 {selectedMetric.description}
               </p>
             </div>
 
-            <div className="min-w-[190px] rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-4 backdrop-blur-xl">
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+            <div className="lifinity-card-soft min-w-[190px] rounded-2xl px-5 py-4">
+              <p className="lifinity-muted-label">
                 Total no período
               </p>
               {hasComparison ? (
                 <div className="mt-2 space-y-1">
-                  <p className="text-2xl font-black text-white tracking-tighter">
+                  <p className="text-2xl font-black tracking-tighter [color:var(--lifinity-text)]">
                     Eu: {formatMetricValue(totalMetricValue.me)}
                   </p>
-                  <p className="text-sm font-black text-amber-200 tracking-tight">
+                  <p className="text-sm font-black tracking-tight [color:var(--lifinity-primary-strong)]">
                     {comparisonLabel}: {formatMetricValue(totalMetricValue.comparison)}
                   </p>
                 </div>
               ) : (
-                <p className="text-3xl font-black text-white tracking-tighter mt-1">
+                <p className="text-3xl font-black tracking-tighter mt-1 [color:var(--lifinity-text)]">
                   {formatMetricValue(totalMetricValue.me)}
                 </p>
               )}
@@ -694,37 +687,37 @@ const Statistics = () => {
       {/* INSIGHTS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className={`${cardClass} p-6 rounded-[2rem]`}>
-          <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2 italic">
+          <p className="lifinity-muted-label mb-2">
             Melhor dia
           </p>
-          <h3 className="text-2xl font-black tracking-tight text-white">
+          <h3 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)]">
             {bestDay ? bestDay.label : '--'}
           </h3>
-          <p className="text-slate-300 font-medium mt-3">
+          <p className={`font-medium mt-3 ${mutedTextClass}`}>
             Foi o dia com maior valor para a métrica selecionada.
           </p>
         </div>
 
         <div className={`${cardClass} p-6 rounded-[2rem]`}>
-          <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2 italic">
+          <p className="lifinity-muted-label mb-2">
             Tarefas pendentes
           </p>
-          <h3 className="text-2xl font-black tracking-tight text-white">
+          <h3 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)]">
             {summary.pendingTasks}
           </h3>
-          <p className="text-slate-300 font-medium mt-3">
+          <p className={`font-medium mt-3 ${mutedTextClass}`}>
             Tarefas ainda não concluídas dentro do período selecionado.
           </p>
         </div>
 
         <div className={`${cardClass} p-6 rounded-[2rem]`}>
-          <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2 italic">
+          <p className="lifinity-muted-label mb-2">
             Comparacoes
           </p>
-          <h3 className="text-2xl font-black tracking-tight text-white">
+          <h3 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)]">
             Amigos e grupos
           </h3>
-          <p className="text-slate-300 font-medium mt-3">
+          <p className={`font-medium mt-3 ${mutedTextClass}`}>
             Compara o teu progresso com amigos aceites ou com a media dos teus
             grupos.
           </p>
