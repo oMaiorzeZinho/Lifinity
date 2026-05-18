@@ -3,6 +3,18 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+const cardClass =
+  'lifinity-card';
+
+const softCardClass =
+  'lifinity-card-soft';
+
+const mutedTextClass =
+  '[color:var(--lifinity-text-muted)]';
+
+const statValueClass =
+  'text-3xl font-black tracking-tighter [color:var(--lifinity-primary-strong)]';
+
 const categoryLabels = {
   level: 'Nivel',
   xp: 'XP',
@@ -67,25 +79,25 @@ const PublicProfileModal = ({ iduser, isOpen, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
       onClick={onClose}
       role="presentation"
     >
       <div
-        className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[2rem] border border-white/10 bg-[#101713] shadow-2xl shadow-black/40"
+        className={`${cardClass} max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[2rem]`}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="public-profile-title"
       >
-        <div className="flex items-start justify-between gap-4 border-b border-white/10 p-6">
+        <div className="flex items-start justify-between gap-4 border-b border-[var(--lifinity-border)] p-6">
           <div>
-            <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+            <p className="lifinity-muted-label mb-2">
               Perfil publico
             </p>
             <h3
               id="public-profile-title"
-              className="text-2xl font-black tracking-tight text-white"
+              className="text-2xl font-black tracking-tight [color:var(--lifinity-text)]"
             >
               {profile?.username || 'A carregar...'}
             </h3>
@@ -94,7 +106,7 @@ const PublicProfileModal = ({ iduser, isOpen, onClose }) => {
           <button
             type="button"
             onClick={onClose}
-            className="h-10 w-10 rounded-xl border border-white/10 bg-white/[0.06] text-slate-300 transition-all hover:bg-white/[0.12] hover:text-white"
+            className="lifinity-button-secondary h-10 w-10 rounded-xl"
             aria-label="Fechar perfil publico"
           >
             X
@@ -102,77 +114,77 @@ const PublicProfileModal = ({ iduser, isOpen, onClose }) => {
         </div>
 
         {loading ? (
-          <div className="p-10 text-center text-xs font-black uppercase tracking-widest text-slate-500">
+          <div className={`p-10 text-center text-xs font-black uppercase tracking-widest ${mutedTextClass}`}>
             A carregar perfil...
           </div>
         ) : error ? (
-          <div className="p-10 text-center text-sm font-bold text-red-200">
+          <div className="p-10 text-center text-sm font-bold [color:var(--lifinity-danger)]">
             {error}
           </div>
         ) : profile ? (
           <div className="space-y-6 p-6">
-            <div className="flex flex-col gap-5 rounded-3xl border border-white/10 bg-white/[0.045] p-6 md:flex-row md:items-center md:justify-between">
+            <div className={`${softCardClass} flex flex-col gap-5 rounded-3xl p-6 md:flex-row md:items-center md:justify-between`}>
               <div className="flex items-center gap-5">
                 {profile.avatar ? (
                   <img
                     src={profile.avatar}
                     alt=""
-                    className="h-20 w-20 rounded-3xl border border-white/10 object-cover"
+                    className="h-20 w-20 rounded-3xl border border-[var(--lifinity-border)] object-cover"
                   />
                 ) : (
-                  <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-white/10 bg-white/[0.08] text-3xl font-black text-white">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-[var(--lifinity-border)] bg-[var(--lifinity-primary-muted)] text-3xl font-black [color:var(--lifinity-text)]">
                     {profile.username?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
                 )}
 
                 <div>
-                  <h4 className="text-3xl font-black tracking-tight text-white">
+                  <h4 className="text-3xl font-black tracking-tight [color:var(--lifinity-text)]">
                     {profile.username}
                   </h4>
-                  <p className="mt-2 text-sm font-bold text-slate-400">
+                  <p className={`mt-2 text-sm font-bold ${mutedTextClass}`}>
                     No Lifinity desde {joinedDate || 'data indisponivel'}
                   </p>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-blue-400/20 bg-blue-500/10 px-5 py-4">
-                <p className="text-[10px] font-black uppercase tracking-widest text-blue-300">
+              <div className={`${softCardClass} rounded-2xl px-5 py-4`}>
+                <p className="lifinity-muted-label">
                   Nivel
                 </p>
-                <p className="text-4xl font-black tracking-tighter text-white">
+                <p className="text-4xl font-black tracking-tighter [color:var(--lifinity-primary-strong)]">
                   {profile.level || 1}
                 </p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="rounded-2xl border border-white/10 bg-white/[0.045] p-5">
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+              <div className={`${softCardClass} rounded-2xl p-5`}>
+                <p className="lifinity-muted-label">
                   Conquistas
                 </p>
-                <p className="mt-1 text-3xl font-black tracking-tighter text-blue-300">
+                <p className={`mt-1 ${statValueClass}`}>
                   {profile.totalUnlockedBadges || 0}
                 </p>
-                <p className="mt-2 text-xs font-bold text-slate-500">
+                <p className={`mt-2 text-xs font-bold ${mutedTextClass}`}>
                   Medalhas desbloqueadas.
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-white/[0.045] p-5">
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+              <div className={`${softCardClass} rounded-2xl p-5`}>
+                <p className="lifinity-muted-label">
                   Grupos em comum
                 </p>
-                <p className="mt-1 text-3xl font-black tracking-tighter text-emerald-300">
+                <p className={`mt-1 ${statValueClass}`}>
                   {profile.commonGroups?.length || 0}
                 </p>
-                <p className="mt-2 text-xs font-bold text-slate-500">
+                <p className={`mt-2 text-xs font-bold ${mutedTextClass}`}>
                   Espaços partilhados contigo.
                 </p>
               </div>
             </div>
 
             <div>
-              <h5 className="mb-3 text-lg font-black tracking-tight text-white">
+              <h5 className="mb-3 text-lg font-black tracking-tight [color:var(--lifinity-text)]">
                 Conquistas destacadas
               </h5>
 
@@ -181,32 +193,32 @@ const PublicProfileModal = ({ iduser, isOpen, onClose }) => {
                   {profile.highlightedBadges.map((badge, index) => (
                     <div
                       key={badge.idbadge}
-                      className="rounded-2xl border border-blue-400/20 bg-blue-500/10 p-4"
+                      className="rounded-2xl border border-[var(--lifinity-primary)] bg-[var(--lifinity-primary-muted)] p-4"
                     >
-                      <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-blue-300">
+                      <p className="mb-2 text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-primary-strong)]">
                         {badge.position ? `Destaque ${badge.position}` : `Recente ${index + 1}`}
                       </p>
-                      <p className="font-black text-white">
+                      <p className="font-black [color:var(--lifinity-text)]">
                         {badge.name}
                       </p>
-                      <p className="mt-2 text-xs font-medium text-blue-100/80">
+                      <p className={`mt-2 text-xs font-medium ${mutedTextClass}`}>
                         {badge.description}
                       </p>
-                      <p className="mt-3 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                      <p className={`mt-3 text-[10px] font-black uppercase tracking-widest ${mutedTextClass}`}>
                         {categoryLabels[badge.category] || badge.category || 'Conquista'}
                       </p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-sm font-bold text-slate-400">
+                <div className={`${softCardClass} rounded-2xl p-5 text-sm font-bold ${mutedTextClass}`}>
                   Este utilizador ainda nao tem conquistas destacadas.
                 </div>
               )}
             </div>
 
             <div>
-              <h5 className="mb-3 text-lg font-black tracking-tight text-white">
+              <h5 className="mb-3 text-lg font-black tracking-tight [color:var(--lifinity-text)]">
                 Grupos em comum
               </h5>
 
@@ -215,24 +227,24 @@ const PublicProfileModal = ({ iduser, isOpen, onClose }) => {
                   {profile.commonGroups.map((group) => (
                     <div
                       key={group.idgroup}
-                      className="rounded-2xl border border-white/10 bg-white/[0.045] p-4"
+                      className={`${softCardClass} rounded-2xl p-4`}
                     >
-                      <p className="font-black text-white">
+                      <p className="font-black [color:var(--lifinity-text)]">
                         {group.name}
                       </p>
                       {group.description && (
-                        <p className="mt-2 text-sm font-medium text-slate-400">
+                        <p className={`mt-2 text-sm font-medium ${mutedTextClass}`}>
                           {group.description}
                         </p>
                       )}
-                      <p className="mt-3 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                      <p className={`mt-3 text-[10px] font-black uppercase tracking-widest ${mutedTextClass}`}>
                         {group.member_count || 0} membros
                       </p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-sm font-bold text-slate-400">
+                <div className={`${softCardClass} rounded-2xl p-5 text-sm font-bold ${mutedTextClass}`}>
                   Ainda nao existem grupos em comum.
                 </div>
               )}

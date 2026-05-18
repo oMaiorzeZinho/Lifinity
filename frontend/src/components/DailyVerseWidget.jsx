@@ -57,35 +57,36 @@ const DailyVerseWidget = () => {
       {!isOpen ? (
         <button
           onClick={() => setIsOpen(true)}
-          className="bg-[#111916]/88 border border-white/10 shadow-xl rounded-2xl px-5 py-4 hover:shadow-2xl transition-all"
+          className="lifinity-button-secondary rounded-2xl px-5 py-4 shadow-[var(--lifinity-shadow)]"
         >
-          <p className="text-[10px] font-black uppercase tracking-widest text-blue-600">
+          <p className="lifinity-muted-label">
             Versículo do Dia
           </p>
         </button>
       ) : (
-        <div className="w-90 bg-[#111916]/88 border border-white/10 shadow-2xl rounded-4xl overflow-hidden">
-          <div className="p-5 border-b border-white/10 flex items-center justify-between">
+        <div className="lifinity-card w-80 sm:w-90 rounded-[2rem] overflow-hidden">
+          <div className="p-5 border-b border-[var(--lifinity-border)] flex items-center justify-between gap-4">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-blue-600">
+              <p className="lifinity-muted-label">
                 Versículo do Dia
               </p>
-              <p className="text-xs text-slate-400 font-bold mt-1">
+              <p className="text-xs font-bold mt-1 [color:var(--lifinity-text-muted)]">
                 {verse.book} {verse.chapter}:{verse.verse}
               </p>
             </div>
 
             <button
               onClick={() => setIsOpen(false)}
-              className="text-slate-400 hover:text-slate-700 text-xl font-black"
+              className="lifinity-button-secondary w-9 h-9 rounded-xl flex items-center justify-center text-xl font-black"
               title="Fechar"
+              aria-label="Fechar widget do versiculo"
             >
               ×
             </button>
           </div>
 
           <div className="p-5 space-y-4">
-            <p className="text-white font-bold leading-relaxed text-sm">
+            <p className="font-bold leading-relaxed text-sm [color:var(--lifinity-text)]">
               “{verse.text}”
             </p>
 
@@ -95,16 +96,17 @@ const DailyVerseWidget = () => {
                 className={`text-2xl transition-all ${
                   verse.isFavorite
                     ? 'text-yellow-400 scale-110'
-                    : 'text-slate-300 hover:text-yellow-400'
+                    : '[color:var(--lifinity-text-muted)] hover:text-yellow-400'
                 }`}
                 title="Adicionar aos favoritos"
+                aria-label="Adicionar aos favoritos"
               >
                 ★
               </button>
 
               <button
                 onClick={() => navigate('/dashboard/inspiration')}
-                className="px-4 py-2 rounded-xl bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all"
+                className="lifinity-button-primary px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest"
               >
                 Abrir Inspiração
               </button>
