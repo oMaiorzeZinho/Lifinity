@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        findViewById(R.id.viewTasksButton).setOnClickListener(v -> openTasksActivity());
         findViewById(R.id.logoutButton).setOnClickListener(v -> logout());
     }
 
@@ -45,6 +46,11 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void openTasksActivity() {
+        Intent intent = new Intent(this, TasksActivity.class);
+        startActivity(intent);
     }
 
     private void logout() {

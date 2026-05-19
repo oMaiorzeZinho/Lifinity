@@ -15,6 +15,9 @@
         android:theme="@style/Theme.Lifinity"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".TasksActivity"
+            android:exported="false" />
+        <activity
             android:name=".LoginActivity"
             android:exported="false" />
         <activity

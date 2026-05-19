@@ -29,11 +29,23 @@
         android:textStyle="bold" />
 
     <Button
-        android:id="@+id/logoutButton"
+        android:id="@+id/viewTasksButton"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_marginTop="32dp"
         android:backgroundTint="#7FE0A4"
+        android:text="Ver tarefas"
+        android:textAllCaps="false"
+        android:textColor="#07110D"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/logoutButton"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="14dp"
+        android:backgroundTint="#F4FBF7"
         android:text="Terminar sessão"
         android:textAllCaps="false"
         android:textColor="#07110D"
