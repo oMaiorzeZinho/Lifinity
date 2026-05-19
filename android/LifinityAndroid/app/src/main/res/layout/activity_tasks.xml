@@ -24,6 +24,18 @@
         android:textColor="#B5C7BC"
         android:textSize="15sp" />
 
+    <Button
+        android:id="@+id/createTaskButton"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="18dp"
+        android:backgroundTint="#7FE0A4"
+        android:text="Nova tarefa"
+        android:textAllCaps="false"
+        android:textColor="#07110D"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
     <ProgressBar
         android:id="@+id/tasksProgressBar"
         style="?android:attr/progressBarStyleLarge"

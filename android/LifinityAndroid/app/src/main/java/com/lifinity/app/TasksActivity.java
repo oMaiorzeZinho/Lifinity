@@ -5,16 +5,22 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.lifinity.app.adapters.TaskAdapter;
 import com.lifinity.app.api.TaskApi;
+import com.lifinity.app.models.CompleteTaskResponse;
 import com.lifinity.app.models.Task;
 import com.lifinity.app.network.ApiClient;
 
@@ -27,13 +33,16 @@ import retrofit2.Response;
 public class TasksActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "lifinity_prefs";
     private static final String KEY_TOKEN = "token";
+    private static final String KEY_USER = "user";
 
     private ProgressBar progressBar;
     private TextView errorText;
     private TextView emptyText;
     private RecyclerView tasksRecyclerView;
+    private Button createTaskButton;
     private TaskAdapter taskAdapter;
     private Call<List<Task>> tasksCall;
+    private Call<CompleteTaskResponse> completeTaskCall;
     private final Gson gson = new Gson();
 
     @Override
@@ -52,10 +61,28 @@ public class TasksActivity extends AppCompatActivity {
         errorText = findViewById(R.id.tasksErrorText);
         emptyText = findViewById(R.id.tasksEmptyText);
         tasksRecyclerView = findViewById(R.id.tasksRecyclerView);
+        createTaskButton = findViewById(R.id.createTaskButton);
 
-        taskAdapter = new TaskAdapter();
+        taskAdapter = new TaskAdapter(this::confirmCompleteTask);
         tasksRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         tasksRecyclerView.setAdapter(taskAdapter);
+
+        createTaskButton.setOnClickListener(v -> openCreateTaskActivity());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (taskAdapter == null) {
+            return;
+        }
+
+        String token = getToken();
+        if (TextUtils.isEmpty(token)) {
+            openLoginActivity();
+            return;
+        }
 
         loadTasks(token);
     }
@@ -99,6 +126,94 @@ public class TasksActivity extends AppCompatActivity {
         });
     }
 
+    private void confirmCompleteTask(Task task) {
+        new AlertDialog.Builder(this)
+                .setTitle("Concluir tarefa")
+                .setMessage("Queres concluir esta tarefa?")
+                .setNegativeButton("Cancelar", null)
+                .setPositiveButton("Concluir", (dialog, which) -> completeTask(task))
+                .show();
+    }
+
+    private void completeTask(Task task) {
+        String token = getToken();
+        if (TextUtils.isEmpty(token)) {
+            openLoginActivity();
+            return;
+        }
+
+        if (task == null || task.getIdtask() == null) {
+            showError("Tarefa invalida.");
+            return;
+        }
+
+        progressBar.setVisibility(View.VISIBLE);
+        errorText.setVisibility(View.GONE);
+
+        TaskApi taskApi = ApiClient.getClient().create(TaskApi.class);
+        completeTaskCall = taskApi.completeTask("Bearer " + token, task.getIdtask());
+        completeTaskCall.enqueue(new Callback<CompleteTaskResponse>() {
+            @Override
+            public void onResponse(Call<CompleteTaskResponse> call, Response<CompleteTaskResponse> response) {
+                progressBar.setVisibility(View.GONE);
+
+                if (!response.isSuccessful()) {
+                    showError(getCompleteTaskErrorMessage(response));
+                    return;
+                }
+
+                CompleteTaskResponse completeResponse = response.body();
+                if (completeResponse == null) {
+                    showError("Resposta invalida do servidor.");
+                    return;
+                }
+
+                updateStoredUser(completeResponse);
+                Toast.makeText(
+                        TasksActivity.this,
+                        valueOrFallback(completeResponse.getMessage(), "Tarefa concluida."),
+                        Toast.LENGTH_LONG
+                ).show();
+                loadTasks(token);
+            }
+
+            @Override
+            public void onFailure(Call<CompleteTaskResponse> call, Throwable t) {
+                if (call.isCanceled()) {
+                    return;
+                }
+
+                progressBar.setVisibility(View.GONE);
+                showError("Nao foi possivel concluir a tarefa. Confirma que o backend esta ativo.");
+            }
+        });
+    }
+
+    private void updateStoredUser(CompleteTaskResponse completeResponse) {
+        if (completeResponse.getNewXP() == null && completeResponse.getNewLevel() == null) {
+            return;
+        }
+
+        SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String savedUser = preferences.getString(KEY_USER, null);
+        if (TextUtils.isEmpty(savedUser)) {
+            return;
+        }
+
+        try {
+            JsonObject userObject = JsonParser.parseString(savedUser).getAsJsonObject();
+            if (completeResponse.getNewXP() != null) {
+                userObject.addProperty("xp", completeResponse.getNewXP());
+            }
+            if (completeResponse.getNewLevel() != null) {
+                userObject.addProperty("level", completeResponse.getNewLevel());
+            }
+            preferences.edit().putString(KEY_USER, gson.toJson(userObject)).apply();
+        } catch (Exception ignored) {
+            // Keep the previous user data if it cannot be parsed.
+        }
+    }
+
     private String getErrorMessage(Response<List<Task>> response) {
         if (response.code() == 401 || response.code() == 403) {
             return "Sessao invalida. Termina sessao e volta a entrar.";
@@ -124,6 +239,40 @@ public class TasksActivity extends AppCompatActivity {
         }
 
         return "Erro ao carregar tarefas.";
+    }
+
+    private String getCompleteTaskErrorMessage(Response<CompleteTaskResponse> response) {
+        if (response.code() == 401) {
+            return "Sessao invalida. Termina sessao e volta a entrar.";
+        }
+
+        if (response.errorBody() == null) {
+            return "Erro ao concluir tarefa.";
+        }
+
+        try {
+            ErrorResponse errorResponse = gson.fromJson(response.errorBody().charStream(), ErrorResponse.class);
+            if (errorResponse != null) {
+                if (!TextUtils.isEmpty(errorResponse.message)) {
+                    return errorResponse.message;
+                }
+
+                if (!TextUtils.isEmpty(errorResponse.error)) {
+                    return errorResponse.error;
+                }
+            }
+        } catch (Exception ignored) {
+            return "Erro ao concluir tarefa.";
+        }
+
+        return "Erro ao concluir tarefa.";
+    }
+
+    private String valueOrFallback(String value, String fallback) {
+        if (TextUtils.isEmpty(value)) {
+            return fallback;
+        }
+        return value;
     }
 
     private void showLoading() {
@@ -161,10 +310,18 @@ public class TasksActivity extends AppCompatActivity {
         finish();
     }
 
+    private void openCreateTaskActivity() {
+        Intent intent = new Intent(this, CreateTaskActivity.class);
+        startActivity(intent);
+    }
+
     @Override
     protected void onDestroy() {
         if (tasksCall != null) {
             tasksCall.cancel();
+        }
+        if (completeTaskCall != null) {
+            completeTaskCall.cancel();
         }
         super.onDestroy();
     }
