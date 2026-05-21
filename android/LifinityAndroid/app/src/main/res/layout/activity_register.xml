@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_app_clay"
     android:fillViewport="true"
-    tools:context=".LoginActivity">
+    tools:context=".RegisterActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="18dp"
                 android:gravity="center"
-                android:text="Entrar na conta"
+                android:text="Criar conta"
                 android:textColor="@color/lifinity_text"
                 android:textSize="30sp"
                 android:textStyle="bold" />
@@ -46,18 +46,34 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:gravity="center"
-                android:text="Usa os teus dados para aceder ao Lifinity."
+                android:text="Regista-te para comecar a organizar as tuas tarefas."
                 android:textColor="@color/lifinity_text_secondary"
                 android:textSize="15sp" />
 
             <EditText
-                android:id="@+id/emailInput"
+                android:id="@+id/registerUsernameInput"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/height_input"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="30dp"
+                android:autofillHints="username"
+                android:background="@drawable/bg_input_clay"
+                android:hint="Username"
+                android:inputType="text"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:singleLine="true"
+                android:textColor="@color/lifinity_input_text"
+                android:textColorHint="@color/lifinity_input_hint"
+                android:textSize="16sp" />
+
+            <EditText
+                android:id="@+id/registerEmailInput"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/height_input"
+                android:layout_marginTop="14dp"
                 android:autofillHints="emailAddress"
                 android:background="@drawable/bg_input_clay"
-                android:hint="Email ou username"
+                android:hint="Email"
                 android:inputType="textEmailAddress"
                 android:paddingStart="18dp"
                 android:paddingEnd="18dp"
@@ -67,11 +83,11 @@
                 android:textSize="16sp" />
 
             <EditText
-                android:id="@+id/passwordInput"
+                android:id="@+id/registerPasswordInput"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/height_input"
                 android:layout_marginTop="14dp"
-                android:autofillHints="password"
+                android:autofillHints="newPassword"
                 android:background="@drawable/bg_input_clay"
                 android:hint="Palavra-passe"
                 android:inputType="textPassword"
@@ -82,8 +98,24 @@
                 android:textColorHint="@color/lifinity_input_hint"
                 android:textSize="16sp" />
 
+            <EditText
+                android:id="@+id/registerConfirmPasswordInput"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/height_input"
+                android:layout_marginTop="14dp"
+                android:autofillHints="newPassword"
+                android:background="@drawable/bg_input_clay"
+                android:hint="Confirmar palavra-passe"
+                android:inputType="textPassword"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:singleLine="true"
+                android:textColor="@color/lifinity_input_text"
+                android:textColorHint="@color/lifinity_input_hint"
+                android:textSize="16sp" />
+
             <TextView
-                android:id="@+id/errorText"
+                android:id="@+id/registerErrorText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
@@ -92,37 +124,37 @@
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:visibility="gone"
-                tools:text="Erro ao iniciar sessao."
+                tools:text="Erro ao criar conta."
                 tools:visibility="visible" />
 
             <Button
-                android:id="@+id/loginButton"
+                android:id="@+id/registerButton"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/height_button"
                 android:layout_marginTop="20dp"
                 android:background="@drawable/btn_primary_clay"
                 android:elevation="8dp"
-                android:text="Entrar"
+                android:text="Criar conta"
                 android:textAllCaps="false"
                 android:textColor="@color/lifinity_text_on_primary"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
             <Button
-                android:id="@+id/createAccountButton"
+                android:id="@+id/backToLoginButton"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/height_button"
                 android:layout_marginTop="14dp"
                 android:background="@drawable/btn_secondary_clay"
                 android:elevation="6dp"
-                android:text="Criar conta"
+                android:text="Ja tenho conta"
                 android:textAllCaps="false"
                 android:textColor="@color/lifinity_text"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
             <ProgressBar
-                android:id="@+id/progressBar"
+                android:id="@+id/registerProgressBar"
                 style="?android:attr/progressBarStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

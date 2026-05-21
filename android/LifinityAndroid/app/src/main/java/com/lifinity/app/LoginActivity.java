@@ -30,6 +30,7 @@ public class LoginActivity extends AppCompatActivity {
     private EditText emailInput;
     private EditText passwordInput;
     private Button loginButton;
+    private Button createAccountButton;
     private ProgressBar progressBar;
     private TextView errorText;
     private Call<LoginResponse> loginCall;
@@ -49,10 +50,12 @@ public class LoginActivity extends AppCompatActivity {
         emailInput = findViewById(R.id.emailInput);
         passwordInput = findViewById(R.id.passwordInput);
         loginButton = findViewById(R.id.loginButton);
+        createAccountButton = findViewById(R.id.createAccountButton);
         progressBar = findViewById(R.id.progressBar);
         errorText = findViewById(R.id.errorText);
 
         loginButton.setOnClickListener(v -> login());
+        createAccountButton.setOnClickListener(v -> openRegisterActivity());
     }
 
     private boolean hasToken() {
@@ -133,6 +136,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void setLoading(boolean loading) {
         loginButton.setEnabled(!loading);
+        createAccountButton.setEnabled(!loading);
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
     }
 
@@ -151,6 +155,11 @@ public class LoginActivity extends AppCompatActivity {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+
+    private void openRegisterActivity() {
+        Intent intent = new Intent(this, RegisterActivity.class);
+        startActivity(intent);
     }
 
     @Override
