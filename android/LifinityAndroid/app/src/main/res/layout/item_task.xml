@@ -3,16 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    android:background="#0D1A14"
+    android:layout_marginBottom="16dp"
+    android:background="@drawable/bg_card_clay"
+    android:elevation="8dp"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="@dimen/space_card">
 
     <TextView
         android:id="@+id/taskTitleText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#F4FBF7"
+        android:textColor="@color/lifinity_text"
         android:textSize="18sp"
         android:textStyle="bold"
         tools:text="Estudar Android" />
@@ -22,56 +23,55 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:textColor="#B5C7BC"
+        android:textColor="@color/lifinity_text_secondary"
         android:textSize="14sp"
         tools:text="Rever Retrofit e RecyclerView." />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:orientation="horizontal">
+        android:layout_marginTop="14dp"
+        android:background="@drawable/bg_card_soft_clay"
+        android:orientation="vertical"
+        android:padding="14dp">
 
         <TextView
             android:id="@+id/taskPriorityText"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="#7FE0A4"
+            android:textColor="@color/lifinity_primary"
             android:textSize="13sp"
             android:textStyle="bold"
             tools:text="Prioridade: media" />
 
         <TextView
             android:id="@+id/taskStatusText"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_weight="1"
-            android:gravity="end"
-            android:textColor="#F4FBF7"
+            android:layout_marginTop="6dp"
+            android:textColor="@color/lifinity_text"
             android:textSize="13sp"
             android:textStyle="bold"
             tools:text="Estado: pendente" />
+
+        <TextView
+            android:id="@+id/taskDueDateText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="@color/lifinity_text_secondary"
+            android:textSize="13sp"
+            tools:text="Data limite: 2026-05-19" />
+
+        <TextView
+            android:id="@+id/taskCreatedAtText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/lifinity_text_secondary"
+            android:textSize="12sp"
+            tools:text="Criada em: 2026-05-19T12:00:00.000Z" />
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/taskDueDateText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:textColor="#B5C7BC"
-        android:textSize="13sp"
-        tools:text="Data limite: 2026-05-19" />
-
-    <TextView
-        android:id="@+id/taskCreatedAtText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:textColor="#637166"
-        android:textSize="12sp"
-        tools:text="Criada em: 2026-05-19T12:00:00.000Z" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -84,10 +84,11 @@
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:backgroundTint="#7FE0A4"
+            android:background="@drawable/btn_primary_clay"
+            android:elevation="6dp"
             android:text="Concluir"
             android:textAllCaps="false"
-            android:textColor="#07110D"
+            android:textColor="@color/lifinity_text_on_primary"
             android:textSize="15sp"
             android:textStyle="bold"
             tools:visibility="visible" />
@@ -98,12 +99,12 @@
             android:layout_height="48dp"
             android:layout_marginStart="10dp"
             android:layout_weight="1"
-            android:backgroundTint="#26372D"
+            android:background="@drawable/btn_secondary_clay"
+            android:elevation="6dp"
             android:text="Opcoes"
             android:textAllCaps="false"
-            android:textColor="#F4FBF7"
+            android:textColor="@color/lifinity_text"
             android:textSize="15sp"
             android:textStyle="bold" />
     </LinearLayout>
-
 </LinearLayout>

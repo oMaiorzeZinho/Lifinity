@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#07110D"
+    android:background="@drawable/bg_app_clay"
     android:fillViewport="true"
     tools:context=".CreateTaskActivity">
 
@@ -11,111 +11,120 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="@dimen/space_screen">
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Nova tarefa"
-            android:textColor="#F4FBF7"
-            android:textSize="28sp"
-            android:textStyle="bold" />
+            android:background="@drawable/bg_card_clay"
+            android:elevation="10dp"
+            android:orientation="vertical"
+            android:padding="26dp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="Cria uma tarefa simples para o Lifinity."
-            android:textColor="#B5C7BC"
-            android:textSize="15sp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Nova tarefa"
+                android:textColor="@color/lifinity_text"
+                android:textSize="30sp"
+                android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/createTaskTitleInput"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="28dp"
-            android:background="#F4FBF7"
-            android:hint="Titulo"
-            android:inputType="textCapSentences"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:singleLine="true"
-            android:textColor="#07110D"
-            android:textColorHint="#637166"
-            android:textSize="16sp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Cria uma tarefa simples para o Lifinity."
+                android:textColor="@color/lifinity_text_secondary"
+                android:textSize="15sp" />
 
-        <EditText
-            android:id="@+id/createTaskDescriptionInput"
-            android:layout_width="match_parent"
-            android:layout_height="110dp"
-            android:layout_marginTop="14dp"
-            android:background="#F4FBF7"
-            android:gravity="top"
-            android:hint="Descricao opcional"
-            android:inputType="textMultiLine|textCapSentences"
-            android:padding="16dp"
-            android:textColor="#07110D"
-            android:textColorHint="#637166"
-            android:textSize="16sp" />
+            <EditText
+                android:id="@+id/createTaskTitleInput"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/height_input"
+                android:layout_marginTop="28dp"
+                android:background="@drawable/bg_input_clay"
+                android:hint="Titulo"
+                android:inputType="textCapSentences"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:singleLine="true"
+                android:textColor="@color/lifinity_input_text"
+                android:textColorHint="@color/lifinity_input_hint"
+                android:textSize="16sp" />
 
-        <Spinner
-            android:id="@+id/createTaskPrioritySpinner"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="14dp"
-            android:background="#F4FBF7"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp" />
+            <EditText
+                android:id="@+id/createTaskDescriptionInput"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_input_clay"
+                android:gravity="top"
+                android:hint="Descricao opcional"
+                android:inputType="textMultiLine|textCapSentences"
+                android:padding="18dp"
+                android:textColor="@color/lifinity_input_text"
+                android:textColorHint="@color/lifinity_input_hint"
+                android:textSize="16sp" />
 
-        <EditText
-            android:id="@+id/createTaskDueDateInput"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="14dp"
-            android:background="#F4FBF7"
-            android:hint="Data limite opcional: YYYY-MM-DDTHH:mm"
-            android:inputType="text"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:singleLine="true"
-            android:textColor="#07110D"
-            android:textColorHint="#637166"
-            android:textSize="16sp" />
+            <Spinner
+                android:id="@+id/createTaskPrioritySpinner"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/height_input"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_input_clay"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp" />
 
-        <TextView
-            android:id="@+id/createTaskErrorText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:gravity="center"
-            android:textColor="#FFB4AB"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:visibility="gone"
-            tools:text="Erro ao criar tarefa."
-            tools:visibility="visible" />
+            <EditText
+                android:id="@+id/createTaskDueDateInput"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/height_input"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_input_clay"
+                android:hint="Data limite opcional: YYYY-MM-DDTHH:mm"
+                android:inputType="text"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:singleLine="true"
+                android:textColor="@color/lifinity_input_text"
+                android:textColorHint="@color/lifinity_input_hint"
+                android:textSize="16sp" />
 
-        <Button
-            android:id="@+id/createTaskSubmitButton"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="20dp"
-            android:backgroundTint="#7FE0A4"
-            android:text="Criar"
-            android:textAllCaps="false"
-            android:textColor="#07110D"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            <TextView
+                android:id="@+id/createTaskErrorText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:gravity="center"
+                android:textColor="@color/lifinity_danger"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:text="Erro ao criar tarefa."
+                tools:visibility="visible" />
 
-        <ProgressBar
-            android:id="@+id/createTaskProgressBar"
-            style="?android:attr/progressBarStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="18dp"
-            android:indeterminateTint="#7FE0A4"
-            android:visibility="gone" />
+            <Button
+                android:id="@+id/createTaskSubmitButton"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/height_button"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/btn_primary_clay"
+                android:elevation="8dp"
+                android:text="Criar"
+                android:textAllCaps="false"
+                android:textColor="@color/lifinity_text_on_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
+            <ProgressBar
+                android:id="@+id/createTaskProgressBar"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="18dp"
+                android:indeterminateTint="@color/lifinity_primary"
+                android:visibility="gone" />
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

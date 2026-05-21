@@ -3,17 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#07110D"
+    android:background="@drawable/bg_app_clay"
     android:orientation="vertical"
-    android:padding="20dp"
+    android:padding="@dimen/space_screen"
     tools:context=".TasksActivity">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Tarefas"
-        android:textColor="#F4FBF7"
-        android:textSize="28sp"
+        android:textColor="@color/lifinity_text"
+        android:textSize="30sp"
         android:textStyle="bold" />
 
     <TextView
@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:text="As tuas tarefas do Lifinity"
-        android:textColor="#B5C7BC"
+        android:textColor="@color/lifinity_text_secondary"
         android:textSize="15sp" />
 
     <LinearLayout
@@ -33,49 +33,54 @@
         <Button
             android:id="@+id/createTaskButton"
             android:layout_width="0dp"
-            android:layout_height="52dp"
+            android:layout_height="@dimen/height_button"
             android:layout_weight="1"
-            android:backgroundTint="#7FE0A4"
+            android:background="@drawable/btn_primary_clay"
+            android:elevation="8dp"
             android:text="Nova tarefa"
             android:textAllCaps="false"
-            android:textColor="#07110D"
+            android:textColor="@color/lifinity_text_on_primary"
             android:textSize="15sp"
             android:textStyle="bold" />
 
         <Button
             android:id="@+id/hideCompletedTasksButton"
             android:layout_width="0dp"
-            android:layout_height="52dp"
+            android:layout_height="@dimen/height_button"
             android:layout_marginStart="10dp"
             android:layout_weight="1"
-            android:backgroundTint="#26372D"
+            android:background="@drawable/btn_secondary_clay"
+            android:elevation="6dp"
             android:text="Ocultar concluidas"
             android:textAllCaps="false"
-            android:textColor="#F4FBF7"
-            android:textSize="15sp"
+            android:textColor="@color/lifinity_text"
+            android:textSize="14sp"
             android:textStyle="bold" />
     </LinearLayout>
 
     <EditText
         android:id="@+id/tasksSearchInput"
         android:layout_width="match_parent"
-        android:layout_height="52dp"
+        android:layout_height="@dimen/height_input"
         android:layout_marginTop="16dp"
-        android:background="#F4FBF7"
+        android:background="@drawable/bg_input_clay"
         android:hint="Pesquisar por titulo"
         android:inputType="text"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
         android:singleLine="true"
-        android:textColor="#07110D"
-        android:textColorHint="#637166"
+        android:textColor="@color/lifinity_input_text"
+        android:textColorHint="@color/lifinity_input_hint"
         android:textSize="15sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:orientation="horizontal">
+        android:background="@drawable/bg_card_soft_clay"
+        android:elevation="5dp"
+        android:orientation="horizontal"
+        android:padding="14dp">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -87,16 +92,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Estado"
-                android:textColor="#B5C7BC"
+                android:textColor="@color/lifinity_text_secondary"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
             <Spinner
                 android:id="@+id/tasksStatusFilterSpinner"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="@dimen/height_input"
                 android:layout_marginTop="6dp"
-                android:background="#F4FBF7"
+                android:background="@drawable/bg_input_clay"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp" />
         </LinearLayout>
@@ -112,16 +117,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Prioridade"
-                android:textColor="#B5C7BC"
+                android:textColor="@color/lifinity_text_secondary"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
             <Spinner
                 android:id="@+id/tasksPriorityFilterSpinner"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="@dimen/height_input"
                 android:layout_marginTop="6dp"
-                android:background="#F4FBF7"
+                android:background="@drawable/bg_input_clay"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp" />
         </LinearLayout>
@@ -134,7 +139,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="40dp"
-        android:indeterminateTint="#7FE0A4"
+        android:indeterminateTint="@color/lifinity_primary"
         android:visibility="gone" />
 
     <TextView
@@ -143,7 +148,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="34dp"
         android:gravity="center"
-        android:textColor="#FFB4AB"
+        android:textColor="@color/lifinity_danger"
         android:textSize="15sp"
         android:textStyle="bold"
         android:visibility="gone"
@@ -156,8 +161,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="34dp"
         android:gravity="center"
-        android:text="Ainda não tens tarefas."
-        android:textColor="#B5C7BC"
+        android:text="Ainda nao tens tarefas."
+        android:textColor="@color/lifinity_text_secondary"
         android:textSize="16sp"
         android:visibility="gone"
         tools:visibility="visible" />
@@ -173,5 +178,4 @@
         android:visibility="gone"
         tools:listitem="@layout/item_task"
         tools:visibility="visible" />
-
 </LinearLayout>

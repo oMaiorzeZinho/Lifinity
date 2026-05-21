@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.viewTasksButton).setOnClickListener(v -> openTasksActivity());
+        findViewById(R.id.profileButton).setOnClickListener(v -> openProfileActivity());
         findViewById(R.id.logoutButton).setOnClickListener(v -> logout());
     }
 
@@ -53,6 +54,11 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void openProfileActivity() {
+        Intent intent = new Intent(this, ProfileActivity.class);
+        startActivity(intent);
+    }
+
     private void logout() {
         SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         preferences.edit()
@@ -60,6 +66,9 @@ public class MainActivity extends AppCompatActivity {
                 .remove(KEY_USER)
                 .apply();
 
-        openLoginActivity();
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }

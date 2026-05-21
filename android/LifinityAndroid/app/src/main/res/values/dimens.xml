@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="space_screen">22dp</dimen>
+    <dimen name="space_card">22dp</dimen>
+    <dimen name="radius_card">28dp</dimen>
+    <dimen name="radius_control">20dp</dimen>
+    <dimen name="height_button">56dp</dimen>
+    <dimen name="height_input">56dp</dimen>
+</resources>
