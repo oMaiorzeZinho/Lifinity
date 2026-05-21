@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.viewTasksButton).setOnClickListener(v -> openTasksActivity());
+        findViewById(R.id.inspirationButton).setOnClickListener(v -> openInspirationActivity());
         findViewById(R.id.profileButton).setOnClickListener(v -> openProfileActivity());
         findViewById(R.id.logoutButton).setOnClickListener(v -> logout());
     }
@@ -51,6 +52,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void openTasksActivity() {
         Intent intent = new Intent(this, TasksActivity.class);
+        startActivity(intent);
+    }
+
+    private void openInspirationActivity() {
+        Intent intent = new Intent(this, InspirationActivity.class);
         startActivity(intent);
     }
 
