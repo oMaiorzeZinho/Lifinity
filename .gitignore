@@ -28,3 +28,5 @@ build/Release/
 
 # Android Studio / IDE
 android/.idea/
+
+.idea/deviceManager.xml
