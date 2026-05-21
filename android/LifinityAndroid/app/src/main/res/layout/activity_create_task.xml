@@ -24,7 +24,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Nova tarefa"
+                android:text="Nova atividade"
                 android:textColor="@color/lifinity_text"
                 android:textSize="30sp"
                 android:textStyle="bold" />
@@ -33,7 +33,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:text="Cria uma tarefa simples para o Lifinity."
+                android:text="Cria uma atividade simples para o Lifinity."
                 android:textColor="@color/lifinity_text_secondary"
                 android:textSize="15sp" />
 
@@ -100,7 +100,7 @@
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:visibility="gone"
-                tools:text="Erro ao criar tarefa."
+                tools:text="Erro ao criar atividade."
                 tools:visibility="visible" />
 
             <Button

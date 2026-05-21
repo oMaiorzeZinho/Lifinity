@@ -11,7 +11,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Tarefas"
+        android:text="Atividades"
         android:textColor="@color/lifinity_text"
         android:textSize="30sp"
         android:textStyle="bold" />
@@ -20,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:text="As tuas tarefas do Lifinity"
+        android:text="As tuas atividades do Lifinity"
         android:textColor="@color/lifinity_text_secondary"
         android:textSize="15sp" />
 
@@ -37,7 +37,7 @@
             android:layout_weight="1"
             android:background="@drawable/btn_primary_clay"
             android:elevation="8dp"
-            android:text="Nova tarefa"
+            android:text="Nova atividade"
             android:textAllCaps="false"
             android:textColor="@color/lifinity_text_on_primary"
             android:textSize="15sp"
@@ -51,7 +51,7 @@
             android:layout_weight="1"
             android:background="@drawable/btn_secondary_clay"
             android:elevation="6dp"
-            android:text="Ocultar concluidas"
+            android:text="Ocultar atividades concluidas"
             android:textAllCaps="false"
             android:textColor="@color/lifinity_text"
             android:textSize="14sp"
@@ -152,7 +152,7 @@
         android:textSize="15sp"
         android:textStyle="bold"
         android:visibility="gone"
-        tools:text="Erro ao carregar tarefas."
+        tools:text="Erro ao carregar atividades."
         tools:visibility="visible" />
 
     <TextView
@@ -161,7 +161,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="34dp"
         android:gravity="center"
-        android:text="Ainda nao tens tarefas."
+        android:text="Ainda nao tens atividades."
         android:textColor="@color/lifinity_text_secondary"
         android:textSize="16sp"
         android:visibility="gone"

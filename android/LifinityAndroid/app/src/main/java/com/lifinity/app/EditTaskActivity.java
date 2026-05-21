@@ -57,7 +57,7 @@ public class EditTaskActivity extends AppCompatActivity {
 
         idtask = getIntent().getIntExtra(EXTRA_IDTASK, -1);
         if (idtask <= 0) {
-            Toast.makeText(this, "Tarefa invalida.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Atividade invalida.", Toast.LENGTH_LONG).show();
             finish();
             return;
         }
@@ -142,7 +142,7 @@ public class EditTaskActivity extends AppCompatActivity {
                     return;
                 }
 
-                String message = "Tarefa atualizada com sucesso.";
+                String message = "Atividade atualizada com sucesso.";
                 JsonObject body = response.body();
                 if (body != null && body.has("message") && !body.get("message").isJsonNull()) {
                     message = body.get("message").getAsString();
@@ -159,7 +159,7 @@ public class EditTaskActivity extends AppCompatActivity {
                 }
 
                 setLoading(false);
-                String message = "Nao foi possivel editar a tarefa. Confirma que o backend esta ativo.";
+                String message = "Nao foi possivel editar a atividade. Confirma que o backend esta ativo.";
                 showError(message);
                 Toast.makeText(EditTaskActivity.this, message, Toast.LENGTH_LONG).show();
             }
@@ -172,7 +172,7 @@ public class EditTaskActivity extends AppCompatActivity {
         }
 
         if (response.errorBody() == null) {
-            return "Erro ao editar tarefa.";
+            return "Erro ao editar atividade.";
         }
 
         try {
@@ -187,10 +187,10 @@ public class EditTaskActivity extends AppCompatActivity {
                 }
             }
         } catch (Exception ignored) {
-            return "Erro ao editar tarefa.";
+            return "Erro ao editar atividade.";
         }
 
-        return "Erro ao editar tarefa.";
+        return "Erro ao editar atividade.";
     }
 
     private String formatDueDateForInput(String dueDate) {

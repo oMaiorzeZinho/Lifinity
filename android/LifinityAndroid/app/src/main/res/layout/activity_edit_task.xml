@@ -24,7 +24,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Editar tarefa"
+                android:text="Editar atividade"
                 android:textColor="@color/lifinity_text"
                 android:textSize="30sp"
                 android:textStyle="bold" />
@@ -33,7 +33,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:text="Atualiza os dados desta tarefa."
+                android:text="Atualiza os dados desta atividade."
                 android:textColor="@color/lifinity_text_secondary"
                 android:textSize="15sp" />
 
@@ -100,7 +100,7 @@
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:visibility="gone"
-                tools:text="Erro ao editar tarefa."
+                tools:text="Erro ao editar atividade."
                 tools:visibility="visible" />
 
             <Button

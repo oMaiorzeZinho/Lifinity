@@ -142,7 +142,7 @@
                 android:layout_marginTop="24dp"
                 android:background="@drawable/btn_primary_clay"
                 android:elevation="8dp"
-                android:text="Ver tarefas"
+                android:text="Ver atividades"
                 android:textAllCaps="false"
                 android:textColor="@color/lifinity_text_on_primary"
                 android:textSize="16sp"

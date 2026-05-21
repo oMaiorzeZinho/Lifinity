@@ -145,15 +145,15 @@ public class TasksActivity extends AppCompatActivity {
                     return;
                 }
 
-                showError("Nao foi possivel carregar as tarefas. Confirma que o backend esta ativo.");
+                showError("Nao foi possivel carregar as atividades. Confirma que o backend esta ativo.");
             }
         });
     }
 
     private void confirmCompleteTask(Task task) {
         new AlertDialog.Builder(this)
-                .setTitle("Concluir tarefa")
-                .setMessage("Queres concluir esta tarefa?")
+                .setTitle("Concluir atividade")
+                .setMessage("Queres concluir esta atividade?")
                 .setNegativeButton("Cancelar", null)
                 .setPositiveButton("Concluir", (dialog, which) -> completeTask(task))
                 .show();
@@ -161,7 +161,7 @@ public class TasksActivity extends AppCompatActivity {
 
     private void showTaskOptions(Task task) {
         if (task == null || task.getIdtask() == null) {
-            showError("Tarefa invalida.");
+            showError("Atividade invalida.");
             return;
         }
 
@@ -171,7 +171,7 @@ public class TasksActivity extends AppCompatActivity {
                 : new String[]{"Ocultar/Eliminar", "Cancelar"};
 
         new AlertDialog.Builder(this)
-                .setTitle("Opcoes da tarefa")
+                .setTitle("Opcoes da atividade")
                 .setItems(options, (dialog, which) -> {
                     String option = options[which];
                     if ("Editar".equals(option)) {
@@ -193,7 +193,7 @@ public class TasksActivity extends AppCompatActivity {
         }
 
         if (task == null || task.getIdtask() == null) {
-            showError("Tarefa invalida.");
+            showError("Atividade invalida.");
             return;
         }
 
@@ -221,7 +221,7 @@ public class TasksActivity extends AppCompatActivity {
                 updateStoredUser(completeResponse);
                 Toast.makeText(
                         TasksActivity.this,
-                        valueOrFallback(completeResponse.getMessage(), "Tarefa concluida."),
+                        valueOrFallback(completeResponse.getMessage(), "Atividade concluida."),
                         Toast.LENGTH_LONG
                 ).show();
                 loadTasks(token);
@@ -234,15 +234,15 @@ public class TasksActivity extends AppCompatActivity {
                 }
 
                 progressBar.setVisibility(View.GONE);
-                showError("Nao foi possivel concluir a tarefa. Confirma que o backend esta ativo.");
+                showError("Nao foi possivel concluir a atividade. Confirma que o backend esta ativo.");
             }
         });
     }
 
     private void confirmDeleteTask(Task task) {
         new AlertDialog.Builder(this)
-                .setTitle("Ocultar/Eliminar tarefa")
-                .setMessage("Queres ocultar ou eliminar esta tarefa?")
+                .setTitle("Ocultar/Eliminar atividade")
+                .setMessage("Queres ocultar ou eliminar esta atividade?")
                 .setNegativeButton("Cancelar", null)
                 .setPositiveButton("Confirmar", (dialog, which) -> deleteTask(task))
                 .show();
@@ -256,7 +256,7 @@ public class TasksActivity extends AppCompatActivity {
         }
 
         if (task == null || task.getIdtask() == null) {
-            showError("Tarefa invalida.");
+            showError("Atividade invalida.");
             return;
         }
 
@@ -271,13 +271,13 @@ public class TasksActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
 
                 if (!response.isSuccessful()) {
-                    String message = getJsonErrorMessage(response, "Erro ao ocultar/eliminar tarefa.");
+                    String message = getJsonErrorMessage(response, "Erro ao ocultar/eliminar atividade.");
                     Toast.makeText(TasksActivity.this, message, Toast.LENGTH_LONG).show();
                     showError(message);
                     return;
                 }
 
-                String message = getJsonSuccessMessage(response.body(), "Tarefa ocultada/eliminada com sucesso.");
+                String message = getJsonSuccessMessage(response.body(), "Atividade ocultada/eliminada com sucesso.");
                 Toast.makeText(TasksActivity.this, message, Toast.LENGTH_LONG).show();
                 loadTasks(token);
             }
@@ -289,7 +289,7 @@ public class TasksActivity extends AppCompatActivity {
                 }
 
                 progressBar.setVisibility(View.GONE);
-                String message = "Nao foi possivel ocultar/eliminar a tarefa. Confirma que o backend esta ativo.";
+                String message = "Nao foi possivel ocultar/eliminar a atividade. Confirma que o backend esta ativo.";
                 Toast.makeText(TasksActivity.this, message, Toast.LENGTH_LONG).show();
                 showError(message);
             }
@@ -298,13 +298,13 @@ public class TasksActivity extends AppCompatActivity {
 
     private void confirmHideCompletedVisibleTasks() {
         if (!hasCompletedVisibleTasks()) {
-            Toast.makeText(this, "Nao ha tarefas concluidas para ocultar.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Nao ha atividades concluidas para ocultar.", Toast.LENGTH_LONG).show();
             return;
         }
 
         new AlertDialog.Builder(this)
                 .setTitle("Ocultar concluidas")
-                .setMessage("Queres ocultar todas as tarefas concluidas visiveis? Isto nao apaga tarefas definitivamente.")
+                .setMessage("Queres ocultar todas as atividades concluidas visiveis? Isto nao apaga atividades definitivamente.")
                 .setNegativeButton("Cancelar", null)
                 .setPositiveButton("Ocultar", (dialog, which) -> hideCompletedVisibleTasks())
                 .show();
@@ -338,13 +338,13 @@ public class TasksActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
 
                 if (!response.isSuccessful()) {
-                    String message = getJsonErrorMessage(response, "Erro ao ocultar tarefas concluidas.");
+                    String message = getJsonErrorMessage(response, "Erro ao ocultar atividades concluidas.");
                     Toast.makeText(TasksActivity.this, message, Toast.LENGTH_LONG).show();
                     showError(message);
                     return;
                 }
 
-                String message = getJsonSuccessMessage(response.body(), "Tarefas concluidas ocultadas com sucesso.");
+                String message = getJsonSuccessMessage(response.body(), "Atividades concluidas ocultadas com sucesso.");
                 Toast.makeText(TasksActivity.this, message, Toast.LENGTH_LONG).show();
                 loadTasks(token);
             }
@@ -356,7 +356,7 @@ public class TasksActivity extends AppCompatActivity {
                 }
 
                 progressBar.setVisibility(View.GONE);
-                String message = "Nao foi possivel ocultar as tarefas concluidas. Confirma que o backend esta ativo.";
+                String message = "Nao foi possivel ocultar as atividades concluidas. Confirma que o backend esta ativo.";
                 Toast.makeText(TasksActivity.this, message, Toast.LENGTH_LONG).show();
                 showError(message);
             }
@@ -394,7 +394,7 @@ public class TasksActivity extends AppCompatActivity {
         }
 
         if (response.errorBody() == null) {
-            return "Erro ao carregar tarefas.";
+            return "Erro ao carregar atividades.";
         }
 
         try {
@@ -409,10 +409,10 @@ public class TasksActivity extends AppCompatActivity {
                 }
             }
         } catch (Exception ignored) {
-            return "Erro ao carregar tarefas.";
+            return "Erro ao carregar atividades.";
         }
 
-        return "Erro ao carregar tarefas.";
+        return "Erro ao carregar atividades.";
     }
 
     private String getCompleteTaskErrorMessage(Response<CompleteTaskResponse> response) {
@@ -421,7 +421,7 @@ public class TasksActivity extends AppCompatActivity {
         }
 
         if (response.errorBody() == null) {
-            return "Erro ao concluir tarefa.";
+            return "Erro ao concluir atividade.";
         }
 
         try {
@@ -436,10 +436,10 @@ public class TasksActivity extends AppCompatActivity {
                 }
             }
         } catch (Exception ignored) {
-            return "Erro ao concluir tarefa.";
+            return "Erro ao concluir atividade.";
         }
 
-        return "Erro ao concluir tarefa.";
+        return "Erro ao concluir atividade.";
     }
 
     private void setupFilters() {
@@ -697,7 +697,7 @@ public class TasksActivity extends AppCompatActivity {
     private void showEmpty() {
         progressBar.setVisibility(View.GONE);
         errorText.setVisibility(View.GONE);
-        emptyText.setText("Ainda nao tens tarefas.");
+        emptyText.setText("Ainda nao tens atividades.");
         emptyText.setVisibility(View.VISIBLE);
         tasksRecyclerView.setVisibility(View.GONE);
     }
@@ -706,8 +706,8 @@ public class TasksActivity extends AppCompatActivity {
         progressBar.setVisibility(View.GONE);
         errorText.setVisibility(View.GONE);
         emptyText.setText(allTasks.isEmpty()
-                ? "Ainda nao tens tarefas."
-                : "Nenhuma tarefa encontrada com estes filtros.");
+                ? "Ainda nao tens atividades."
+                : "Nenhuma atividade encontrada com estes filtros.");
         emptyText.setVisibility(View.VISIBLE);
         tasksRecyclerView.setVisibility(View.GONE);
     }

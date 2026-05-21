@@ -94,7 +94,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 OnTaskCompleteClickListener completeClickListener,
                 OnTaskOptionsClickListener optionsClickListener
         ) {
-            titleText.setText(valueOrFallback(task.getTitle(), "Tarefa sem titulo"));
+            titleText.setText(valueOrFallback(task.getTitle(), "Atividade sem titulo"));
             descriptionText.setText(valueOrFallback(task.getDescription(), "Sem descricao."));
             priorityText.setText("Prioridade: " + valueOrFallback(task.getPriority(), "-"));
             statusText.setText("Estado: " + getDisplayStatus(task));

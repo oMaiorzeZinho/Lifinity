@@ -114,7 +114,7 @@ public class CreateTaskActivity extends AppCompatActivity {
                     return;
                 }
 
-                String message = "Tarefa criada com sucesso!";
+                String message = "Atividade criada com sucesso!";
                 JsonObject body = response.body();
                 if (body != null && body.has("message") && !body.get("message").isJsonNull()) {
                     message = body.get("message").getAsString();
@@ -131,7 +131,7 @@ public class CreateTaskActivity extends AppCompatActivity {
                 }
 
                 setLoading(false);
-                showError("Nao foi possivel criar a tarefa. Confirma que o backend esta ativo.");
+                showError("Nao foi possivel criar a atividade. Confirma que o backend esta ativo.");
             }
         });
     }
@@ -142,7 +142,7 @@ public class CreateTaskActivity extends AppCompatActivity {
         }
 
         if (response.errorBody() == null) {
-            return "Erro ao criar tarefa.";
+            return "Erro ao criar atividade.";
         }
 
         try {
@@ -157,10 +157,10 @@ public class CreateTaskActivity extends AppCompatActivity {
                 }
             }
         } catch (Exception ignored) {
-            return "Erro ao criar tarefa.";
+            return "Erro ao criar atividade.";
         }
 
-        return "Erro ao criar tarefa.";
+        return "Erro ao criar atividade.";
     }
 
     private void setLoading(boolean loading) {

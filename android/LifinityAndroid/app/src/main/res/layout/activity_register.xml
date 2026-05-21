@@ -46,7 +46,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:gravity="center"
-                android:text="Regista-te para comecar a organizar as tuas tarefas."
+                android:text="Regista-te para comecar a organizar as tuas atividades."
                 android:textColor="@color/lifinity_text_secondary"
                 android:textSize="15sp" />
 
