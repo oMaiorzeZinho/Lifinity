@@ -1,4 +1,27 @@
+const bcrypt = require('bcryptjs');
 const db = require('../config/db');
+
+const PUBLIC_USER_FIELDS = "iduser, username, email, xp, level, avatar, created_at";
+
+const normalizeUsername = (username) => {
+    if (typeof username !== "string") {
+        return "";
+    }
+
+    return username.trim();
+};
+
+const getPublicUserById = async (iduser, executor = db) => {
+    const [users] = await executor.query(
+        `SELECT ${PUBLIC_USER_FIELDS}
+         FROM USER
+         WHERE iduser = ?
+         LIMIT 1`,
+        [iduser]
+    );
+
+    return users[0] || null;
+};
 
 // Obter o Ranking Global (Top 10 utilizadores por XP)
 exports.getRanking = async (req, res) => {
@@ -28,6 +51,157 @@ exports.searchUsers = async (req, res) => {
     } catch (err) {
         console.error("Erro ao pesquisar utilizadores:", err);
         res.status(500).json({ error: "Erro ao pesquisar utilizadores." });
+    }
+};
+
+exports.updatePassword = async (req, res) => {
+    try {
+        const iduser = req.user.iduser;
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({
+                message: "A password atual e a nova password sao obrigatorias."
+            });
+        }
+
+        if (String(newPassword).length < 6) {
+            return res.status(400).json({
+                message: "A nova password deve ter pelo menos 6 caracteres."
+            });
+        }
+
+        const [users] = await db.query(
+            "SELECT iduser, password FROM USER WHERE iduser = ? LIMIT 1",
+            [iduser]
+        );
+
+        if (users.length === 0) {
+            return res.status(404).json({ message: "Utilizador nao encontrado." });
+        }
+
+        const isCurrentPasswordValid = await bcrypt.compare(
+            String(currentPassword),
+            users[0].password
+        );
+
+        if (!isCurrentPasswordValid) {
+            return res.status(401).json({ message: "Password atual incorreta." });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(String(newPassword), salt);
+
+        await db.query(
+            "UPDATE USER SET password = ? WHERE iduser = ?",
+            [hashedPassword, iduser]
+        );
+
+        res.json({ message: "Password atualizada com sucesso." });
+    } catch (err) {
+        console.error("Erro ao atualizar password:", err);
+        res.status(500).json({ message: "Erro ao atualizar password." });
+    }
+};
+
+exports.updateUsername = async (req, res) => {
+    try {
+        const iduser = req.user.iduser;
+        const newUsername = normalizeUsername(req.body.newUsername);
+
+        if (!newUsername) {
+            return res.status(400).json({ message: "O novo username e obrigatorio." });
+        }
+
+        if (newUsername.length < 3 || newUsername.length > 30) {
+            return res.status(400).json({
+                message: "O username deve ter entre 3 e 30 caracteres."
+            });
+        }
+
+        const [existingUsers] = await db.query(
+            "SELECT iduser FROM USER WHERE username = ? AND iduser != ? LIMIT 1",
+            [newUsername, iduser]
+        );
+
+        if (existingUsers.length > 0) {
+            return res.status(409).json({ message: "Este username ja esta em uso." });
+        }
+
+        await db.query(
+            "UPDATE USER SET username = ? WHERE iduser = ?",
+            [newUsername, iduser]
+        );
+
+        const updatedUser = await getPublicUserById(iduser);
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: "Utilizador nao encontrado." });
+        }
+
+        res.json({
+            message: "Username atualizado com sucesso.",
+            user: updatedUser
+        });
+    } catch (err) {
+        console.error("Erro ao atualizar username:", err);
+        res.status(500).json({ message: "Erro ao atualizar username." });
+    }
+};
+
+exports.deleteAccount = async (req, res) => {
+    const connection = await db.getConnection();
+
+    try {
+        const iduser = req.user.iduser;
+        const username = normalizeUsername(req.body.username);
+        const { password } = req.body;
+
+        if (!username || !password) {
+            return res.status(400).json({
+                message: "Username e password sao obrigatorios."
+            });
+        }
+
+        const [users] = await connection.query(
+            "SELECT iduser, username, password FROM USER WHERE iduser = ? LIMIT 1",
+            [iduser]
+        );
+
+        if (users.length === 0) {
+            return res.status(404).json({ message: "Utilizador nao encontrado." });
+        }
+
+        const user = users[0];
+
+        if (user.username !== username) {
+            return res.status(400).json({
+                message: "O username nao corresponde ao utilizador autenticado."
+            });
+        }
+
+        const isPasswordValid = await bcrypt.compare(String(password), user.password);
+
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: "Password incorreta." });
+        }
+
+        await connection.beginTransaction();
+        await connection.query("DELETE FROM USER WHERE iduser = ?", [iduser]);
+        await connection.commit();
+
+        res.json({ message: "Conta apagada com sucesso." });
+    } catch (err) {
+        try {
+            await connection.rollback();
+        } catch (rollbackErr) {
+            console.error("Erro ao reverter eliminacao de conta:", rollbackErr);
+        }
+
+        console.error("Erro ao apagar conta:", err);
+        res.status(500).json({ message: "Erro ao apagar conta." });
+    } finally {
+        connection.release();
     }
 };
 

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, Outlet, Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import DailyVerseWidget from '../components/DailyVerseWidget';
+import AccountSettingsModal from '../components/AccountSettingsModal';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -19,6 +20,7 @@ const DashboardLayout = () => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [notificationError, setNotificationError] = useState('');
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -190,10 +192,6 @@ const DashboardLayout = () => {
   const isProfilePage = location.pathname === '/dashboard/profile';
   const isChatPage = location.pathname === '/dashboard/chat';
   const isLightTheme = theme === 'light';
-
-  const toggleTheme = () => {
-    setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'));
-  };
 
   const accentOpacity = isLightTheme ? 0.22 : 0.15;
   const secondaryAccentOpacity = isLightTheme ? 0.17 : 0.11;
@@ -448,49 +446,31 @@ const DashboardLayout = () => {
             </div>
 
             <button
-              onClick={toggleTheme}
-              className={`lifinity-button-secondary w-10 h-10 rounded-xl flex items-center justify-center ${
-                isLightTheme
-                  ? 'hover:text-[#2f6f4f]'
-                  : 'hover:text-[#d8c990]'
-              }`}
-              title={isLightTheme ? 'Mudar para modo escuro' : 'Mudar para modo claro'}
-              aria-label={isLightTheme ? 'Mudar para modo escuro' : 'Mudar para modo claro'}
-              aria-pressed={isLightTheme}
+              onClick={() => setSettingsOpen(true)}
+              className="lifinity-button-secondary w-10 h-10 rounded-xl flex items-center justify-center hover:[color:var(--lifinity-primary-strong)]"
+              title="Configuracoes"
+              aria-label="Abrir configuracoes"
             >
-              {isLightTheme ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21.752 15.002A9.718 9.718 0 0118 15.75 9.75 9.75 0 018.25 6c0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25 9.75 9.75 0 0012.75 21a9.753 9.753 0 009.002-5.998z"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
-                  />
-                </svg>
-              )}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.094c.55 0 1.02.398 1.11.94l.149.894c.063.38.32.697.665.87.075.037.148.077.22.118.334.193.73.218 1.092.083l.853-.32a1.125 1.125 0 011.37.49l.547.948c.275.477.178 1.084-.232 1.451l-.675.607a1.125 1.125 0 00-.327 1.157c.021.08.04.162.057.244.08.377.315.704.643.906l.774.478c.468.289.668.87.49 1.391l-.338 1.04a1.125 1.125 0 01-1.206.754l-.9-.113a1.125 1.125 0 00-1.055.48 7.32 7.32 0 01-.157.194 1.125 1.125 0 00-.154 1.151l.36.833c.219.505.034 1.095-.44 1.374l-.943.555a1.125 1.125 0 01-1.454-.244l-.579-.698a1.125 1.125 0 00-1.133-.367 6.996 6.996 0 01-.25.041 1.125 1.125 0 00-.915.637l-.393.817a1.125 1.125 0 01-1.332.598l-1.05-.298a1.125 1.125 0 01-.79-1.182l.083-.905a1.125 1.125 0 00-.514-1.038 6.98 6.98 0 01-.204-.148 1.125 1.125 0 00-1.158-.116l-.817.39a1.125 1.125 0 01-1.39-.39l-.595-.919a1.125 1.125 0 01.18-1.462l.67-.614c.285-.262.412-.657.33-1.036a6.507 6.507 0 01-.045-.25 1.125 1.125 0 00-.665-.89l-.831-.365a1.125 1.125 0 01-.642-1.313l.26-1.064a1.125 1.125 0 011.153-.832l.908.052c.386.022.756-.155.982-.47.049-.069.1-.137.153-.202.24-.302.31-.71.19-1.077l-.282-.863a1.125 1.125 0 01.548-1.347l.966-.512a1.125 1.125 0 011.439.313l.556.719c.236.305.616.462.997.407.083-.012.167-.022.251-.03.384-.036.723-.273.886-.622l.382-.824z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
             </button>
 
             <button
@@ -526,6 +506,15 @@ const DashboardLayout = () => {
       </main>
 
       {!isInspirationPage && <DailyVerseWidget />}
+      {settingsOpen && (
+        <AccountSettingsModal
+          user={user}
+          setUser={setUser}
+          theme={theme}
+          setTheme={setTheme}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
       </div>
     </div>
   );
