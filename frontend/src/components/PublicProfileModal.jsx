@@ -18,7 +18,7 @@ const statValueClass =
 const categoryLabels = {
   level: 'Nivel',
   xp: 'XP',
-  tasks: 'Tarefas',
+  tasks: 'Atividades',
   friends: 'Amigos',
   groups: 'Grupos',
   chat: 'Chat',

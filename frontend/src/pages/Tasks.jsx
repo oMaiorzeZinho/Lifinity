@@ -363,7 +363,7 @@ const Tasks = () => {
 
   const openEditModal = (task) => {
     if (!canEditTask(task)) {
-      alert('Esta tarefa ja nao pode ser editada.');
+      alert('Esta atividade ja nao pode ser editada.');
       return;
     }
 
@@ -446,7 +446,7 @@ const openCompleteConfirmation = (task) => {
       window.dispatchEvent(new Event('lifinity-tasks-updated'));
     } catch (err) {
       console.error('Erro ao concluir tarefa:', err);
-      alert(err.response?.data?.message || 'Erro ao concluir tarefa.');
+      alert(err.response?.data?.message || 'Erro ao concluir atividade.');
     }
   };
 
@@ -456,10 +456,10 @@ const openCompleteConfirmation = (task) => {
     const shouldHide = isCompleted || isLost;
 
     const confirmMessage = shouldHide
-      ? `Tens a certeza que queres ocultar esta tarefa ${
+      ? `Tens a certeza que queres ocultar esta atividade ${
           isLost ? 'perdida' : 'concluída'
         } da lista?`
-      : 'Tens a certeza que queres eliminar esta tarefa?';
+      : 'Tens a certeza que queres eliminar esta atividade?';
 
     if (!window.confirm(confirmMessage)) return;
 
@@ -480,12 +480,12 @@ const openCompleteConfirmation = (task) => {
         err
       );
 
-      alert(shouldHide ? 'Erro ao ocultar tarefa.' : 'Erro ao eliminar tarefa.');
+      alert(shouldHide ? 'Erro ao ocultar atividade.' : 'Erro ao eliminar atividade.');
     }
   };
 
   const handleClearCompleted = async () => {
-    if (!window.confirm('Tens a certeza que queres ocultar as tarefas concluídas da lista?')) {
+    if (!window.confirm('Tens a certeza que queres ocultar as atividades concluídas da lista?')) {
       return;
     }
 
@@ -502,7 +502,7 @@ const openCompleteConfirmation = (task) => {
       window.dispatchEvent(new Event('lifinity-tasks-updated'));
     } catch (err) {
       console.error('Erro ao ocultar tarefas concluídas:', err);
-      alert('Erro ao ocultar tarefas concluídas.');
+      alert('Erro ao ocultar atividades concluídas.');
     }
   };
 
@@ -625,7 +625,7 @@ const openCompleteConfirmation = (task) => {
             `Linha ${lineNumber}: ${
               err.response?.data?.message ||
               err.response?.data?.error ||
-              'erro ao criar tarefa.'
+              'erro ao criar atividade.'
             }`
           );
         }
@@ -639,7 +639,7 @@ const openCompleteConfirmation = (task) => {
       const shortErrors = errors.slice(0, 5);
       const extraErrors = errors.length - shortErrors.length;
       const alertLines = [
-        `${importedCount} tarefas importadas`,
+        `${importedCount} atividades importadas`,
         `${ignoredCount} linhas ignoradas`
       ];
 
@@ -656,7 +656,7 @@ const openCompleteConfirmation = (task) => {
       console.error('Erro ao importar CSV:', err);
       alert(
         [
-          `${importedCount} tarefas importadas`,
+          `${importedCount} atividades importadas`,
           `${ignoredCount} linhas ignoradas`,
           '',
           'Erros:',
@@ -672,8 +672,8 @@ const openCompleteConfirmation = (task) => {
     const csvTemplate = [
       'title,description,priority,due_date,assignees,groups',
       'Estudar Matemática,Rever capítulo 4,alta,2026-05-10T18:00,,',
-      'Tarefa para amigo,Enviar tarefa para um amigo,media,2026-05-11T18:00,cliente,',
-      'Tarefa para grupo,Enviar tarefa para um grupo,baixa,2026-05-12T18:00,,Grupo Sigma',
+      'Atividade para amigo,Enviar atividade para um amigo,media,2026-05-11T18:00,cliente,',
+      'Atividade para grupo,Enviar atividade para um grupo,baixa,2026-05-12T18:00,,Grupo Sigma',
       'Descrição com vírgula,"Preparar notas, slides e perguntas",media,,,',
       'Amigo e grupo,Exemplo com vários destinos,alta,2026-05-13T20:00,cliente,Grupo Sigma'
     ].join('\n');
@@ -686,7 +686,7 @@ const openCompleteConfirmation = (task) => {
     const link = document.createElement('a');
 
     link.href = url;
-    link.download = 'modelo_tarefas_lifinity.csv';
+    link.download = 'modelo_atividades_lifinity.csv';
     document.body.appendChild(link);
     link.click();
 
@@ -701,7 +701,7 @@ const openCompleteConfirmation = (task) => {
       const token = localStorage.getItem('token');
 
       if (editingTask && !canEditTask(editingTask)) {
-        alert('Esta tarefa ja nao pode ser editada.');
+        alert('Esta atividade ja nao pode ser editada.');
         closeTaskModal();
         await fetchTasks(token);
         await fetchTaskSummary(token);
@@ -738,7 +738,7 @@ const openCompleteConfirmation = (task) => {
       window.dispatchEvent(new Event('lifinity-tasks-updated'));
     } catch (err) {
       console.error('Erro ao guardar tarefa:', err);
-      alert(err.response?.data?.message || 'Erro ao guardar tarefa.');
+      alert(err.response?.data?.message || 'Erro ao guardar atividade.');
     }
   };
 
@@ -848,9 +848,9 @@ const openCompleteConfirmation = (task) => {
           <div className="flex flex-wrap gap-2 items-center">
             <div className="relative">
               <input
-                aria-label="Procurar tarefa"
+                aria-label="Procurar atividade"
                 type="text"
-                placeholder="Procurar tarefa..."
+                placeholder="Procurar atividade..."
                 className={`pl-10 pr-4 py-3 rounded-xl text-xs font-bold w-64 ${inputClass}`}
                 value={searchTask}
                 onChange={(e) => setSearchTask(e.target.value)}
@@ -953,7 +953,7 @@ const openCompleteConfirmation = (task) => {
               onClick={openCreateModal}
               className={buttonPrimaryClass}
             >
-              Nova Tarefa
+              Nova Atividade
             </button>
           </div>
         </div>
@@ -963,7 +963,7 @@ const openCompleteConfirmation = (task) => {
           <div className="p-4 space-y-3">
             {filteredTasks.length === 0 ? (
               <div className="p-20 text-center font-bold italic uppercase text-xs tracking-widest [color:var(--lifinity-text-muted)]">
-                Nenhuma tarefa encontrada com estes filtros.
+                Nenhuma atividade encontrada com estes filtros.
               </div>
             ) : (
               filteredTasks.map((task) => {
@@ -1016,7 +1016,7 @@ const openCompleteConfirmation = (task) => {
                                 ? `Recebida de ${task.creator_username || 'utilizador'}`
                                 : task.task_origin === 'group_task'
                                   ? `Grupo: ${task.group_names || 'grupo'}`
-                                  : 'Tarefa'}
+                                  : 'Atividade'}
                           </span>
                         )}
                         {dueDateLabel && (
@@ -1115,8 +1115,8 @@ const openCompleteConfirmation = (task) => {
                             className="transition-all p-2 [color:var(--lifinity-text-muted)] hover:[color:var(--lifinity-danger)]"
                             title={
                               task.status === 'concluida' || taskOverdue
-                                ? 'Ocultar tarefa'
-                                : 'Eliminar tarefa'
+                                ? 'Ocultar atividade'
+                                : 'Eliminar atividade'
                             }
                           >
                             <svg
@@ -1153,12 +1153,12 @@ const openCompleteConfirmation = (task) => {
           >
             <div className="space-y-2 text-center">
               <h2 className="text-4xl font-black tracking-tighter [color:var(--lifinity-text)]">
-                {editingTask ? 'Editar Tarefa' : 'Nova Tarefa'}
+                {editingTask ? 'Editar Atividade' : 'Nova Atividade'}
               </h2>
               <p className="text-xs font-black uppercase tracking-widest [color:var(--lifinity-text-muted)]">
                 {editingTask
-                  ? 'Só podes editar tarefas recentes ainda não concluídas.'
-                  : 'Define a tua próxima tarefa.'}
+                  ? 'Só podes editar atividades recentes ainda não concluídas.'
+                  : 'Define a tua próxima atividade.'}
               </p>
             </div>
 
@@ -1168,7 +1168,7 @@ const openCompleteConfirmation = (task) => {
                   htmlFor="task-title"
                   className={labelClass}
                 >
-                  Título da Tarefa
+                  Título da Atividade
                 </label>
                 <input
                   id="task-title"
@@ -1218,7 +1218,7 @@ const openCompleteConfirmation = (task) => {
                   }
                 />
                 <p className="text-[10px] font-bold uppercase tracking-widest ml-2 [color:var(--lifinity-text-muted)]">
-                  Se deixares em branco, a tarefa fica sem prazo definido.
+                  Se deixares em branco, a atividade fica sem prazo definido.
                 </p>
               </div>
 
@@ -1358,7 +1358,7 @@ const openCompleteConfirmation = (task) => {
                   type="submit"
                   className="lifinity-button-primary flex-1 px-6 py-5 rounded-2xl font-black text-xs uppercase tracking-widest"
                 >
-                  {editingTask ? 'Guardar' : 'Criar tarefa'}
+                  {editingTask ? 'Guardar' : 'Criar atividade'}
                 </button>
               </div>
             </form>

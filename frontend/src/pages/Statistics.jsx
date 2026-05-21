@@ -36,22 +36,22 @@ const metricOptions = {
     fill: '#6f8f7b'
   },
   tasksCompleted: {
-    label: 'Tarefas concluídas',
-    description: 'Mostra quantas tarefas foram concluídas ao longo do tempo.',
+    label: 'Atividades concluídas',
+    description: 'Mostra quantas atividades foram concluídas ao longo do tempo.',
     colorClass: '[color:var(--lifinity-primary-strong)]',
     stroke: '#2f6f4f',
     fill: '#9bbca7'
   },
   tasksCreated: {
-    label: 'Tarefas criadas',
-    description: 'Mostra quantas tarefas foram criadas no período escolhido.',
+    label: 'Atividades criadas',
+    description: 'Mostra quantas atividades foram criadas no período escolhido.',
     colorClass: '[color:var(--lifinity-text)]',
     stroke: '#6f8f7b',
     fill: '#aab9ae'
   },
   tasksLost: {
-    label: 'Tarefas perdidas',
-    description: 'Mostra tarefas cujo prazo terminou sem conclusão.',
+    label: 'Atividades perdidas',
+    description: 'Mostra atividades cujo prazo terminou sem conclusão.',
     colorClass: '[color:var(--lifinity-danger)]',
     stroke: '#f87171',
     fill: '#ef4444'
@@ -423,7 +423,7 @@ const Statistics = () => {
             Estatísticas do teu progresso
           </h2>
           <p className="text-sm md:text-base font-medium leading-relaxed [color:var(--lifinity-text-muted)]">
-            Analisa tarefas concluídas, XP ganho, tarefas perdidas e evolução ao
+            Analisa atividades concluídas, XP ganho, atividades perdidas e evolução ao
             longo do tempo. Estes dados ajudam-te a perceber padrões e a melhorar
             a tua organização diária.
           </p>
@@ -439,14 +439,14 @@ const Statistics = () => {
         </div>
       )}
 
-      {/* ALERTA DE TAREFAS PERDIDAS */}
+      {/* ALERTA DE ATIVIDADES PERDIDAS */}
       <div className="lifinity-card-soft lifinity-danger-surface rounded-3xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <p className="text-[10px] font-black uppercase tracking-widest mb-1 [color:var(--lifinity-danger)]">
-            Tarefas perdidas no período
+            Atividades perdidas no período
           </p>
           <p className="text-sm font-bold [color:var(--lifinity-text-muted)]">
-            Tarefas cujo prazo terminou sem conclusão.
+            Atividades cujo prazo terminou sem conclusão.
           </p>
         </div>
 
@@ -489,13 +489,13 @@ const Statistics = () => {
                   XP ganho
                 </option>
                 <option value="tasksCompleted">
-                  Tarefas concluídas
+                  Atividades concluídas
                 </option>
                 <option value="tasksCreated">
-                  Tarefas criadas
+                  Atividades criadas
                 </option>
                 <option value="tasksLost">
-                  Tarefas perdidas
+                  Atividades perdidas
                 </option>
               </select>
             </div>
@@ -700,13 +700,13 @@ const Statistics = () => {
 
         <div className={`${cardClass} p-6 rounded-[2rem]`}>
           <p className="lifinity-muted-label mb-2">
-            Tarefas pendentes
+            Atividades pendentes
           </p>
           <h3 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)]">
             {summary.pendingTasks}
           </h3>
           <p className={`font-medium mt-3 ${mutedTextClass}`}>
-            Tarefas ainda não concluídas dentro do período selecionado.
+            Atividades ainda não concluídas dentro do período selecionado.
           </p>
         </div>
 

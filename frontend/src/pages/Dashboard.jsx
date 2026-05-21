@@ -283,7 +283,7 @@ const DashboardLayout = () => {
               to="/dashboard/tasks"
               className={navLinkClass(isTasksPage)}
             >
-              Tarefas
+              Atividades
             </Link>
 
             <Link

@@ -486,7 +486,7 @@ const Chat = () => {
                 Sempre disponivel
               </p>
               <p className="text-sm font-medium mt-4 line-clamp-2 [color:var(--lifinity-text-muted)]">
-                Ajuda com tarefas, foco, motivacao e organizacao.
+                Ajuda com atividades, foco, motivacao e organizacao.
               </p>
             </button>
 

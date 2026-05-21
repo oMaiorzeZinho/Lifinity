@@ -134,7 +134,7 @@ const Ranking = () => {
 
             <p className={`max-w-2xl font-medium mt-4 leading-relaxed ${mutedTextClass}`}>
               Compara o teu progresso com outros utilizadores, acompanha o teu XP
-              e mantém a motivação para concluir tarefas diariamente.
+              e mantém a motivação para concluir atividades diariamente.
             </p>
           </div>
 
@@ -232,7 +232,7 @@ const Ranking = () => {
             onClick={() => navigate('/dashboard/tasks')}
             className="lifinity-button-primary px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest"
           >
-            Ganhar XP ao concluir tarefas
+            Ganhar XP ao concluir atividades
           </button>
         </div>
 
@@ -322,20 +322,20 @@ const Ranking = () => {
             Sistema de XP
           </h4>
           <p className={`text-sm font-medium mt-3 leading-relaxed ${mutedTextClass}`}>
-            O Lifinity recompensa os utilizadores à medida que concluem tarefas.
+            O Lifinity recompensa os utilizadores à medida que concluem atividades.
             A gamificação ajuda a manter consistência, motivação e progresso diário.
           </p>
         </div>
 
         <div className={`${cardClass} p-6 rounded-3xl`}>
           <p className="lifinity-muted-label mb-3">
-            Concluir tarefa
+            Concluir atividade
           </p>
           <h4 className="text-2xl font-black tracking-tight [color:var(--lifinity-primary-strong)]">
             + XP
           </h4>
           <p className={`text-sm font-medium mt-3 leading-relaxed ${mutedTextClass}`}>
-            Cada tarefa concluída aumenta a pontuação do utilizador.
+            Cada atividade concluída aumenta a pontuação do utilizador.
           </p>
         </div>
 

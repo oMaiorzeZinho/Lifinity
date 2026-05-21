@@ -22,7 +22,7 @@ const buttonPrimaryClass =
 const achievementCategoryLabels = {
   level: 'Nivel',
   xp: 'XP',
-  tasks: 'Tarefas',
+  tasks: 'Atividades',
   friends: 'Amigos',
   groups: 'Grupos',
   chat: 'Chat',
@@ -73,6 +73,7 @@ const Profile = () => {
   const [selectedHighlightIds, setSelectedHighlightIds] = useState([]);
   const [achievementError, setAchievementError] = useState('');
   const [savingHighlights, setSavingHighlights] = useState(false);
+  const [achievementsModalOpen, setAchievementsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
@@ -243,6 +244,7 @@ const Profile = () => {
           .map((achievement) => Number(achievement.idbadge))
       );
       setAchievementError('');
+      setAchievementsModalOpen(false);
     } catch (err) {
       console.error('Erro ao guardar destaques:', err);
       setAchievementError('Nao foi possivel guardar os destaques.');
@@ -328,7 +330,7 @@ const Profile = () => {
             </h3>
 
             <p className="font-medium mt-2 [color:var(--lifinity-text-muted)]">
-              O teu nível aumenta conforme completas tarefas e ganhas XP.
+              O teu nível aumenta conforme completas atividades e ganhas XP.
             </p>
           </div>
 
@@ -414,153 +416,79 @@ const Profile = () => {
               Medalhas
             </p>
             <h3 className="text-3xl font-black tracking-tighter [color:var(--lifinity-text)]">
-              Conquistas
+              Conquistas em destaque
             </h3>
             <p className="font-medium mt-2 [color:var(--lifinity-text-muted)]">
-              Escolhe ate 3 conquistas desbloqueadas para destacar no teu perfil.
+              Mantem o perfil limpo com ate 3 conquistas destacadas.
             </p>
           </div>
 
           <button
             type="button"
-            onClick={saveHighlights}
-            disabled={savingHighlights}
-            className="lifinity-button-primary px-5 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => setAchievementsModalOpen(true)}
+            className="lifinity-button-primary px-5 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest"
           >
-            {savingHighlights ? 'A guardar...' : 'Guardar destaques'}
+            Ver conquistas
           </button>
         </div>
 
-        <div className="p-6 md:p-8 space-y-8">
+        <div className="p-6 md:p-8 space-y-6">
           {achievementError && (
             <div className="lifinity-card-soft lifinity-danger-surface p-4 rounded-2xl text-sm font-bold">
               {achievementError}
             </div>
           )}
 
-          <div>
-            <div className="flex items-center justify-between gap-4 mb-4">
-              <h4 className="text-xl font-black tracking-tight [color:var(--lifinity-text)]">
-                Destaques
-              </h4>
-              <p className="lifinity-muted-label">
-                {selectedHighlightIds.length}/3 selecionadas
-              </p>
-            </div>
-
-            {displayedHighlights.length === 0 ? (
-              <div className={`${innerCardClass} p-5 text-sm font-bold [color:var(--lifinity-text-muted)]`}>
-                Ainda nao tens conquistas desbloqueadas para destacar.
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {displayedHighlights.map((achievement, index) => (
-                  <div
-                    key={achievement.idbadge}
-                    className="p-5 rounded-2xl bg-[var(--lifinity-primary-muted)] border border-[var(--lifinity-primary)] shadow-sm"
-                  >
-                    <p className="text-[10px] font-black uppercase tracking-widest mb-3 [color:var(--lifinity-primary-strong)]">
-                      Destaque {achievement.position || index + 1}
-                    </p>
-                    <h5 className="text-lg font-black [color:var(--lifinity-text)]">
-                      {achievement.name}
-                    </h5>
-                    <p className="text-sm font-medium mt-2 [color:var(--lifinity-text-muted)]">
-                      {achievement.description}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div>
-            <h4 className="text-xl font-black tracking-tight mb-4 [color:var(--lifinity-text)]">
-              Desbloqueadas
-            </h4>
-
-            {unlockedAchievements.length === 0 ? (
-              <div className={`${innerCardClass} p-5 text-sm font-bold [color:var(--lifinity-text-muted)]`}>
-                Continua a usar o Lifinity para desbloquear as primeiras conquistas.
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {unlockedAchievements.map((achievement) => {
-                  const isSelected = selectedHighlightIds.includes(Number(achievement.idbadge));
-                  const selectedPosition = selectedHighlightIds.indexOf(Number(achievement.idbadge)) + 1;
-                  const selectionLimitReached = selectedHighlightIds.length >= 3 && !isSelected;
-
-                  return (
-                    <button
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-5">
+            <div>
+              {displayedHighlights.length === 0 ? (
+                <div className={`${innerCardClass} p-5 text-sm font-bold [color:var(--lifinity-text-muted)]`}>
+                  Ainda nao tens conquistas desbloqueadas para destacar.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {displayedHighlights.slice(0, 3).map((achievement, index) => (
+                    <div
                       key={achievement.idbadge}
-                      type="button"
-                      onClick={() => toggleHighlightSelection(achievement)}
-                      disabled={selectionLimitReached}
-                      className={`text-left p-5 rounded-2xl border transition-all ${
-                        isSelected
-                          ? 'bg-[var(--lifinity-primary-muted)] border-[var(--lifinity-primary)] shadow-sm'
-                          : 'lifinity-card-soft border-[var(--lifinity-border)] hover:bg-[var(--lifinity-primary-muted)]'
-                      } disabled:opacity-55 disabled:cursor-not-allowed`}
+                      className="p-5 rounded-2xl bg-[var(--lifinity-primary-muted)] border border-[var(--lifinity-primary)] shadow-sm"
                     >
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <p className="lifinity-muted-label mb-2">
-                            {achievementCategoryLabels[achievement.category] || achievement.category || 'Conquista'}
-                          </p>
-                          <h5 className="text-lg font-black [color:var(--lifinity-text)]">
-                            {achievement.name}
-                          </h5>
-                        </div>
-
-                        {isSelected && (
-                          <span className="shrink-0 lifinity-badge text-[10px]">
-                            #{selectedPosition}
-                          </span>
-                        )}
-                      </div>
-
-                      <p className="text-sm font-medium mt-3 [color:var(--lifinity-text-muted)]">
+                      <p className="text-[10px] font-black uppercase tracking-widest mb-3 [color:var(--lifinity-primary-strong)]">
+                        Destaque {achievement.position || index + 1}
+                      </p>
+                      <h5 className="text-lg font-black [color:var(--lifinity-text)]">
+                        {achievement.name}
+                      </h5>
+                      <p className="text-sm font-medium mt-2 [color:var(--lifinity-text-muted)]">
                         {achievement.description}
                       </p>
-                      <p className="text-[10px] font-black uppercase tracking-widest mt-4 [color:var(--lifinity-text-muted)]">
-                        Desbloqueada em{' '}
-                        {achievement.earned_at
-                          ? new Date(achievement.earned_at).toLocaleDateString('pt-PT')
-                          : '--'}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {lockedAchievements.length > 0 && (
-            <div>
-              <h4 className="text-xl font-black tracking-tight mb-4 [color:var(--lifinity-text)]">
-                Bloqueadas
-              </h4>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {lockedAchievements.map((achievement) => (
-                  <div
-                    key={achievement.idbadge}
-                    className="p-5 rounded-2xl bg-[var(--lifinity-surface-soft)] border border-[var(--lifinity-border)] opacity-60"
-                  >
-                    <p className="text-[10px] font-black uppercase tracking-widest mb-2 [color:var(--lifinity-text-muted)]">
-                      {achievementCategoryLabels[achievement.category] || achievement.category || 'Conquista'}
-                    </p>
-                    <h5 className="text-lg font-black [color:var(--lifinity-text-muted)]">
-                      {achievement.name}
-                    </h5>
-                    <p className="text-sm font-medium mt-3 [color:var(--lifinity-text-muted)]">
-                      {achievement.description}
-                    </p>
-                  </div>
-                ))}
-              </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
+
+            <div className={`${innerCardClass} p-5 flex flex-col justify-between gap-4`}>
+              <div>
+                <p className="lifinity-muted-label mb-1">
+                  Desbloqueadas
+                </p>
+                <p className={statValueClass}>
+                  {unlockedAchievements.length}
+                </p>
+                <p className="text-xs font-bold mt-2 [color:var(--lifinity-text-muted)]">
+                  de {achievements.length} conquistas.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setAchievementsModalOpen(true)}
+                className="lifinity-button-secondary px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest"
+              >
+                Gerir conquistas
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -633,7 +561,7 @@ const Profile = () => {
               onClick={() => navigate('/dashboard/tasks')}
               className={buttonPrimaryClass}
             >
-              Ver tarefas
+              Ver atividades
             </button>
 
             <button
@@ -654,6 +582,155 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      {achievementsModalOpen && (
+        <div className="fixed inset-0 bg-[var(--lifinity-overlay)] backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <div className={`${cardClass} w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-[2rem]`}>
+            <div className="p-6 md:p-8 border-b border-[var(--lifinity-border)] flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
+              <div>
+                <p className="lifinity-muted-label mb-2">
+                  Medalhas
+                </p>
+                <h3 className="text-3xl font-black tracking-tighter [color:var(--lifinity-text)]">
+                  Gerir conquistas
+                </h3>
+                <p className="font-medium mt-2 [color:var(--lifinity-text-muted)]">
+                  Escolhe ate 3 conquistas desbloqueadas para destacar no teu perfil.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={saveHighlights}
+                  disabled={savingHighlights}
+                  className="lifinity-button-primary px-5 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {savingHighlights ? 'A guardar...' : 'Guardar destaques'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setAchievementsModalOpen(false)}
+                  className="lifinity-button-secondary px-5 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest"
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 md:p-8 space-y-8">
+              {achievementError && (
+                <div className="lifinity-card-soft lifinity-danger-surface p-4 rounded-2xl text-sm font-bold">
+                  {achievementError}
+                </div>
+              )}
+
+              <div className={`${innerCardClass} p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3`}>
+                <div>
+                  <p className="lifinity-muted-label">
+                    Selecionadas
+                  </p>
+                  <p className="text-sm font-bold mt-1 [color:var(--lifinity-text-muted)]">
+                    Clica em conquistas desbloqueadas para definir a ordem de destaque.
+                  </p>
+                </div>
+                <p className="text-2xl font-black [color:var(--lifinity-primary-strong)]">
+                  {selectedHighlightIds.length}/3
+                </p>
+              </div>
+
+              <div>
+                <h4 className="text-xl font-black tracking-tight mb-4 [color:var(--lifinity-text)]">
+                  Desbloqueadas
+                </h4>
+
+                {unlockedAchievements.length === 0 ? (
+                  <div className={`${innerCardClass} p-5 text-sm font-bold [color:var(--lifinity-text-muted)]`}>
+                    Continua a usar o Lifinity para desbloquear as primeiras conquistas.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {unlockedAchievements.map((achievement) => {
+                      const isSelected = selectedHighlightIds.includes(Number(achievement.idbadge));
+                      const selectedPosition = selectedHighlightIds.indexOf(Number(achievement.idbadge)) + 1;
+                      const selectionLimitReached = selectedHighlightIds.length >= 3 && !isSelected;
+
+                      return (
+                        <button
+                          key={achievement.idbadge}
+                          type="button"
+                          onClick={() => toggleHighlightSelection(achievement)}
+                          disabled={selectionLimitReached}
+                          className={`text-left p-5 rounded-2xl border transition-all ${
+                            isSelected
+                              ? 'bg-[var(--lifinity-primary-muted)] border-[var(--lifinity-primary)] shadow-sm'
+                              : 'lifinity-card-soft border-[var(--lifinity-border)] hover:bg-[var(--lifinity-primary-muted)]'
+                          } disabled:opacity-55 disabled:cursor-not-allowed`}
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <p className="lifinity-muted-label mb-2">
+                                {achievementCategoryLabels[achievement.category] || achievement.category || 'Conquista'}
+                              </p>
+                              <h5 className="text-lg font-black [color:var(--lifinity-text)]">
+                                {achievement.name}
+                              </h5>
+                            </div>
+
+                            {isSelected && (
+                              <span className="shrink-0 lifinity-badge text-[10px]">
+                                #{selectedPosition}
+                              </span>
+                            )}
+                          </div>
+
+                          <p className="text-sm font-medium mt-3 [color:var(--lifinity-text-muted)]">
+                            {achievement.description}
+                          </p>
+                          <p className="text-[10px] font-black uppercase tracking-widest mt-4 [color:var(--lifinity-text-muted)]">
+                            Desbloqueada em{' '}
+                            {achievement.earned_at
+                              ? new Date(achievement.earned_at).toLocaleDateString('pt-PT')
+                              : '--'}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {lockedAchievements.length > 0 && (
+                <div>
+                  <h4 className="text-xl font-black tracking-tight mb-4 [color:var(--lifinity-text)]">
+                    Bloqueadas
+                  </h4>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {lockedAchievements.map((achievement) => (
+                      <div
+                        key={achievement.idbadge}
+                        className="p-5 rounded-2xl bg-[var(--lifinity-surface-soft)] border border-[var(--lifinity-border)] opacity-55"
+                      >
+                        <p className="text-[10px] font-black uppercase tracking-widest mb-2 [color:var(--lifinity-text-muted)]">
+                          {achievementCategoryLabels[achievement.category] || achievement.category || 'Conquista'}
+                        </p>
+                        <h5 className="text-lg font-black [color:var(--lifinity-text-muted)]">
+                          {achievement.name}
+                        </h5>
+                        <p className="text-sm font-medium mt-3 [color:var(--lifinity-text-muted)]">
+                          {achievement.description}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -502,7 +502,7 @@ const Community = () => {
 
               <p className="max-w-3xl font-medium leading-relaxed [color:var(--lifinity-text-secondary)]">
                 Cria grupos, entra por código de convite, adiciona amigos e prepara
-                o Lifinity para tarefas partilhadas, estatísticas comparativas e
+                o Lifinity para atividades partilhadas, estatísticas comparativas e
                 conversas e progresso em conjunto.
               </p>
             </div>
@@ -627,7 +627,7 @@ const Community = () => {
 
           <div className="lifinity-card-soft mt-6 p-5 rounded-2xl">
             <p className="text-xs font-bold leading-relaxed [color:var(--lifinity-text-muted)]">
-              Os grupos juntam tarefas partilhadas, estatísticas por grupo,
+              Os grupos juntam atividades partilhadas, estatísticas por grupo,
               chat e partilha de versículos.
             </p>
           </div>
@@ -1152,10 +1152,10 @@ const Community = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="lifinity-card-soft p-5 rounded-2xl">
             <p className="text-[10px] font-black uppercase tracking-widest mb-2 [color:var(--lifinity-primary-strong)]">
-              Tarefas de grupo
+              Atividades de grupo
             </p>
             <p className="text-sm font-medium [color:var(--lifinity-text-muted)]">
-              Criar tarefas destinadas a grupos ou membros específicos.
+              Criar atividades destinadas a grupos ou membros específicos.
             </p>
           </div>
 
