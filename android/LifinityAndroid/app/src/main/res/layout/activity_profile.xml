@@ -433,6 +433,19 @@
             android:textStyle="bold" />
 
         <Button
+            android:id="@+id/profileAchievementsButton"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/height_button"
+            android:layout_marginTop="14dp"
+            android:background="@drawable/btn_secondary_clay"
+            android:elevation="6dp"
+            android:text="Todas as conquistas"
+            android:textAllCaps="false"
+            android:textColor="@color/lifinity_text"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <Button
             android:id="@+id/profileInspirationButton"
             android:layout_width="match_parent"
             android:layout_height="@dimen/height_button"

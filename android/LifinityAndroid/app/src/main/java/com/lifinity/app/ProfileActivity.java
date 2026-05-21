@@ -131,6 +131,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void setupButtons() {
         findViewById(R.id.profileTasksButton).setOnClickListener(v -> openTasksActivity());
+        findViewById(R.id.profileAchievementsButton).setOnClickListener(v -> openAchievementsActivity());
         findViewById(R.id.profileInspirationButton).setOnClickListener(v -> openInspirationActivity());
         findViewById(R.id.profileSettingsButton).setOnClickListener(v -> openSettingsActivity());
         findViewById(R.id.profileLogoutButton).setOnClickListener(v -> logout());
@@ -516,6 +517,11 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void openTasksActivity() {
         Intent intent = new Intent(this, TasksActivity.class);
+        startActivity(intent);
+    }
+
+    private void openAchievementsActivity() {
+        Intent intent = new Intent(this, AchievementsActivity.class);
         startActivity(intent);
     }
 

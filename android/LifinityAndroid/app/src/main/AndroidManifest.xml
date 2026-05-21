@@ -15,6 +15,9 @@
         android:theme="@style/Theme.Lifinity"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".AchievementsActivity"
+            android:exported="false" />
+        <activity
             android:name=".InspirationActivity"
             android:exported="false" />
         <activity
