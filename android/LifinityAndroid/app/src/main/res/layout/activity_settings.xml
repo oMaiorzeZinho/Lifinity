@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_app_clay"
+    android:fillViewport="true"
+    tools:context=".SettingsActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/space_screen">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Configuracoes"
+            android:textColor="@color/lifinity_text"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Gere a tua conta Lifinity."
+            android:textColor="@color/lifinity_text_secondary"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/settingsErrorText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_card_soft_clay"
+            android:padding="14dp"
+            android:textColor="@color/lifinity_danger"
+            android:textSize="14sp"
+            android:visibility="gone"
+            tools:text="Erro"
+            tools:visibility="visible" />
+
+        <ProgressBar
+            android:id="@+id/settingsProgressBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:background="@drawable/bg_card_clay"
+            android:elevation="10dp"
+            android:orientation="vertical"
+            android:padding="@dimen/space_card">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Aparencia"
+                android:textColor="@color/lifinity_text"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_card_soft_clay"
+                android:padding="16dp"
+                android:text="O modo claro/escuro no Android fica preparado para uma proxima fase."
+                android:textColor="@color/lifinity_text_secondary"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/bg_card_clay"
+            android:elevation="10dp"
+            android:orientation="vertical"
+            android:padding="@dimen/space_card">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Mudar nome de utilizador"
+                android:textColor="@color/lifinity_text"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/settingsUsernameInput"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/height_input"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_input_clay"
+                android:hint="Novo username"
+                android:inputType="text"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:singleLine="true"
+                android:textColor="@color/lifinity_input_text"
+                android:textColorHint="@color/lifinity_input_hint" />
+
+            <Button
+                android:id="@+id/settingsUsernameButton"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/height_button"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/btn_primary_clay"
+                android:elevation="8dp"
+                android:text="Guardar username"
+                android:textAllCaps="false"
+                android:textColor="@color/lifinity_text_on_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/bg_card_clay"
+            android:elevation="10dp"
+            android:orientation="vertical"
+            android:padding="@dimen/space_card">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Mudar palavra-passe"
+                android:textColor="@color/lifinity_text"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/settingsCurrentPasswordInput"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/height_input"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_input_clay"
+                android:hint="Palavra-passe atual"
+                android:inputType="textPassword"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:singleLine="true"
+                android:textColor="@color/lifinity_input_text"
+                android:textColorHint="@color/lifinity_input_hint" />
+
+            <EditText
+                android:id="@+id/settingsNewPasswordInput"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/height_input"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_input_clay"
+                android:hint="Nova palavra-passe"
+                android:inputType="textPassword"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:singleLine="true"
+                android:textColor="@color/lifinity_input_text"
+                android:textColorHint="@color/lifinity_input_hint" />
+
+            <EditText
+                android:id="@+id/settingsConfirmPasswordInput"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/height_input"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_input_clay"
+                android:hint="Confirmar nova palavra-passe"
+                android:inputType="textPassword"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:singleLine="true"
+                android:textColor="@color/lifinity_input_text"
+                android:textColorHint="@color/lifinity_input_hint" />
+
+            <Button
+                android:id="@+id/settingsPasswordButton"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/height_button"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/btn_secondary_clay"
+                android:elevation="6dp"
+                android:text="Guardar palavra-passe"
+                android:textAllCaps="false"
+                android:textColor="@color/lifinity_text"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:layout_marginBottom="18dp"
+            android:background="@drawable/bg_card_clay"
+            android:elevation="10dp"
+            android:orientation="vertical"
+            android:padding="@dimen/space_card">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Apagar conta"
+                android:textColor="@color/lifinity_danger"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Confirma o teu username e palavra-passe antes de apagar a conta."
+                android:textColor="@color/lifinity_text_secondary"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/settingsDeleteUsernameInput"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/height_input"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_input_clay"
+                android:hint="Username atual"
+                android:inputType="text"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:singleLine="true"
+                android:textColor="@color/lifinity_input_text"
+                android:textColorHint="@color/lifinity_input_hint" />
+
+            <EditText
+                android:id="@+id/settingsDeletePasswordInput"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/height_input"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_input_clay"
+                android:hint="Palavra-passe"
+                android:inputType="textPassword"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:singleLine="true"
+                android:textColor="@color/lifinity_input_text"
+                android:textColorHint="@color/lifinity_input_hint" />
+
+            <Button
+                android:id="@+id/settingsDeleteButton"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/height_button"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/btn_danger_clay"
+                android:elevation="6dp"
+                android:text="Apagar conta"
+                android:textAllCaps="false"
+                android:textColor="@color/lifinity_text_on_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

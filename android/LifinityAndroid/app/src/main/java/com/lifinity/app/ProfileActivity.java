@@ -34,7 +34,17 @@ public class ProfileActivity extends AppCompatActivity {
         bindUser(user);
 
         findViewById(R.id.profileTasksButton).setOnClickListener(v -> openTasksActivity());
+        findViewById(R.id.profileSettingsButton).setOnClickListener(v -> openSettingsActivity());
         findViewById(R.id.profileLogoutButton).setOnClickListener(v -> logout());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (!TextUtils.isEmpty(getToken())) {
+            bindUser(getSavedUser());
+        }
     }
 
     private String getToken() {
@@ -98,6 +108,11 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void openTasksActivity() {
         Intent intent = new Intent(this, TasksActivity.class);
+        startActivity(intent);
+    }
+
+    private void openSettingsActivity() {
+        Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
 
