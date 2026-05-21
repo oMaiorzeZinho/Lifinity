@@ -23,9 +23,14 @@ import java.text.SimpleDateFormat;
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
     private final List<Task> tasks = new ArrayList<>();
     private final OnTaskCompleteClickListener completeClickListener;
+    private final OnTaskOptionsClickListener optionsClickListener;
 
-    public TaskAdapter(OnTaskCompleteClickListener completeClickListener) {
+    public TaskAdapter(
+            OnTaskCompleteClickListener completeClickListener,
+            OnTaskOptionsClickListener optionsClickListener
+    ) {
         this.completeClickListener = completeClickListener;
+        this.optionsClickListener = optionsClickListener;
     }
 
     public void setTasks(List<Task> newTasks) {
@@ -46,7 +51,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
-        holder.bind(tasks.get(position), completeClickListener);
+        holder.bind(tasks.get(position), completeClickListener, optionsClickListener);
     }
 
     @Override
@@ -58,6 +63,10 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         void onTaskCompleteClick(Task task);
     }
 
+    public interface OnTaskOptionsClickListener {
+        void onTaskOptionsClick(Task task);
+    }
+
     static class TaskViewHolder extends RecyclerView.ViewHolder {
         private final TextView titleText;
         private final TextView descriptionText;
@@ -66,6 +75,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         private final TextView dueDateText;
         private final TextView createdAtText;
         private final Button completeButton;
+        private final Button optionsButton;
 
         TaskViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -76,9 +86,14 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             dueDateText = itemView.findViewById(R.id.taskDueDateText);
             createdAtText = itemView.findViewById(R.id.taskCreatedAtText);
             completeButton = itemView.findViewById(R.id.taskCompleteButton);
+            optionsButton = itemView.findViewById(R.id.taskOptionsButton);
         }
 
-        void bind(Task task, OnTaskCompleteClickListener completeClickListener) {
+        void bind(
+                Task task,
+                OnTaskCompleteClickListener completeClickListener,
+                OnTaskOptionsClickListener optionsClickListener
+        ) {
             titleText.setText(valueOrFallback(task.getTitle(), "Tarefa sem titulo"));
             descriptionText.setText(valueOrFallback(task.getDescription(), "Sem descricao."));
             priorityText.setText("Prioridade: " + valueOrFallback(task.getPriority(), "-"));
@@ -93,6 +108,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 completeButton.setVisibility(View.GONE);
                 completeButton.setOnClickListener(null);
             }
+
+            optionsButton.setOnClickListener(v -> optionsClickListener.onTaskOptionsClick(task));
         }
 
         private String valueOrFallback(String value, String fallback) {

@@ -25,6 +25,10 @@ import com.lifinity.app.models.Task;
 import com.lifinity.app.network.ApiClient;
 
 import java.util.List;
+import java.util.Date;
+import java.util.Locale;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -43,6 +47,7 @@ public class TasksActivity extends AppCompatActivity {
     private TaskAdapter taskAdapter;
     private Call<List<Task>> tasksCall;
     private Call<CompleteTaskResponse> completeTaskCall;
+    private Call<JsonObject> deleteTaskCall;
     private final Gson gson = new Gson();
 
     @Override
@@ -63,7 +68,7 @@ public class TasksActivity extends AppCompatActivity {
         tasksRecyclerView = findViewById(R.id.tasksRecyclerView);
         createTaskButton = findViewById(R.id.createTaskButton);
 
-        taskAdapter = new TaskAdapter(this::confirmCompleteTask);
+        taskAdapter = new TaskAdapter(this::confirmCompleteTask, this::showTaskOptions);
         tasksRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         tasksRecyclerView.setAdapter(taskAdapter);
 
@@ -135,6 +140,32 @@ public class TasksActivity extends AppCompatActivity {
                 .show();
     }
 
+    private void showTaskOptions(Task task) {
+        if (task == null || task.getIdtask() == null) {
+            showError("Tarefa invalida.");
+            return;
+        }
+
+        boolean canEdit = canEditTask(task);
+        String[] options = canEdit
+                ? new String[]{"Editar", "Ocultar/Eliminar", "Cancelar"}
+                : new String[]{"Ocultar/Eliminar", "Cancelar"};
+
+        new AlertDialog.Builder(this)
+                .setTitle("Opcoes da tarefa")
+                .setItems(options, (dialog, which) -> {
+                    String option = options[which];
+                    if ("Editar".equals(option)) {
+                        openEditTaskActivity(task);
+                    } else if ("Ocultar/Eliminar".equals(option)) {
+                        confirmDeleteTask(task);
+                    } else {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+    }
+
     private void completeTask(Task task) {
         String token = getToken();
         if (TextUtils.isEmpty(token)) {
@@ -185,6 +216,63 @@ public class TasksActivity extends AppCompatActivity {
 
                 progressBar.setVisibility(View.GONE);
                 showError("Nao foi possivel concluir a tarefa. Confirma que o backend esta ativo.");
+            }
+        });
+    }
+
+    private void confirmDeleteTask(Task task) {
+        new AlertDialog.Builder(this)
+                .setTitle("Ocultar/Eliminar tarefa")
+                .setMessage("Queres ocultar ou eliminar esta tarefa?")
+                .setNegativeButton("Cancelar", null)
+                .setPositiveButton("Confirmar", (dialog, which) -> deleteTask(task))
+                .show();
+    }
+
+    private void deleteTask(Task task) {
+        String token = getToken();
+        if (TextUtils.isEmpty(token)) {
+            openLoginActivity();
+            return;
+        }
+
+        if (task == null || task.getIdtask() == null) {
+            showError("Tarefa invalida.");
+            return;
+        }
+
+        progressBar.setVisibility(View.VISIBLE);
+        errorText.setVisibility(View.GONE);
+
+        TaskApi taskApi = ApiClient.getClient().create(TaskApi.class);
+        deleteTaskCall = taskApi.deleteTask("Bearer " + token, task.getIdtask());
+        deleteTaskCall.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                progressBar.setVisibility(View.GONE);
+
+                if (!response.isSuccessful()) {
+                    String message = getJsonErrorMessage(response, "Erro ao ocultar/eliminar tarefa.");
+                    Toast.makeText(TasksActivity.this, message, Toast.LENGTH_LONG).show();
+                    showError(message);
+                    return;
+                }
+
+                String message = getJsonSuccessMessage(response.body(), "Tarefa ocultada/eliminada com sucesso.");
+                Toast.makeText(TasksActivity.this, message, Toast.LENGTH_LONG).show();
+                loadTasks(token);
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                if (call.isCanceled()) {
+                    return;
+                }
+
+                progressBar.setVisibility(View.GONE);
+                String message = "Nao foi possivel ocultar/eliminar a tarefa. Confirma que o backend esta ativo.";
+                Toast.makeText(TasksActivity.this, message, Toast.LENGTH_LONG).show();
+                showError(message);
             }
         });
     }
@@ -268,6 +356,79 @@ public class TasksActivity extends AppCompatActivity {
         return "Erro ao concluir tarefa.";
     }
 
+    private String getJsonErrorMessage(Response<JsonObject> response, String fallback) {
+        if (response.code() == 401) {
+            return "Sessao invalida. Termina sessao e volta a entrar.";
+        }
+
+        if (response.errorBody() == null) {
+            return fallback;
+        }
+
+        try {
+            ErrorResponse errorResponse = gson.fromJson(response.errorBody().charStream(), ErrorResponse.class);
+            if (errorResponse != null) {
+                if (!TextUtils.isEmpty(errorResponse.message)) {
+                    return errorResponse.message;
+                }
+
+                if (!TextUtils.isEmpty(errorResponse.error)) {
+                    return errorResponse.error;
+                }
+            }
+        } catch (Exception ignored) {
+            return fallback;
+        }
+
+        return fallback;
+    }
+
+    private String getJsonSuccessMessage(JsonObject body, String fallback) {
+        if (body != null && body.has("message") && !body.get("message").isJsonNull()) {
+            return body.get("message").getAsString();
+        }
+        return fallback;
+    }
+
+    private boolean canEditTask(Task task) {
+        if (task == null || task.getIdtask() == null) {
+            return false;
+        }
+
+        String status = task.getStatus();
+        if (!TextUtils.isEmpty(status) && "concluida".equals(status.trim().toLowerCase(Locale.US))) {
+            return false;
+        }
+
+        Date dueDate = parseDate(task.getDueDate());
+        return dueDate == null || !dueDate.before(new Date());
+    }
+
+    private Date parseDate(String value) {
+        if (TextUtils.isEmpty(value)) {
+            return null;
+        }
+
+        String[] patterns = {
+                "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                "yyyy-MM-dd'T'HH:mm:ss'Z'",
+                "yyyy-MM-dd'T'HH:mm",
+                "yyyy-MM-dd HH:mm:ss",
+                "yyyy-MM-dd"
+        };
+
+        for (String pattern : patterns) {
+            try {
+                SimpleDateFormat format = new SimpleDateFormat(pattern, Locale.US);
+                return format.parse(value);
+            } catch (ParseException ignored) {
+                // Try the next server date format.
+            }
+        }
+
+        return null;
+    }
+
     private String valueOrFallback(String value, String fallback) {
         if (TextUtils.isEmpty(value)) {
             return fallback;
@@ -315,6 +476,16 @@ public class TasksActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void openEditTaskActivity(Task task) {
+        Intent intent = new Intent(this, EditTaskActivity.class);
+        intent.putExtra(EditTaskActivity.EXTRA_IDTASK, task.getIdtask());
+        intent.putExtra(EditTaskActivity.EXTRA_TITLE, task.getTitle());
+        intent.putExtra(EditTaskActivity.EXTRA_DESCRIPTION, task.getDescription());
+        intent.putExtra(EditTaskActivity.EXTRA_PRIORITY, task.getPriority());
+        intent.putExtra(EditTaskActivity.EXTRA_DUE_DATE, task.getDueDate());
+        startActivity(intent);
+    }
+
     @Override
     protected void onDestroy() {
         if (tasksCall != null) {
@@ -322,6 +493,9 @@ public class TasksActivity extends AppCompatActivity {
         }
         if (completeTaskCall != null) {
             completeTaskCall.cancel();
+        }
+        if (deleteTaskCall != null) {
+            deleteTaskCall.cancel();
         }
         super.onDestroy();
     }

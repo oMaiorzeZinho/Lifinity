@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#07110D"
+    android:fillViewport="true"
+    tools:context=".EditTaskActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Editar tarefa"
+            android:textColor="#F4FBF7"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Atualiza os dados desta tarefa."
+            android:textColor="#B5C7BC"
+            android:textSize="15sp" />
+
+        <EditText
+            android:id="@+id/editTaskTitleInput"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="28dp"
+            android:background="#F4FBF7"
+            android:hint="Titulo"
+            android:inputType="textCapSentences"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:singleLine="true"
+            android:textColor="#07110D"
+            android:textColorHint="#637166"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/editTaskDescriptionInput"
+            android:layout_width="match_parent"
+            android:layout_height="110dp"
+            android:layout_marginTop="14dp"
+            android:background="#F4FBF7"
+            android:gravity="top"
+            android:hint="Descricao opcional"
+            android:inputType="textMultiLine|textCapSentences"
+            android:padding="16dp"
+            android:textColor="#07110D"
+            android:textColorHint="#637166"
+            android:textSize="16sp" />
+
+        <Spinner
+            android:id="@+id/editTaskPrioritySpinner"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="14dp"
+            android:background="#F4FBF7"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp" />
+
+        <EditText
+            android:id="@+id/editTaskDueDateInput"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="14dp"
+            android:background="#F4FBF7"
+            android:hint="Data limite opcional: YYYY-MM-DDTHH:mm"
+            android:inputType="text"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:singleLine="true"
+            android:textColor="#07110D"
+            android:textColorHint="#637166"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/editTaskErrorText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:gravity="center"
+            android:textColor="#FFB4AB"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:text="Erro ao editar tarefa."
+            tools:visibility="visible" />
+
+        <Button
+            android:id="@+id/editTaskSubmitButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="#7FE0A4"
+            android:text="Guardar"
+            android:textAllCaps="false"
+            android:textColor="#07110D"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <ProgressBar
+            android:id="@+id/editTaskProgressBar"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="18dp"
+            android:indeterminateTint="#7FE0A4"
+            android:visibility="gone" />
+
+    </LinearLayout>
+</ScrollView>
