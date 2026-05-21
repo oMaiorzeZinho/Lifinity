@@ -621,6 +621,100 @@ exports.clearCompletedTasks = async (req, res) => {
     }
 };
 
+exports.hideCompletedVisibleTasks = async (req, res) => {
+    let connection;
+
+    try {
+        const iduser = req.user.iduser;
+
+        connection = await db.getConnection();
+        await connection.beginTransaction();
+
+        const [visibleRows] = await connection.query(
+            `SELECT COUNT(*) AS total
+             FROM TASK t
+             WHERE t.archived_at IS NULL
+               AND ${taskHiddenForUserCondition}
+               AND ${taskVisibilityCondition}
+               AND t.status = 'concluida'`,
+            [iduser, iduser, iduser, iduser]
+        );
+
+        const totalVisible = Number(visibleRows[0]?.total || 0);
+
+        if (totalVisible === 0) {
+            await connection.commit();
+            return res.json({
+                message: "Nao ha tarefas concluidas para ocultar.",
+                hiddenCount: 0
+            });
+        }
+
+        await connection.query(
+            `UPDATE TASK t
+             SET t.archived_at = NOW()
+             WHERE t.iduser = ?
+               AND t.archived_at IS NULL
+               AND ${taskHiddenForUserCondition}
+               AND t.status = 'concluida'
+               AND NOT EXISTS (
+                    SELECT 1
+                    FROM TASK_ASSIGNEE ta
+                    WHERE ta.idtask = t.idtask
+               )
+               AND NOT EXISTS (
+                    SELECT 1
+                    FROM GROUP_TASK gt
+                    WHERE gt.idtask = t.idtask
+               )`,
+            [iduser, iduser]
+        );
+
+        await connection.query(
+            `INSERT INTO TASK_USER_ARCHIVE (idtask, iduser)
+             SELECT t.idtask, ?
+             FROM TASK t
+             WHERE t.archived_at IS NULL
+               AND ${taskHiddenForUserCondition}
+               AND ${taskVisibilityCondition}
+               AND t.status = 'concluida'
+               AND NOT (
+                    t.iduser = ?
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM TASK_ASSIGNEE ta
+                        WHERE ta.idtask = t.idtask
+                    )
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM GROUP_TASK gt
+                        WHERE gt.idtask = t.idtask
+                    )
+               )
+             ON DUPLICATE KEY UPDATE hidden_at = CURRENT_TIMESTAMP`,
+            [iduser, iduser, iduser, iduser, iduser, iduser]
+        );
+
+        await connection.commit();
+
+        res.json({
+            message: `${totalVisible} tarefa(s) concluida(s) ocultada(s) com sucesso.`,
+            hiddenCount: totalVisible
+        });
+    } catch (err) {
+        if (connection) {
+            await connection.rollback();
+        }
+
+        console.error("Erro ao ocultar tarefas concluidas visiveis:", err);
+        res.status(500).json({ error: "Erro ao ocultar tarefas concluidas visiveis." });
+    } finally {
+        if (connection) {
+            connection.release();
+        }
+    }
+};
+
 // 7. Resumo diario das tarefas do utilizador.
 // Tarefas ocultadas continuam a contar no dia em que foram concluidas/perdidas.
 // 7. Resumo diario das tarefas do utilizador.

@@ -97,7 +97,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             titleText.setText(valueOrFallback(task.getTitle(), "Tarefa sem titulo"));
             descriptionText.setText(valueOrFallback(task.getDescription(), "Sem descricao."));
             priorityText.setText("Prioridade: " + valueOrFallback(task.getPriority(), "-"));
-            statusText.setText("Estado: " + valueOrFallback(task.getStatus(), "-"));
+            statusText.setText("Estado: " + getDisplayStatus(task));
             dueDateText.setText("Data limite: " + valueOrFallback(task.getDueDate(), "-"));
             createdAtText.setText("Criada em: " + valueOrFallback(task.getCreatedAt(), "-"));
 
@@ -119,24 +119,41 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             return value;
         }
 
+        private String getDisplayStatus(Task task) {
+            if (isCompleted(task)) {
+                return "concluida";
+            }
+
+            if (isLost(task)) {
+                return "perdida";
+            }
+
+            return "pendente";
+        }
+
         private boolean canCompleteTask(Task task) {
             if (task == null || task.getIdtask() == null) {
                 return false;
             }
 
-            String status = task.getStatus();
-            if (!TextUtils.isEmpty(status)) {
-                String normalizedStatus = status.trim().toLowerCase(Locale.US);
-                if ("concluida".equals(normalizedStatus)
-                        || "perdida".equals(normalizedStatus)
-                        || "perdido".equals(normalizedStatus)
-                        || "lost".equals(normalizedStatus)) {
-                    return false;
-                }
+            return !isCompleted(task) && !isLost(task);
+        }
+
+        private boolean isCompleted(Task task) {
+            if (task == null || TextUtils.isEmpty(task.getStatus())) {
+                return false;
+            }
+
+            return "concluida".equals(task.getStatus().trim().toLowerCase(Locale.US));
+        }
+
+        private boolean isLost(Task task) {
+            if (task == null || isCompleted(task)) {
+                return false;
             }
 
             Date dueDate = parseDate(task.getDueDate());
-            return dueDate == null || !dueDate.before(new Date());
+            return dueDate != null && dueDate.before(new Date());
         }
 
         private Date parseDate(String value) {
@@ -145,8 +162,11 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             }
 
             String[] patterns = {
+                    "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
                     "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                    "yyyy-MM-dd'T'HH:mm:ssXXX",
                     "yyyy-MM-dd'T'HH:mm:ss'Z'",
+                    "yyyy-MM-dd'T'HH:mm",
                     "yyyy-MM-dd HH:mm:ss",
                     "yyyy-MM-dd"
             };

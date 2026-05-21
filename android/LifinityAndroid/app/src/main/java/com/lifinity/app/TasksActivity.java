@@ -3,10 +3,16 @@ package com.lifinity.app;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +30,7 @@ import com.lifinity.app.models.CompleteTaskResponse;
 import com.lifinity.app.models.Task;
 import com.lifinity.app.network.ApiClient;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 import java.util.Locale;
@@ -42,12 +49,19 @@ public class TasksActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private TextView errorText;
     private TextView emptyText;
+    private EditText searchInput;
+    private Spinner statusFilterSpinner;
+    private Spinner priorityFilterSpinner;
     private RecyclerView tasksRecyclerView;
     private Button createTaskButton;
+    private Button hideCompletedTasksButton;
     private TaskAdapter taskAdapter;
+    private final List<Task> allTasks = new ArrayList<>();
+    private final List<Task> filteredTasks = new ArrayList<>();
     private Call<List<Task>> tasksCall;
     private Call<CompleteTaskResponse> completeTaskCall;
     private Call<JsonObject> deleteTaskCall;
+    private Call<JsonObject> hideCompletedVisibleTasksCall;
     private final Gson gson = new Gson();
 
     @Override
@@ -65,14 +79,20 @@ public class TasksActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.tasksProgressBar);
         errorText = findViewById(R.id.tasksErrorText);
         emptyText = findViewById(R.id.tasksEmptyText);
+        searchInput = findViewById(R.id.tasksSearchInput);
+        statusFilterSpinner = findViewById(R.id.tasksStatusFilterSpinner);
+        priorityFilterSpinner = findViewById(R.id.tasksPriorityFilterSpinner);
         tasksRecyclerView = findViewById(R.id.tasksRecyclerView);
         createTaskButton = findViewById(R.id.createTaskButton);
+        hideCompletedTasksButton = findViewById(R.id.hideCompletedTasksButton);
 
         taskAdapter = new TaskAdapter(this::confirmCompleteTask, this::showTaskOptions);
         tasksRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         tasksRecyclerView.setAdapter(taskAdapter);
 
+        setupFilters();
         createTaskButton.setOnClickListener(v -> openCreateTaskActivity());
+        hideCompletedTasksButton.setOnClickListener(v -> confirmHideCompletedVisibleTasks());
     }
 
     @Override
@@ -110,14 +130,13 @@ public class TasksActivity extends AppCompatActivity {
                     return;
                 }
 
+                allTasks.clear();
                 List<Task> tasks = response.body();
-                if (tasks == null || tasks.isEmpty()) {
-                    showEmpty();
-                    return;
+                if (tasks != null) {
+                    allTasks.addAll(tasks);
                 }
 
-                taskAdapter.setTasks(tasks);
-                showList();
+                applyFilters();
             }
 
             @Override
@@ -277,6 +296,73 @@ public class TasksActivity extends AppCompatActivity {
         });
     }
 
+    private void confirmHideCompletedVisibleTasks() {
+        if (!hasCompletedVisibleTasks()) {
+            Toast.makeText(this, "Nao ha tarefas concluidas para ocultar.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle("Ocultar concluidas")
+                .setMessage("Queres ocultar todas as tarefas concluidas visiveis? Isto nao apaga tarefas definitivamente.")
+                .setNegativeButton("Cancelar", null)
+                .setPositiveButton("Ocultar", (dialog, which) -> hideCompletedVisibleTasks())
+                .show();
+    }
+
+    private boolean hasCompletedVisibleTasks() {
+        for (Task task : allTasks) {
+            if (isTaskCompleted(task)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void hideCompletedVisibleTasks() {
+        String token = getToken();
+        if (TextUtils.isEmpty(token)) {
+            openLoginActivity();
+            return;
+        }
+
+        progressBar.setVisibility(View.VISIBLE);
+        errorText.setVisibility(View.GONE);
+
+        TaskApi taskApi = ApiClient.getClient().create(TaskApi.class);
+        hideCompletedVisibleTasksCall = taskApi.hideCompletedVisibleTasks("Bearer " + token);
+        hideCompletedVisibleTasksCall.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                progressBar.setVisibility(View.GONE);
+
+                if (!response.isSuccessful()) {
+                    String message = getJsonErrorMessage(response, "Erro ao ocultar tarefas concluidas.");
+                    Toast.makeText(TasksActivity.this, message, Toast.LENGTH_LONG).show();
+                    showError(message);
+                    return;
+                }
+
+                String message = getJsonSuccessMessage(response.body(), "Tarefas concluidas ocultadas com sucesso.");
+                Toast.makeText(TasksActivity.this, message, Toast.LENGTH_LONG).show();
+                loadTasks(token);
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                if (call.isCanceled()) {
+                    return;
+                }
+
+                progressBar.setVisibility(View.GONE);
+                String message = "Nao foi possivel ocultar as tarefas concluidas. Confirma que o backend esta ativo.";
+                Toast.makeText(TasksActivity.this, message, Toast.LENGTH_LONG).show();
+                showError(message);
+            }
+        });
+    }
+
     private void updateStoredUser(CompleteTaskResponse completeResponse) {
         if (completeResponse.getNewXP() == null && completeResponse.getNewLevel() == null) {
             return;
@@ -356,6 +442,163 @@ public class TasksActivity extends AppCompatActivity {
         return "Erro ao concluir tarefa.";
     }
 
+    private void setupFilters() {
+        ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                new String[]{"Todas", "Pendentes", "Concluidas", "Perdidas"}
+        );
+        statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        statusFilterSpinner.setAdapter(statusAdapter);
+
+        ArrayAdapter<String> priorityAdapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                new String[]{"Todas", "Baixa", "Media", "Alta"}
+        );
+        priorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        priorityFilterSpinner.setAdapter(priorityAdapter);
+
+        searchInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // No-op.
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                applyFilters();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // No-op.
+            }
+        });
+
+        AdapterView.OnItemSelectedListener filterListener = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                applyFilters();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                applyFilters();
+            }
+        };
+
+        statusFilterSpinner.setOnItemSelectedListener(filterListener);
+        priorityFilterSpinner.setOnItemSelectedListener(filterListener);
+    }
+
+    private void applyFilters() {
+        filteredTasks.clear();
+
+        String query = searchInput == null
+                ? ""
+                : searchInput.getText().toString().trim().toLowerCase(Locale.US);
+        String statusFilter = getSelectedFilterValue(statusFilterSpinner);
+        String priorityFilter = getSelectedFilterValue(priorityFilterSpinner);
+
+        for (Task task : allTasks) {
+            if (!matchesSearch(task, query)) {
+                continue;
+            }
+
+            if (!matchesStatusFilter(task, statusFilter)) {
+                continue;
+            }
+
+            if (!matchesPriorityFilter(task, priorityFilter)) {
+                continue;
+            }
+
+            filteredTasks.add(task);
+        }
+
+        taskAdapter.setTasks(filteredTasks);
+
+        if (filteredTasks.isEmpty()) {
+            showFilteredEmpty();
+        } else {
+            showList();
+        }
+    }
+
+    private String getSelectedFilterValue(Spinner spinner) {
+        if (spinner == null || spinner.getSelectedItem() == null) {
+            return "todas";
+        }
+
+        return spinner.getSelectedItem().toString().trim().toLowerCase(Locale.US);
+    }
+
+    private boolean matchesSearch(Task task, String query) {
+        if (TextUtils.isEmpty(query)) {
+            return true;
+        }
+
+        if (task == null || TextUtils.isEmpty(task.getTitle())) {
+            return false;
+        }
+
+        return task.getTitle().toLowerCase(Locale.US).contains(query);
+    }
+
+    private boolean matchesStatusFilter(Task task, String statusFilter) {
+        if ("todas".equals(statusFilter)) {
+            return true;
+        }
+
+        boolean completed = isTaskCompleted(task);
+        boolean lost = isTaskLost(task);
+
+        if ("pendentes".equals(statusFilter)) {
+            return !completed && !lost;
+        }
+
+        if ("concluidas".equals(statusFilter)) {
+            return completed;
+        }
+
+        if ("perdidas".equals(statusFilter)) {
+            return lost;
+        }
+
+        return true;
+    }
+
+    private boolean matchesPriorityFilter(Task task, String priorityFilter) {
+        if ("todas".equals(priorityFilter)) {
+            return true;
+        }
+
+        if (task == null || TextUtils.isEmpty(task.getPriority())) {
+            return false;
+        }
+
+        String priority = task.getPriority().trim().toLowerCase(Locale.US);
+        return priority.equals(priorityFilter);
+    }
+
+    private boolean isTaskCompleted(Task task) {
+        if (task == null || TextUtils.isEmpty(task.getStatus())) {
+            return false;
+        }
+
+        return "concluida".equals(task.getStatus().trim().toLowerCase(Locale.US));
+    }
+
+    private boolean isTaskLost(Task task) {
+        if (task == null || isTaskCompleted(task)) {
+            return false;
+        }
+
+        Date dueDate = parseDate(task.getDueDate());
+        return dueDate != null && dueDate.before(new Date());
+    }
+
     private String getJsonErrorMessage(Response<JsonObject> response, String fallback) {
         if (response.code() == 401) {
             return "Sessao invalida. Termina sessao e volta a entrar.";
@@ -395,13 +638,11 @@ public class TasksActivity extends AppCompatActivity {
             return false;
         }
 
-        String status = task.getStatus();
-        if (!TextUtils.isEmpty(status) && "concluida".equals(status.trim().toLowerCase(Locale.US))) {
+        if (isTaskCompleted(task)) {
             return false;
         }
 
-        Date dueDate = parseDate(task.getDueDate());
-        return dueDate == null || !dueDate.before(new Date());
+        return !isTaskLost(task);
     }
 
     private Date parseDate(String value) {
@@ -410,7 +651,9 @@ public class TasksActivity extends AppCompatActivity {
         }
 
         String[] patterns = {
+                "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
                 "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                "yyyy-MM-dd'T'HH:mm:ssXXX",
                 "yyyy-MM-dd'T'HH:mm:ss'Z'",
                 "yyyy-MM-dd'T'HH:mm",
                 "yyyy-MM-dd HH:mm:ss",
@@ -454,6 +697,17 @@ public class TasksActivity extends AppCompatActivity {
     private void showEmpty() {
         progressBar.setVisibility(View.GONE);
         errorText.setVisibility(View.GONE);
+        emptyText.setText("Ainda nao tens tarefas.");
+        emptyText.setVisibility(View.VISIBLE);
+        tasksRecyclerView.setVisibility(View.GONE);
+    }
+
+    private void showFilteredEmpty() {
+        progressBar.setVisibility(View.GONE);
+        errorText.setVisibility(View.GONE);
+        emptyText.setText(allTasks.isEmpty()
+                ? "Ainda nao tens tarefas."
+                : "Nenhuma tarefa encontrada com estes filtros.");
         emptyText.setVisibility(View.VISIBLE);
         tasksRecyclerView.setVisibility(View.GONE);
     }
@@ -496,6 +750,9 @@ public class TasksActivity extends AppCompatActivity {
         }
         if (deleteTaskCall != null) {
             deleteTaskCall.cancel();
+        }
+        if (hideCompletedVisibleTasksCall != null) {
+            hideCompletedVisibleTasksCall.cancel();
         }
         super.onDestroy();
     }

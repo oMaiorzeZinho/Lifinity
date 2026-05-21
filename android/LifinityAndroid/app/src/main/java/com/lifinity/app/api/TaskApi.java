@@ -33,6 +33,9 @@ public interface TaskApi {
             @Path("idtask") int idtask
     );
 
+    @PUT("tasks/hide-completed-visible")
+    Call<JsonObject> hideCompletedVisibleTasks(@Header("Authorization") String authorization);
+
     @PUT("tasks/{idtask}")
     Call<JsonObject> updateTask(
             @Header("Authorization") String authorization,
