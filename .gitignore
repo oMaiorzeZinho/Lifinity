@@ -30,3 +30,6 @@ build/Release/
 android/.idea/
 
 .idea/deviceManager.xml
+
+# Claude Code memory (privado, nao vai para o GitHub)
+.claude/

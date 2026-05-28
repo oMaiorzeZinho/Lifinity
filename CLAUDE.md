@@ -77,3 +77,17 @@ O ficheiro `backend/.env` contém as variáveis de ambiente (porta, credenciais 
 - O módulo C (`gamification.c`) precisa de ser compilado com `npm install` no backend (node-gyp faz isso automaticamente)
 - A base de dados MySQL corre localmente via XAMPP — verificar se está ativo antes de testar o backend
 - A documentação completa do projeto está em `docs/OVERALL_LIFINITY.md`
+
+## Memória persistente
+
+A pasta `.claude/memory/` dentro do projeto contém ficheiros de memória privados (não vão para o GitHub via .gitignore).
+**No início de cada conversa, lê todos os ficheiros em `.claude/memory/` para recuperar contexto.**
+**Quando aprenderes algo relevante sobre o projeto ou o utilizador, guarda em `.claude/memory/` em formato markdown.**
+
+Ficheiros de memória usam este formato:
+```
+---
+type: user | project | feedback | reference
+---
+conteúdo
+```
