@@ -132,3 +132,28 @@ Tailwind CSS + custom CSS variables in `src/index.css`. Design system: "clayomor
 - `docs/OVERALL_LIFINITY.md` — full feature breakdown and project history
 - `docs/SETUP_LIFINITY.md` — detailed machine setup
 - `docs/base_dados/` — SQL schema files
+
+---
+
+## Claude Code Setup (novo computador)
+
+Após clonar o repo e instalar Claude Code (`npm install -g @anthropic-ai/claude-code`):
+
+### 1. MCP do GitHub
+
+```bash
+cp .claude/settings.local.json.example .claude/settings.local.json
+```
+
+Abre `.claude/settings.local.json` e substitui `COLOCA_AQUI_O_TEU_TOKEN_DO_GITHUB` pelo token real (GitHub → Settings → Developer settings → Personal access tokens).
+
+### 2. Fullstack Dev Skills (plugin marketplace)
+
+Dentro do Claude Code, corre:
+
+```
+/plugin marketplace add jeffallan/claude-skills
+/plugin install fullstack-dev-skills@jeffallan
+```
+
+Reinicia o Claude Code quando pedido.
