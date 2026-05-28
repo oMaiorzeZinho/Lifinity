@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude --version)",
+      "Bash(echo \"Exit code: $?\")",
+      "PowerShell(Get-Command claude -ErrorAction SilentlyContinue)",
+      "PowerShell(npm list -g @anthropic-ai/claude-code 2>$null)",
+      "PowerShell(node --version)",
+      "PowerShell(npm --version)",
+      "PowerShell(npm install -g @anthropic-ai/claude-code)",
+      "PowerShell(claude --version)",
+      "Bash(git checkout *)",
+      "Bash(gh auth *)",
+      "Bash(where gh *)"
+    ]
+  },
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "COLOCA_AQUI_O_TEU_TOKEN_DO_GITHUB"
+      }
+    }
+  }
+}

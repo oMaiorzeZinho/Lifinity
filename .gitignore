@@ -30,3 +30,6 @@ build/Release/
 android/.idea/
 
 .idea/deviceManager.xml
+
+# Claude Code local settings (contém tokens)
+.claude/settings.local.json
