@@ -25,7 +25,7 @@ Os principais objetivos são:
 
 ### Node.js
 
-O Node.js foi utilizado no backend. Ele permite executar JavaScript no servidor e criar uma API capaz de responder ao frontend. A vantagem é usar JavaScript tanto no frontend como no backend, mantendo o projeto mais consistente.
+O Node.js foi utilizado no backend. Ele permite executar JavaScript no servidor e criar uma API capaz de responder ao frontend. A vantagem é usar JavaScript tanto no frontend como no backend, mantendo o projeto mais consistente. (não precisa usar por exemplo xampp nem nada, (cria o seu proprio servidor), bastantes frameworks para fazer ligação e é muito mais rápido)
 
 No Lifinity, o Node.js é responsável por receber pedidos, validar utilizadores, comunicar com a base de dados, aplicar regras de negócio e devolver respostas em JSON.
 
