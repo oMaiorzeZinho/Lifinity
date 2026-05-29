@@ -4,178 +4,485 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_app_clay"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     android:orientation="vertical"
-    android:padding="@dimen/space_screen"
     tools:context=".TasksActivity">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Atividades"
-        android:textColor="@color/lifinity_text"
-        android:textSize="30sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="As tuas atividades do Lifinity"
-        android:textColor="@color/lifinity_text_secondary"
-        android:textSize="15sp" />
-
+    <!-- ===== HEADER ===== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="18dp"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/createTaskButton"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/height_button"
-            android:layout_weight="1"
-            android:background="@drawable/btn_primary_clay"
-            android:elevation="8dp"
-            android:text="Nova atividade"
-            android:textAllCaps="false"
-            android:textColor="@color/lifinity_text_on_primary"
-            android:textSize="15sp"
-            android:textStyle="bold" />
-
-        <Button
-            android:id="@+id/hideCompletedTasksButton"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/height_button"
-            android:layout_marginStart="10dp"
-            android:layout_weight="1"
-            android:background="@drawable/btn_secondary_clay"
-            android:elevation="6dp"
-            android:text="Ocultar atividades concluidas"
-            android:textAllCaps="false"
-            android:textColor="@color/lifinity_text"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-    </LinearLayout>
-
-    <EditText
-        android:id="@+id/tasksSearchInput"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/height_input"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/bg_input_clay"
-        android:hint="Pesquisar por titulo"
-        android:inputType="text"
-        android:paddingStart="18dp"
-        android:paddingEnd="18dp"
-        android:singleLine="true"
-        android:textColor="@color/lifinity_input_text"
-        android:textColorHint="@color/lifinity_input_hint"
-        android:textSize="15sp" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/bg_card_soft_clay"
-        android:elevation="5dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="14dp">
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="12dp">
 
+        <!-- Logo + marca -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Estado"
-                android:textColor="@color/lifinity_text_secondary"
-                android:textSize="12sp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/bg_pill_mint"
+                android:gravity="center"
+                android:text="&#8734;"
+                android:textColor="@color/lifinity_primary"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
-            <Spinner
-                android:id="@+id/tasksStatusFilterSpinner"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/height_input"
-                android:layout_marginTop="6dp"
-                android:background="@drawable/bg_input_clay"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Lifinity"
+                android:textColor="@color/lifinity_text"
+                android:textSize="18sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="0dp"
+        <!-- Pill utilizador (nível) -->
+        <TextView
+            android:id="@+id/headerUserPill"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/bg_card_soft_clay"
+            android:elevation="4dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:textColor="@color/lifinity_primary"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            tools:text="Telmo · NÍV 5" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Prioridade"
-                android:textColor="@color/lifinity_text_secondary"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <Spinner
-                android:id="@+id/tasksPriorityFilterSpinner"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/height_input"
-                android:layout_marginTop="6dp"
-                android:background="@drawable/bg_input_clay"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp" />
-        </LinearLayout>
+        <!-- Botão notificações -->
+        <TextView
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_card_soft_clay"
+            android:elevation="4dp"
+            android:gravity="center"
+            android:text="&#128276;"
+            android:textSize="16sp" />
     </LinearLayout>
 
-    <ProgressBar
-        android:id="@+id/tasksProgressBar"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="40dp"
-        android:indeterminateTint="@color/lifinity_primary"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/tasksErrorText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="34dp"
-        android:gravity="center"
-        android:textColor="@color/lifinity_danger"
-        android:textSize="15sp"
-        android:textStyle="bold"
-        android:visibility="gone"
-        tools:text="Erro ao carregar atividades."
-        tools:visibility="visible" />
-
-    <TextView
-        android:id="@+id/tasksEmptyText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="34dp"
-        android:gravity="center"
-        android:text="Ainda nao tens atividades."
-        android:textColor="@color/lifinity_text_secondary"
-        android:textSize="16sp"
-        android:visibility="gone"
-        tools:visibility="visible" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/tasksRecyclerView"
+    <!-- ===== CONTEÚDO SCROLLÁVEL ===== -->
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="22dp"
         android:layout_weight="1"
-        android:clipToPadding="false"
-        android:paddingBottom="12dp"
-        android:visibility="gone"
-        tools:listitem="@layout/item_task"
-        tools:visibility="visible" />
+        android:fillViewport="true"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:clipToPadding="false">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="8dp">
+
+            <!-- Título do ecrã -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:text="Atividades"
+                android:textColor="@color/lifinity_text"
+                android:textSize="27sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tasksHeaderGreeting"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="18dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/lifinity_text_secondary"
+                android:textSize="14sp"
+                tools:text="Bom trabalho, Telmo" />
+
+            <!-- ===== CARTÃO XP ===== -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="14dp"
+                android:background="@drawable/bg_card_clay"
+                android:elevation="10dp"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.13"
+                    android:text="NÍVEL"
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/xpCardLevelNumber"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/lifinity_text"
+                        android:textSize="36sp"
+                        android:textStyle="bold"
+                        tools:text="5" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:text=" · "
+                        android:textColor="@color/lifinity_text_secondary"
+                        android:textSize="22sp" />
+
+                    <TextView
+                        android:id="@+id/xpCardXpNumber"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@color/lifinity_text"
+                        android:textSize="30sp"
+                        android:textStyle="bold"
+                        tools:text="2043" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="XP"
+                        android:textColor="@color/lifinity_primary"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Barra de progresso do nível -->
+                <ProgressBar
+                    android:id="@+id/xpCardProgressBar"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp"
+                    android:layout_marginTop="12dp"
+                    android:indeterminate="false"
+                    android:max="100"
+                    android:progress="0"
+                    android:progressBackgroundTint="@color/lifinity_inset"
+                    android:progressTint="@color/lifinity_primary" />
+
+                <TextView
+                    android:id="@+id/xpCardProgressLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="13sp"
+                    tools:text="Faltam 219 XP para o nível 6" />
+            </LinearLayout>
+
+            <!-- ===== CARTÃO RESUMO DE HOJE ===== -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="14dp"
+                android:background="@drawable/bg_card_clay"
+                android:elevation="10dp"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="14dp"
+                    android:letterSpacing="0.13"
+                    android:text="RESUMO DE HOJE"
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <!-- Mini-cartão Pendentes -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_card_soft_clay"
+                        android:elevation="5dp"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+
+                        <TextView
+                            android:id="@+id/summaryPendingCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/lifinity_text"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            tools:text="3" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:letterSpacing="0.05"
+                            android:text="PENDENTES"
+                            android:textColor="@color/lifinity_text_secondary"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Mini-cartão Concluídas -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_card_soft_clay"
+                        android:elevation="5dp"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+
+                        <TextView
+                            android:id="@+id/summaryCompletedCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/lifinity_primary"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            tools:text="2" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:letterSpacing="0.05"
+                            android:text="CONCLUÍDAS"
+                            android:textColor="@color/lifinity_text_secondary"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Mini-cartão Perdidas -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_card_soft_clay"
+                        android:elevation="5dp"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+
+                        <TextView
+                            android:id="@+id/summaryLostCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/lifinity_coral"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            tools:text="1" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:letterSpacing="0.05"
+                            android:text="PERDIDAS"
+                            android:textColor="@color/lifinity_text_secondary"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ===== PESQUISA ===== -->
+            <EditText
+                android:id="@+id/tasksSearchInput"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/bg_input_clay"
+                android:hint="&#128269; Procurar atividade..."
+                android:inputType="text"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:singleLine="true"
+                android:textColor="@color/lifinity_input_text"
+                android:textColorHint="@color/lifinity_input_hint"
+                android:textSize="15sp" />
+
+            <!-- ===== FILTROS ===== -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="18dp"
+                android:orientation="horizontal">
+
+                <Spinner
+                    android:id="@+id/tasksStatusFilterSpinner"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_input_clay"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp" />
+
+                <Spinner
+                    android:id="@+id/tasksPriorityFilterSpinner"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_input_clay"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp" />
+            </LinearLayout>
+
+            <!-- ===== LABEL LISTA ===== -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:letterSpacing="0.13"
+                    android:text="AS MINHAS ATIVIDADES"
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tasksCountLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_pill_mint"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp"
+                    android:textColor="@color/lifinity_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    tools:text="5" />
+            </LinearLayout>
+
+            <!-- ===== FEEDBACK ESTADOS ===== -->
+            <ProgressBar
+                android:id="@+id/tasksProgressBar"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="24dp"
+                android:indeterminateTint="@color/lifinity_primary"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tasksErrorText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:textColor="@color/lifinity_danger"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:text="Erro ao carregar atividades."
+                tools:visibility="visible" />
+
+            <!-- Estado vazio (cartão clay) -->
+            <LinearLayout
+                android:id="@+id/tasksEmptyCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_card_clay"
+                android:elevation="8dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="32dp"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="&#10003;"
+                    android:textColor="@color/lifinity_primary"
+                    android:textSize="40sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tasksEmptyText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center"
+                    android:text="Tudo em dia!"
+                    android:textColor="@color/lifinity_text"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:gravity="center"
+                    android:text="Usa o botão + para criar uma nova atividade."
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- ===== LISTA DE TAREFAS ===== -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/tasksRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                android:paddingBottom="100dp"
+                android:visibility="gone"
+                tools:listitem="@layout/item_task"
+                tools:visibility="visible" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- ===== BARRA DE NAVEGAÇÃO INFERIOR ===== -->
+    <include
+        android:id="@+id/bottomNavInclude"
+        layout="@layout/nav_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
 </LinearLayout>
