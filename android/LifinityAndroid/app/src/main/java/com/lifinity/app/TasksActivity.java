@@ -377,15 +377,15 @@ public class TasksActivity extends AppCompatActivity {
 
     private void setupFilters() {
         ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_item,
+                this, R.layout.item_spinner,
                 new String[]{"Todas", "Pendentes", "Concluídas", "Perdidas"});
-        statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        statusAdapter.setDropDownViewResource(R.layout.item_spinner);
         statusFilterSpinner.setAdapter(statusAdapter);
 
         ArrayAdapter<String> priorityAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_item,
+                this, R.layout.item_spinner,
                 new String[]{"Todas", "Baixa", "Média", "Alta"});
-        priorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        priorityAdapter.setDropDownViewResource(R.layout.item_spinner);
         priorityFilterSpinner.setAdapter(priorityAdapter);
 
         searchInput.addTextChangedListener(new TextWatcher() {

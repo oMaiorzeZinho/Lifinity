@@ -28,15 +28,15 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <TextView
+            <ImageView
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:background="@drawable/bg_pill_mint"
-                android:gravity="center"
-                android:text="&#8734;"
-                android:textColor="@color/lifinity_primary"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:padding="6dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/lifinity_logo"
+                android:tint="@color/lifinity_primary"
+                android:contentDescription="Lifinity" />
 
             <TextView
                 android:layout_width="wrap_content"

@@ -5,7 +5,7 @@
      que o Java saiba qual tab está ativa. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="80dp"
     android:clipChildren="false"
     android:clipToPadding="false">
 
@@ -14,6 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="72dp"
         android:layout_gravity="bottom"
+        android:layout_marginTop="8dp"
         android:background="@drawable/bg_nav_clay"
         android:elevation="12dp"
         android:gravity="center_vertical"
@@ -151,7 +152,7 @@
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_gravity="top|center_horizontal"
-        android:layout_marginTop="-8dp"
+        android:layout_marginTop="0dp"
         android:background="@drawable/bg_fab_clay"
         android:elevation="20dp"
         android:text="+"
