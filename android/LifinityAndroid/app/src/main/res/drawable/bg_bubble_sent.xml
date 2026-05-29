@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bolha enviada (utilizador): gradiente menta -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="152"
+        android:startColor="@color/lifinity_primary_light"
+        android:endColor="@color/lifinity_primary_dark" />
+    <corners
+        android:topLeftRadius="20dp"
+        android:topRightRadius="20dp"
+        android:bottomLeftRadius="20dp"
+        android:bottomRightRadius="6dp" />
+</shape>

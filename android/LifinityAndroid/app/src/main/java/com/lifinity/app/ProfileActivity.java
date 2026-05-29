@@ -137,6 +137,10 @@ public class ProfileActivity extends AppCompatActivity {
         findViewById(R.id.profileInspirationButton).setOnClickListener(v -> openInspirationActivity());
         findViewById(R.id.profileSettingsButton).setOnClickListener(v -> openSettingsActivity());
         findViewById(R.id.profileLogoutButton).setOnClickListener(v -> logout());
+
+        findViewById(R.id.headerSettingsIcon).setOnClickListener(v -> openSettingsActivity());
+        findViewById(R.id.profileMenuAssistant).setOnClickListener(v ->
+                startActivity(new Intent(ProfileActivity.this, AssistantActivity.class)));
     }
 
     private String getToken() {
