@@ -20,16 +20,46 @@
         android:paddingTop="16dp"
         android:paddingBottom="12dp">
 
-        <TextView
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Perfil"
-            android:textColor="@color/lifinity_text"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/bg_pill_mint"
+                android:contentDescription="Lifinity"
+                android:padding="6dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/lifinity_logo"
+                android:tint="@color/lifinity_primary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Lifinity"
+                android:textColor="@color/lifinity_text"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <TextView
+            android:id="@+id/headerNotificationBell"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/bg_card_soft_clay"
+            android:elevation="4dp"
+            android:gravity="center"
+            android:text="&#128276;"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/headerSettingsIcon"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:background="@drawable/bg_card_soft_clay"

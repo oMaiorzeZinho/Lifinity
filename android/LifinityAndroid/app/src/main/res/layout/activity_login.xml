@@ -22,10 +22,23 @@
             android:orientation="vertical"
             android:padding="28dp">
 
+            <ImageView
+                android:layout_width="78dp"
+                android:layout_height="78dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_pill_mint"
+                android:contentDescription="Lifinity"
+                android:padding="16dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/lifinity_logo"
+                android:tint="@color/lifinity_primary" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
+                android:letterSpacing="0.04"
                 android:text="Lifinity"
                 android:textColor="@color/lifinity_primary"
                 android:textSize="20sp"
