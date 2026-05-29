@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ponto/badge coral solido (notificacoes nao lidas, alertas) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/lifinity_coral" />
+    <corners android:radius="999dp" />
+</shape>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_app_clay"
+    android:orientation="vertical"
+    tools:context=".AssistantActivity">
+
+    <!-- ===== CABEÇALHO COM BOTÃO VOLTAR ===== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="12dp">
+
+        <TextView
+            android:id="@+id/assistantBackButton"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:background="@drawable/bg_card_soft_clay"
+            android:elevation="4dp"
+            android:gravity="center"
+            android:text="‹"
+            android:textColor="@color/lifinity_text"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Assistente IA"
+                android:textColor="@color/lifinity_text"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Produtividade e organização"
+                android:textColor="@color/lifinity_text_secondary"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_pill_mint"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:text="IA"
+            android:textColor="@color/lifinity_primary"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- ===== LISTA DE MENSAGENS ===== -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/assistantRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        tools:listitem="@layout/item_message_assistant" />
+
+    <!-- ===== BARRA DE INPUT ===== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp">
+
+        <EditText
+            android:id="@+id/assistantInput"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/height_input"
+            android:layout_weight="1"
+            android:background="@drawable/bg_input_clay"
+            android:hint="Escreve uma mensagem..."
+            android:imeOptions="actionSend"
+            android:inputType="textCapSentences|textMultiLine"
+            android:maxLines="4"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp"
+            android:textColor="@color/lifinity_text"
+            android:textColorHint="@color/lifinity_text_faint"
+            android:textSize="15sp" />
+
+        <Button
+            android:id="@+id/assistantSendButton"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/btn_primary_clay"
+            android:elevation="6dp"
+            android:text="➤"
+            android:textAllCaps="false"
+            android:textColor="@color/lifinity_text_on_primary"
+            android:textSize="18sp" />
+    </LinearLayout>
+</LinearLayout>

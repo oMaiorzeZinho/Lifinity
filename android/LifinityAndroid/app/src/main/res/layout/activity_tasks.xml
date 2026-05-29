@@ -67,6 +67,7 @@
 
         <!-- Botão notificações -->
         <TextView
+            android:id="@+id/headerNotificationBell"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:background="@drawable/bg_card_soft_clay"

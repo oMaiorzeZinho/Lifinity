@@ -94,6 +94,7 @@ public class TasksActivity extends AppCompatActivity {
         bindViews();
         setupFilters();
         setupBottomNav();
+        HeaderHelper.setupBell(this);
         bindUserHeader();
 
         taskAdapter = new TaskAdapter(this::confirmCompleteTask, this::showTaskOptions);

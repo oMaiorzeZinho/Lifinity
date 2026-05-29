@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_app_clay"
+    android:orientation="vertical"
+    tools:context=".NotificationsActivity">
+
+    <!-- ===== CABEÇALHO COM BOTÃO VOLTAR ===== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="12dp">
+
+        <TextView
+            android:id="@+id/notificationsBackButton"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:background="@drawable/bg_card_soft_clay"
+            android:elevation="4dp"
+            android:gravity="center"
+            android:text="‹"
+            android:textColor="@color/lifinity_text"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_weight="1"
+            android:text="Notificações"
+            android:textColor="@color/lifinity_text"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Subtítulo -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="12dp"
+        android:text="As tuas notificações mais recentes."
+        android:textColor="@color/lifinity_text_secondary"
+        android:textSize="14sp" />
+
+    <!-- ===== BOTÃO MARCAR TODAS COMO LIDAS (acima da lista) ===== -->
+    <TextView
+        android:id="@+id/notificationsMarkAllButton"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/height_button"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/btn_secondary_clay"
+        android:gravity="center"
+        android:text="Marcar todas como lidas"
+        android:textColor="@color/lifinity_primary"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <!-- Loading -->
+    <ProgressBar
+        android:id="@+id/notificationsProgressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="24dp"
+        android:indeterminateTint="@color/lifinity_primary"
+        android:visibility="gone" />
+
+    <!-- Mensagem de erro -->
+    <TextView
+        android:id="@+id/notificationsErrorText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:textColor="@color/lifinity_danger"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        tools:text="Não foi possível carregar notificações."
+        tools:visibility="visible" />
+
+    <!-- Lista vazia -->
+    <TextView
+        android:id="@+id/notificationsEmptyText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_card_soft_clay"
+        android:gravity="center"
+        android:padding="24dp"
+        android:text="Não tens notificações."
+        android:textColor="@color/lifinity_text_secondary"
+        android:textSize="15sp"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <!-- Lista de notificações -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/notificationsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="20dp"
+        android:visibility="gone"
+        tools:listitem="@layout/item_notification"
+        tools:visibility="visible" />
+</LinearLayout>

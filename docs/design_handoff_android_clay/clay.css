@@ -1,0 +1,191 @@
+/* ===========================================================
+   Lifinity — Sistema Claymorphism (Android)
+   Paleta extraída da página "Atividades": verde-floresta escuro,
+   menta #7EE0A2, dourado nas prioridades.
+   As variáveis de cor/relevo são controladas por JS (tweaks).
+   =========================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&display=swap');
+
+:root {
+  /* base — modo escuro (definido por defeito; JS pode trocar p/ claro) */
+  --bg:        #18271c;
+  --bg2:       #11201591;
+  --surface:   #27392d;
+  --surface2:  #2f4435;
+  --inset:     #16241a;
+  --inset2:    #1b2b1f;
+
+  --mint:      #7EE0A2;
+  --mint-2:    #8eedb0;
+  --mint-d:    #57b87e;
+  --on-mint:   #0e2c1b;
+
+  --gold:      #e2bd4d;
+  --coral:     #ef9b7e;
+  --sky:       #8fb8e8;
+  --sage:      #a6c7af;
+
+  --text:      #eef6f0;
+  --muted:     #92aa9b;
+  --faint:     #6f8a78;
+
+  --r:         30px;
+  --r-md:      22px;
+  --r-sm:      16px;
+
+  /* intensidade do relevo clay — escalada por --clay (tweak 0.4–1.6) */
+  --clay:      1;
+
+  /* tons de luz/sombra do relevo (mudam entre claro/escuro) */
+  --hi:        rgba(150, 205, 165, 0.16);
+  --hi-strong: rgba(170, 220, 185, 0.22);
+  --lo:        rgba(0, 0, 0, 0.42);
+  --lo-strong: rgba(0, 0, 0, 0.52);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body { margin: 0; }
+
+#root, .clay-root {
+  font-family: 'Nunito', system-ui, sans-serif;
+  color: var(--text);
+}
+
+/* ---------- Superfícies clay ---------- */
+
+.clay {
+  background: linear-gradient(152deg, var(--surface2), var(--surface));
+  border-radius: var(--r);
+  box-shadow:
+    calc(8px * var(--clay)) calc(10px * var(--clay)) calc(24px * var(--clay)) var(--lo),
+    calc(-6px * var(--clay)) calc(-6px * var(--clay)) calc(18px * var(--clay)) var(--hi),
+    inset calc(4px * var(--clay)) calc(4px * var(--clay)) calc(9px * var(--clay)) var(--hi),
+    inset calc(-6px * var(--clay)) calc(-7px * var(--clay)) calc(13px * var(--clay)) var(--lo);
+}
+
+/* variante mais leve (para sub-cartões dentro de cartões) */
+.clay-soft {
+  background: linear-gradient(152deg, var(--surface2), var(--surface));
+  border-radius: var(--r-md);
+  box-shadow:
+    calc(5px * var(--clay)) calc(6px * var(--clay)) calc(15px * var(--clay)) var(--lo),
+    calc(-4px * var(--clay)) calc(-4px * var(--clay)) calc(11px * var(--clay)) var(--hi),
+    inset calc(3px * var(--clay)) calc(3px * var(--clay)) calc(6px * var(--clay)) var(--hi),
+    inset calc(-4px * var(--clay)) calc(-5px * var(--clay)) calc(9px * var(--clay)) var(--lo);
+}
+
+/* afundado — campos, barras de progresso, slots */
+.clay-inset {
+  background: var(--inset);
+  border-radius: var(--r-sm);
+  box-shadow:
+    inset calc(5px * var(--clay)) calc(5px * var(--clay)) calc(11px * var(--clay)) var(--lo-strong),
+    inset calc(-3px * var(--clay)) calc(-3px * var(--clay)) calc(8px * var(--clay)) var(--hi);
+}
+
+/* ---------- Botões ---------- */
+
+.clay-btn {
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 800;
+  color: var(--on-mint);
+  background: linear-gradient(152deg, var(--mint-2), var(--mint-d));
+  border-radius: var(--r-sm);
+  box-shadow:
+    calc(5px * var(--clay)) calc(6px * var(--clay)) calc(15px * var(--clay)) var(--lo),
+    inset calc(3px * var(--clay)) calc(3px * var(--clay)) calc(6px * var(--clay)) rgba(255,255,255,0.5),
+    inset calc(-4px * var(--clay)) calc(-5px * var(--clay)) calc(10px * var(--clay)) rgba(30,110,65,0.55);
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+.clay-btn:active {
+  transform: translateY(2px) scale(0.98);
+  box-shadow:
+    calc(2px * var(--clay)) calc(2px * var(--clay)) calc(8px * var(--clay)) var(--lo),
+    inset calc(4px * var(--clay)) calc(4px * var(--clay)) calc(9px * var(--clay)) rgba(30,110,65,0.55),
+    inset calc(-2px * var(--clay)) calc(-3px * var(--clay)) calc(7px * var(--clay)) rgba(255,255,255,0.35);
+}
+
+/* botão neutro (sub-tom) */
+.clay-btn-soft {
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 800;
+  color: var(--text);
+  background: linear-gradient(152deg, var(--surface2), var(--surface));
+  border-radius: var(--r-sm);
+  box-shadow:
+    calc(4px * var(--clay)) calc(5px * var(--clay)) calc(12px * var(--clay)) var(--lo),
+    inset calc(2px * var(--clay)) calc(2px * var(--clay)) calc(5px * var(--clay)) var(--hi),
+    inset calc(-3px * var(--clay)) calc(-4px * var(--clay)) calc(8px * var(--clay)) var(--lo);
+  transition: transform .12s ease, filter .12s ease;
+}
+.clay-btn-soft:active { transform: translateY(2px) scale(0.98); filter: brightness(0.94); }
+
+/* ícone-botão circular */
+.clay-ico {
+  border: 0;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--text);
+  background: linear-gradient(152deg, var(--surface2), var(--surface));
+  box-shadow:
+    calc(4px * var(--clay)) calc(5px * var(--clay)) calc(12px * var(--clay)) var(--lo),
+    inset calc(2px * var(--clay)) calc(2px * var(--clay)) calc(5px * var(--clay)) var(--hi),
+    inset calc(-3px * var(--clay)) calc(-4px * var(--clay)) calc(8px * var(--clay)) var(--lo);
+  transition: transform .12s ease, filter .12s ease;
+}
+.clay-ico:active { transform: scale(0.92); }
+
+/* ---------- Pills / badges ---------- */
+.clay-pill {
+  border-radius: 999px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow:
+    calc(3px * var(--clay)) calc(3px * var(--clay)) calc(8px * var(--clay)) var(--lo),
+    inset calc(2px * var(--clay)) calc(2px * var(--clay)) calc(4px * var(--clay)) rgba(255,255,255,0.18),
+    inset calc(-2px * var(--clay)) calc(-3px * var(--clay)) calc(6px * var(--clay)) var(--lo);
+}
+
+/* ---------- Util ---------- */
+.label {
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-weight: 800;
+  font-size: 11px;
+  color: var(--muted);
+}
+.scroll { overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
+.scroll::-webkit-scrollbar { display: none; }
+
+@keyframes popIn {
+  0%   { transform: scale(0.8); opacity: 0; }
+  60%  { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+/* entrada segura: mesmo se a timeline congelar no frame 0, o conteúdo fica visível */
+@keyframes sheetIn {
+  from { transform: translateY(26px); }
+  to   { transform: translateY(0); }
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes floatUp {
+  0%   { transform: translateY(0); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translateY(-46px); opacity: 0; }
+}
+@keyframes collapse {
+  to { transform: scale(0.85); opacity: 0; max-height: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; }
+}

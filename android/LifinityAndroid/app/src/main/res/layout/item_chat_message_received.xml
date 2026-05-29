@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:layout_marginEnd="60dp"
+        android:background="@drawable/bg_bubble_received"
+        android:elevation="4dp"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="11dp"
+        android:paddingBottom="11dp">
+
+        <TextView
+            android:id="@+id/messageSenderName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="3dp"
+            android:textColor="@color/lifinity_primary"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:text="Assistente"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/messageContentText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="280dp"
+            android:textColor="@color/lifinity_text"
+            android:textSize="15sp"
+            tools:text="Tarefa criada com prioridade média." />
+
+        <TextView
+            android:id="@+id/messageTimeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginTop="3dp"
+            android:textColor="@color/lifinity_text_secondary"
+            android:textSize="10sp"
+            tools:text="14:31" />
+    </LinearLayout>
+</LinearLayout>

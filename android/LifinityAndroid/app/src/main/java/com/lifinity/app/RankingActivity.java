@@ -1,5 +1,6 @@
 package com.lifinity.app;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -34,10 +35,22 @@ public class RankingActivity extends AppCompatActivity {
     private TextView podium3Username, podium3Xp;
     private TextView listLabel;
     private TextView headerUserPill;
+    private Call<List<RankingUser>> rankingCall;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Redireciona para o login se não houver token guardado
+        String token = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getString(KEY_TOKEN, null);
+        if (TextUtils.isEmpty(token)) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_ranking);
 
         progressBar     = findViewById(R.id.rankingProgressBar);
@@ -61,6 +74,7 @@ public class RankingActivity extends AppCompatActivity {
         }
 
         BottomNavHelper.setup(this, BottomNavHelper.Tab.RANKING);
+        HeaderHelper.setupBell(this);
         loadRanking();
     }
 
@@ -71,12 +85,11 @@ public class RankingActivity extends AppCompatActivity {
         podiumLayout.setVisibility(View.GONE);
         listLabel.setVisibility(View.GONE);
 
-        String token = "Bearer " + getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        String authToken = "Bearer " + getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                 .getString(KEY_TOKEN, "");
 
-        ApiClient.getClient().create(UserApi.class)
-                .getRanking(token)
-                .enqueue(new Callback<List<RankingUser>>() {
+        rankingCall = ApiClient.getClient().create(UserApi.class).getRanking(authToken);
+        rankingCall.enqueue(new Callback<List<RankingUser>>() {
                     @Override
                     public void onResponse(Call<List<RankingUser>> call, Response<List<RankingUser>> response) {
                         progressBar.setVisibility(View.GONE);
@@ -89,6 +102,7 @@ public class RankingActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(Call<List<RankingUser>> call, Throwable t) {
+                        if (call.isCanceled()) return;
                         progressBar.setVisibility(View.GONE);
                         showError("Sem ligação ao servidor.");
                     }
@@ -122,6 +136,14 @@ public class RankingActivity extends AppCompatActivity {
     private void showError(String message) {
         errorText.setText(message);
         errorText.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (rankingCall != null) {
+            rankingCall.cancel();
+        }
+        super.onDestroy();
     }
 
     private User getSavedUser() {

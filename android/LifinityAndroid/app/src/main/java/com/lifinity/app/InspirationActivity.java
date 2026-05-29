@@ -84,6 +84,7 @@ public class InspirationActivity extends AppCompatActivity {
         copyVerseButton.setOnClickListener(v -> copyCurrentVerseToClipboard());
 
         setupBottomNav();
+        HeaderHelper.setupBell(this);
         loadInitialData();
     }
 

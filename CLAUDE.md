@@ -11,7 +11,7 @@ O projeto serve como demonstração académica de fullstack: frontend React, bac
 - **Frontend**: React + Vite + Tailwind CSS + Recharts + Axios
 - **Backend**: Node.js + Express + JWT + bcryptjs + módulo C via N-API/node-gyp
 - **Base de dados**: MySQL (gerida com XAMPP/phpMyAdmin)
-- **Android**: Kotlin + Jetpack Compose (pasta `android/LifinityAndroid/`)
+- **Android**: Java + layouts XML (Views) + Retrofit (pasta `android/LifinityAndroid/`) — NÃO é Kotlin/Compose
 - **Controlo de versões**: Git + GitHub (branch principal: `main`)
 
 ## Estrutura
@@ -36,7 +36,7 @@ Lifinity/
 │   │   ├── App.jsx
 │   │   └── index.css
 │   └── package.json
-├── android/LifinityAndroid/  ← app Android Kotlin/Jetpack Compose
+├── android/LifinityAndroid/  ← app Android Java + XML (Views) + Retrofit
 └── docs/OVERALL_LIFINITY.md  ← documentação completa do projeto
 ```
 
@@ -69,7 +69,7 @@ O ficheiro `backend/.env` contém as variáveis de ambiente (porta, credenciais 
 ## Estado atual do desenvolvimento
 
 - Web app: funcionalidades principais completas (tarefas, XP, ranking, estatísticas, inspiração, comunidade, perfil, chat, conquistas, notificações, assistente)
-- Android: em redesign de UI (branch `feature/android-ui-redesign`), usa Jetpack Compose
+- Android: redesign clay em curso (branch `feature/android-ui-redesign`), Java + XML (Views). Ver `.claude/memory/project-status.md` para o handoff detalhado do que está feito/falta.
 
 ## Notas importantes para o Claude
 

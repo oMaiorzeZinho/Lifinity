@@ -79,6 +79,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_profile);
         BottomNavHelper.setup(this, BottomNavHelper.Tab.PROFILE);
+        HeaderHelper.setupBell(this);
         bindViews();
         setupButtons();
         bindUser(getSavedUser());
@@ -136,6 +137,12 @@ public class ProfileActivity extends AppCompatActivity {
         findViewById(R.id.profileInspirationButton).setOnClickListener(v -> openInspirationActivity());
         findViewById(R.id.profileSettingsButton).setOnClickListener(v -> openSettingsActivity());
         findViewById(R.id.profileLogoutButton).setOnClickListener(v -> logout());
+
+        findViewById(R.id.headerSettingsIcon).setOnClickListener(v -> openSettingsActivity());
+        findViewById(R.id.profileMenuAssistant).setOnClickListener(v ->
+                startActivity(new Intent(ProfileActivity.this, AssistantActivity.class)));
+        findViewById(R.id.profileMenuStatistics).setOnClickListener(v ->
+                startActivity(new Intent(ProfileActivity.this, StatisticsActivity.class)));
     }
 
     private String getToken() {

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Barra de grafico (menta), cantos arredondados no topo -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="90"
+        android:startColor="@color/lifinity_primary_dark"
+        android:endColor="@color/lifinity_primary_light" />
+    <corners
+        android:topLeftRadius="6dp"
+        android:topRightRadius="6dp"
+        android:bottomLeftRadius="2dp"
+        android:bottomRightRadius="2dp" />
+</shape>
