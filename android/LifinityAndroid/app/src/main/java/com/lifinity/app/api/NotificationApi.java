@@ -1,7 +1,7 @@
 package com.lifinity.app.api;
 
 import com.google.gson.JsonObject;
-import com.lifinity.app.models.Notification;
+import com.lifinity.app.models.AppNotification;
 
 import java.util.List;
 
@@ -13,17 +13,11 @@ import retrofit2.http.Path;
 
 public interface NotificationApi {
     @GET("notifications")
-    Call<List<Notification>> getNotifications(@Header("Authorization") String authorization);
-
-    @GET("notifications/unread-count")
-    Call<JsonObject> getUnreadCount(@Header("Authorization") String authorization);
-
-    @PUT("notifications/{idnotification}/read")
-    Call<JsonObject> markAsRead(
-            @Header("Authorization") String authorization,
-            @Path("idnotification") int idnotification
-    );
+    Call<List<AppNotification>> getNotifications(@Header("Authorization") String token);
 
     @PUT("notifications/read-all")
-    Call<JsonObject> markAllAsRead(@Header("Authorization") String authorization);
+    Call<JsonObject> readAll(@Header("Authorization") String token);
+
+    @PUT("notifications/{id}/read")
+    Call<JsonObject> readOne(@Header("Authorization") String token, @Path("id") int id);
 }

@@ -7,7 +7,7 @@
     android:orientation="vertical"
     tools:context=".NotificationsActivity">
 
-    <!-- ===== HEADER ===== -->
+    <!-- ===== CABEÇALHO COM BOTÃO VOLTAR ===== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -39,22 +39,9 @@
             android:textColor="@color/lifinity_text"
             android:textSize="20sp"
             android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/notificationsMarkAllButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_pill_mint"
-            android:paddingStart="14dp"
-            android:paddingEnd="14dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:text="Marcar lidas"
-            android:textColor="@color/lifinity_primary"
-            android:textSize="12sp"
-            android:textStyle="bold" />
     </LinearLayout>
 
+    <!-- Subtítulo -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -65,6 +52,22 @@
         android:textColor="@color/lifinity_text_secondary"
         android:textSize="14sp" />
 
+    <!-- ===== BOTÃO MARCAR TODAS COMO LIDAS (acima da lista) ===== -->
+    <TextView
+        android:id="@+id/notificationsMarkAllButton"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/height_button"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/btn_secondary_clay"
+        android:gravity="center"
+        android:text="Marcar todas como lidas"
+        android:textColor="@color/lifinity_primary"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <!-- Loading -->
     <ProgressBar
         android:id="@+id/notificationsProgressBar"
         style="?android:attr/progressBarStyleLarge"
@@ -75,22 +78,40 @@
         android:indeterminateTint="@color/lifinity_primary"
         android:visibility="gone" />
 
+    <!-- Mensagem de erro -->
+    <TextView
+        android:id="@+id/notificationsErrorText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:textColor="@color/lifinity_danger"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        tools:text="Não foi possível carregar notificações."
+        tools:visibility="visible" />
+
+    <!-- Lista vazia -->
     <TextView
         android:id="@+id/notificationsEmptyText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:background="@drawable/bg_card_soft_clay"
         android:gravity="center"
         android:padding="24dp"
-        android:text="Ainda não tens notificações."
+        android:text="Não tens notificações."
         android:textColor="@color/lifinity_text_secondary"
         android:textSize="15sp"
         android:visibility="gone"
         tools:visibility="visible" />
 
+    <!-- Lista de notificações -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/notificationsRecyclerView"
         android:layout_width="match_parent"
@@ -101,5 +122,7 @@
         android:paddingEnd="20dp"
         android:paddingTop="4dp"
         android:paddingBottom="20dp"
-        tools:listitem="@layout/item_notification" />
+        android:visibility="gone"
+        tools:listitem="@layout/item_notification"
+        tools:visibility="visible" />
 </LinearLayout>

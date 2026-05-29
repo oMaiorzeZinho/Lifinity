@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.gson.JsonObject;
 import com.lifinity.app.adapters.NotificationAdapter;
 import com.lifinity.app.api.NotificationApi;
-import com.lifinity.app.models.Notification;
+import com.lifinity.app.models.AppNotification;
 import com.lifinity.app.network.ApiClient;
 
 import java.util.ArrayList;
@@ -31,19 +31,24 @@ public class NotificationsActivity extends AppCompatActivity {
     private static final String KEY_TOKEN = "token";
 
     private ProgressBar progressBar;
+    private TextView errorText;
     private TextView emptyText;
     private TextView markAllButton;
     private RecyclerView recyclerView;
     private NotificationAdapter adapter;
 
-    private final List<Notification> notifications = new ArrayList<>();
-    private Call<List<Notification>> notificationsCall;
+    // Lista local para actualizações sem recarga completa
+    private final List<AppNotification> notifications = new ArrayList<>();
+
+    // Calls activos — cancelados em onDestroy para evitar fugas de memória
+    private Call<List<AppNotification>> notificationsCall;
     private Call<JsonObject> markCall;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Redireciona para o login se não houver token guardado
         if (TextUtils.isEmpty(getToken())) {
             openLoginActivity();
             return;
@@ -51,10 +56,11 @@ public class NotificationsActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_notifications);
 
-        progressBar = findViewById(R.id.notificationsProgressBar);
-        emptyText = findViewById(R.id.notificationsEmptyText);
+        progressBar   = findViewById(R.id.notificationsProgressBar);
+        errorText     = findViewById(R.id.notificationsErrorText);
+        emptyText     = findViewById(R.id.notificationsEmptyText);
         markAllButton = findViewById(R.id.notificationsMarkAllButton);
-        recyclerView = findViewById(R.id.notificationsRecyclerView);
+        recyclerView  = findViewById(R.id.notificationsRecyclerView);
 
         findViewById(R.id.notificationsBackButton).setOnClickListener(v -> finish());
         markAllButton.setOnClickListener(v -> markAllAsRead());
@@ -62,29 +68,29 @@ public class NotificationsActivity extends AppCompatActivity {
         adapter = new NotificationAdapter(this::onNotificationClick);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
+    }
 
-        loadNotifications();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Recarrega sempre que o ecrã fica visível (inclui a primeira abertura)
+        if (!TextUtils.isEmpty(getToken())) {
+            loadNotifications();
+        }
     }
 
     private void loadNotifications() {
-        String token = getToken();
-        if (TextUtils.isEmpty(token)) {
-            openLoginActivity();
-            return;
-        }
-
-        progressBar.setVisibility(View.VISIBLE);
-        emptyText.setVisibility(View.GONE);
+        showLoading();
 
         NotificationApi api = ApiClient.getClient().create(NotificationApi.class);
-        notificationsCall = api.getNotifications("Bearer " + token);
-        notificationsCall.enqueue(new Callback<List<Notification>>() {
+        notificationsCall = api.getNotifications("Bearer " + getToken());
+        notificationsCall.enqueue(new Callback<List<AppNotification>>() {
             @Override
-            public void onResponse(Call<List<Notification>> call, Response<List<Notification>> response) {
+            public void onResponse(Call<List<AppNotification>> call, Response<List<AppNotification>> response) {
                 progressBar.setVisibility(View.GONE);
 
                 if (!response.isSuccessful() || response.body() == null) {
-                    showEmpty("Não foi possível carregar notificações.");
+                    showError("Não foi possível carregar notificações.");
                     return;
                 }
 
@@ -92,8 +98,11 @@ public class NotificationsActivity extends AppCompatActivity {
                 notifications.addAll(response.body());
                 adapter.setNotifications(notifications);
 
+                errorText.setVisibility(View.GONE);
+
                 if (notifications.isEmpty()) {
-                    showEmpty("Ainda não tens notificações.");
+                    emptyText.setVisibility(View.VISIBLE);
+                    recyclerView.setVisibility(View.GONE);
                 } else {
                     emptyText.setVisibility(View.GONE);
                     recyclerView.setVisibility(View.VISIBLE);
@@ -101,87 +110,79 @@ public class NotificationsActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<List<Notification>> call, Throwable t) {
-                if (call.isCanceled()) {
-                    return;
-                }
+            public void onFailure(Call<List<AppNotification>> call, Throwable t) {
+                if (call.isCanceled()) return;
                 progressBar.setVisibility(View.GONE);
-                showEmpty("Sem ligação ao servidor. Confirma que o backend está ativo.");
+                showError("Sem ligação ao servidor. Confirma que o backend está ativo.");
             }
         });
     }
 
-    private void onNotificationClick(Notification notification) {
-        if (notification == null || notification.getIdnotification() == null || notification.isRead()) {
-            return;
-        }
+    // Chamado ao clicar numa notificação: marca como lida sem recarregar a lista inteira.
+    private void onNotificationClick(AppNotification notification) {
+        if (notification == null || notification.getIdnotification() == null) return;
 
-        String token = getToken();
-        if (TextUtils.isEmpty(token)) {
-            openLoginActivity();
-            return;
-        }
-
-        notification.setRead(true);
+        // Actualiza estado local imediatamente para feedback visual instantâneo
+        notification.markAsRead();
         adapter.setNotifications(notifications);
 
         NotificationApi api = ApiClient.getClient().create(NotificationApi.class);
-        markCall = api.markAsRead("Bearer " + token, notification.getIdnotification());
+        markCall = api.readOne("Bearer " + getToken(), notification.getIdnotification());
         markCall.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                // Estado local ja atualizado; nada mais a fazer.
+                // Estado local já actualizado; nada mais a fazer.
             }
 
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
-                // Silencioso: a marcacao tentara novamente na proxima abertura.
+                // Silencioso: a marcação repetir-se-á na próxima abertura.
             }
         });
     }
 
     private void markAllAsRead() {
-        String token = getToken();
-        if (TextUtils.isEmpty(token)) {
-            openLoginActivity();
-            return;
-        }
-
         NotificationApi api = ApiClient.getClient().create(NotificationApi.class);
-        markCall = api.markAllAsRead("Bearer " + token);
+        markCall = api.readAll("Bearer " + getToken());
         markCall.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                if (response.isSuccessful()) {
-                    for (Notification notification : notifications) {
-                        notification.setRead(true);
-                    }
-                    adapter.setNotifications(notifications);
-                    Toast.makeText(NotificationsActivity.this,
-                            "Notificações marcadas como lidas.", Toast.LENGTH_SHORT).show();
+                if (!response.isSuccessful()) return;
+
+                for (AppNotification n : notifications) {
+                    n.markAsRead();
                 }
+                adapter.setNotifications(notifications);
+                Toast.makeText(NotificationsActivity.this,
+                        "Notificações marcadas como lidas.", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
-                if (call.isCanceled()) {
-                    return;
-                }
+                if (call.isCanceled()) return;
                 Toast.makeText(NotificationsActivity.this,
                         "Não foi possível atualizar agora.", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void showEmpty(String message) {
+    private void showLoading() {
+        progressBar.setVisibility(View.VISIBLE);
+        errorText.setVisibility(View.GONE);
+        emptyText.setVisibility(View.GONE);
         recyclerView.setVisibility(View.GONE);
-        emptyText.setText(message);
-        emptyText.setVisibility(View.VISIBLE);
+    }
+
+    private void showError(String message) {
+        errorText.setText(message);
+        errorText.setVisibility(View.VISIBLE);
+        emptyText.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.GONE);
     }
 
     private String getToken() {
-        SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        return preferences.getString(KEY_TOKEN, null);
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        return prefs.getString(KEY_TOKEN, null);
     }
 
     private void openLoginActivity() {
@@ -193,12 +194,8 @@ public class NotificationsActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if (notificationsCall != null) {
-            notificationsCall.cancel();
-        }
-        if (markCall != null) {
-            markCall.cancel();
-        }
+        if (notificationsCall != null) notificationsCall.cancel();
+        if (markCall != null) markCall.cancel();
         super.onDestroy();
     }
 }
