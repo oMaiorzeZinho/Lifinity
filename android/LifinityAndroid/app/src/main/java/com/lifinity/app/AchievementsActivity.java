@@ -49,6 +49,9 @@ public class AchievementsActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_achievements);
 
+        // Botão voltar
+        findViewById(R.id.achievementsBackButton).setOnClickListener(v -> finish());
+
         progressBar = findViewById(R.id.achievementsProgressBar);
         errorText = findViewById(R.id.achievementsErrorText);
         emptyText = findViewById(R.id.achievementsEmptyText);
