@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bolha de mensagem do utilizador — alinhada à direita, fundo verde -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="7dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:background="@drawable/btn_primary_clay"
+        android:elevation="4dp"
+        android:orientation="vertical"
+        android:padding="@dimen/space_card">
+
+        <TextView
+            android:id="@+id/messageContentText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="260dp"
+            android:textColor="@color/lifinity_text_on_primary"
+            android:textSize="15sp"
+            tools:text="Quais são as minhas tarefas pendentes?" />
+    </LinearLayout>
+</FrameLayout>

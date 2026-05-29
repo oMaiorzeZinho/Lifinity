@@ -1,13 +1,14 @@
 package com.lifinity.app.models;
 
+// Corpo do pedido POST /assistant/messages.
 public class AssistantSendRequest {
-    private final String content;
+    private final String message;
 
-    public AssistantSendRequest(String content) {
-        this.content = content;
+    public AssistantSendRequest(String message) {
+        this.message = message;
     }
 
-    public String getContent() {
-        return content;
+    public String getMessage() {
+        return message;
     }
 }

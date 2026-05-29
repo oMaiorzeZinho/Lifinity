@@ -8,19 +8,19 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.lifinity.app.adapters.AssistantAdapter;
+import com.lifinity.app.adapters.AssistantMessageAdapter;
 import com.lifinity.app.api.AssistantApi;
 import com.lifinity.app.models.AssistantMessage;
 import com.lifinity.app.models.AssistantSendRequest;
 import com.lifinity.app.models.AssistantSendResponse;
 import com.lifinity.app.network.ApiClient;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -29,25 +29,28 @@ import retrofit2.Response;
 
 public class AssistantActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "lifinity_prefs";
-    private static final String KEY_TOKEN = "token";
+    private static final String KEY_TOKEN  = "token";
+
+    // Mensagem de boas-vindas mostrada quando o histórico está vazio.
     private static final String WELCOME =
             "Olá! Sou o assistente Lifinity. Posso ajudar-te a organizar tarefas, ver a tua "
                     + "produtividade e dar sugestões. Experimenta: \"tarefas pendentes\" ou "
                     + "\"cria tarefa estudar\".";
 
     private RecyclerView recyclerView;
-    private EditText input;
-    private Button sendButton;
-    private AssistantAdapter adapter;
+    private EditText     input;
+    private Button       sendButton;
+    private AssistantMessageAdapter adapter;
 
-    private final List<AssistantMessage> messages = new ArrayList<>();
-    private Call<List<AssistantMessage>> messagesCall;
-    private Call<AssistantSendResponse> sendCall;
+    // Calls activos — cancelados em onDestroy para evitar fugas de memória
+    private Call<List<AssistantMessage>> historyCall;
+    private Call<AssistantSendResponse>  sendCall;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Redireciona para o login se não houver token guardado
         if (TextUtils.isEmpty(getToken())) {
             openLoginActivity();
             return;
@@ -56,18 +59,20 @@ public class AssistantActivity extends AppCompatActivity {
         setContentView(R.layout.activity_assistant);
 
         recyclerView = findViewById(R.id.assistantRecyclerView);
-        input = findViewById(R.id.assistantInput);
-        sendButton = findViewById(R.id.assistantSendButton);
+        input        = findViewById(R.id.assistantInput);
+        sendButton   = findViewById(R.id.assistantSendButton);
 
         findViewById(R.id.assistantBackButton).setOnClickListener(v -> finish());
 
+        // StackFromEnd garante que novas mensagens aparecem na parte inferior.
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(layoutManager);
-        adapter = new AssistantAdapter();
+
+        adapter = new AssistantMessageAdapter();
         recyclerView.setAdapter(adapter);
 
-        sendButton.setOnClickListener(v -> send());
+        // Permite enviar com a tecla do teclado (IME action Send)
         input.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEND) {
                 send();
@@ -76,105 +81,97 @@ public class AssistantActivity extends AppCompatActivity {
             return false;
         });
 
-        loadMessages();
+        sendButton.setOnClickListener(v -> send());
+
+        loadHistory();
     }
 
-    private void loadMessages() {
-        String token = getToken();
-        if (TextUtils.isEmpty(token)) {
-            openLoginActivity();
-            return;
-        }
-
+    // Carrega o histórico de mensagens da API.
+    private void loadHistory() {
         AssistantApi api = ApiClient.getClient().create(AssistantApi.class);
-        messagesCall = api.getMessages("Bearer " + token);
-        messagesCall.enqueue(new Callback<List<AssistantMessage>>() {
+        historyCall = api.getHistory("Bearer " + getToken());
+        historyCall.enqueue(new Callback<List<AssistantMessage>>() {
             @Override
             public void onResponse(Call<List<AssistantMessage>> call, Response<List<AssistantMessage>> response) {
-                messages.clear();
-                if (response.isSuccessful() && response.body() != null) {
-                    messages.addAll(response.body());
+                if (call.isCanceled()) return;
+
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    adapter.setMessages(response.body());
+                } else {
+                    // Sem histórico — mostra mensagem de boas-vindas
+                    adapter.addMessage(new AssistantMessage("assistant", WELCOME));
                 }
-                if (messages.isEmpty()) {
-                    messages.add(new AssistantMessage("assistant", WELCOME));
-                }
-                adapter.setMessages(messages);
                 scrollToBottom();
             }
 
             @Override
             public void onFailure(Call<List<AssistantMessage>> call, Throwable t) {
-                if (call.isCanceled()) {
-                    return;
-                }
-                messages.clear();
-                messages.add(new AssistantMessage("assistant", WELCOME));
-                adapter.setMessages(messages);
+                if (call.isCanceled()) return;
+                // Sem ligação — mostra mensagem de boas-vindas
+                adapter.addMessage(new AssistantMessage("assistant", WELCOME));
                 scrollToBottom();
             }
         });
     }
 
+    // Envia a mensagem do utilizador e aguarda resposta do assistente.
     private void send() {
-        String content = input.getText().toString().trim();
-        if (TextUtils.isEmpty(content)) {
-            return;
-        }
+        String text = input.getText().toString().trim();
+        if (TextUtils.isEmpty(text)) return;
 
-        String token = getToken();
-        if (TextUtils.isEmpty(token)) {
+        if (TextUtils.isEmpty(getToken())) {
             openLoginActivity();
             return;
         }
 
+        // Adiciona imediatamente a mensagem do utilizador e limpa o campo
+        adapter.addMessage(new AssistantMessage("user", text));
+        scrollToBottom();
         input.setText("");
         sendButton.setEnabled(false);
 
-        messages.add(new AssistantMessage("user", content));
-        final AssistantMessage pending = new AssistantMessage("assistant", "A escrever…");
-        messages.add(pending);
-        adapter.setMessages(messages);
-        scrollToBottom();
-
         AssistantApi api = ApiClient.getClient().create(AssistantApi.class);
-        sendCall = api.sendMessage("Bearer " + token, new AssistantSendRequest(content));
+        sendCall = api.sendMessage("Bearer " + getToken(), new AssistantSendRequest(text));
         sendCall.enqueue(new Callback<AssistantSendResponse>() {
             @Override
             public void onResponse(Call<AssistantSendResponse> call, Response<AssistantSendResponse> response) {
+                if (call.isCanceled()) return;
                 sendButton.setEnabled(true);
-                String reply = null;
-                if (response.isSuccessful() && response.body() != null && response.body().getReply() != null) {
-                    reply = response.body().getReply().getContent();
+
+                AssistantMessage assistantMsg = response.isSuccessful() && response.body() != null
+                        ? response.body().getAssistantMessage()
+                        : null;
+
+                if (assistantMsg != null && !TextUtils.isEmpty(assistantMsg.getContent())) {
+                    adapter.addMessage(assistantMsg);
+                } else {
+                    // Resposta vazia ou erro HTTP — mostra mensagem de fallback
+                    adapter.addMessage(new AssistantMessage("assistant",
+                            "Não consegui gerar uma resposta. Tenta reformular a mensagem."));
                 }
-                pending.setContent(TextUtils.isEmpty(reply)
-                        ? "Não consegui gerar uma resposta agora. Tenta reformular a mensagem."
-                        : reply);
-                adapter.setMessages(messages);
                 scrollToBottom();
             }
 
             @Override
             public void onFailure(Call<AssistantSendResponse> call, Throwable t) {
-                if (call.isCanceled()) {
-                    return;
-                }
+                if (call.isCanceled()) return;
                 sendButton.setEnabled(true);
-                pending.setContent("Não consegui responder agora. Confirma que o backend está ativo e tenta novamente.");
-                adapter.setMessages(messages);
-                scrollToBottom();
+                Toast.makeText(AssistantActivity.this,
+                        "Não foi possível enviar a mensagem.", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void scrollToBottom() {
-        if (adapter.getItemCount() > 0) {
-            recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+        int count = adapter.getItemCount();
+        if (count > 0) {
+            recyclerView.scrollToPosition(count - 1);
         }
     }
 
     private String getToken() {
-        SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        return preferences.getString(KEY_TOKEN, null);
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        return prefs.getString(KEY_TOKEN, null);
     }
 
     private void openLoginActivity() {
@@ -186,12 +183,8 @@ public class AssistantActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if (messagesCall != null) {
-            messagesCall.cancel();
-        }
-        if (sendCall != null) {
-            sendCall.cancel();
-        }
+        if (historyCall != null) historyCall.cancel();
+        if (sendCall != null)    sendCall.cancel();
         super.onDestroy();
     }
 }

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bolha de mensagem do assistente — alinhada à esquerda, fundo escuro -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="7dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:orientation="vertical">
+
+        <!-- Label "Lifinity IA" acima da bolha -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:letterSpacing="0.05"
+            android:text="Lifinity IA"
+            android:textColor="@color/lifinity_primary"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <!-- Bolha com o texto da resposta -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card_soft_clay"
+            android:elevation="4dp"
+            android:orientation="vertical"
+            android:padding="@dimen/space_card">
+
+            <TextView
+                android:id="@+id/messageContentText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxWidth="260dp"
+                android:textColor="@color/lifinity_text"
+                android:textSize="15sp"
+                tools:text="Tens 3 tarefas pendentes: Estudar, Ler livro e Ir ao ginásio." />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

@@ -7,7 +7,7 @@
     android:orientation="vertical"
     tools:context=".AssistantActivity">
 
-    <!-- ===== HEADER ===== -->
+    <!-- ===== CABEÇALHO COM BOTÃO VOLTAR ===== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -40,7 +40,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Assistente"
+                android:text="Assistente IA"
                 android:textColor="@color/lifinity_text"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -67,7 +67,7 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- ===== MENSAGENS ===== -->
+    <!-- ===== LISTA DE MENSAGENS ===== -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/assistantRecyclerView"
         android:layout_width="match_parent"
@@ -78,7 +78,7 @@
         android:paddingEnd="16dp"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
-        tools:listitem="@layout/item_chat_message_received" />
+        tools:listitem="@layout/item_message_assistant" />
 
     <!-- ===== BARRA DE INPUT ===== -->
     <LinearLayout
@@ -94,7 +94,7 @@
         <EditText
             android:id="@+id/assistantInput"
             android:layout_width="0dp"
-            android:layout_height="52dp"
+            android:layout_height="@dimen/height_input"
             android:layout_weight="1"
             android:background="@drawable/bg_input_clay"
             android:hint="Escreve uma mensagem..."
@@ -112,8 +112,8 @@
             android:layout_width="52dp"
             android:layout_height="52dp"
             android:layout_marginStart="10dp"
-            android:background="@drawable/bg_fab_clay"
-            android:elevation="8dp"
+            android:background="@drawable/btn_primary_clay"
+            android:elevation="6dp"
             android:text="➤"
             android:textAllCaps="false"
             android:textColor="@color/lifinity_text_on_primary"

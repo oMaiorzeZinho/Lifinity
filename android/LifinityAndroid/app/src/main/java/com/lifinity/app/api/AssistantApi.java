@@ -14,11 +14,11 @@ import retrofit2.http.POST;
 
 public interface AssistantApi {
     @GET("assistant/messages")
-    Call<List<AssistantMessage>> getMessages(@Header("Authorization") String authorization);
+    Call<List<AssistantMessage>> getHistory(@Header("Authorization") String token);
 
     @POST("assistant/messages")
     Call<AssistantSendResponse> sendMessage(
-            @Header("Authorization") String authorization,
-            @Body AssistantSendRequest request
+            @Header("Authorization") String token,
+            @Body AssistantSendRequest body
     );
 }

@@ -1,21 +1,15 @@
 package com.lifinity.app.models;
 
-import java.util.List;
+import com.google.gson.annotations.SerializedName;
 
+// Resposta ao POST /assistant/messages.
 public class AssistantSendResponse {
-    private AssistantMessage reply;
-    private List<AssistantMessage> messages;
-    private String action_type;
+    @SerializedName("userMessage")
+    private AssistantMessage userMessage;
 
-    public AssistantMessage getReply() {
-        return reply;
-    }
+    @SerializedName("assistantMessage")
+    private AssistantMessage assistantMessage;
 
-    public List<AssistantMessage> getMessages() {
-        return messages;
-    }
-
-    public String getActionType() {
-        return action_type;
-    }
+    public AssistantMessage getUserMessage()      { return userMessage; }
+    public AssistantMessage getAssistantMessage() { return assistantMessage; }
 }

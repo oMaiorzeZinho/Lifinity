@@ -1,46 +1,29 @@
 package com.lifinity.app.models;
 
-// Mensagem do assistente (tabela ASSISTANT_MESSAGE). sender = "user" | "assistant".
+import com.google.gson.annotations.SerializedName;
+
+// Mensagem do chat com o assistente IA (role = "user" | "assistant").
 public class AssistantMessage {
     private Integer idmessage;
-    private String sender;
+    private String role;
     private String content;
-    private String action_type;
+
+    @SerializedName("created_at")
     private String created_at;
 
-    public AssistantMessage() {
-    }
-
-    public AssistantMessage(String sender, String content) {
-        this.sender = sender;
+    // Construtor para mensagens criadas localmente (sem vir da API).
+    public AssistantMessage(String role, String content) {
+        this.role = role;
         this.content = content;
     }
 
-    public Integer getIdmessage() {
-        return idmessage;
-    }
+    public Integer getIdmessage() { return idmessage; }
+    public String  getRole()      { return role; }
+    public String  getContent()   { return content; }
+    public String  getCreatedAt() { return created_at; }
 
-    public String getSender() {
-        return sender;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public String getActionType() {
-        return action_type;
-    }
-
-    public String getCreatedAt() {
-        return created_at;
-    }
-
-    public boolean isFromUser() {
-        return "user".equals(sender);
+    // Devolve true se a mensagem foi enviada pelo utilizador.
+    public boolean isUser() {
+        return "user".equals(role);
     }
 }
