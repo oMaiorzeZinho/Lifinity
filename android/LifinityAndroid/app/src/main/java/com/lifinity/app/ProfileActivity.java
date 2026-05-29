@@ -141,6 +141,8 @@ public class ProfileActivity extends AppCompatActivity {
         findViewById(R.id.headerSettingsIcon).setOnClickListener(v -> openSettingsActivity());
         findViewById(R.id.profileMenuAssistant).setOnClickListener(v ->
                 startActivity(new Intent(ProfileActivity.this, AssistantActivity.class)));
+        findViewById(R.id.profileMenuStatistics).setOnClickListener(v ->
+                startActivity(new Intent(ProfileActivity.this, StatisticsActivity.class)));
     }
 
     private String getToken() {
