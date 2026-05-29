@@ -7,7 +7,7 @@
     android:orientation="vertical"
     tools:context=".StatisticsActivity">
 
-    <!-- ===== HEADER ===== -->
+    <!-- ===== CABEÇALHO COM BOTÃO VOLTAR ===== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -39,31 +39,41 @@
             android:textColor="@color/lifinity_text"
             android:textSize="20sp"
             android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_pill_mint"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp"
-            android:text="30 dias"
-            android:textColor="@color/lifinity_primary"
-            android:textSize="12sp"
-            android:textStyle="bold" />
     </LinearLayout>
 
+    <!-- ===== SPINNER DE PERÍODO ===== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/height_button"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_card_soft_clay"
+        android:elevation="4dp"
+        android:gravity="center_vertical">
+
+        <Spinner
+            android:id="@+id/statisticsPeriodSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:popupBackground="@drawable/bg_card_clay" />
+    </LinearLayout>
+
+    <!-- Loading -->
     <ProgressBar
         android:id="@+id/statisticsProgressBar"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="32dp"
         android:indeterminateTint="@color/lifinity_primary"
-        android:visibility="gone" />
+        android:visibility="visible" />
 
+    <!-- Mensagem de erro -->
     <TextView
         android:id="@+id/statisticsErrorText"
         android:layout_width="match_parent"
@@ -76,15 +86,20 @@
         android:textSize="15sp"
         android:textStyle="bold"
         android:visibility="gone"
-        tools:text="Não foi possível carregar estatísticas." />
+        tools:text="Não foi possível carregar estatísticas."
+        tools:visibility="visible" />
 
+    <!-- ===== CONTEÚDO: CARTÕES DE ESTATÍSTICAS (oculto até os dados chegarem) ===== -->
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/statisticsScrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
         android:paddingStart="20dp"
-        android:paddingEnd="20dp">
+        android:paddingEnd="20dp"
+        android:visibility="gone"
+        tools:visibility="visible">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -92,268 +107,230 @@
             android:orientation="vertical"
             android:paddingBottom="24dp">
 
-            <!-- ===== CARTÃO DESTAQUE ===== -->
+            <!-- Cartão 1: Tarefas Concluídas -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="14dp"
+                android:layout_marginBottom="7dp"
                 android:background="@drawable/bg_card_clay"
-                android:elevation="10dp"
+                android:elevation="8dp"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="@dimen/space_card">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:letterSpacing="0.13"
+                    android:letterSpacing="0.1"
+                    android:text="TAREFAS CONCLUÍDAS"
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/statTasksCompletedText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/lifinity_primary"
+                    android:textSize="36sp"
+                    android:textStyle="bold"
+                    tools:text="13" />
+            </LinearLayout>
+
+            <!-- Cartão 2: Tarefas Criadas -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                android:background="@drawable/bg_card_clay"
+                android:elevation="8dp"
+                android:orientation="vertical"
+                android:padding="@dimen/space_card">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.1"
+                    android:text="TAREFAS CRIADAS"
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/statTasksCreatedText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/lifinity_text"
+                    android:textSize="36sp"
+                    android:textStyle="bold"
+                    tools:text="18" />
+            </LinearLayout>
+
+            <!-- Cartão 3: Tarefas Falhadas -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                android:background="@drawable/bg_card_clay"
+                android:elevation="8dp"
+                android:orientation="vertical"
+                android:padding="@dimen/space_card">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.1"
+                    android:text="TAREFAS FALHADAS"
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/statTasksMissedText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="#FF6B6B"
+                    android:textSize="36sp"
+                    android:textStyle="bold"
+                    tools:text="2" />
+            </LinearLayout>
+
+            <!-- Cartão 4: XP Ganho -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                android:background="@drawable/bg_card_clay"
+                android:elevation="8dp"
+                android:orientation="vertical"
+                android:padding="@dimen/space_card">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.1"
+                    android:text="XP GANHO"
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/statXpEarnedText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/lifinity_primary"
+                    android:textSize="36sp"
+                    android:textStyle="bold"
+                    tools:text="640" />
+            </LinearLayout>
+
+            <!-- Cartão 5: Streak Actual -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                android:background="@drawable/bg_card_clay"
+                android:elevation="8dp"
+                android:orientation="vertical"
+                android:padding="@dimen/space_card">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.1"
+                    android:text="STREAK ACTUAL"
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:gravity="baseline"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/statStreakText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/lifinity_text"
+                        android:textSize="36sp"
+                        android:textStyle="bold"
+                        tools:text="5" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginBottom="6dp"
+                        android:text="dias"
+                        android:textColor="@color/lifinity_text_secondary"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Cartão 6: Taxa de Conclusão -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                android:background="@drawable/bg_card_clay"
+                android:elevation="8dp"
+                android:orientation="vertical"
+                android:padding="@dimen/space_card">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.1"
                     android:text="TAXA DE CONCLUSÃO"
                     android:textColor="@color/lifinity_text_secondary"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="bottom"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/completionRateText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/lifinity_text"
-                        android:textSize="40sp"
-                        android:textStyle="bold"
-                        tools:text="72" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:layout_marginBottom="6dp"
-                        android:text="%"
-                        android:textColor="@color/lifinity_primary"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/productivityScoreText"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:layout_weight="1"
-                        android:gravity="end"
-                        android:textColor="@color/lifinity_text_secondary"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        tools:text="Produtividade 64" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- ===== GRELHA DE STATS ===== -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_card_soft_clay"
-                    android:elevation="5dp"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:id="@+id/statTotalText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/lifinity_text"
-                        android:textSize="24sp"
-                        android:textStyle="bold"
-                        tools:text="18" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:letterSpacing="0.05"
-                        android:text="TOTAL"
-                        android:textColor="@color/lifinity_text_secondary"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_card_soft_clay"
-                    android:elevation="5dp"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:id="@+id/statCompletedText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/lifinity_primary"
-                        android:textSize="24sp"
-                        android:textStyle="bold"
-                        tools:text="13" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:letterSpacing="0.05"
-                        android:text="CONCLUÍDAS"
-                        android:textColor="@color/lifinity_text_secondary"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="14dp"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_card_soft_clay"
-                    android:elevation="5dp"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:id="@+id/statPendingText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/lifinity_text"
-                        android:textSize="24sp"
-                        android:textStyle="bold"
-                        tools:text="3" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:letterSpacing="0.05"
-                        android:text="PENDENTES"
-                        android:textColor="@color/lifinity_text_secondary"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_card_soft_clay"
-                    android:elevation="5dp"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:id="@+id/statLostText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/lifinity_coral"
-                        android:textSize="24sp"
-                        android:textStyle="bold"
-                        tools:text="2" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:letterSpacing="0.05"
-                        android:text="PERDIDAS"
-                        android:textColor="@color/lifinity_text_secondary"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- ===== XP ===== -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="14dp"
-                android:background="@drawable/bg_card_soft_clay"
-                android:elevation="5dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="18dp">
-
                 <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:letterSpacing="0.05"
-                    android:text="XP GANHO NO PERÍODO"
-                    android:textColor="@color/lifinity_text_secondary"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/statXpText"
+                    android:id="@+id/statCompletionRateText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/lifinity_primary"
-                    android:textSize="24sp"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/lifinity_text"
+                    android:textSize="36sp"
                     android:textStyle="bold"
-                    tools:text="640" />
+                    tools:text="73%" />
             </LinearLayout>
 
-            <!-- ===== GRÁFICO ===== -->
+            <!-- Cartão 7: Melhor Dia -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
                 android:background="@drawable/bg_card_clay"
-                android:elevation="10dp"
+                android:elevation="8dp"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="@dimen/space_card">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:letterSpacing="0.13"
-                    android:text="ÚLTIMOS 7 DIAS · CONCLUÍDAS"
+                    android:letterSpacing="0.1"
+                    android:text="MELHOR DIA"
                     android:textColor="@color/lifinity_text_secondary"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
-                <LinearLayout
-                    android:id="@+id/statisticsChartContainer"
-                    android:layout_width="match_parent"
-                    android:layout_height="170dp"
-                    android:layout_marginTop="16dp"
-                    android:gravity="bottom"
-                    android:orientation="horizontal" />
-
                 <TextView
-                    android:id="@+id/statisticsChartEmptyText"
-                    android:layout_width="match_parent"
+                    android:id="@+id/statBestDayText"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:gravity="center"
-                    android:text="Ainda não há dados suficientes."
-                    android:textColor="@color/lifinity_text_secondary"
-                    android:textSize="13sp"
-                    android:visibility="gone" />
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/lifinity_text"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    tools:text="Segunda-feira" />
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

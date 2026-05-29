@@ -4,21 +4,19 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.Gravity;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.widget.NestedScrollView;
 
 import com.lifinity.app.api.StatisticsApi;
-import com.lifinity.app.models.StatisticsDay;
-import com.lifinity.app.models.StatisticsResponse;
 import com.lifinity.app.models.StatisticsSummary;
 import com.lifinity.app.network.ApiClient;
-
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -26,26 +24,35 @@ import retrofit2.Response;
 
 public class StatisticsActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "lifinity_prefs";
-    private static final String KEY_TOKEN = "token";
+    private static final String KEY_TOKEN  = "token";
+
+    // Opções do spinner — índice sincronizado com periodValues[]
+    private static final String[] PERIOD_LABELS = {"Últimos 7 dias", "Últimos 30 dias", "Último ano"};
+    private static final String[] PERIOD_VALUES = {"7d", "30d", "1y"};
 
     private ProgressBar progressBar;
-    private TextView errorText;
-    private TextView completionRateText;
-    private TextView productivityScoreText;
-    private TextView statTotalText;
-    private TextView statCompletedText;
-    private TextView statPendingText;
-    private TextView statLostText;
-    private TextView statXpText;
-    private LinearLayout chartContainer;
-    private TextView chartEmptyText;
+    private TextView    errorText;
+    private NestedScrollView scrollView;
 
-    private Call<StatisticsResponse> statisticsCall;
+    private TextView statTasksCompletedText;
+    private TextView statTasksCreatedText;
+    private TextView statTasksMissedText;
+    private TextView statXpEarnedText;
+    private TextView statStreakText;
+    private TextView statCompletionRateText;
+    private TextView statBestDayText;
+
+    // Período actualmente carregado — evita recarregar ao inicializar o spinner
+    private String currentPeriod = "7d";
+
+    // Call activo — cancelado em onDestroy para evitar fugas de memória
+    private Call<StatisticsSummary> statisticsCall;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Redireciona para o login se não houver token guardado
         if (TextUtils.isEmpty(getToken())) {
             openLoginActivity();
             return;
@@ -54,142 +61,131 @@ public class StatisticsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_statistics);
 
         progressBar = findViewById(R.id.statisticsProgressBar);
-        errorText = findViewById(R.id.statisticsErrorText);
-        completionRateText = findViewById(R.id.completionRateText);
-        productivityScoreText = findViewById(R.id.productivityScoreText);
-        statTotalText = findViewById(R.id.statTotalText);
-        statCompletedText = findViewById(R.id.statCompletedText);
-        statPendingText = findViewById(R.id.statPendingText);
-        statLostText = findViewById(R.id.statLostText);
-        statXpText = findViewById(R.id.statXpText);
-        chartContainer = findViewById(R.id.statisticsChartContainer);
-        chartEmptyText = findViewById(R.id.statisticsChartEmptyText);
+        errorText   = findViewById(R.id.statisticsErrorText);
+        scrollView  = findViewById(R.id.statisticsScrollView);
+
+        statTasksCompletedText = findViewById(R.id.statTasksCompletedText);
+        statTasksCreatedText   = findViewById(R.id.statTasksCreatedText);
+        statTasksMissedText    = findViewById(R.id.statTasksMissedText);
+        statXpEarnedText       = findViewById(R.id.statXpEarnedText);
+        statStreakText         = findViewById(R.id.statStreakText);
+        statCompletionRateText = findViewById(R.id.statCompletionRateText);
+        statBestDayText        = findViewById(R.id.statBestDayText);
 
         findViewById(R.id.statisticsBackButton).setOnClickListener(v -> finish());
 
-        loadStatistics();
+        configurarSpinner();
+
+        // Carrega o período inicial ("7d")
+        loadStatistics(currentPeriod);
     }
 
-    private void loadStatistics() {
-        String token = getToken();
-        if (TextUtils.isEmpty(token)) {
-            openLoginActivity();
-            return;
-        }
+    private void configurarSpinner() {
+        Spinner spinner = findViewById(R.id.statisticsPeriodSpinner);
 
-        progressBar.setVisibility(View.VISIBLE);
-        errorText.setVisibility(View.GONE);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                PERIOD_LABELS
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
 
-        StatisticsApi api = ApiClient.getClient().create(StatisticsApi.class);
-        statisticsCall = api.getMyStatistics("Bearer " + token, "30d");
-        statisticsCall.enqueue(new Callback<StatisticsResponse>() {
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onResponse(Call<StatisticsResponse> call, Response<StatisticsResponse> response) {
-                progressBar.setVisibility(View.GONE);
-                if (!response.isSuccessful() || response.body() == null || response.body().getSummary() == null) {
-                    showError("Não foi possível carregar estatísticas.");
-                    return;
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selected = PERIOD_VALUES[position];
+                // Só recarrega se o período realmente mudou (evita chamada dupla no arranque)
+                if (!selected.equals(currentPeriod)) {
+                    currentPeriod = selected;
+                    loadStatistics(currentPeriod);
                 }
-                bindSummary(response.body().getSummary());
-                buildChart(response.body().getChartData());
             }
 
             @Override
-            public void onFailure(Call<StatisticsResponse> call, Throwable t) {
-                if (call.isCanceled()) {
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+
+    private void loadStatistics(String period) {
+        // Cancela qualquer pedido anterior em voo
+        if (statisticsCall != null) {
+            statisticsCall.cancel();
+        }
+
+        showLoading();
+
+        StatisticsApi api = ApiClient.getClient().create(StatisticsApi.class);
+        statisticsCall = api.getStatistics("Bearer " + getToken(), period);
+        statisticsCall.enqueue(new Callback<StatisticsSummary>() {
+            @Override
+            public void onResponse(Call<StatisticsSummary> call, Response<StatisticsSummary> response) {
+                if (call.isCanceled()) return;
+                progressBar.setVisibility(View.GONE);
+
+                if (!response.isSuccessful() || response.body() == null) {
+                    showError("Não foi possível carregar estatísticas.");
                     return;
                 }
+
+                bindStats(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<StatisticsSummary> call, Throwable t) {
+                if (call.isCanceled()) return;
                 progressBar.setVisibility(View.GONE);
                 showError("Sem ligação ao servidor. Confirma que o backend está ativo.");
             }
         });
     }
 
-    private void bindSummary(StatisticsSummary summary) {
-        completionRateText.setText(String.valueOf(Math.round(summary.getCompletionRate())));
-        productivityScoreText.setText("Produtividade " + Math.round(summary.getProductivityScore()));
-        statTotalText.setText(String.valueOf(summary.getTotalTasks()));
-        statCompletedText.setText(String.valueOf(summary.getCompletedTasks()));
-        statPendingText.setText(String.valueOf(summary.getPendingTasks()));
-        statLostText.setText(String.valueOf(summary.getLostTasks()));
-        statXpText.setText(String.valueOf(summary.getTotalXP()));
+    // Preenche os 7 cartões com os dados recebidos; null → "—".
+    private void bindStats(StatisticsSummary s) {
+        statTasksCompletedText.setText(s.getTasksCompleted() != null
+                ? String.valueOf(s.getTasksCompleted()) : "—");
+
+        statTasksCreatedText.setText(s.getTasksCreated() != null
+                ? String.valueOf(s.getTasksCreated()) : "—");
+
+        statTasksMissedText.setText(s.getTasksMissed() != null
+                ? String.valueOf(s.getTasksMissed()) : "—");
+
+        statXpEarnedText.setText(s.getXpEarned() != null
+                ? String.valueOf(s.getXpEarned()) : "—");
+
+        statStreakText.setText(s.getCurrentStreak() != null
+                ? String.valueOf(s.getCurrentStreak()) : "—");
+
+        // Taxa de conclusão: Double 0.0–1.0 → percentagem inteira, ex. 0.73 → "73%"
+        if (s.getCompletionRate() != null) {
+            int pct = (int) (s.getCompletionRate() * 100);
+            statCompletionRateText.setText(pct + "%");
+        } else {
+            statCompletionRateText.setText("—");
+        }
+
+        statBestDayText.setText(!TextUtils.isEmpty(s.getBestDay()) ? s.getBestDay() : "—");
+
+        errorText.setVisibility(View.GONE);
+        scrollView.setVisibility(View.VISIBLE);
     }
 
-    private void buildChart(List<StatisticsDay> days) {
-        chartContainer.removeAllViews();
-
-        if (days == null || days.isEmpty()) {
-            chartEmptyText.setVisibility(View.VISIBLE);
-            return;
-        }
-
-        List<StatisticsDay> last7 = days.size() > 7
-                ? days.subList(days.size() - 7, days.size())
-                : days;
-
-        int max = 0;
-        for (StatisticsDay day : last7) {
-            max = Math.max(max, day.getTasksCompleted());
-        }
-
-        chartEmptyText.setVisibility(max > 0 ? View.GONE : View.VISIBLE);
-
-        int maxBarPx = dp(110);
-        int textColor = getResources().getColor(R.color.lifinity_primary, getTheme());
-        int labelColor = getResources().getColor(R.color.lifinity_text_secondary, getTheme());
-
-        for (StatisticsDay day : last7) {
-            LinearLayout column = new LinearLayout(this);
-            column.setOrientation(LinearLayout.VERTICAL);
-            column.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
-            LinearLayout.LayoutParams columnParams = new LinearLayout.LayoutParams(
-                    0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
-            column.setLayoutParams(columnParams);
-
-            TextView value = new TextView(this);
-            value.setText(String.valueOf(day.getTasksCompleted()));
-            value.setTextColor(textColor);
-            value.setTextSize(11);
-            value.setTypeface(value.getTypeface(), android.graphics.Typeface.BOLD);
-            value.setGravity(Gravity.CENTER);
-            column.addView(value);
-
-            View bar = new View(this);
-            int barHeight = max > 0
-                    ? Math.max(dp(4), Math.round((day.getTasksCompleted() / (float) max) * maxBarPx))
-                    : dp(4);
-            LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(dp(18), barHeight);
-            barParams.gravity = Gravity.CENTER_HORIZONTAL;
-            barParams.topMargin = dp(4);
-            barParams.bottomMargin = dp(6);
-            bar.setLayoutParams(barParams);
-            bar.setBackgroundResource(R.drawable.bg_bar_clay);
-            column.addView(bar);
-
-            TextView label = new TextView(this);
-            label.setText(day.getLabel());
-            label.setTextColor(labelColor);
-            label.setTextSize(9);
-            label.setMaxLines(1);
-            label.setGravity(Gravity.CENTER);
-            column.addView(label);
-
-            chartContainer.addView(column);
-        }
-    }
-
-    private int dp(int value) {
-        return Math.round(value * getResources().getDisplayMetrics().density);
+    private void showLoading() {
+        progressBar.setVisibility(View.VISIBLE);
+        errorText.setVisibility(View.GONE);
+        scrollView.setVisibility(View.GONE);
     }
 
     private void showError(String message) {
         errorText.setText(message);
         errorText.setVisibility(View.VISIBLE);
+        scrollView.setVisibility(View.GONE);
     }
 
     private String getToken() {
-        SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        return preferences.getString(KEY_TOKEN, null);
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        return prefs.getString(KEY_TOKEN, null);
     }
 
     private void openLoginActivity() {
@@ -201,9 +197,7 @@ public class StatisticsActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if (statisticsCall != null) {
-            statisticsCall.cancel();
-        }
+        if (statisticsCall != null) statisticsCall.cancel();
         super.onDestroy();
     }
 }
