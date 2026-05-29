@@ -1,80 +1,232 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_app_clay"
-    android:fillViewport="true"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:orientation="vertical"
     tools:context=".ProfileActivity">
 
+    <!-- ===== HEADER ===== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="@dimen/space_screen">
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="12dp">
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="Perfil"
             android:textColor="@color/lifinity_text"
-            android:textSize="30sp"
+            android:textSize="18sp"
             android:textStyle="bold" />
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="O teu progresso no Lifinity."
-            android:textColor="@color/lifinity_text_secondary"
-            android:textSize="15sp" />
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_card_soft_clay"
+            android:elevation="4dp"
+            android:gravity="center"
+            android:text="⚙"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <!-- ===== CONTEÚDO SCROLLÁVEL ===== -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:clipToPadding="false">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="22dp"
-            android:background="@drawable/bg_card_clay"
-            android:elevation="10dp"
-            android:gravity="center_horizontal"
             android:orientation="vertical"
-            android:padding="28dp">
+            android:paddingBottom="8dp">
 
-            <TextView
-                android:id="@+id/profileAvatarText"
-                android:layout_width="104dp"
-                android:layout_height="104dp"
-                android:background="@drawable/bg_avatar_clay"
-                android:gravity="center"
-                android:textColor="@color/lifinity_text_on_primary"
-                android:textSize="44sp"
-                android:textStyle="bold"
-                tools:text="L" />
-
-            <TextView
-                android:id="@+id/profileUsernameText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
-                android:gravity="center"
-                android:textColor="@color/lifinity_text"
-                android:textSize="26sp"
-                android:textStyle="bold"
-                tools:text="username" />
-
-            <TextView
-                android:id="@+id/profileEmailText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:gravity="center"
-                android:textColor="@color/lifinity_text_secondary"
-                android:textSize="15sp"
-                tools:text="email@lifinity.pt" />
-
+            <!-- ===== CARTÃO AVATAR + INFO ===== -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="22dp"
+                android:layout_marginBottom="24dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_card_clay"
+                android:elevation="10dp"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:padding="28dp">
+
+                <!-- Avatar circular clay -->
+                <TextView
+                    android:id="@+id/profileAvatarText"
+                    android:layout_width="104dp"
+                    android:layout_height="104dp"
+                    android:background="@drawable/bg_avatar_clay"
+                    android:gravity="center"
+                    android:textColor="@color/lifinity_text_on_primary"
+                    android:textSize="44sp"
+                    android:textStyle="bold"
+                    tools:text="T" />
+
+                <!-- Nome + email -->
+                <TextView
+                    android:id="@+id/profileUsernameText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:gravity="center"
+                    android:textColor="@color/lifinity_text"
+                    android:textSize="26sp"
+                    android:textStyle="bold"
+                    tools:text="Telmo" />
+
+                <TextView
+                    android:id="@+id/profileEmailText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:gravity="center"
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="14sp"
+                    tools:text="telmo@lifinity.pt" />
+
+                <!-- Pills Nível + XP -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_pill_mint"
+                        android:elevation="4dp"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                        android:textColor="@color/lifinity_primary"
+                        android:textSize="13sp"
+                        android:textStyle="bold">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
+                            NÍVEL
+                        </TextView>
+                    </TextView>
+
+                    <TextView
+                        android:id="@+id/profileLevelText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_pill_mint"
+                        android:elevation="4dp"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                        android:textColor="@color/lifinity_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        tools:text="5" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:background="@drawable/bg_pill_alta"
+                        android:elevation="4dp"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                        android:textColor="#0E2C1B"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:text="XP" />
+
+                    <TextView
+                        android:id="@+id/profileXpText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_pill_alta"
+                        android:elevation="4dp"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                        android:textColor="#0E2C1B"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        tools:text="2043" />
+                </LinearLayout>
+
+                <!-- Barra de progresso do nível -->
+                <TextView
+                    android:id="@+id/profileLevelProgressLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:gravity="center"
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    tools:text="219 XP para nível 6" />
+
+                <ProgressBar
+                    android:id="@+id/profileLevelProgressBar"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="12dp"
+                    android:layout_marginTop="10dp"
+                    android:indeterminate="false"
+                    android:max="100"
+                    android:progress="0"
+                    android:progressBackgroundTint="@color/lifinity_inset"
+                    android:progressTint="@color/lifinity_primary" />
+            </LinearLayout>
+
+            <!-- ===== RESUMO DE ATIVIDADES ===== -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:letterSpacing="0.13"
+                android:text="RESUMO DE ATIVIDADES"
+                android:textColor="@color/lifinity_text_secondary"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/profileActivitySummaryStatusText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:textColor="@color/lifinity_text_secondary"
+                android:textSize="13sp"
+                tools:text="A carregar..." />
+
+            <!-- Grid 2x2 de stats -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
                 android:orientation="horizontal">
 
                 <LinearLayout
@@ -82,406 +234,292 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="@drawable/bg_card_soft_clay"
+                    android:elevation="5dp"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="16dp">
 
                     <TextView
+                        android:id="@+id/profileTotalActivitiesText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Nivel"
-                        android:textColor="@color/lifinity_text_secondary"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/profileLevelText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
                         android:textColor="@color/lifinity_primary"
                         android:textSize="24sp"
                         android:textStyle="bold"
-                        tools:text="2" />
+                        tools:text="12" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:letterSpacing="0.05"
+                        android:text="TOTAL"
+                        android:textColor="@color/lifinity_text_secondary"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="10dp"
                     android:layout_weight="1"
                     android:background="@drawable/bg_card_soft_clay"
+                    android:elevation="5dp"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="16dp">
 
                     <TextView
+                        android:id="@+id/profileCompletedActivitiesText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="XP"
-                        android:textColor="@color/lifinity_text_secondary"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/profileXpText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
                         android:textColor="@color/lifinity_primary"
                         android:textSize="24sp"
                         android:textStyle="bold"
-                        tools:text="120" />
+                        tools:text="8" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:letterSpacing="0.05"
+                        android:text="CONCLUÍDAS"
+                        android:textColor="@color/lifinity_text_secondary"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/profileLevelProgressLabel"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginBottom="24dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_card_soft_clay"
+                    android:elevation="5dp"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/profilePendingActivitiesText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/lifinity_primary"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        tools:text="3" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:letterSpacing="0.05"
+                        android:text="PENDENTES"
+                        android:textColor="@color/lifinity_text_secondary"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_card_soft_clay"
+                    android:elevation="5dp"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/profileLostActivitiesText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/lifinity_coral"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        tools:text="1" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:letterSpacing="0.05"
+                        android:text="PERDIDAS"
+                        android:textColor="@color/lifinity_text_secondary"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ===== CONQUISTAS ===== -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:letterSpacing="0.13"
+                android:text="CONQUISTAS"
+                android:textColor="@color/lifinity_text_secondary"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/profileAchievementsSummaryText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
                 android:textColor="@color/lifinity_text_secondary"
                 android:textSize="13sp"
-                android:textStyle="bold"
-                tools:text="20 XP para nivel 3" />
+                tools:text="3 de 10 conquistadas" />
 
-            <ProgressBar
-                android:id="@+id/profileLevelProgressBar"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="12dp"
-                android:layout_marginTop="8dp"
-                android:indeterminate="false"
-                android:max="100"
-                android:progress="0"
-                android:progressBackgroundTint="@color/lifinity_border"
-                android:progressTint="@color/lifinity_primary" />
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Resumo de atividades"
-            android:textColor="@color/lifinity_text"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/profileActivitySummaryStatusText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="A carregar atividades..."
-            android:textColor="@color/lifinity_text_secondary"
-            android:textSize="14sp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:orientation="horizontal">
-
+            <!-- Achievements (manter IDs existentes) -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:id="@+id/profileAchievement1Container"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginBottom="10dp"
                 android:background="@drawable/bg_card_soft_clay"
                 android:elevation="5dp"
-                android:gravity="center"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="16dp"
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <TextView
-                    android:id="@+id/profileTotalActivitiesText"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/profileAchievement1Title"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textColor="@color/lifinity_primary"
-                    android:textSize="24sp"
+                    android:textSize="15sp"
                     android:textStyle="bold"
-                    tools:text="8" />
+                    tools:text="Primeira atividade" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:id="@+id/profileAchievement1Description"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Total"
                     android:textColor="@color/lifinity_text_secondary"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textSize="13sp"
+                    tools:text="Conclui a tua primeira atividade." />
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:id="@+id/profileAchievement2Container"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_weight="1"
+                android:layout_marginBottom="10dp"
                 android:background="@drawable/bg_card_soft_clay"
                 android:elevation="5dp"
-                android:gravity="center"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="16dp"
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <TextView
-                    android:id="@+id/profileCompletedActivitiesText"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/profileAchievement2Title"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textColor="@color/lifinity_primary"
-                    android:textSize="24sp"
+                    android:textSize="15sp"
                     android:textStyle="bold"
-                    tools:text="4" />
+                    tools:text="Nível 2" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:id="@+id/profileAchievement2Description"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Concluidas"
                     android:textColor="@color/lifinity_text_secondary"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/bg_card_soft_clay"
-                android:elevation="5dp"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:id="@+id/profilePendingActivitiesText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/lifinity_primary"
-                    android:textSize="24sp"
-                    android:textStyle="bold"
-                    tools:text="3" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Pendentes"
-                    android:textColor="@color/lifinity_text_secondary"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textSize="13sp"
+                    tools:text="Chega ao nível 2." />
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:id="@+id/profileAchievement3Container"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_weight="1"
+                android:layout_marginBottom="24dp"
                 android:background="@drawable/bg_card_soft_clay"
                 android:elevation="5dp"
-                android:gravity="center"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="16dp"
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <TextView
-                    android:id="@+id/profileLostActivitiesText"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/profileAchievement3Title"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textColor="@color/lifinity_primary"
-                    android:textSize="24sp"
+                    android:textSize="15sp"
                     android:textStyle="bold"
-                    tools:text="1" />
+                    tools:text="500 XP" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:id="@+id/profileAchievement3Description"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Perdidas"
                     android:textColor="@color/lifinity_text_secondary"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textSize="13sp"
+                    tools:text="Acumula 500 XP." />
             </LinearLayout>
+
+            <!-- Botões de ação (simplificados) -->
+            <Button
+                android:id="@+id/profileLogoutButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/btn_danger_clay"
+                android:elevation="8dp"
+                android:text="Terminar sessão"
+                android:textAllCaps="false"
+                android:textColor="@color/lifinity_text_on_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <!-- Placeholders para botões existentes (ocultos) -->
+            <Button
+                android:id="@+id/profileTasksButton"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/profileAchievementsButton"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/profileInspirationButton"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/profileSettingsButton"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="gone" />
+
         </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Conquistas"
-            android:textColor="@color/lifinity_text"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+    <!-- ===== BARRA DE NAVEGAÇÃO INFERIOR ===== -->
+    <include
+        android:id="@+id/bottomNavInclude"
+        layout="@layout/nav_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
-        <TextView
-            android:id="@+id/profileAchievementsSummaryText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="A carregar conquistas..."
-            android:textColor="@color/lifinity_text_secondary"
-            android:textSize="14sp" />
-
-        <LinearLayout
-            android:id="@+id/profileAchievement1Container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_card_soft_clay"
-            android:elevation="5dp"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:visibility="gone"
-            tools:visibility="visible">
-
-            <TextView
-                android:id="@+id/profileAchievement1Title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/lifinity_primary"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                tools:text="Primeira atividade" />
-
-            <TextView
-                android:id="@+id/profileAchievement1Description"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/lifinity_text_secondary"
-                android:textSize="13sp"
-                tools:text="Conclui a tua primeira atividade." />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/profileAchievement2Container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/bg_card_soft_clay"
-            android:elevation="5dp"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:visibility="gone"
-            tools:visibility="visible">
-
-            <TextView
-                android:id="@+id/profileAchievement2Title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/lifinity_primary"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                tools:text="Nivel 2" />
-
-            <TextView
-                android:id="@+id/profileAchievement2Description"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/lifinity_text_secondary"
-                android:textSize="13sp"
-                tools:text="Chega ao nivel 2." />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/profileAchievement3Container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/bg_card_soft_clay"
-            android:elevation="5dp"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:visibility="gone"
-            tools:visibility="visible">
-
-            <TextView
-                android:id="@+id/profileAchievement3Title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/lifinity_primary"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                tools:text="500 XP" />
-
-            <TextView
-                android:id="@+id/profileAchievement3Description"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/lifinity_text_secondary"
-                android:textSize="13sp"
-                tools:text="Acumula 500 XP." />
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/profileTasksButton"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/height_button"
-            android:layout_marginTop="24dp"
-            android:background="@drawable/btn_primary_clay"
-            android:elevation="8dp"
-            android:text="Ver atividades"
-            android:textAllCaps="false"
-            android:textColor="@color/lifinity_text_on_primary"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <Button
-            android:id="@+id/profileAchievementsButton"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/height_button"
-            android:layout_marginTop="14dp"
-            android:background="@drawable/btn_secondary_clay"
-            android:elevation="6dp"
-            android:text="Todas as conquistas"
-            android:textAllCaps="false"
-            android:textColor="@color/lifinity_text"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <Button
-            android:id="@+id/profileInspirationButton"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/height_button"
-            android:layout_marginTop="14dp"
-            android:background="@drawable/btn_secondary_clay"
-            android:elevation="6dp"
-            android:text="Inspiracao"
-            android:textAllCaps="false"
-            android:textColor="@color/lifinity_text"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <Button
-            android:id="@+id/profileSettingsButton"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/height_button"
-            android:layout_marginTop="14dp"
-            android:background="@drawable/btn_secondary_clay"
-            android:elevation="6dp"
-            android:text="Configuracoes"
-            android:textAllCaps="false"
-            android:textColor="@color/lifinity_text"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <Button
-            android:id="@+id/profileLogoutButton"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/height_button"
-            android:layout_marginTop="14dp"
-            android:background="@drawable/btn_danger_clay"
-            android:elevation="6dp"
-            android:text="Terminar sessao"
-            android:textAllCaps="false"
-            android:textColor="@color/lifinity_text_on_primary"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-    </LinearLayout>
-</ScrollView>
+</LinearLayout>

@@ -78,6 +78,7 @@ public class ProfileActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.activity_profile);
+        BottomNavHelper.setup(this, BottomNavHelper.Tab.PROFILE);
         bindViews();
         setupButtons();
         bindUser(getSavedUser());

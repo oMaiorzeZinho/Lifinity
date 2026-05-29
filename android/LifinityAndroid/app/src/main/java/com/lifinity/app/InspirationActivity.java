@@ -1,5 +1,7 @@
 package com.lifinity.app;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -40,6 +42,7 @@ public class InspirationActivity extends AppCompatActivity {
     private Button randomVerseButton;
     private Button dailyVerseButton;
     private Button favoriteButton;
+    private Button copyVerseButton;
     private ProgressBar progressBar;
     private LinearLayout favoritesContainer;
 
@@ -71,13 +74,16 @@ public class InspirationActivity extends AppCompatActivity {
         randomVerseButton = findViewById(R.id.randomVerseButton);
         dailyVerseButton = findViewById(R.id.dailyVerseButton);
         favoriteButton = findViewById(R.id.favoriteVerseButton);
+        copyVerseButton = findViewById(R.id.copyVerseButton);
         progressBar = findViewById(R.id.inspirationProgressBar);
         favoritesContainer = findViewById(R.id.inspirationFavoritesContainer);
 
         randomVerseButton.setOnClickListener(v -> loadRandomVerse());
         dailyVerseButton.setOnClickListener(v -> loadDailyVerse(false));
         favoriteButton.setOnClickListener(v -> toggleCurrentFavorite());
+        copyVerseButton.setOnClickListener(v -> copyCurrentVerseToClipboard());
 
+        setupBottomNav();
         loadInitialData();
     }
 
@@ -297,13 +303,13 @@ public class InspirationActivity extends AppCompatActivity {
 
     private void bindFavoriteButton() {
         if (currentVerse == null) {
-            favoriteButton.setText("Favoritar");
+            favoriteButton.setText("♥ Guardar");
             favoriteButton.setEnabled(false);
             return;
         }
 
         favoriteButton.setEnabled(true);
-        favoriteButton.setText(isCurrentFavorite() ? "Remover favorito" : "Favoritar");
+        favoriteButton.setText(isCurrentFavorite() ? "♡ Remover" : "♥ Guardar");
     }
 
     private void bindFavorites() {
@@ -536,6 +542,22 @@ public class InspirationActivity extends AppCompatActivity {
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void copyCurrentVerseToClipboard() {
+        if (currentVerse == null || TextUtils.isEmpty(currentVerse.getText())) {
+            Toast.makeText(this, "Versículo indisponível para copiar.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("Versículo", currentVerse.getText());
+        clipboard.setPrimaryClip(clip);
+        Toast.makeText(this, "Versículo copiado para a área de transferência.", Toast.LENGTH_SHORT).show();
+    }
+
+    private void setupBottomNav() {
+        BottomNavHelper.setup(this, BottomNavHelper.Tab.INSPIRATION);
     }
 
     @Override

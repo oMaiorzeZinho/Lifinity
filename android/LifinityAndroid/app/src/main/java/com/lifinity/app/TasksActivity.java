@@ -174,50 +174,7 @@ public class TasksActivity extends AppCompatActivity {
     }
 
     private void setupBottomNav() {
-        // FAB abre criar tarefa
-        View fab = findViewById(R.id.navFab);
-        if (fab != null) fab.setOnClickListener(v -> openCreateTaskActivity());
-
-        // Tabs de navegação
-        View navTasks = findViewById(R.id.navTabTasks);
-        View navRanking = findViewById(R.id.navTabRanking);
-        View navInspiration = findViewById(R.id.navTabInspiration);
-        View navProfile = findViewById(R.id.navTabProfile);
-
-        setNavTabActive(navTasks, true);
-
-        if (navRanking != null) navRanking.setOnClickListener(v -> {
-            // Placeholder — ainda sem ecrã de Ranking
-            Toast.makeText(this, "Ranking em breve!", Toast.LENGTH_SHORT).show();
-        });
-        if (navInspiration != null) navInspiration.setOnClickListener(v -> {
-            Intent intent = new Intent(this, InspirationActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            startActivity(intent);
-        });
-        if (navProfile != null) navProfile.setOnClickListener(v -> {
-            Intent intent = new Intent(this, ProfileActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            startActivity(intent);
-        });
-    }
-
-    private void setNavTabActive(View tab, boolean active) {
-        if (tab == null) return;
-        TextView icon = null, label = null;
-        if (tab.getId() == R.id.navTabTasks) {
-            icon = tab.findViewById(R.id.navTabTasksIcon);
-            label = tab.findViewById(R.id.navTabTasksLabel);
-        }
-        if (icon != null) icon.setTextColor(active
-                ? getResources().getColor(R.color.lifinity_primary, null)
-                : getResources().getColor(R.color.lifinity_text_secondary, null));
-        if (label != null) label.setTextColor(active
-                ? getResources().getColor(R.color.lifinity_primary, null)
-                : getResources().getColor(R.color.lifinity_text_secondary, null));
-        tab.setBackground(active
-                ? getResources().getDrawable(R.drawable.bg_nav_item_active, null)
-                : null);
+        BottomNavHelper.setup(this, BottomNavHelper.Tab.TASKS);
     }
 
     private String getToken() {
