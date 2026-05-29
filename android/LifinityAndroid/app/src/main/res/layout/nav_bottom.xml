@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Barra de navegação inferior clay com FAB central.
+     Incluir no fundo de cada Activity principal.
+     Definir android:tag="tasks|ranking|inspiration|profile" no root para
+     que o Java saiba qual tab está ativa. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clipChildren="false"
+    android:clipToPadding="false">
+
+    <!-- Barra de fundo clay -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:layout_gravity="bottom"
+        android:background="@drawable/bg_nav_clay"
+        android:elevation="12dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="4dp"
+        android:paddingTop="8dp">
+
+        <!-- Tab Atividades -->
+        <LinearLayout
+            android:id="@+id/navTabTasks"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="6dp">
+
+            <TextView
+                android:id="@+id/navTabTasksIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="&#9776;"
+                android:textSize="18sp"
+                android:textColor="@color/lifinity_text_secondary" />
+
+            <TextView
+                android:id="@+id/navTabTasksLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Tarefas"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="@color/lifinity_text_secondary" />
+        </LinearLayout>
+
+        <!-- Tab Ranking -->
+        <LinearLayout
+            android:id="@+id/navTabRanking"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="6dp">
+
+            <TextView
+                android:id="@+id/navTabRankingIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="&#9733;"
+                android:textSize="18sp"
+                android:textColor="@color/lifinity_text_secondary" />
+
+            <TextView
+                android:id="@+id/navTabRankingLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Ranking"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="@color/lifinity_text_secondary" />
+        </LinearLayout>
+
+        <!-- Espaço para o FAB central -->
+        <View
+            android:layout_width="68dp"
+            android:layout_height="match_parent" />
+
+        <!-- Tab Inspiração -->
+        <LinearLayout
+            android:id="@+id/navTabInspiration"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="6dp">
+
+            <TextView
+                android:id="@+id/navTabInspirationIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="&#10022;"
+                android:textSize="18sp"
+                android:textColor="@color/lifinity_text_secondary" />
+
+            <TextView
+                android:id="@+id/navTabInspirationLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Inspiração"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="@color/lifinity_text_secondary" />
+        </LinearLayout>
+
+        <!-- Tab Perfil -->
+        <LinearLayout
+            android:id="@+id/navTabProfile"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="6dp">
+
+            <TextView
+                android:id="@+id/navTabProfileIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="&#9711;"
+                android:textSize="18sp"
+                android:textColor="@color/lifinity_text_secondary" />
+
+            <TextView
+                android:id="@+id/navTabProfileLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Perfil"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="@color/lifinity_text_secondary" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- FAB central (sobreposto, emerge acima da barra) -->
+    <Button
+        android:id="@+id/navFab"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="-8dp"
+        android:background="@drawable/bg_fab_clay"
+        android:elevation="20dp"
+        android:text="+"
+        android:textColor="@color/lifinity_text_on_primary"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:textAllCaps="false" />
+
+</FrameLayout>

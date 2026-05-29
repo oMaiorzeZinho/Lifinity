@@ -1,5 +1,6 @@
 package com.lifinity.app.adapters;
 
+import android.content.Context;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -70,18 +71,20 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     static class TaskViewHolder extends RecyclerView.ViewHolder {
         private final TextView titleText;
         private final TextView descriptionText;
-        private final TextView priorityText;
+        private final TextView priorityPill;
         private final TextView statusText;
         private final TextView dueDateText;
         private final TextView createdAtText;
         private final Button completeButton;
         private final Button optionsButton;
+        private final Context context;
 
         TaskViewHolder(@NonNull View itemView) {
             super(itemView);
+            context = itemView.getContext();
             titleText = itemView.findViewById(R.id.taskTitleText);
             descriptionText = itemView.findViewById(R.id.taskDescriptionText);
-            priorityText = itemView.findViewById(R.id.taskPriorityText);
+            priorityPill = itemView.findViewById(R.id.taskPriorityPill);
             statusText = itemView.findViewById(R.id.taskStatusText);
             dueDateText = itemView.findViewById(R.id.taskDueDateText);
             createdAtText = itemView.findViewById(R.id.taskCreatedAtText);
@@ -94,12 +97,27 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 OnTaskCompleteClickListener completeClickListener,
                 OnTaskOptionsClickListener optionsClickListener
         ) {
-            titleText.setText(valueOrFallback(task.getTitle(), "Atividade sem titulo"));
-            descriptionText.setText(valueOrFallback(task.getDescription(), "Sem descricao."));
-            priorityText.setText("Prioridade: " + valueOrFallback(task.getPriority(), "-"));
-            statusText.setText("Estado: " + getDisplayStatus(task));
-            dueDateText.setText("Data limite: " + valueOrFallback(task.getDueDate(), "-"));
-            createdAtText.setText("Criada em: " + valueOrFallback(task.getCreatedAt(), "-"));
+            titleText.setText(valueOrFallback(task.getTitle(), "Atividade sem título"));
+
+            String description = task.getDescription();
+            if (!TextUtils.isEmpty(description)) {
+                descriptionText.setText(description);
+                descriptionText.setVisibility(View.VISIBLE);
+            } else {
+                descriptionText.setVisibility(View.GONE);
+            }
+
+            bindPriorityPill(task.getPriority());
+            bindStatus(task);
+            bindDueDate(task.getDueDate());
+
+            String createdAt = formatShortDate(task.getCreatedAt());
+            if (!TextUtils.isEmpty(createdAt)) {
+                createdAtText.setText("Criada a " + createdAt);
+                createdAtText.setVisibility(View.VISIBLE);
+            } else {
+                createdAtText.setVisibility(View.GONE);
+            }
 
             if (canCompleteTask(task)) {
                 completeButton.setVisibility(View.VISIBLE);
@@ -112,55 +130,91 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             optionsButton.setOnClickListener(v -> optionsClickListener.onTaskOptionsClick(task));
         }
 
-        private String valueOrFallback(String value, String fallback) {
-            if (TextUtils.isEmpty(value)) {
-                return fallback;
+        private void bindPriorityPill(String priority) {
+            if (TextUtils.isEmpty(priority)) {
+                priorityPill.setVisibility(View.GONE);
+                return;
             }
-            return value;
+            priorityPill.setVisibility(View.VISIBLE);
+            switch (priority.trim().toLowerCase(Locale.US)) {
+                case "alta":
+                    priorityPill.setText("ALTA");
+                    priorityPill.setBackgroundResource(R.drawable.bg_pill_alta);
+                    break;
+                case "media":
+                    priorityPill.setText("MÉDIA");
+                    priorityPill.setBackgroundResource(R.drawable.bg_pill_media);
+                    break;
+                case "baixa":
+                    priorityPill.setText("BAIXA");
+                    priorityPill.setBackgroundResource(R.drawable.bg_pill_baixa);
+                    break;
+                default:
+                    priorityPill.setText(priority.toUpperCase(Locale.US));
+                    priorityPill.setBackgroundResource(R.drawable.bg_card_soft_clay);
+                    break;
+            }
         }
 
-        private String getDisplayStatus(Task task) {
+        private void bindStatus(Task task) {
             if (isCompleted(task)) {
-                return "concluida";
+                statusText.setText("Concluída");
+                statusText.setVisibility(View.VISIBLE);
+            } else if (isLost(task)) {
+                statusText.setText("Perdida");
+                statusText.setVisibility(View.VISIBLE);
+            } else {
+                statusText.setVisibility(View.GONE);
             }
+        }
 
-            if (isLost(task)) {
-                return "perdida";
+        private void bindDueDate(String dueDate) {
+            if (TextUtils.isEmpty(dueDate)) {
+                dueDateText.setVisibility(View.GONE);
+                return;
             }
+            String formatted = formatShortDate(dueDate);
+            if (!TextUtils.isEmpty(formatted)) {
+                dueDateText.setText("Prazo: " + formatted);
+                dueDateText.setVisibility(View.VISIBLE);
+            } else {
+                dueDateText.setVisibility(View.GONE);
+            }
+        }
 
-            return "pendente";
+        private String formatShortDate(String value) {
+            if (TextUtils.isEmpty(value)) return null;
+            try {
+                Date date = parseDate(value);
+                if (date == null) return value.length() >= 10 ? value.substring(0, 10) : value;
+                return new SimpleDateFormat("dd/MM/yyyy", Locale.US).format(date);
+            } catch (Exception e) {
+                return value.length() >= 10 ? value.substring(0, 10) : value;
+            }
+        }
+
+        private String valueOrFallback(String value, String fallback) {
+            return TextUtils.isEmpty(value) ? fallback : value;
         }
 
         private boolean canCompleteTask(Task task) {
-            if (task == null || task.getIdtask() == null) {
-                return false;
-            }
-
+            if (task == null || task.getIdtask() == null) return false;
             return !isCompleted(task) && !isLost(task);
         }
 
         private boolean isCompleted(Task task) {
-            if (task == null || TextUtils.isEmpty(task.getStatus())) {
-                return false;
-            }
-
+            if (task == null || TextUtils.isEmpty(task.getStatus())) return false;
             return "concluida".equals(task.getStatus().trim().toLowerCase(Locale.US));
         }
 
         private boolean isLost(Task task) {
-            if (task == null || isCompleted(task)) {
-                return false;
-            }
-
+            if (task == null || isCompleted(task)) return false;
             Date dueDate = parseDate(task.getDueDate());
             return dueDate != null && dueDate.before(new Date());
         }
 
         private Date parseDate(String value) {
-            if (TextUtils.isEmpty(value)) {
-                return null;
-            }
-
+            if (TextUtils.isEmpty(value)) return null;
             String[] patterns = {
                     "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
                     "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
@@ -170,16 +224,12 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                     "yyyy-MM-dd HH:mm:ss",
                     "yyyy-MM-dd"
             };
-
             for (String pattern : patterns) {
                 try {
-                    SimpleDateFormat format = new SimpleDateFormat(pattern, Locale.US);
-                    return format.parse(value);
+                    return new SimpleDateFormat(pattern, Locale.US).parse(value);
                 } catch (ParseException ignored) {
-                    // Try the next server date format.
                 }
             }
-
             return null;
         }
     }

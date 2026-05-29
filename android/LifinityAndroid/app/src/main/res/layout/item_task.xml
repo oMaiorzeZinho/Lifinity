@@ -3,76 +3,114 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="16dp"
+    android:layout_marginBottom="14dp"
     android:background="@drawable/bg_card_clay"
-    android:elevation="8dp"
+    android:elevation="10dp"
     android:orientation="vertical"
-    android:padding="@dimen/space_card">
+    android:padding="18dp">
 
-    <TextView
-        android:id="@+id/taskTitleText"
+    <!-- Linha topo: título + pill de prioridade -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/lifinity_text"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        tools:text="Estudar Android" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
+        <TextView
+            android:id="@+id/taskTitleText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/lifinity_text"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:lineSpacingMultiplier="1.3"
+            tools:text="Estudar para o exame de matemática" />
+
+        <TextView
+            android:id="@+id/taskPriorityPill"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/bg_pill_media"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:textColor="#0E2C1B"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.05"
+            tools:text="MÉDIA" />
+    </LinearLayout>
+
+    <!-- Descrição (opcional) -->
     <TextView
         android:id="@+id/taskDescriptionText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:textColor="@color/lifinity_text_secondary"
-        android:textSize="14sp"
-        tools:text="Rever Retrofit e RecyclerView." />
+        android:textSize="13sp"
+        android:lineSpacingMultiplier="1.35"
+        android:visibility="gone"
+        tools:text="Rever todos os capítulos do livro."
+        tools:visibility="visible" />
 
+    <!-- Badges de meta (prazo, estado) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
-        android:background="@drawable/bg_card_soft_clay"
-        android:orientation="vertical"
-        android:padding="14dp">
-
-        <TextView
-            android:id="@+id/taskPriorityText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@color/lifinity_primary"
-            android:textSize="13sp"
-            android:textStyle="bold"
-            tools:text="Prioridade: media" />
-
-        <TextView
-            android:id="@+id/taskStatusText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:textColor="@color/lifinity_text"
-            android:textSize="13sp"
-            android:textStyle="bold"
-            tools:text="Estado: pendente" />
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal"
+        android:flexDirection="row">
 
         <TextView
             android:id="@+id/taskDueDateText"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:textColor="@color/lifinity_text_secondary"
-            android:textSize="13sp"
-            tools:text="Data limite: 2026-05-19" />
-
-        <TextView
-            android:id="@+id/taskCreatedAtText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_card_soft_clay"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
             android:textColor="@color/lifinity_text_secondary"
             android:textSize="12sp"
-            tools:text="Criada em: 2026-05-19T12:00:00.000Z" />
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:text="Prazo: 2026-06-10"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/taskStatusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_card_soft_clay"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:textColor="@color/lifinity_text_secondary"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:text="Pendente"
+            tools:visibility="visible" />
     </LinearLayout>
 
+    <!-- Data de criação (discreta) -->
+    <TextView
+        android:id="@+id/taskCreatedAtText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:textColor="@color/lifinity_text_faint"
+        android:textSize="11sp"
+        android:visibility="gone"
+        tools:text="Criada em: 2026-05-19" />
+
+    <!-- Linha de ações -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -90,21 +128,18 @@
             android:textAllCaps="false"
             android:textColor="@color/lifinity_text_on_primary"
             android:textSize="15sp"
-            android:textStyle="bold"
-            tools:visibility="visible" />
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/taskOptionsButton"
-            android:layout_width="0dp"
+            android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginStart="10dp"
-            android:layout_weight="1"
             android:background="@drawable/btn_secondary_clay"
-            android:elevation="6dp"
-            android:text="Opcoes"
+            android:elevation="4dp"
+            android:text="&#8942;"
             android:textAllCaps="false"
-            android:textColor="@color/lifinity_text"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+            android:textColor="@color/lifinity_text_secondary"
+            android:textSize="20sp" />
     </LinearLayout>
 </LinearLayout>
