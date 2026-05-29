@@ -10,7 +10,6 @@
         <item name="colorOnPrimary">@color/lifinity_text_on_primary</item>
         <item name="colorSurface">@color/lifinity_surface</item>
         <item name="colorOnSurface">@color/lifinity_text</item>
-        <item name="colorBackground">@color/lifinity_bg</item>
         <item name="android:colorBackground">@color/lifinity_bg</item>
         <item name="colorError">@color/lifinity_coral</item>
     </style>
