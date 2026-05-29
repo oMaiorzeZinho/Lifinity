@@ -1,15 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Botão primário clay: gradiente menta, raio 16dp -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true">
-        <shape>
-            <solid android:color="@color/lifinity_primary_pressed" />
-            <corners android:radius="@dimen/radius_control" />
-        </shape>
+        <layer-list>
+            <item>
+                <shape>
+                    <gradient
+                        android:angle="152"
+                        android:startColor="@color/lifinity_primary"
+                        android:endColor="@color/lifinity_primary_dark" />
+                    <corners android:radius="@dimen/radius_control" />
+                </shape>
+            </item>
+        </layer-list>
     </item>
     <item>
-        <shape>
-            <solid android:color="@color/lifinity_primary" />
-            <corners android:radius="@dimen/radius_control" />
-        </shape>
+        <layer-list>
+            <!-- Realce superior-esquerdo (brilho plástico) -->
+            <item
+                android:bottom="6dp"
+                android:right="6dp">
+                <shape>
+                    <solid android:color="#28FFFFFF" />
+                    <corners android:radius="@dimen/radius_control" />
+                </shape>
+            </item>
+            <!-- Gradiente principal menta -->
+            <item>
+                <shape>
+                    <gradient
+                        android:angle="152"
+                        android:startColor="@color/lifinity_primary_light"
+                        android:endColor="@color/lifinity_primary_dark" />
+                    <corners android:radius="@dimen/radius_control" />
+                </shape>
+            </item>
+        </layer-list>
     </item>
 </selector>

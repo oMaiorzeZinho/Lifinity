@@ -2,19 +2,48 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="lifinity_bg">#071A13</color>
-    <color name="lifinity_bg_deep">#04100C</color>
-    <color name="lifinity_card">#10281D</color>
-    <color name="lifinity_card_soft">#183528</color>
+
+    <!-- Fundo da app -->
+    <color name="lifinity_bg">#18271C</color>
+    <color name="lifinity_bg_deep">#112015</color>
+
+    <!-- Superfícies clay (cartões) -->
+    <color name="lifinity_surface">#27392D</color>
+    <color name="lifinity_surface2">#2F4435</color>
+
+    <!-- Afundado (inputs, barras de progresso) -->
+    <color name="lifinity_inset">#16241A</color>
+    <color name="lifinity_inset2">#1B2B1F</color>
+
+    <!-- Acento menta -->
     <color name="lifinity_primary">#7EE0A2</color>
-    <color name="lifinity_primary_pressed">#63C98B</color>
-    <color name="lifinity_text">#F3FFF8</color>
-    <color name="lifinity_text_secondary">#9AB5A6</color>
-    <color name="lifinity_text_on_primary">#071A13</color>
-    <color name="lifinity_danger">#FF8F8F</color>
-    <color name="lifinity_danger_pressed">#FF7474</color>
-    <color name="lifinity_input">#F3FFF8</color>
-    <color name="lifinity_input_hint">#5E7668</color>
-    <color name="lifinity_input_text">#071A13</color>
-    <color name="lifinity_border">#2A4D3B</color>
+    <color name="lifinity_primary_light">#8EEDB0</color>
+    <color name="lifinity_primary_dark">#57B87E</color>
+
+    <!-- Texto sobre menta -->
+    <color name="lifinity_text_on_primary">#0E2C1B</color>
+
+    <!-- Texto -->
+    <color name="lifinity_text">#EEF6F0</color>
+    <color name="lifinity_text_secondary">#92AA9B</color>
+    <color name="lifinity_text_faint">#6F8A78</color>
+
+    <!-- Estados / prioridades -->
+    <color name="lifinity_gold">#E2BD4D</color>
+    <color name="lifinity_coral">#EF9B7E</color>
+    <color name="lifinity_sage">#A6C7AF</color>
+
+    <!-- Perigo (coral) -->
+    <color name="lifinity_danger">#EF9B7E</color>
+    <color name="lifinity_danger_dark">#D8815F</color>
+
+    <!-- Aliases de compatibilidade (usados nos layouts existentes) -->
+    <color name="lifinity_card">#27392D</color>
+    <color name="lifinity_card_soft">#2F4435</color>
+    <color name="lifinity_input">#16241A</color>
+    <color name="lifinity_input_hint">#6F8A78</color>
+    <color name="lifinity_input_text">#EEF6F0</color>
+    <color name="lifinity_border">#2F4435</color>
+    <color name="lifinity_primary_pressed">#57B87E</color>
+    <color name="lifinity_danger_pressed">#D8815F</color>
 </resources>

@@ -1,9 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="space_screen">22dp</dimen>
-    <dimen name="space_card">22dp</dimen>
-    <dimen name="radius_card">28dp</dimen>
-    <dimen name="radius_control">20dp</dimen>
-    <dimen name="height_button">56dp</dimen>
-    <dimen name="height_input">56dp</dimen>
+    <!-- Espaçamento -->
+    <dimen name="space_screen">20dp</dimen>
+    <dimen name="space_card">18dp</dimen>
+    <dimen name="space_gap">14dp</dimen>
+
+    <!-- Raios clay — design: cartão 30dp, suave 22dp, controlo/input 16dp -->
+    <dimen name="radius_card">30dp</dimen>
+    <dimen name="radius_card_soft">22dp</dimen>
+    <dimen name="radius_control">16dp</dimen>
+    <dimen name="radius_pill">999dp</dimen>
+
+    <!-- Alturas de controlos (alvos de toque ≥ 44dp) -->
+    <dimen name="height_button">52dp</dimen>
+    <dimen name="height_input">52dp</dimen>
+    <dimen name="height_button_icon">48dp</dimen>
+
+    <!-- Avatares -->
+    <dimen name="size_avatar_large">80dp</dimen>
+    <dimen name="size_avatar_medium">48dp</dimen>
+    <dimen name="size_avatar_small">40dp</dimen>
 </resources>

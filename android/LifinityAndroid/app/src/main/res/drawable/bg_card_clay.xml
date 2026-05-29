@@ -1,13 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/lifinity_card" />
-    <corners android:radius="@dimen/radius_card" />
-    <stroke
-        android:width="1dp"
-        android:color="@color/lifinity_border" />
-    <padding
-        android:left="0dp"
-        android:top="0dp"
-        android:right="0dp"
-        android:bottom="0dp" />
-</shape>
+<!-- Cartão clay principal: gradiente surface2→surface, raio 30dp -->
+<!-- A sombra drop é controlada por android:elevation no layout -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Camada de realce superior-esquerdo (glow clay) -->
+    <item
+        android:bottom="4dp"
+        android:right="4dp">
+        <shape>
+            <solid android:color="#1596CDA5" />
+            <corners android:radius="30dp" />
+        </shape>
+    </item>
+    <!-- Superfície principal com gradiente -->
+    <item>
+        <shape>
+            <gradient
+                android:angle="152"
+                android:startColor="@color/lifinity_surface2"
+                android:endColor="@color/lifinity_surface" />
+            <corners android:radius="30dp" />
+        </shape>
+    </item>
+</layer-list>

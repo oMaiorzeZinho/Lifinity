@@ -62,8 +62,8 @@
                 android:paddingStart="18dp"
                 android:paddingEnd="18dp"
                 android:singleLine="true"
-                android:textColor="@color/lifinity_input_text"
-                android:textColorHint="@color/lifinity_input_hint"
+                android:textColor="@color/lifinity_text"
+                android:textColorHint="@color/lifinity_text_faint"
                 android:textSize="16sp" />
 
             <EditText
@@ -78,8 +78,8 @@
                 android:paddingStart="18dp"
                 android:paddingEnd="18dp"
                 android:singleLine="true"
-                android:textColor="@color/lifinity_input_text"
-                android:textColorHint="@color/lifinity_input_hint"
+                android:textColor="@color/lifinity_text"
+                android:textColorHint="@color/lifinity_text_faint"
                 android:textSize="16sp" />
 
             <TextView

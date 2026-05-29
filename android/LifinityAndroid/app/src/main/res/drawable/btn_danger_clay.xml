@@ -1,15 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Botão de perigo clay: coral, raio 16dp -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true">
         <shape>
-            <solid android:color="@color/lifinity_danger_pressed" />
+            <solid android:color="@color/lifinity_danger_dark" />
             <corners android:radius="@dimen/radius_control" />
         </shape>
     </item>
     <item>
-        <shape>
-            <solid android:color="@color/lifinity_danger" />
-            <corners android:radius="@dimen/radius_control" />
-        </shape>
+        <layer-list>
+            <item
+                android:bottom="5dp"
+                android:right="5dp">
+                <shape>
+                    <solid android:color="#28FFFFFF" />
+                    <corners android:radius="@dimen/radius_control" />
+                </shape>
+            </item>
+            <item>
+                <shape>
+                    <gradient
+                        android:angle="152"
+                        android:startColor="#F5AE90"
+                        android:endColor="@color/lifinity_danger_dark" />
+                    <corners android:radius="@dimen/radius_control" />
+                </shape>
+            </item>
+        </layer-list>
     </item>
 </selector>

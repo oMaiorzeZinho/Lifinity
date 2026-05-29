@@ -3,6 +3,6 @@
     <gradient
         android:angle="135"
         android:startColor="@color/lifinity_bg"
-        android:centerColor="@color/lifinity_card"
+        android:centerColor="#1A2F22"
         android:endColor="@color/lifinity_bg_deep" />
 </shape>
