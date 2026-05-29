@@ -148,16 +148,10 @@
                         android:paddingEnd="14dp"
                         android:paddingTop="8dp"
                         android:paddingBottom="8dp"
+                        android:text="NÍVEL"
                         android:textColor="@color/lifinity_primary"
                         android:textSize="13sp"
-                        android:textStyle="bold">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content">
-                            NÍVEL
-                        </TextView>
-                    </TextView>
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/profileLevelText"
