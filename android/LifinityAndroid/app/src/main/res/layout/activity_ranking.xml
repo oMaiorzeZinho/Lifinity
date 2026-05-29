@@ -51,6 +51,7 @@
             android:id="@+id/headerUserPill"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
             android:background="@drawable/bg_card_soft_clay"
             android:elevation="4dp"
             android:paddingStart="12dp"
@@ -61,6 +62,16 @@
             android:textSize="12sp"
             android:textStyle="bold"
             tools:text="Telmo · NÍV 5" />
+
+        <TextView
+            android:id="@+id/headerNotificationBell"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_card_soft_clay"
+            android:elevation="4dp"
+            android:gravity="center"
+            android:text="&#128276;"
+            android:textSize="16sp" />
     </LinearLayout>
 
     <!-- ===== CONTEÚDO SCROLLÁVEL ===== -->

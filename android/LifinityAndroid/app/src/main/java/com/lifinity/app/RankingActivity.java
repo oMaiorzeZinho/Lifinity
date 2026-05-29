@@ -61,6 +61,7 @@ public class RankingActivity extends AppCompatActivity {
         }
 
         BottomNavHelper.setup(this, BottomNavHelper.Tab.RANKING);
+        HeaderHelper.setupBell(this);
         loadRanking();
     }
 
