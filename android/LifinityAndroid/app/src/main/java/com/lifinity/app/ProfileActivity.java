@@ -139,10 +139,20 @@ public class ProfileActivity extends AppCompatActivity {
         findViewById(R.id.profileLogoutButton).setOnClickListener(v -> logout());
 
         findViewById(R.id.headerSettingsIcon).setOnClickListener(v -> openSettingsActivity());
+        // Itens já existentes no hub "MAIS NO LIFINITY"
         findViewById(R.id.profileMenuAssistant).setOnClickListener(v ->
                 startActivity(new Intent(ProfileActivity.this, AssistantActivity.class)));
         findViewById(R.id.profileMenuStatistics).setOnClickListener(v ->
                 startActivity(new Intent(ProfileActivity.this, StatisticsActivity.class)));
+        // Novos itens de navegação do hub
+        findViewById(R.id.profileNavNotifications).setOnClickListener(v ->
+                startActivity(new Intent(ProfileActivity.this, NotificationsActivity.class)));
+        findViewById(R.id.profileNavChat).setOnClickListener(v ->
+                startActivity(new Intent(ProfileActivity.this, ConversationsActivity.class)));
+        findViewById(R.id.profileNavAchievements).setOnClickListener(v ->
+                startActivity(new Intent(ProfileActivity.this, AchievementsActivity.class)));
+        findViewById(R.id.profileNavSettings).setOnClickListener(v ->
+                startActivity(new Intent(ProfileActivity.this, SettingsActivity.class)));
     }
 
     private String getToken() {
