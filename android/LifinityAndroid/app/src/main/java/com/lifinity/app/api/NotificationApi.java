@@ -15,6 +15,9 @@ public interface NotificationApi {
     @GET("notifications")
     Call<List<AppNotification>> getNotifications(@Header("Authorization") String token);
 
+    @GET("notifications/unread-count")
+    Call<JsonObject> getUnreadCount(@Header("Authorization") String token);
+
     @PUT("notifications/read-all")
     Call<JsonObject> readAll(@Header("Authorization") String token);
 
