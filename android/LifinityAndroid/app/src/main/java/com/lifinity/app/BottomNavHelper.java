@@ -7,16 +7,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class BottomNavHelper {
-    public enum Tab { TASKS, RANKING, INSPIRATION, PROFILE }
+    public enum Tab { TASKS, COMMUNITY, INSPIRATION, PROFILE }
 
     public static void setup(Activity activity, Tab active) {
         View fab = activity.findViewById(R.id.navFab);
         if (fab != null) fab.setOnClickListener(v ->
                 activity.startActivity(new Intent(activity, CreateTaskActivity.class)));
 
-        int[] tabIds = {R.id.navTabTasks, R.id.navTabRanking,
+        int[] tabIds = {R.id.navTabTasks, R.id.navTabCommunity,
                 R.id.navTabInspiration, R.id.navTabProfile};
-        Tab[] tabs   = {Tab.TASKS, Tab.RANKING, Tab.INSPIRATION, Tab.PROFILE};
+        Tab[] tabs   = {Tab.TASKS, Tab.COMMUNITY, Tab.INSPIRATION, Tab.PROFILE};
 
         for (int i = 0; i < tabIds.length; i++) {
             View tab = activity.findViewById(tabIds[i]);
@@ -32,7 +32,7 @@ public class BottomNavHelper {
         Class<?> dest;
         switch (target) {
             case TASKS:       dest = TasksActivity.class; break;
-            case RANKING:     dest = RankingActivity.class; break;
+            case COMMUNITY:   dest = CommunityActivity.class; break;
             case INSPIRATION: dest = InspirationActivity.class; break;
             case PROFILE:     dest = ProfileActivity.class; break;
             default:          return;

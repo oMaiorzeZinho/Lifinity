@@ -50,6 +50,9 @@
             android:name=".RankingActivity"
             android:exported="false" />
         <activity
+            android:name=".CommunityActivity"
+            android:exported="false" />
+        <activity
             android:name=".EditTaskActivity"
             android:exported="false" />
         <activity
