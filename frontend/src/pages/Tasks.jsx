@@ -284,6 +284,8 @@ const Tasks = () => {
   const [filterGroup, setFilterGroup] = useState('all');
   const [filterFriend, setFilterFriend] = useState('all');
   const [searchTask, setSearchTask] = useState('');
+  // Controla a visibilidade do painel de filtros recolhivel
+  const [showFilters, setShowFilters] = useState(false);
   const csvFileInputRef = useRef(null);
 
   const navigate = useNavigate();
@@ -801,6 +803,10 @@ const openCompleteConfirmation = (task) => {
     };
   const completedVisibleTasks = tasks.filter((task) => task.status === 'concluida');
 
+  // Conta quantos filtros (alem da pesquisa) estao ativos, para o badge do botao "Filtros"
+  const activeFilterCount = [filterStatus, filterPriority, filterGroup, filterFriend]
+    .filter((value) => value !== 'all').length;
+
   return (
     <div className="space-y-8">
       {/* CARDS DE RESUMO */}
@@ -854,17 +860,18 @@ const openCompleteConfirmation = (task) => {
       </div>
 
       <div className="space-y-6">
-        {/* BARRA DE FILTROS E PESQUISA */}
+        {/* BARRA SUPERIOR: pesquisa + botao Filtros + acoes (sempre visivel) */}
         <div
           className={`${cardClass} p-4 rounded-2xl flex flex-wrap gap-4 items-center justify-between`}
         >
-          <div className="flex flex-wrap gap-2 items-center">
-            <div className="relative">
+          <div className="flex flex-wrap gap-3 items-center flex-1 min-w-0">
+            {/* PESQUISA (sempre visivel, ocupa o espaco flexivel) */}
+            <div className="relative flex-1 min-w-48">
               <input
                 aria-label="Procurar atividade"
                 type="text"
                 placeholder="Procurar atividade..."
-                className={`pl-10 pr-4 py-3 rounded-xl text-xs font-bold w-64 ${inputClass}`}
+                className={`pl-10 pr-4 py-3 rounded-xl text-xs font-bold w-full ${inputClass}`}
                 value={searchTask}
                 onChange={(e) => setSearchTask(e.target.value)}
               />
@@ -887,82 +894,41 @@ const openCompleteConfirmation = (task) => {
               </svg>
             </div>
 
-            <select
-              aria-label="Filtrar por estado"
-              className={`rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest ${selectClass}`}
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
+            {/* BOTAO FILTROS: abre/fecha o painel; badge com nº de filtros ativos */}
+            <button
+              type="button"
+              onClick={() => setShowFilters((current) => !current)}
+              className={`${buttonSecondaryClass} flex items-center gap-2`}
+              aria-expanded={showFilters}
+              aria-label="Mostrar ou esconder filtros"
             >
-              <option className={optionClass} value="all">
-                Todos os Estados
-              </option>
-              <option className={optionClass} value="pending">
-                Pendentes
-              </option>
-              <option className={optionClass} value="completed">
-                Concluídas
-              </option>
-              <option className={optionClass} value="lost">
-                Perdidas
-              </option>
-            </select>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 5h18M6 12h12M10 19h4"
+                />
+              </svg>
 
-            <select
-              aria-label="Filtrar por prioridade"
-              className={`rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest ${selectClass}`}
-              value={filterPriority}
-              onChange={(e) => setFilterPriority(e.target.value)}
-            >
-              <option className={optionClass} value="all">
-                Todas as Prioridades
-              </option>
-              <option className={optionClass} value="alta">
-                Prioridade Alta
-              </option>
-              <option className={optionClass} value="media">
-                Prioridade Média
-              </option>
-              <option className={optionClass} value="baixa">
-                Prioridade Baixa
-              </option>
-            </select>
+              <span>Filtros</span>
 
-            {/* Filtro por grupo: usa a lista de grupos ja carregada */}
-            <select
-              aria-label="Filtrar por grupo"
-              className={`rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest ${selectClass}`}
-              value={filterGroup}
-              onChange={(e) => setFilterGroup(e.target.value)}
-            >
-              <option className={optionClass} value="all">
-                Todos os Grupos
-              </option>
-              {groups.map((group) => (
-                <option className={optionClass} key={group.idgroup} value={group.idgroup}>
-                  {group.name}
-                </option>
-              ))}
-            </select>
-
-            {/* Filtro por amigo: usa a lista de amigos ja carregada */}
-            <select
-              aria-label="Filtrar por amigo"
-              className={`rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest ${selectClass}`}
-              value={filterFriend}
-              onChange={(e) => setFilterFriend(e.target.value)}
-            >
-              <option className={optionClass} value="all">
-                Todos os Amigos
-              </option>
-              {friends.map((friend) => (
-                <option className={optionClass} key={friend.iduser} value={friend.iduser}>
-                  {friend.username}
-                </option>
-              ))}
-            </select>
+              {activeFilterCount > 0 && (
+                <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full text-[10px] font-black bg-[var(--lifinity-primary)] [color:var(--lifinity-on-primary)]">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             {completedVisibleTasks.length > 0 && (
               <button
                 onClick={handleClearCompleted}
@@ -1004,6 +970,105 @@ const openCompleteConfirmation = (task) => {
             </button>
           </div>
         </div>
+
+        {/* PAINEL DE FILTROS (recolhivel): 4 selects numa grelha responsiva */}
+        {showFilters && (
+          <div className="lifinity-card-soft p-5 rounded-2xl space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+              <select
+                aria-label="Filtrar por estado"
+                className={`w-full rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest ${selectClass}`}
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+              >
+                <option className={optionClass} value="all">
+                  Todos os Estados
+                </option>
+                <option className={optionClass} value="pending">
+                  Pendentes
+                </option>
+                <option className={optionClass} value="completed">
+                  Concluídas
+                </option>
+                <option className={optionClass} value="lost">
+                  Perdidas
+                </option>
+              </select>
+
+              <select
+                aria-label="Filtrar por prioridade"
+                className={`w-full rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest ${selectClass}`}
+                value={filterPriority}
+                onChange={(e) => setFilterPriority(e.target.value)}
+              >
+                <option className={optionClass} value="all">
+                  Todas as Prioridades
+                </option>
+                <option className={optionClass} value="alta">
+                  Prioridade Alta
+                </option>
+                <option className={optionClass} value="media">
+                  Prioridade Média
+                </option>
+                <option className={optionClass} value="baixa">
+                  Prioridade Baixa
+                </option>
+              </select>
+
+              {/* Filtro por grupo: usa a lista de grupos ja carregada */}
+              <select
+                aria-label="Filtrar por grupo"
+                className={`w-full rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest ${selectClass}`}
+                value={filterGroup}
+                onChange={(e) => setFilterGroup(e.target.value)}
+              >
+                <option className={optionClass} value="all">
+                  Todos os Grupos
+                </option>
+                {groups.map((group) => (
+                  <option className={optionClass} key={group.idgroup} value={group.idgroup}>
+                    {group.name}
+                  </option>
+                ))}
+              </select>
+
+              {/* Filtro por amigo: usa a lista de amigos ja carregada */}
+              <select
+                aria-label="Filtrar por amigo"
+                className={`w-full rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest ${selectClass}`}
+                value={filterFriend}
+                onChange={(e) => setFilterFriend(e.target.value)}
+              >
+                <option className={optionClass} value="all">
+                  Todos os Amigos
+                </option>
+                {friends.map((friend) => (
+                  <option className={optionClass} key={friend.iduser} value={friend.iduser}>
+                    {friend.username}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Limpar filtros: repoe os 4 selects a 'all' (nao mexe na pesquisa) */}
+            {activeFilterCount > 0 && (
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFilterStatus('all');
+                    setFilterPriority('all');
+                    setFilterGroup('all');
+                    setFilterFriend('all');
+                  }}
+                  className="text-xs font-black uppercase tracking-widest transition-colors [color:var(--lifinity-danger)] hover:opacity-80"
+                >
+                  Limpar filtros
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* LISTAGEM FILTRADA */}
         <div className={`${cardClass} rounded-2xl overflow-hidden`}>
