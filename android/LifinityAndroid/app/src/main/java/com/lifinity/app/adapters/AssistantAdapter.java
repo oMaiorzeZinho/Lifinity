@@ -35,7 +35,7 @@ public class AssistantAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     @Override
     public int getItemViewType(int position) {
-        return messages.get(position).isFromUser() ? TYPE_USER : TYPE_ASSISTANT;
+        return messages.get(position).isUser() ? TYPE_USER : TYPE_ASSISTANT;
     }
 
     @NonNull

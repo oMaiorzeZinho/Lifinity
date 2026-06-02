@@ -92,6 +92,9 @@ public class TasksActivity extends AppCompatActivity {
         setContentView(R.layout.activity_tasks);
 
         bindViews();
+        // Botão de estatísticas no topo abre o ecrã de Estatísticas.
+        findViewById(R.id.tasksStatsButton).setOnClickListener(v ->
+                startActivity(new Intent(this, StatisticsActivity.class)));
         setupFilters();
         setupBottomNav();
         HeaderHelper.setupBell(this);

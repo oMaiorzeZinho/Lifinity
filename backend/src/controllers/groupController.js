@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const { safeUnlockAchievementsForUser } = require('../utils/achievements');
+const { createNotifications } = require('./notificationController');
 
 // Gera um codigo simples para convite de grupo
 const generateInviteCode = () => {
@@ -9,6 +10,42 @@ const generateInviteCode = () => {
 const buildPlaceholders = (rows, columnsPerRow) => (
     rows.map(() => `(${Array(columnsPerRow).fill('?').join(', ')})`).join(', ')
 );
+
+// Duracoes possiveis para suspender (mute) um membro: minutos + texto legivel
+const MUTE_DURATIONS = {
+    '30min': { minutes: 30, label: '30 minutos' },
+    '1d': { minutes: 1440, label: '1 dia' },
+    '3d': { minutes: 4320, label: '3 dias' }
+};
+
+// Devolve a data/hora ate a qual o membro esta suspenso nesse grupo,
+// ou null se nao estiver suspenso (sem registo, NULL, ou ja expirou).
+const getMutedUntil = async (iduser, idgroup) => {
+    const [rows] = await db.query(
+        `SELECT muted_until
+         FROM GROUP_MEMBER
+         WHERE iduser = ? AND idgroup = ?
+         LIMIT 1`,
+        [iduser, idgroup]
+    );
+
+    if (rows.length === 0 || !rows[0].muted_until) {
+        return null;
+    }
+
+    const mutedUntil = new Date(rows[0].muted_until);
+    return mutedUntil > new Date() ? mutedUntil : null;
+};
+
+// Indica se um utilizador esta atualmente suspenso (mute) num grupo.
+// Devolve true apenas se muted_until existir e ainda estiver no futuro.
+const isUserMutedInGroup = async (iduser, idgroup) => {
+    const mutedUntil = await getMutedUntil(iduser, idgroup);
+    return mutedUntil !== null;
+};
+
+exports.getMutedUntil = getMutedUntil;
+exports.isUserMutedInGroup = isUserMutedInGroup;
 
 const syncGroupConversationMembers = async (connection, conversation, group) => {
     const [members] = await connection.query(
@@ -309,12 +346,13 @@ exports.getGroupMembers = async (req, res) => {
         }
 
         const [members] = await db.query(
-            `SELECT 
+            `SELECT
                 u.iduser,
                 u.username,
                 u.level,
                 u.xp,
-                gm.role
+                gm.role,
+                gm.muted_until
              FROM GROUP_MEMBER gm
              INNER JOIN USER u ON gm.iduser = u.iduser
              WHERE gm.idgroup = ?
@@ -375,6 +413,257 @@ exports.leaveGroup = async (req, res) => {
     } catch (err) {
         console.error('Erro ao sair do grupo:', err);
         res.status(500).json({ message: 'Erro ao sair do grupo.' });
+    }
+};
+
+// Expulsar (kick) um membro de um grupo
+exports.kickGroupMember = async (req, res) => {
+    try {
+        const iduser = req.user.iduser;       // quem expulsa (utilizador autenticado)
+        const idgroup = req.params.idgroup;   // grupo de onde vai expulsar
+        const idtarget = req.params.iduser;   // membro a ser expulso
+        const { reason } = req.body;          // motivo da expulsao
+
+        // A razao e obrigatoria e nao pode ser vazia
+        const trimmedReason = typeof reason === 'string' ? reason.trim() : '';
+        if (!trimmedReason) {
+            return res.status(400).json({ message: 'Tens de indicar uma razão para expulsar o membro.' });
+        }
+
+        // O grupo tem de existir
+        const [groups] = await db.query(
+            'SELECT idgroup, idowner, name FROM GROUP_ENTITY WHERE idgroup = ?',
+            [idgroup]
+        );
+
+        if (groups.length === 0) {
+            return res.status(404).json({ message: 'Grupo nao encontrado.' });
+        }
+
+        const group = groups[0];
+
+        // Quem expulsa tem de ser admin do grupo ou o dono
+        const [membership] = await db.query(
+            'SELECT role FROM GROUP_MEMBER WHERE iduser = ? AND idgroup = ?',
+            [iduser, idgroup]
+        );
+
+        const isOwner = Number(group.idowner) === Number(iduser);
+        const isAdmin = membership.length > 0 && membership[0].role === 'admin';
+
+        if (!isOwner && !isAdmin) {
+            return res.status(403).json({ message: 'Apenas administradores podem expulsar membros.' });
+        }
+
+        // Nao se pode expulsar a si proprio
+        if (Number(idtarget) === Number(iduser)) {
+            return res.status(400).json({ message: 'Não te podes expulsar a ti próprio. Usa a opção de sair do grupo.' });
+        }
+
+        // Nao se pode expulsar o dono do grupo
+        if (Number(idtarget) === Number(group.idowner)) {
+            return res.status(400).json({ message: 'Não podes expulsar o dono do grupo.' });
+        }
+
+        // O alvo tem de pertencer ao grupo
+        const [targetMembership] = await db.query(
+            'SELECT iduser FROM GROUP_MEMBER WHERE iduser = ? AND idgroup = ?',
+            [idtarget, idgroup]
+        );
+
+        if (targetMembership.length === 0) {
+            return res.status(404).json({ message: 'Esse utilizador não pertence ao grupo.' });
+        }
+
+        // Remove o membro do grupo e da conversa associada numa transacao
+        const connection = await db.getConnection();
+
+        try {
+            await connection.beginTransaction();
+
+            // Remove de GROUP_MEMBER
+            await connection.query(
+                'DELETE FROM GROUP_MEMBER WHERE idgroup = ? AND iduser = ?',
+                [idgroup, idtarget]
+            );
+
+            // Remove da conversa do grupo (CONVERSATION_MEMBER), tal como no leaveGroup
+            await connection.query(
+                `DELETE cm
+                 FROM CONVERSATION_MEMBER cm
+                 INNER JOIN CONVERSATION c
+                    ON c.idconversation = cm.idconversation
+                 WHERE c.idgroup = ?
+                   AND cm.iduser = ?`,
+                [idgroup, idtarget]
+            );
+
+            await connection.commit();
+            connection.release();
+        } catch (err) {
+            await connection.rollback();
+            connection.release();
+            throw err;
+        }
+
+        // Notifica o membro expulso, indicando o motivo
+        await createNotifications({
+            recipients: [Number(idtarget)],
+            type: 'sistema',
+            message: `Foste removido do grupo "${group.name}". Motivo: ${trimmedReason}`,
+            entity_type: 'group',
+            entity_id: Number(idgroup),
+            link: null
+        });
+
+        res.json({ message: 'Membro removido do grupo.' });
+    } catch (err) {
+        console.error('Erro ao expulsar membro do grupo:', err);
+        res.status(500).json({ message: 'Erro ao expulsar membro do grupo.' });
+    }
+};
+
+// Suspender (mute) temporariamente um membro de um grupo
+exports.muteGroupMember = async (req, res) => {
+    try {
+        const iduser = req.user.iduser;       // quem suspende (utilizador autenticado)
+        const idgroup = req.params.idgroup;   // grupo
+        const idtarget = req.params.iduser;   // membro a suspender
+        const { reason, duration } = req.body;
+
+        // A razao e obrigatoria e nao pode ser vazia
+        const trimmedReason = typeof reason === 'string' ? reason.trim() : '';
+        if (!trimmedReason) {
+            return res.status(400).json({ message: 'Tens de indicar uma razão para suspender o membro.' });
+        }
+
+        // A duracao tem de ser uma das opcoes validas
+        const durationConfig = MUTE_DURATIONS[duration];
+        if (!durationConfig) {
+            return res.status(400).json({ message: 'Duração inválida.' });
+        }
+
+        // O grupo tem de existir
+        const [groups] = await db.query(
+            'SELECT idgroup, idowner, name FROM GROUP_ENTITY WHERE idgroup = ?',
+            [idgroup]
+        );
+
+        if (groups.length === 0) {
+            return res.status(404).json({ message: 'Grupo nao encontrado.' });
+        }
+
+        const group = groups[0];
+
+        // Quem suspende tem de ser admin do grupo ou o dono
+        const [membership] = await db.query(
+            'SELECT role FROM GROUP_MEMBER WHERE iduser = ? AND idgroup = ?',
+            [iduser, idgroup]
+        );
+
+        const isOwner = Number(group.idowner) === Number(iduser);
+        const isAdmin = membership.length > 0 && membership[0].role === 'admin';
+
+        if (!isOwner && !isAdmin) {
+            return res.status(403).json({ message: 'Apenas administradores podem suspender membros.' });
+        }
+
+        // Nao se pode suspender a si proprio
+        if (Number(idtarget) === Number(iduser)) {
+            return res.status(400).json({ message: 'Não te podes suspender a ti próprio.' });
+        }
+
+        // Nao se pode suspender o dono do grupo
+        if (Number(idtarget) === Number(group.idowner)) {
+            return res.status(400).json({ message: 'Não podes suspender o dono do grupo.' });
+        }
+
+        // O alvo tem de pertencer ao grupo
+        const [targetMembership] = await db.query(
+            'SELECT iduser FROM GROUP_MEMBER WHERE iduser = ? AND idgroup = ?',
+            [idtarget, idgroup]
+        );
+
+        if (targetMembership.length === 0) {
+            return res.status(404).json({ message: 'Esse utilizador não pertence ao grupo.' });
+        }
+
+        // Define muted_until = agora + duracao escolhida
+        await db.query(
+            `UPDATE GROUP_MEMBER
+             SET muted_until = DATE_ADD(NOW(), INTERVAL ? MINUTE)
+             WHERE idgroup = ? AND iduser = ?`,
+            [durationConfig.minutes, idgroup, idtarget]
+        );
+
+        // Le de volta o valor aplicado pela BD para devolver ao cliente
+        const [updatedRows] = await db.query(
+            'SELECT muted_until FROM GROUP_MEMBER WHERE idgroup = ? AND iduser = ?',
+            [idgroup, idtarget]
+        );
+        const mutedUntil = updatedRows.length > 0 ? updatedRows[0].muted_until : null;
+
+        // Notifica o membro suspenso, indicando duracao e motivo
+        await createNotifications({
+            recipients: [Number(idtarget)],
+            type: 'sistema',
+            message: `Foste suspenso do grupo "${group.name}" durante ${durationConfig.label}. Motivo: ${trimmedReason}`,
+            entity_type: 'group',
+            entity_id: Number(idgroup),
+            link: null
+        });
+
+        res.json({ message: 'Membro suspenso.', muted_until: mutedUntil });
+    } catch (err) {
+        console.error('Erro ao suspender membro do grupo:', err);
+        res.status(500).json({ message: 'Erro ao suspender membro do grupo.' });
+    }
+};
+
+// Levantar a suspensao (unmute) de um membro de um grupo
+exports.unmuteGroupMember = async (req, res) => {
+    try {
+        const iduser = req.user.iduser;       // quem levanta a suspensao (autenticado)
+        const idgroup = req.params.idgroup;   // grupo
+        const idtarget = req.params.iduser;   // membro a reativar
+
+        // O grupo tem de existir
+        const [groups] = await db.query(
+            'SELECT idgroup, idowner FROM GROUP_ENTITY WHERE idgroup = ?',
+            [idgroup]
+        );
+
+        if (groups.length === 0) {
+            return res.status(404).json({ message: 'Grupo nao encontrado.' });
+        }
+
+        const group = groups[0];
+
+        // Quem levanta a suspensao tem de ser admin do grupo ou o dono
+        const [membership] = await db.query(
+            'SELECT role FROM GROUP_MEMBER WHERE iduser = ? AND idgroup = ?',
+            [iduser, idgroup]
+        );
+
+        const isOwner = Number(group.idowner) === Number(iduser);
+        const isAdmin = membership.length > 0 && membership[0].role === 'admin';
+
+        if (!isOwner && !isAdmin) {
+            return res.status(403).json({ message: 'Apenas administradores podem levantar suspensões.' });
+        }
+
+        // Remove a suspensao (muted_until volta a NULL)
+        await db.query(
+            `UPDATE GROUP_MEMBER
+             SET muted_until = NULL
+             WHERE idgroup = ? AND iduser = ?`,
+            [idgroup, idtarget]
+        );
+
+        res.json({ message: 'Suspensão removida.' });
+    } catch (err) {
+        console.error('Erro ao levantar suspensao do membro:', err);
+        res.status(500).json({ message: 'Erro ao levantar suspensao do membro.' });
     }
 };
 

@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const { createNotifications } = require('./notificationController');
+const { isUserMutedInGroup, getMutedUntil } = require('./groupController');
 const { safeUnlockAchievementsForUser } = require('../utils/achievements');
 
 const normalizePrivatePair = (iduser, idfriend) => {
@@ -596,6 +597,15 @@ exports.sendMessage = async (req, res) => {
 
         if (!membership) {
             return res.status(403).json({ message: 'Nao tens acesso a esta conversa.' });
+        }
+
+        // Bloqueia envio se for conversa de um grupo Lifinity e o utilizador estiver suspenso
+        if (membership.idgroup && await isUserMutedInGroup(iduser, membership.idgroup)) {
+            const mutedUntil = await getMutedUntil(iduser, membership.idgroup);
+            const ate = mutedUntil ? mutedUntil.toLocaleString('pt-PT') : '';
+            return res.status(403).json({
+                message: `Estás suspenso deste grupo e não podes enviar mensagens até ${ate}.`
+            });
         }
 
         const memberIds = await getConversationMemberIds(idconversation);

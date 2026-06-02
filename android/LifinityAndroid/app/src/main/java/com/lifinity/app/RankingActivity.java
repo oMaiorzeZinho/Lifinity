@@ -73,7 +73,8 @@ public class RankingActivity extends AppCompatActivity {
             headerUserPill.setText(currentUser.getUsername() + " · NÍV " + currentUser.getLevel());
         }
 
-        BottomNavHelper.setup(this, BottomNavHelper.Tab.RANKING);
+        // O Ranking passou a viver dentro da Comunidade, por isso destaca-se esse tab.
+        BottomNavHelper.setup(this, BottomNavHelper.Tab.COMMUNITY);
         HeaderHelper.setupBell(this);
         loadRanking();
     }

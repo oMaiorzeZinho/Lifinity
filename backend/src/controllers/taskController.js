@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const { createNotifications } = require('./notificationController');
+const { isUserMutedInGroup, getMutedUntil } = require('./groupController');
 const { safeUnlockAchievementsForUser } = require('../utils/achievements');
 // IMPORTANTE: Este require aponta para o binário que acabaste de compilar em C
 const gamification = require('../../build/Release/gamification'); 
@@ -63,6 +64,19 @@ exports.getTasks = async (req, res) => {
                 END AS task_origin,
 
                 (
+                    SELECT GROUP_CONCAT(DISTINCT gt.idgroup)
+                    FROM GROUP_TASK gt
+                    INNER JOIN GROUP_MEMBER gm ON gm.idgroup = gt.idgroup
+                    WHERE gt.idtask = t.idtask AND gm.iduser = ?
+                ) AS group_ids,
+
+                (
+                    SELECT GROUP_CONCAT(DISTINCT ta.iduser)
+                    FROM TASK_ASSIGNEE ta
+                    WHERE ta.idtask = t.idtask
+                ) AS assignee_ids,
+
+                (
                     SELECT GROUP_CONCAT(DISTINCT ge.name SEPARATOR ', ')
                     FROM GROUP_TASK gt
                     INNER JOIN GROUP_ENTITY ge
@@ -82,7 +96,7 @@ exports.getTasks = async (req, res) => {
                AND ${taskVisibilityCondition}
 
              ORDER BY t.idtask DESC`,
-            [iduser, iduser, iduser, iduser, iduser, iduser, iduser, iduser]
+            [iduser, iduser, iduser, iduser, iduser, iduser, iduser, iduser, iduser]
         );
 
         res.json(results);
@@ -194,6 +208,17 @@ exports.createTask = async (req, res) => {
                 return res.status(403).json({
                     message: "So podes enviar tarefas para grupos aos quais pertences."
                 });
+            }
+
+            // Bloqueia criar tarefas para grupos onde o utilizador esta suspenso
+            for (const groupId of groupIds) {
+                if (await isUserMutedInGroup(iduser, groupId)) {
+                    const mutedUntil = await getMutedUntil(iduser, groupId);
+                    const ate = mutedUntil ? mutedUntil.toLocaleString('pt-PT') : '';
+                    return res.status(403).json({
+                        message: `Estás suspenso do grupo e não podes criar tarefas para ele até ${ate}.`
+                    });
+                }
             }
 
             const [groupMembers] = await db.query(

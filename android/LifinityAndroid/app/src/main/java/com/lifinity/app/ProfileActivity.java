@@ -139,10 +139,14 @@ public class ProfileActivity extends AppCompatActivity {
         findViewById(R.id.profileLogoutButton).setOnClickListener(v -> logout());
 
         findViewById(R.id.headerSettingsIcon).setOnClickListener(v -> openSettingsActivity());
-        findViewById(R.id.profileMenuAssistant).setOnClickListener(v ->
-                startActivity(new Intent(ProfileActivity.this, AssistantActivity.class)));
-        findViewById(R.id.profileMenuStatistics).setOnClickListener(v ->
-                startActivity(new Intent(ProfileActivity.this, StatisticsActivity.class)));
+        // Itens de navegação do hub "MAIS NO LIFINITY"
+        // (Estatísticas mudou para o topo das Tarefas; Assistente/Chat para a Comunidade.)
+        findViewById(R.id.profileNavNotifications).setOnClickListener(v ->
+                startActivity(new Intent(ProfileActivity.this, NotificationsActivity.class)));
+        findViewById(R.id.profileNavAchievements).setOnClickListener(v ->
+                startActivity(new Intent(ProfileActivity.this, AchievementsActivity.class)));
+        findViewById(R.id.profileNavSettings).setOnClickListener(v ->
+                startActivity(new Intent(ProfileActivity.this, SettingsActivity.class)));
     }
 
     private String getToken() {

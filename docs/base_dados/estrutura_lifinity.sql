@@ -109,6 +109,7 @@ CREATE TABLE GROUP_MEMBER (
     iduser INT,
     idgroup INT,
     role ENUM('admin', 'membro') DEFAULT 'membro',
+    muted_until DATETIME DEFAULT NULL,
     PRIMARY KEY (iduser, idgroup),
     FOREIGN KEY (iduser) REFERENCES USER(iduser) ON DELETE CASCADE,
     FOREIGN KEY (idgroup) REFERENCES GROUP_ENTITY(idgroup) ON DELETE CASCADE
