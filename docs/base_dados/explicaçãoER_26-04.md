@@ -160,6 +160,7 @@ A tabela `GROUP_MEMBER` representa a ligação entre utilizadores e grupos.
 - `iduser` — utilizador membro do grupo.
 - `idgroup` — grupo ao qual o utilizador pertence.
 - `role` — papel do utilizador no grupo: `admin` ou `membro`.
+- `muted_until` — data e hora até à qual o membro está temporariamente suspenso do grupo; NULL = não suspenso.
 
 ### Função no sistema
 

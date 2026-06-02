@@ -31,6 +31,17 @@ const dangerMenuItemClass =
 
 const getToken = () => localStorage.getItem('token');
 
+// Opcoes de duracao para suspender um membro (valor enviado -> etiqueta visivel)
+const muteDurations = [
+  { value: '30min', label: '30 minutos' },
+  { value: '1d', label: '1 dia' },
+  { value: '3d', label: '3 dias' }
+];
+
+// Indica se um membro esta atualmente suspenso (muted_until ainda no futuro)
+const isMemberMuted = (member) =>
+  Boolean(member?.muted_until) && new Date(member.muted_until) > new Date();
+
 const Community = () => {
   const [groups, setGroups] = useState([]);
   const [friends, setFriends] = useState([]);
@@ -50,6 +61,13 @@ const Community = () => {
   const [loading, setLoading] = useState(true);
   const [openActionMenu, setOpenActionMenu] = useState(null);
   const [publicProfileUserId, setPublicProfileUserId] = useState(null);
+
+  // Estado do modal de moderacao (suspender/expulsar membros do grupo)
+  const [moderationTarget, setModerationTarget] = useState(null);
+  const [moderationReason, setModerationReason] = useState('');
+  const [moderationMode, setModerationMode] = useState('kick');
+  const [moderationDuration, setModerationDuration] = useState('1d');
+
   const messageTimeoutRef = useRef(null);
 
   const navigate = useNavigate();
@@ -456,44 +474,86 @@ const Community = () => {
     }
   };
 
-  const handleKickMember = async (member) => {
+  // Abre o modal de moderacao para um membro, no modo indicado ('mute' ou 'kick')
+  const openModeration = (member, mode) => {
+    setOpenActionMenu(null);
+    setModerationTarget(member);
+    setModerationMode(mode);
+    setModerationReason('');
+    setModerationDuration('1d');
+  };
+
+  // Fecha o modal de moderacao e limpa o estado associado
+  const closeModeration = () => {
+    setModerationTarget(null);
+    setModerationReason('');
+  };
+
+  // Levanta a suspensao de um membro (unmute)
+  const handleUnmute = async (member) => {
+    setOpenActionMenu(null);
+
     if (!selectedGroup) {
-      return;
-    }
-
-    // Pede o motivo da expulsao ao admin
-    const reason = window.prompt('Indica o motivo da expulsão:');
-
-    // Cancelou o prompt
-    if (reason === null) {
-      return;
-    }
-
-    // Motivo vazio nao avanca
-    if (!reason.trim()) {
-      showMessage('Tens de indicar um motivo.');
       return;
     }
 
     try {
       const token = getToken();
 
-      // No axios.delete o corpo vai dentro da config, em "data"
-      await axios.delete(
-        `${API_URL}/groups/${selectedGroup.idgroup}/members/${member.iduser}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          data: { reason }
-        }
+      await axios.put(
+        `${API_URL}/groups/${selectedGroup.idgroup}/members/${member.iduser}/unmute`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Recarrega membros do grupo e restantes dados da comunidade
+      await fetchGroupMembers(selectedGroup);
+      showMessage('Suspensão removida.');
+    } catch (err) {
+      console.error('Erro ao levantar suspensao:', err);
+      showMessage(err.response?.data?.message || 'Erro ao levantar suspensão.');
+    }
+  };
+
+  // Confirma a acao do modal: expulsar (kick) ou suspender (mute) o membro
+  const handleConfirmModeration = async () => {
+    if (!selectedGroup || !moderationTarget) {
+      return;
+    }
+
+    // O motivo e sempre obrigatorio; se vazio, nao fecha o modal
+    if (!moderationReason.trim()) {
+      showMessage('Tens de indicar um motivo.');
+      return;
+    }
+
+    try {
+      const token = getToken();
+      const headers = { Authorization: `Bearer ${token}` };
+
+      if (moderationMode === 'kick') {
+        // Expulsar: DELETE com o corpo dentro da config, em "data"
+        await axios.delete(
+          `${API_URL}/groups/${selectedGroup.idgroup}/members/${moderationTarget.iduser}`,
+          { data: { reason: moderationReason }, headers }
+        );
+        showMessage('Membro removido do grupo.');
+      } else {
+        // Suspender: PUT com motivo e duracao escolhida
+        await axios.put(
+          `${API_URL}/groups/${selectedGroup.idgroup}/members/${moderationTarget.iduser}/mute`,
+          { reason: moderationReason, duration: moderationDuration },
+          { headers }
+        );
+        showMessage('Membro suspenso.');
+      }
+
+      // Fecha o modal e recarrega membros e dados da comunidade
+      closeModeration();
       await fetchGroupMembers(selectedGroup);
       await refreshCommunityData();
-      showMessage('Membro removido do grupo.');
     } catch (err) {
-      console.error('Erro ao expulsar membro:', err);
-      showMessage(err.response?.data?.message || 'Erro ao expulsar membro.');
+      console.error('Erro ao moderar membro:', err);
+      showMessage(err.response?.data?.message || 'Erro ao moderar membro.');
     }
   };
 
@@ -865,42 +925,111 @@ const Community = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {groupMembers.map((member) => (
-                  <div
-                    key={member.iduser}
-                    className="lifinity-card-soft rounded-2xl p-5"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => openPublicProfile(member.iduser)}
-                      className="text-left text-lg font-black [color:var(--lifinity-text)] hover:[color:var(--lifinity-primary-strong)] transition-colors"
+                {groupMembers.map((member) => {
+                  // Pode moderar se for admin/dono do grupo selecionado
+                  const canModerate =
+                    selectedGroup.role === 'admin' ||
+                    Number(selectedGroup.idowner) === Number(currentUserId);
+
+                  // Menu so aparece para admin/dono, nunca sobre o proprio nem sobre o dono
+                  const showMemberMenu =
+                    canModerate &&
+                    Number(member.iduser) !== Number(currentUserId) &&
+                    Number(member.iduser) !== Number(selectedGroup.idowner);
+
+                  const memberMuted = isMemberMuted(member);
+
+                  return (
+                    <div
+                      key={member.iduser}
+                      className={`lifinity-card-soft relative rounded-2xl p-5 ${
+                        openActionMenu === `member-${member.iduser}` ? 'z-[90]' : 'z-0'
+                      }`}
                     >
-                      {member.username}
-                    </button>
-
-                    <p className="text-[10px] font-black uppercase tracking-widest mt-1 [color:var(--lifinity-text-muted)]">
-                      Nível {member.level} • {member.xp} XP
-                    </p>
-
-                    <p className="text-[10px] font-black uppercase tracking-widest mt-4 [color:var(--lifinity-primary-strong)]">
-                      {member.role}
-                    </p>
-
-                    {/* Botao de expulsar: so para admin/dono, e nunca sobre o proprio nem sobre o dono */}
-                    {(selectedGroup.role === 'admin' ||
-                      Number(selectedGroup.idowner) === Number(currentUserId)) &&
-                      Number(member.iduser) !== Number(currentUserId) &&
-                      Number(member.iduser) !== Number(selectedGroup.idowner) && (
+                      <div className="flex items-start justify-between gap-3">
                         <button
                           type="button"
-                          onClick={() => handleKickMember(member)}
-                          className="lifinity-danger-item mt-4 px-3 py-2 rounded-xl border border-[var(--lifinity-border)] text-[10px] font-black uppercase tracking-widest"
+                          onClick={() => openPublicProfile(member.iduser)}
+                          className="text-left text-lg font-black [color:var(--lifinity-text)] hover:[color:var(--lifinity-primary-strong)] transition-colors"
                         >
-                          Expulsar
+                          {member.username}
                         </button>
-                      )}
-                  </div>
-                ))}
+
+                        {showMemberMenu && (
+                          <div className="relative" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              type="button"
+                              onClick={(e) => handleMenuClick(e, `member-${member.iduser}`)}
+                              className={menuButtonClass}
+                              title="Acoes do membro"
+                              aria-label="Acoes do membro"
+                              aria-expanded={openActionMenu === `member-${member.iduser}`}
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18"
+                                height="18"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle cx="5" cy="12" r="2" />
+                                <circle cx="12" cy="12" r="2" />
+                                <circle cx="19" cy="12" r="2" />
+                              </svg>
+                            </button>
+
+                            {openActionMenu === `member-${member.iduser}` && (
+                              <div className={menuPanelClass}>
+                                <button
+                                  type="button"
+                                  onClick={() => openModeration(member, 'mute')}
+                                  className={menuItemClass}
+                                >
+                                  Suspender
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => openModeration(member, 'kick')}
+                                  className={dangerMenuItemClass}
+                                >
+                                  Expulsar
+                                </button>
+
+                                {memberMuted && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleUnmute(member)}
+                                    className={menuItemClass}
+                                  >
+                                    Levantar suspensão
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <p className="text-[10px] font-black uppercase tracking-widest mt-1 [color:var(--lifinity-text-muted)]">
+                        Nível {member.level} • {member.xp} XP
+                      </p>
+
+                      <div className="flex items-center gap-2 mt-4">
+                        <p className="text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-primary-strong)]">
+                          {member.role}
+                        </p>
+
+                        {/* Etiqueta de membro suspenso (estilo danger) */}
+                        {memberMuted && (
+                          <span className="lifinity-danger-item px-2 py-1 rounded-lg border border-[var(--lifinity-border)] text-[9px] font-black uppercase tracking-widest">
+                            Suspenso
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -1242,6 +1371,95 @@ const Community = () => {
           </div>
         </div>
       </div>
+
+      {/* MODAL DE MODERACAO (suspender / expulsar membro) */}
+      {moderationTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--lifinity-overlay)] p-4 backdrop-blur-sm"
+          onClick={closeModeration}
+          role="presentation"
+        >
+          <div
+            className="lifinity-card w-full max-w-lg rounded-[2rem]"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="moderation-title"
+          >
+            <div className="border-b border-[var(--lifinity-border)] p-6">
+              <p className="lifinity-muted-label mb-2 italic">
+                {moderationMode === 'mute' ? 'Suspender membro' : 'Expulsar membro'}
+              </p>
+
+              <h3
+                id="moderation-title"
+                className="text-2xl font-black tracking-tight [color:var(--lifinity-text)]"
+              >
+                {moderationMode === 'mute' ? 'Suspender' : 'Expulsar'} {moderationTarget.username}
+              </h3>
+            </div>
+
+            <div className="space-y-5 p-6">
+              <div>
+                <label htmlFor="moderation-reason" className="lifinity-muted-label mb-2 block">
+                  Motivo
+                </label>
+                <textarea
+                  id="moderation-reason"
+                  value={moderationReason}
+                  onChange={(e) => setModerationReason(e.target.value)}
+                  placeholder="Indica o motivo..."
+                  className={`${inputClass} resize-none h-28`}
+                />
+              </div>
+
+              {/* Seletor de duracao apenas no modo suspender */}
+              {moderationMode === 'mute' && (
+                <div>
+                  <p className="lifinity-muted-label mb-2">
+                    Duração
+                  </p>
+
+                  <div className="grid grid-cols-3 gap-3">
+                    {muteDurations.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setModerationDuration(option.value)}
+                        className={`px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest ${
+                          moderationDuration === option.value
+                            ? 'lifinity-button-primary'
+                            : 'lifinity-button-secondary'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-3 border-t border-[var(--lifinity-border)] p-6">
+              <button
+                type="button"
+                onClick={closeModeration}
+                className={buttonSecondaryClass}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                onClick={handleConfirmModeration}
+                className="lifinity-button-primary px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <PublicProfileModal
         iduser={publicProfileUserId}
