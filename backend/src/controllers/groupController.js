@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const { safeUnlockAchievementsForUser } = require('../utils/achievements');
+const { createNotifications } = require('./notificationController');
 
 // Gera um codigo simples para convite de grupo
 const generateInviteCode = () => {
@@ -375,6 +376,113 @@ exports.leaveGroup = async (req, res) => {
     } catch (err) {
         console.error('Erro ao sair do grupo:', err);
         res.status(500).json({ message: 'Erro ao sair do grupo.' });
+    }
+};
+
+// Expulsar (kick) um membro de um grupo
+exports.kickGroupMember = async (req, res) => {
+    try {
+        const iduser = req.user.iduser;       // quem expulsa (utilizador autenticado)
+        const idgroup = req.params.idgroup;   // grupo de onde vai expulsar
+        const idtarget = req.params.iduser;   // membro a ser expulso
+        const { reason } = req.body;          // motivo da expulsao
+
+        // A razao e obrigatoria e nao pode ser vazia
+        const trimmedReason = typeof reason === 'string' ? reason.trim() : '';
+        if (!trimmedReason) {
+            return res.status(400).json({ message: 'Tens de indicar uma razão para expulsar o membro.' });
+        }
+
+        // O grupo tem de existir
+        const [groups] = await db.query(
+            'SELECT idgroup, idowner, name FROM GROUP_ENTITY WHERE idgroup = ?',
+            [idgroup]
+        );
+
+        if (groups.length === 0) {
+            return res.status(404).json({ message: 'Grupo nao encontrado.' });
+        }
+
+        const group = groups[0];
+
+        // Quem expulsa tem de ser admin do grupo ou o dono
+        const [membership] = await db.query(
+            'SELECT role FROM GROUP_MEMBER WHERE iduser = ? AND idgroup = ?',
+            [iduser, idgroup]
+        );
+
+        const isOwner = Number(group.idowner) === Number(iduser);
+        const isAdmin = membership.length > 0 && membership[0].role === 'admin';
+
+        if (!isOwner && !isAdmin) {
+            return res.status(403).json({ message: 'Apenas administradores podem expulsar membros.' });
+        }
+
+        // Nao se pode expulsar a si proprio
+        if (Number(idtarget) === Number(iduser)) {
+            return res.status(400).json({ message: 'Não te podes expulsar a ti próprio. Usa a opção de sair do grupo.' });
+        }
+
+        // Nao se pode expulsar o dono do grupo
+        if (Number(idtarget) === Number(group.idowner)) {
+            return res.status(400).json({ message: 'Não podes expulsar o dono do grupo.' });
+        }
+
+        // O alvo tem de pertencer ao grupo
+        const [targetMembership] = await db.query(
+            'SELECT iduser FROM GROUP_MEMBER WHERE iduser = ? AND idgroup = ?',
+            [idtarget, idgroup]
+        );
+
+        if (targetMembership.length === 0) {
+            return res.status(404).json({ message: 'Esse utilizador não pertence ao grupo.' });
+        }
+
+        // Remove o membro do grupo e da conversa associada numa transacao
+        const connection = await db.getConnection();
+
+        try {
+            await connection.beginTransaction();
+
+            // Remove de GROUP_MEMBER
+            await connection.query(
+                'DELETE FROM GROUP_MEMBER WHERE idgroup = ? AND iduser = ?',
+                [idgroup, idtarget]
+            );
+
+            // Remove da conversa do grupo (CONVERSATION_MEMBER), tal como no leaveGroup
+            await connection.query(
+                `DELETE cm
+                 FROM CONVERSATION_MEMBER cm
+                 INNER JOIN CONVERSATION c
+                    ON c.idconversation = cm.idconversation
+                 WHERE c.idgroup = ?
+                   AND cm.iduser = ?`,
+                [idgroup, idtarget]
+            );
+
+            await connection.commit();
+            connection.release();
+        } catch (err) {
+            await connection.rollback();
+            connection.release();
+            throw err;
+        }
+
+        // Notifica o membro expulso, indicando o motivo
+        await createNotifications({
+            recipients: [Number(idtarget)],
+            type: 'sistema',
+            message: `Foste removido do grupo "${group.name}". Motivo: ${trimmedReason}`,
+            entity_type: 'group',
+            entity_id: Number(idgroup),
+            link: null
+        });
+
+        res.json({ message: 'Membro removido do grupo.' });
+    } catch (err) {
+        console.error('Erro ao expulsar membro do grupo:', err);
+        res.status(500).json({ message: 'Erro ao expulsar membro do grupo.' });
     }
 };
 

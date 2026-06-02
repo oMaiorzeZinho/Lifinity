@@ -456,6 +456,47 @@ const Community = () => {
     }
   };
 
+  const handleKickMember = async (member) => {
+    if (!selectedGroup) {
+      return;
+    }
+
+    // Pede o motivo da expulsao ao admin
+    const reason = window.prompt('Indica o motivo da expulsão:');
+
+    // Cancelou o prompt
+    if (reason === null) {
+      return;
+    }
+
+    // Motivo vazio nao avanca
+    if (!reason.trim()) {
+      showMessage('Tens de indicar um motivo.');
+      return;
+    }
+
+    try {
+      const token = getToken();
+
+      // No axios.delete o corpo vai dentro da config, em "data"
+      await axios.delete(
+        `${API_URL}/groups/${selectedGroup.idgroup}/members/${member.iduser}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          data: { reason }
+        }
+      );
+
+      // Recarrega membros do grupo e restantes dados da comunidade
+      await fetchGroupMembers(selectedGroup);
+      await refreshCommunityData();
+      showMessage('Membro removido do grupo.');
+    } catch (err) {
+      console.error('Erro ao expulsar membro:', err);
+      showMessage(err.response?.data?.message || 'Erro ao expulsar membro.');
+    }
+  };
+
   const copyInviteCode = async (code) => {
     try {
       await navigator.clipboard.writeText(code);
@@ -844,6 +885,20 @@ const Community = () => {
                     <p className="text-[10px] font-black uppercase tracking-widest mt-4 [color:var(--lifinity-primary-strong)]">
                       {member.role}
                     </p>
+
+                    {/* Botao de expulsar: so para admin/dono, e nunca sobre o proprio nem sobre o dono */}
+                    {(selectedGroup.role === 'admin' ||
+                      Number(selectedGroup.idowner) === Number(currentUserId)) &&
+                      Number(member.iduser) !== Number(currentUserId) &&
+                      Number(member.iduser) !== Number(selectedGroup.idowner) && (
+                        <button
+                          type="button"
+                          onClick={() => handleKickMember(member)}
+                          className="lifinity-danger-item mt-4 px-3 py-2 rounded-xl border border-[var(--lifinity-border)] text-[10px] font-black uppercase tracking-widest"
+                        >
+                          Expulsar
+                        </button>
+                      )}
                   </div>
                 ))}
               </div>
