@@ -280,6 +280,9 @@ const Tasks = () => {
   // Estados dos filtros
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterPriority, setFilterPriority] = useState('all');
+  // Novos filtros: por grupo especifico e por amigo (assignee)
+  const [filterGroup, setFilterGroup] = useState('all');
+  const [filterFriend, setFilterFriend] = useState('all');
   const [searchTask, setSearchTask] = useState('');
   const csvFileInputRef = useRef(null);
 
@@ -773,7 +776,17 @@ const openCompleteConfirmation = (task) => {
         .toLowerCase()
         .includes(searchTask.toLowerCase());
 
-      return matchesStatus && matchesPriority && matchesSearch;
+      // Filtro por grupo: group_ids vem como string "3,7,12" (ou null)
+      const groupIdList = (task.group_ids || '').split(',').filter(Boolean);
+      const matchesGroup =
+        filterGroup === 'all' ? true : groupIdList.includes(String(filterGroup));
+
+      // Filtro por amigo: assignee_ids vem como string "5,9" (ou null)
+      const assigneeIdList = (task.assignee_ids || '').split(',').filter(Boolean);
+      const matchesFriend =
+        filterFriend === 'all' ? true : assigneeIdList.includes(String(filterFriend));
+
+      return matchesStatus && matchesPriority && matchesSearch && matchesGroup && matchesFriend;
     })
     .sort((a, b) => {
       const statusOrderDiff = getTaskStatusOrder(a) - getTaskStatusOrder(b);
@@ -912,6 +925,40 @@ const openCompleteConfirmation = (task) => {
               <option className={optionClass} value="baixa">
                 Prioridade Baixa
               </option>
+            </select>
+
+            {/* Filtro por grupo: usa a lista de grupos ja carregada */}
+            <select
+              aria-label="Filtrar por grupo"
+              className={`rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest ${selectClass}`}
+              value={filterGroup}
+              onChange={(e) => setFilterGroup(e.target.value)}
+            >
+              <option className={optionClass} value="all">
+                Todos os Grupos
+              </option>
+              {groups.map((group) => (
+                <option className={optionClass} key={group.idgroup} value={group.idgroup}>
+                  {group.name}
+                </option>
+              ))}
+            </select>
+
+            {/* Filtro por amigo: usa a lista de amigos ja carregada */}
+            <select
+              aria-label="Filtrar por amigo"
+              className={`rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest ${selectClass}`}
+              value={filterFriend}
+              onChange={(e) => setFilterFriend(e.target.value)}
+            >
+              <option className={optionClass} value="all">
+                Todos os Amigos
+              </option>
+              {friends.map((friend) => (
+                <option className={optionClass} key={friend.iduser} value={friend.iduser}>
+                  {friend.username}
+                </option>
+              ))}
             </select>
           </div>
 
