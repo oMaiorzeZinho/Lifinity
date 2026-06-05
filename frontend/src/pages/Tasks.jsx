@@ -253,6 +253,14 @@ const formatDateForInput = (date) => {
   return localDate.toISOString().slice(0, 16);
 };
 
+// Formata a data de criação para "dd/mm" em pt-PT; devolve null se inválida
+const formatCreationDate = (dateString) => {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return null;
+  return date.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' });
+};
+
 const Tasks = () => {
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user');
@@ -803,6 +811,194 @@ const openCompleteConfirmation = (task) => {
     };
   const completedVisibleTasks = tasks.filter((task) => task.status === 'concluida');
 
+  // Divide as tarefas filtradas em pendentes/atrasadas (bloco A) e concluídas (bloco B)
+  const tasksNotDone = filteredTasks.filter((task) => task.status !== 'concluida');
+  const tasksDone = filteredTasks.filter((task) => task.status === 'concluida');
+
+  // Cartão de tarefa reutilizável nos dois blocos para evitar duplicação de JSX
+  const renderTaskCard = (task) => {
+    const taskOverdue = isTaskOverdue(task);
+    const taskIsOwner = isTaskOwner(task);
+    const taskCanBeHidden = task.status === 'concluida' || taskOverdue;
+    const taskCanBeEdited = taskIsOwner && canEditTask(task);
+    const dueDateLabel = formatDueDate(task.due_date);
+    const creationDateLabel = formatCreationDate(task.created_at);
+
+    return (
+      <div
+        key={task.idtask}
+        className={`flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5 p-6 rounded-2xl transition-all border ${
+          task.status === 'concluida'
+            ? 'bg-[var(--lifinity-surface-soft)] opacity-60 border-[var(--lifinity-border)]'
+            : taskOverdue
+              ? 'lifinity-danger-surface hover:bg-[var(--lifinity-danger-surface)]'
+              : 'bg-[var(--lifinity-surface-soft)] border-[var(--lifinity-border)] hover:bg-[var(--lifinity-surface-hover)] shadow-sm'
+        }`}
+      >
+        <div className="flex flex-col gap-2">
+          <span
+            className={`font-black text-lg tracking-tight leading-tight ${
+              task.status === 'concluida'
+                ? '[color:var(--lifinity-text-muted)] line-through italic'
+                : taskOverdue
+                  ? '[color:var(--lifinity-danger)]'
+                  : '[color:var(--lifinity-text)]'
+            }`}
+          >
+            {task.title}
+          </span>
+
+          <span
+            className={`text-sm font-medium ${
+              task.status === 'concluida'
+                ? '[color:var(--lifinity-text-muted)] line-through italic'
+                : '[color:var(--lifinity-text-muted)]'
+            }`}
+          >
+            {task.description || 'Sem descrição detalhada.'}
+          </span>
+
+          <div className="flex flex-wrap gap-2 mt-2">
+            {task.task_origin && (
+              <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)]">
+                {task.task_origin === 'created_by_me'
+                  ? 'Criada por mim'
+                  : task.task_origin === 'assigned_to_me'
+                    ? `Recebida de ${task.creator_username || 'utilizador'}`
+                    : task.task_origin === 'group_task'
+                      ? `Grupo: ${task.group_names || 'grupo'}`
+                      : 'Atividade'}
+              </span>
+            )}
+
+            {dueDateLabel && (
+              <span
+                className={`text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border ${
+                  taskOverdue
+                    ? 'lifinity-danger-surface'
+                    : 'bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)]'
+                }`}
+              >
+                Prazo: {dueDateLabel}
+              </span>
+            )}
+
+            {/* Data de criação da tarefa em formato dd/mm */}
+            {creationDateLabel && (
+              <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)]">
+                Criada a {creationDateLabel}
+              </span>
+            )}
+
+            {taskCanBeEdited && (
+              <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-[var(--lifinity-success-surface)] [color:var(--lifinity-success)] border-[var(--lifinity-border)]">
+                Editável
+              </span>
+            )}
+
+            {!taskCanBeEdited && task.status !== 'concluida' && (
+              <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)] opacity-70">
+                Edição bloqueada
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 xl:justify-end">
+          <span
+            className={`text-xs font-black uppercase px-4 py-2 rounded-xl tracking-widest border ${
+              task.status === 'concluida'
+                ? 'bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)]'
+                : taskOverdue
+                  ? 'lifinity-danger-surface'
+                  : task.priority === 'alta'
+                    ? 'lifinity-danger-surface'
+                    : task.priority === 'media'
+                      ? 'bg-[var(--lifinity-warning-surface)] [color:var(--lifinity-warning)] border-[var(--lifinity-border)]'
+                      : 'bg-[var(--lifinity-primary-muted)] [color:var(--lifinity-primary-strong)] border-[var(--lifinity-border)]'
+            }`}
+          >
+            {task.status === 'concluida'
+              ? 'Finalizado'
+              : taskOverdue
+                ? 'Perdida'
+                : task.priority}
+          </span>
+
+          {taskCanBeEdited && (
+            <button
+              onClick={() => openEditModal(task)}
+              className="lifinity-button-secondary px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest"
+            >
+              Editar
+            </button>
+          )}
+
+          {task.status !== 'concluida' && !taskOverdue && (
+            taskToComplete?.idtask === task.idtask ? (
+              <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--lifinity-border)] bg-[var(--lifinity-success-surface)] px-3 py-2">
+                <span className="text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-success)]">
+                  Concluir?
+                </span>
+
+                <button
+                  type="button"
+                  onClick={closeCompleteConfirmation}
+                  className="lifinity-button-secondary px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest"
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  type="button"
+                  onClick={confirmCompleteTask}
+                  className="lifinity-button-primary px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest"
+                >
+                  Confirmar
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => openCompleteConfirmation(task)}
+                className="lifinity-button-secondary px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest"
+              >
+                Concluir
+              </button>
+            )
+          )}
+
+          {(taskIsOwner || taskCanBeHidden) && (
+            <button
+              onClick={() => handleDeleteTask(task)}
+              className="transition-all p-2 [color:var(--lifinity-text-muted)] hover:[color:var(--lifinity-danger)]"
+              title={
+                task.status === 'concluida' || taskOverdue
+                  ? 'Ocultar atividade'
+                  : 'Eliminar atividade'
+              }
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   // Conta quantos filtros (alem da pesquisa) estao ativos, para o badge do botao "Filtros"
   const activeFilterCount = [filterStatus, filterPriority, filterGroup, filterFriend]
     .filter((value) => value !== 'all').length;
@@ -1078,180 +1274,24 @@ const openCompleteConfirmation = (task) => {
                 Nenhuma atividade encontrada com estes filtros.
               </div>
             ) : (
-              filteredTasks.map((task) => {
-                const taskOverdue = isTaskOverdue(task);
-                const taskIsOwner = isTaskOwner(task);
-                const taskCanBeHidden = task.status === 'concluida' || taskOverdue;
-                const taskCanBeEdited = taskIsOwner && canEditTask(task);
-                const dueDateLabel = formatDueDate(task.due_date);
+              <>
+                {/* Bloco A: tarefas não concluídas (pendentes e atrasadas) */}
+                {tasksNotDone.map(renderTaskCard)}
 
-                return (
-                  <div
-                    key={task.idtask}
-                    className={`flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5 p-6 rounded-2xl transition-all border ${
-                      task.status === 'concluida'
-                        ? 'bg-[var(--lifinity-surface-soft)] opacity-60 border-[var(--lifinity-border)]'
-                        : taskOverdue
-                          ? 'lifinity-danger-surface hover:bg-[var(--lifinity-danger-surface)]'
-                          : 'bg-[var(--lifinity-surface-soft)] border-[var(--lifinity-border)] hover:bg-[var(--lifinity-surface-hover)] shadow-sm'
-                    }`}
-                  >
-                    <div className="flex flex-col gap-2">
-                      <span
-                        className={`font-black text-lg tracking-tight leading-tight ${
-                          task.status === 'concluida'
-                            ? '[color:var(--lifinity-text-muted)] line-through italic'
-                            : taskOverdue
-                              ? '[color:var(--lifinity-danger)]'
-                              : '[color:var(--lifinity-text)]'
-                        }`}
-                      >
-                        {task.title}
-                      </span>
-
-                      <span
-                        className={`text-sm font-medium ${
-                          task.status === 'concluida'
-                            ? '[color:var(--lifinity-text-muted)] line-through italic'
-                            : '[color:var(--lifinity-text-muted)]'
-                        }`}
-                      >
-                        {task.description || 'Sem descrição detalhada.'}
-                      </span>
-
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {task.task_origin && (
-                          <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)]">
-                            {task.task_origin === 'created_by_me'
-                              ? 'Criada por mim'
-                              : task.task_origin === 'assigned_to_me'
-                                ? `Recebida de ${task.creator_username || 'utilizador'}`
-                                : task.task_origin === 'group_task'
-                                  ? `Grupo: ${task.group_names || 'grupo'}`
-                                  : 'Atividade'}
-                          </span>
-                        )}
-                        {dueDateLabel && (
-                          <span
-                            className={`text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border ${
-                              taskOverdue
-                                ? 'lifinity-danger-surface'
-                                : 'bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)]'
-                            }`}
-                          >
-                            Prazo: {dueDateLabel}
-                          </span>
-                        )}
-
-                        {taskCanBeEdited && (
-                          <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-[var(--lifinity-success-surface)] [color:var(--lifinity-success)] border-[var(--lifinity-border)]">
-                            Editável
-                          </span>
-                        )}
-
-                        {!taskCanBeEdited && task.status !== 'concluida' && (
-                          <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)] opacity-70">
-                            Edição bloqueada
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3 xl:justify-end">
-                      <span
-                        className={`text-xs font-black uppercase px-4 py-2 rounded-xl tracking-widest border ${
-                          task.status === 'concluida'
-                            ? 'bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)]'
-                            : taskOverdue
-                              ? 'lifinity-danger-surface'
-                              : task.priority === 'alta'
-                                ? 'lifinity-danger-surface'
-                                : task.priority === 'media'
-                                  ? 'bg-[var(--lifinity-warning-surface)] [color:var(--lifinity-warning)] border-[var(--lifinity-border)]'
-                                  : 'bg-[var(--lifinity-primary-muted)] [color:var(--lifinity-primary-strong)] border-[var(--lifinity-border)]'
-                        }`}
-                      >
-                        {task.status === 'concluida'
-                          ? 'Finalizado'
-                          : taskOverdue
-                            ? 'Perdida'
-                            : task.priority}
-                      </span>
-
-                      {taskCanBeEdited && (
-                        <button
-                          onClick={() => openEditModal(task)}
-                          className="lifinity-button-secondary px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest"
-                        >
-                          Editar
-                        </button>
-                      )}
-
-
-                      {task.status !== 'concluida' && !taskOverdue && (
-                        taskToComplete?.idtask === task.idtask ? (
-                          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--lifinity-border)] bg-[var(--lifinity-success-surface)] px-3 py-2">
-                            <span className="text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-success)]">
-                              Concluir?
-                            </span>
-
-                            <button
-                              type="button"
-                              onClick={closeCompleteConfirmation}
-                              className="lifinity-button-secondary px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest"
-                            >
-                              Cancelar
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={confirmCompleteTask}
-                              className="lifinity-button-primary px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest"
-                            >
-                              Confirmar
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => openCompleteConfirmation(task)}
-                            className="lifinity-button-secondary px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest"
-                          >
-                            Concluir
-                          </button>
-                        )
-                      )}
-
-                      {(taskIsOwner || taskCanBeHidden) && (
-                          <button
-                            onClick={() => handleDeleteTask(task)}
-                            className="transition-all p-2 [color:var(--lifinity-text-muted)] hover:[color:var(--lifinity-danger)]"
-                            title={
-                              task.status === 'concluida' || taskOverdue
-                                ? 'Ocultar atividade'
-                                : 'Eliminar atividade'
-                            }
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="20"
-                              height="20"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              />
-                            </svg>
-                          </button>
-                        )}
-                    </div>
+                {/* Divisória entre pendentes e concluídas — só aparece se existirem ambos os blocos */}
+                {tasksNotDone.length > 0 && tasksDone.length > 0 && (
+                  <div className="flex items-center gap-3 py-2">
+                    <div className="flex-1 h-px bg-[var(--lifinity-border)]"></div>
+                    <span className="text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-text-muted)]">
+                      Concluídas
+                    </span>
+                    <div className="flex-1 h-px bg-[var(--lifinity-border)]"></div>
                   </div>
-                );
-              })
+                )}
+
+                {/* Bloco B: tarefas concluídas */}
+                {tasksDone.map(renderTaskCard)}
+              </>
             )}
           </div>
         </div>
