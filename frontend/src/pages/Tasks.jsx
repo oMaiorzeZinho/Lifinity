@@ -203,6 +203,11 @@ const canEditTask = (task) => {
   if (isTaskOverdue(task)) return false;
   if (!task.created_at) return false;
 
+  // Tarefas atribuídas a outros: editáveis até serem concluídas, sem limite de tempo.
+  const hasAssignees = Boolean(Number(task.has_assignees));
+  if (hasAssignees) return true;
+
+  // Tarefas pessoais: só editáveis até 1 hora depois da criação.
   const createdAt = new Date(task.created_at);
   const now = new Date();
 
@@ -791,10 +796,14 @@ const openCompleteConfirmation = (task) => {
       const matchesGroup =
         filterGroup === 'all' ? true : groupIdList.includes(String(filterGroup));
 
-      // Filtro por amigo: assignee_ids vem como string "5,9" (ou null)
+      // Filtro por amigo: a tarefa "envolve o amigo" se ele é destinatário (assignee)
+      // OU se é o criador da tarefa (task.iduser). Assim apanhamos as duas direções:
+      // tarefas que ele me enviou e tarefas que eu lhe enviei.
       const assigneeIdList = (task.assignee_ids || '').split(',').filter(Boolean);
+      const friendIsAssignee = assigneeIdList.includes(String(filterFriend));
+      const friendIsCreator = String(task.iduser) === String(filterFriend);
       const matchesFriend =
-        filterFriend === 'all' ? true : assigneeIdList.includes(String(filterFriend));
+        filterFriend === 'all' ? true : friendIsAssignee || friendIsCreator;
 
       return matchesStatus && matchesPriority && matchesSearch && matchesGroup && matchesFriend;
     })
@@ -836,6 +845,18 @@ const openCompleteConfirmation = (task) => {
     const taskCanBeEdited = taskIsOwner && canEditTask(task);
     const dueDateLabel = formatDueDate(task.due_date);
     const creationDateLabel = formatCreationDate(task.created_at);
+
+    // Permissão para concluir: se a tarefa tem destinatários, só um destinatário
+    // (assignee) a pode concluir; tarefas pessoais e de grupo mantêm o comportamento atual.
+    const taskHasAssignees = Boolean(Number(task.has_assignees));
+    const taskIsAssignee = (task.assignee_ids || '')
+      .split(',')
+      .filter(Boolean)
+      .includes(String(user.iduser));
+    const taskCanBeCompleted =
+      task.status !== 'concluida' &&
+      !taskOverdue &&
+      (!taskHasAssignees || taskIsAssignee);
 
     return (
       <div
@@ -947,7 +968,7 @@ const openCompleteConfirmation = (task) => {
             </button>
           )}
 
-          {task.status !== 'concluida' && !taskOverdue && (
+          {taskCanBeCompleted && (
             taskToComplete?.idtask === task.idtask ? (
               <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--lifinity-border)] bg-[var(--lifinity-success-surface)] px-3 py-2">
                 <span className="text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-success)]">
