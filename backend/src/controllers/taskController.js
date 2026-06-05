@@ -85,7 +85,21 @@ exports.getTasks = async (req, res) => {
                         ON gm.idgroup = gt.idgroup
                     WHERE gt.idtask = t.idtask
                       AND gm.iduser = ?
-                ) AS group_names
+                ) AS group_names,
+
+                -- Indica (0/1) se a tarefa tem destinatarios diretos (amigos)
+                (
+                    SELECT COUNT(*) > 0
+                    FROM TASK_ASSIGNEE ta
+                    WHERE ta.idtask = t.idtask
+                ) AS has_assignees,
+
+                -- Indica (0/1) se a tarefa foi atribuida a algum grupo
+                (
+                    SELECT COUNT(*) > 0
+                    FROM GROUP_TASK gt
+                    WHERE gt.idtask = t.idtask
+                ) AS has_groups
 
              FROM TASK t
              INNER JOIN USER creator

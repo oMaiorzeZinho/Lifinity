@@ -811,9 +811,22 @@ const openCompleteConfirmation = (task) => {
     };
   const completedVisibleTasks = tasks.filter((task) => task.status === 'concluida');
 
-  // Divide as tarefas filtradas em pendentes/atrasadas (bloco A) e concluídas (bloco B)
-  const tasksNotDone = filteredTasks.filter((task) => task.status !== 'concluida');
-  const tasksDone = filteredTasks.filter((task) => task.status === 'concluida');
+  // Classifica cada tarefa numa de três categorias lógicas, com base na origem
+  // (task_origin) e em ter ou não destinatários (has_assignees / has_groups).
+  // Os campos booleanos podem vir como 1/0, "1"/"0" ou true/false — normalizamos.
+  const getTaskCategory = (task) => {
+    const hasAssignees = Boolean(Number(task.has_assignees));
+    const hasGroups = Boolean(Number(task.has_groups));
+    const hasRecipients = hasAssignees || hasGroups;
+
+    if (task.task_origin === 'created_by_me') {
+      // Criada por mim: pessoal (sem destinatários) ou atribuída a outros
+      return hasRecipients ? 'created_for_others' : 'to_complete_mine';
+    }
+
+    // Recebida de outro utilizador ('assigned_to_me') ou de um grupo ('group_task')
+    return 'to_complete_received';
+  };
 
   // Cartão de tarefa reutilizável nos dois blocos para evitar duplicação de JSX
   const renderTaskCard = (task) => {
@@ -995,6 +1008,55 @@ const openCompleteConfirmation = (task) => {
             </button>
           )}
         </div>
+      </div>
+    );
+  };
+
+  // Renderiza uma lista de tarefas com a divisão da Fase 1:
+  // não-concluídas primeiro, divisória "CONCLUÍDAS", depois as concluídas.
+  const renderTaskList = (taskList) => {
+    const notDone = taskList.filter((task) => task.status !== 'concluida');
+    const done = taskList.filter((task) => task.status === 'concluida');
+
+    return (
+      <>
+        {/* Bloco A: tarefas não concluídas (pendentes e atrasadas) */}
+        {notDone.map(renderTaskCard)}
+
+        {/* Divisória entre pendentes e concluídas — só aparece se existirem ambos os blocos */}
+        {notDone.length > 0 && done.length > 0 && (
+          <div className="flex items-center gap-3 py-2">
+            <div className="flex-1 h-px bg-[var(--lifinity-border)]"></div>
+            <span className="text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-text-muted)]">
+              Concluídas
+            </span>
+            <div className="flex-1 h-px bg-[var(--lifinity-border)]"></div>
+          </div>
+        )}
+
+        {/* Bloco B: tarefas concluídas */}
+        {done.map(renderTaskCard)}
+      </>
+    );
+  };
+
+  // Renderiza uma secção (cabeçalho clay + lista) apenas se tiver tarefas.
+  const renderSection = (title, taskList) => {
+    if (taskList.length === 0) return null;
+
+    return (
+      <div key={title} className="space-y-3">
+        {/* Cabeçalho da secção com o título e a contagem de tarefas */}
+        <div className="flex items-center gap-3 px-2 pt-2">
+          <span className="text-xs font-black uppercase tracking-widest [color:var(--lifinity-primary)]">
+            {title}
+          </span>
+          <span className="text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-text-muted)]">
+            ({taskList.length})
+          </span>
+        </div>
+
+        {renderTaskList(taskList)}
       </div>
     );
   };
@@ -1269,30 +1331,80 @@ const openCompleteConfirmation = (task) => {
         {/* LISTAGEM FILTRADA */}
         <div className={`${cardClass} rounded-2xl overflow-hidden`}>
           <div className="p-4 space-y-3">
-            {filteredTasks.length === 0 ? (
-              <div className="p-20 text-center font-bold italic uppercase text-xs tracking-widest [color:var(--lifinity-text-muted)]">
-                Nenhuma atividade encontrada com estes filtros.
-              </div>
-            ) : (
-              <>
-                {/* Bloco A: tarefas não concluídas (pendentes e atrasadas) */}
-                {tasksNotDone.map(renderTaskCard)}
+            {(() => {
+              // Nome do amigo selecionado (para os títulos do modo B)
+              const selectedFriend = friends.find(
+                (friend) => String(friend.iduser) === String(filterFriend)
+              );
+              const selectedFriendName = selectedFriend?.username || 'este amigo';
 
-                {/* Divisória entre pendentes e concluídas — só aparece se existirem ambos os blocos */}
-                {tasksNotDone.length > 0 && tasksDone.length > 0 && (
-                  <div className="flex items-center gap-3 py-2">
-                    <div className="flex-1 h-px bg-[var(--lifinity-border)]"></div>
-                    <span className="text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-text-muted)]">
-                      Concluídas
-                    </span>
-                    <div className="flex-1 h-px bg-[var(--lifinity-border)]"></div>
+              // Constrói as secções a apresentar conforme o modo de visualização.
+              // As secções operam SEMPRE sobre filteredTasks (já filtrado).
+              const sections =
+                filterFriend === 'all'
+                  ? [
+                      // MODO A — sem filtro de amigo: três secções por origem
+                      {
+                        title: 'As minhas tarefas',
+                        tasks: filteredTasks.filter(
+                          (task) => getTaskCategory(task) === 'to_complete_mine'
+                        )
+                      },
+                      {
+                        title: 'Recebidas de outros',
+                        tasks: filteredTasks.filter(
+                          (task) => getTaskCategory(task) === 'to_complete_received'
+                        )
+                      },
+                      {
+                        title: 'Atribuídas por mim',
+                        tasks: filteredTasks.filter(
+                          (task) => getTaskCategory(task) === 'created_for_others'
+                        )
+                      }
+                    ]
+                  : [
+                      // MODO B — com filtro de amigo: duas secções (recebidas dele / enviadas a ele)
+                      {
+                        title: `Recebidas de ${selectedFriendName}`,
+                        // Tarefas criadas por esse amigo (ele é o criador)
+                        tasks: filteredTasks.filter(
+                          (task) => String(task.iduser) === String(filterFriend)
+                        )
+                      },
+                      {
+                        title: `Enviadas a ${selectedFriendName}`,
+                        // Tarefas que eu criei e atribuí a esse amigo
+                        tasks: filteredTasks.filter((task) => {
+                          if (task.task_origin !== 'created_by_me') return false;
+                          const assigneeIdList = (task.assignee_ids || '')
+                            .split(',')
+                            .filter(Boolean);
+                          return assigneeIdList.includes(String(filterFriend));
+                        })
+                      }
+                    ];
+
+              // Se nenhuma secção tiver tarefas, mostra a mensagem de "sem tarefas".
+              const hasAnyTask = sections.some((section) => section.tasks.length > 0);
+
+              if (!hasAnyTask) {
+                return (
+                  <div className="p-20 text-center font-bold italic uppercase text-xs tracking-widest [color:var(--lifinity-text-muted)]">
+                    Nenhuma atividade encontrada com estes filtros.
                   </div>
-                )}
+                );
+              }
 
-                {/* Bloco B: tarefas concluídas */}
-                {tasksDone.map(renderTaskCard)}
-              </>
-            )}
+              // Renderiza as secções (renderSection ignora as vazias devolvendo null).
+              return (
+                <div className="space-y-6">
+                  {sections.map((section) =>
+                    renderSection(section.title, section.tasks)
+                  )}
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>
