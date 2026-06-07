@@ -85,7 +85,21 @@ exports.getTasks = async (req, res) => {
                         ON gm.idgroup = gt.idgroup
                     WHERE gt.idtask = t.idtask
                       AND gm.iduser = ?
-                ) AS group_names
+                ) AS group_names,
+
+                -- Indica (0/1) se a tarefa tem destinatarios diretos (amigos)
+                (
+                    SELECT COUNT(*) > 0
+                    FROM TASK_ASSIGNEE ta
+                    WHERE ta.idtask = t.idtask
+                ) AS has_assignees,
+
+                -- Indica (0/1) se a tarefa foi atribuida a algum grupo
+                (
+                    SELECT COUNT(*) > 0
+                    FROM GROUP_TASK gt
+                    WHERE gt.idtask = t.idtask
+                ) AS has_groups
 
              FROM TASK t
              INNER JOIN USER creator
@@ -347,6 +361,27 @@ exports.completeTask = async (req, res) => {
 
         const task = tasks[0];
 
+        // Regra: se a tarefa foi atribuída a alguém (tem assignees), só um
+        // destinatário a pode concluir. O criador (se não for assignee) não conclui.
+        // Tarefas de grupo e pessoais nao entram aqui (nao tem TASK_ASSIGNEE).
+        const [assigneeRows] = await db.query(
+            `SELECT
+                COUNT(*) AS total,
+                SUM(CASE WHEN ta.iduser = ? THEN 1 ELSE 0 END) AS mine
+             FROM TASK_ASSIGNEE ta
+             WHERE ta.idtask = ?`,
+            [iduser, idtask]
+        );
+
+        const hasAssignees = Number(assigneeRows[0].total) > 0;
+        const isAssignee = Number(assigneeRows[0].mine) > 0;
+
+        if (hasAssignees && !isAssignee) {
+            return res.status(403).json({
+                message: "Apenas a pessoa a quem a tarefa foi atribuída a pode concluir."
+            });
+        }
+
         if (task.status === "concluida") {
             return res.status(400).json({
                 message: "Esta tarefa já foi concluída."
@@ -445,7 +480,8 @@ exports.updateTask = async (req, res) => {
         // Procurar tarefa e confirmar se pertence ao utilizador autenticado
         const [tasks] = await db.query(
             `SELECT *,
-                    (due_date IS NOT NULL AND due_date < NOW() AND status != 'concluida') AS is_lost
+                    (due_date IS NOT NULL AND due_date < NOW() AND status != 'concluida') AS is_lost,
+                    (SELECT COUNT(*) > 0 FROM TASK_ASSIGNEE ta WHERE ta.idtask = TASK.idtask) AS has_assignees
              FROM TASK
              WHERE idtask = ? AND iduser = ?`,
             [idtask, iduser]
@@ -472,16 +508,22 @@ exports.updateTask = async (req, res) => {
             });
         }
 
-        // Regra: so pode editar ate 1 hora depois da criacao.
-        const createdAt = new Date(task.created_at);
-        const now = new Date();
-        const diffInMs = now.getTime() - createdAt.getTime();
-        const oneHourInMs = 60 * 60 * 1000;
+        // Regra de edicao depende do tipo de tarefa:
+        // - tarefa PESSOAL (sem assignees): so editavel ate 1 hora depois da criacao.
+        // - tarefa PARA OUTROS (com assignees): editavel ate ser concluida (sem limite de tempo).
+        const hasAssignees = Number(task.has_assignees) > 0;
 
-        if (diffInMs > oneHourInMs) {
-            return res.status(403).json({
-                message: "Esta tarefa já não pode ser editada porque passou mais de 1 hora desde a criação."
-            });
+        if (!hasAssignees) {
+            const createdAt = new Date(task.created_at);
+            const now = new Date();
+            const diffInMs = now.getTime() - createdAt.getTime();
+            const oneHourInMs = 60 * 60 * 1000;
+
+            if (diffInMs > oneHourInMs) {
+                return res.status(403).json({
+                    message: "Esta tarefa já não pode ser editada porque passou mais de 1 hora desde a criação."
+                });
+            }
         }
 
         const normalizedDueDate = due_date && due_date.trim() !== ""

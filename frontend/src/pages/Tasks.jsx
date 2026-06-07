@@ -203,6 +203,11 @@ const canEditTask = (task) => {
   if (isTaskOverdue(task)) return false;
   if (!task.created_at) return false;
 
+  // Tarefas atribuídas a outros: editáveis até serem concluídas, sem limite de tempo.
+  const hasAssignees = Boolean(Number(task.has_assignees));
+  if (hasAssignees) return true;
+
+  // Tarefas pessoais: só editáveis até 1 hora depois da criação.
   const createdAt = new Date(task.created_at);
   const now = new Date();
 
@@ -253,6 +258,14 @@ const formatDateForInput = (date) => {
   return localDate.toISOString().slice(0, 16);
 };
 
+// Formata a data de criação para "dd/mm" em pt-PT; devolve null se inválida
+const formatCreationDate = (dateString) => {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return null;
+  return date.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' });
+};
+
 const Tasks = () => {
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user');
@@ -284,6 +297,8 @@ const Tasks = () => {
   const [filterGroup, setFilterGroup] = useState('all');
   const [filterFriend, setFilterFriend] = useState('all');
   const [searchTask, setSearchTask] = useState('');
+  // Controla a visibilidade do painel de filtros recolhivel
+  const [showFilters, setShowFilters] = useState(false);
   const csvFileInputRef = useRef(null);
 
   const navigate = useNavigate();
@@ -781,10 +796,14 @@ const openCompleteConfirmation = (task) => {
       const matchesGroup =
         filterGroup === 'all' ? true : groupIdList.includes(String(filterGroup));
 
-      // Filtro por amigo: assignee_ids vem como string "5,9" (ou null)
+      // Filtro por amigo: a tarefa "envolve o amigo" se ele é destinatário (assignee)
+      // OU se é o criador da tarefa (task.iduser). Assim apanhamos as duas direções:
+      // tarefas que ele me enviou e tarefas que eu lhe enviei.
       const assigneeIdList = (task.assignee_ids || '').split(',').filter(Boolean);
+      const friendIsAssignee = assigneeIdList.includes(String(filterFriend));
+      const friendIsCreator = String(task.iduser) === String(filterFriend);
       const matchesFriend =
-        filterFriend === 'all' ? true : assigneeIdList.includes(String(filterFriend));
+        filterFriend === 'all' ? true : friendIsAssignee || friendIsCreator;
 
       return matchesStatus && matchesPriority && matchesSearch && matchesGroup && matchesFriend;
     })
@@ -800,6 +819,272 @@ const openCompleteConfirmation = (task) => {
       return Number(task.iduser) === Number(user.iduser);
     };
   const completedVisibleTasks = tasks.filter((task) => task.status === 'concluida');
+
+  // Classifica cada tarefa numa de três categorias lógicas, com base na origem
+  // (task_origin) e em ter ou não destinatários (has_assignees / has_groups).
+  // Os campos booleanos podem vir como 1/0, "1"/"0" ou true/false — normalizamos.
+  const getTaskCategory = (task) => {
+    const hasAssignees = Boolean(Number(task.has_assignees));
+    const hasGroups = Boolean(Number(task.has_groups));
+    const hasRecipients = hasAssignees || hasGroups;
+
+    if (task.task_origin === 'created_by_me') {
+      // Criada por mim: pessoal (sem destinatários) ou atribuída a outros
+      return hasRecipients ? 'created_for_others' : 'to_complete_mine';
+    }
+
+    // Recebida de outro utilizador ('assigned_to_me') ou de um grupo ('group_task')
+    return 'to_complete_received';
+  };
+
+  // Cartão de tarefa reutilizável nos dois blocos para evitar duplicação de JSX
+  const renderTaskCard = (task) => {
+    const taskOverdue = isTaskOverdue(task);
+    const taskIsOwner = isTaskOwner(task);
+    const taskCanBeHidden = task.status === 'concluida' || taskOverdue;
+    const taskCanBeEdited = taskIsOwner && canEditTask(task);
+    const dueDateLabel = formatDueDate(task.due_date);
+    const creationDateLabel = formatCreationDate(task.created_at);
+
+    // Permissão para concluir: se a tarefa tem destinatários, só um destinatário
+    // (assignee) a pode concluir; tarefas pessoais e de grupo mantêm o comportamento atual.
+    const taskHasAssignees = Boolean(Number(task.has_assignees));
+    const taskIsAssignee = (task.assignee_ids || '')
+      .split(',')
+      .filter(Boolean)
+      .includes(String(user.iduser));
+    const taskCanBeCompleted =
+      task.status !== 'concluida' &&
+      !taskOverdue &&
+      (!taskHasAssignees || taskIsAssignee);
+
+    return (
+      <div
+        key={task.idtask}
+        className={`flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5 p-6 rounded-2xl transition-all border ${
+          task.status === 'concluida'
+            ? 'bg-[var(--lifinity-surface-soft)] opacity-60 border-[var(--lifinity-border)]'
+            : taskOverdue
+              ? 'lifinity-danger-surface hover:bg-[var(--lifinity-danger-surface)]'
+              : 'bg-[var(--lifinity-surface-soft)] border-[var(--lifinity-border)] hover:bg-[var(--lifinity-surface-hover)] shadow-sm'
+        }`}
+      >
+        <div className="flex flex-col gap-2">
+          <span
+            className={`font-black text-lg tracking-tight leading-tight ${
+              task.status === 'concluida'
+                ? '[color:var(--lifinity-text-muted)] line-through italic'
+                : taskOverdue
+                  ? '[color:var(--lifinity-danger)]'
+                  : '[color:var(--lifinity-text)]'
+            }`}
+          >
+            {task.title}
+          </span>
+
+          <span
+            className={`text-sm font-medium ${
+              task.status === 'concluida'
+                ? '[color:var(--lifinity-text-muted)] line-through italic'
+                : '[color:var(--lifinity-text-muted)]'
+            }`}
+          >
+            {task.description || 'Sem descrição detalhada.'}
+          </span>
+
+          <div className="flex flex-wrap gap-2 mt-2">
+            {task.task_origin && (
+              <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)]">
+                {task.task_origin === 'created_by_me'
+                  ? 'Criada por mim'
+                  : task.task_origin === 'assigned_to_me'
+                    ? `Recebida de ${task.creator_username || 'utilizador'}`
+                    : task.task_origin === 'group_task'
+                      ? `Grupo: ${task.group_names || 'grupo'}`
+                      : 'Atividade'}
+              </span>
+            )}
+
+            {dueDateLabel && (
+              <span
+                className={`text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border ${
+                  taskOverdue
+                    ? 'lifinity-danger-surface'
+                    : 'bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)]'
+                }`}
+              >
+                Prazo: {dueDateLabel}
+              </span>
+            )}
+
+            {/* Data de criação da tarefa em formato dd/mm */}
+            {creationDateLabel && (
+              <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)]">
+                Criada a {creationDateLabel}
+              </span>
+            )}
+
+            {taskCanBeEdited && (
+              <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-[var(--lifinity-success-surface)] [color:var(--lifinity-success)] border-[var(--lifinity-border)]">
+                Editável
+              </span>
+            )}
+
+            {!taskCanBeEdited && task.status !== 'concluida' && (
+              <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)] opacity-70">
+                Edição bloqueada
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 xl:justify-end">
+          <span
+            className={`text-xs font-black uppercase px-4 py-2 rounded-xl tracking-widest border ${
+              task.status === 'concluida'
+                ? 'bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)]'
+                : taskOverdue
+                  ? 'lifinity-danger-surface'
+                  : task.priority === 'alta'
+                    ? 'lifinity-danger-surface'
+                    : task.priority === 'media'
+                      ? 'bg-[var(--lifinity-warning-surface)] [color:var(--lifinity-warning)] border-[var(--lifinity-border)]'
+                      : 'bg-[var(--lifinity-primary-muted)] [color:var(--lifinity-primary-strong)] border-[var(--lifinity-border)]'
+            }`}
+          >
+            {task.status === 'concluida'
+              ? 'Finalizado'
+              : taskOverdue
+                ? 'Perdida'
+                : task.priority}
+          </span>
+
+          {taskCanBeEdited && (
+            <button
+              onClick={() => openEditModal(task)}
+              className="lifinity-button-secondary px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest"
+            >
+              Editar
+            </button>
+          )}
+
+          {taskCanBeCompleted && (
+            taskToComplete?.idtask === task.idtask ? (
+              <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--lifinity-border)] bg-[var(--lifinity-success-surface)] px-3 py-2">
+                <span className="text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-success)]">
+                  Concluir?
+                </span>
+
+                <button
+                  type="button"
+                  onClick={closeCompleteConfirmation}
+                  className="lifinity-button-secondary px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest"
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  type="button"
+                  onClick={confirmCompleteTask}
+                  className="lifinity-button-primary px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest"
+                >
+                  Confirmar
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => openCompleteConfirmation(task)}
+                className="lifinity-button-secondary px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest"
+              >
+                Concluir
+              </button>
+            )
+          )}
+
+          {(taskIsOwner || taskCanBeHidden) && (
+            <button
+              onClick={() => handleDeleteTask(task)}
+              className="transition-all p-2 [color:var(--lifinity-text-muted)] hover:[color:var(--lifinity-danger)]"
+              title={
+                task.status === 'concluida' || taskOverdue
+                  ? 'Ocultar atividade'
+                  : 'Eliminar atividade'
+              }
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // Renderiza uma lista de tarefas com a divisão da Fase 1:
+  // não-concluídas primeiro, divisória "CONCLUÍDAS", depois as concluídas.
+  const renderTaskList = (taskList) => {
+    const notDone = taskList.filter((task) => task.status !== 'concluida');
+    const done = taskList.filter((task) => task.status === 'concluida');
+
+    return (
+      <>
+        {/* Bloco A: tarefas não concluídas (pendentes e atrasadas) */}
+        {notDone.map(renderTaskCard)}
+
+        {/* Divisória entre pendentes e concluídas — só aparece se existirem ambos os blocos */}
+        {notDone.length > 0 && done.length > 0 && (
+          <div className="flex items-center gap-3 py-2">
+            <div className="flex-1 h-px bg-[var(--lifinity-border)]"></div>
+            <span className="text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-text-muted)]">
+              Concluídas
+            </span>
+            <div className="flex-1 h-px bg-[var(--lifinity-border)]"></div>
+          </div>
+        )}
+
+        {/* Bloco B: tarefas concluídas */}
+        {done.map(renderTaskCard)}
+      </>
+    );
+  };
+
+  // Renderiza uma secção (cabeçalho clay + lista) apenas se tiver tarefas.
+  const renderSection = (title, taskList) => {
+    if (taskList.length === 0) return null;
+
+    return (
+      <div key={title} className="space-y-3">
+        {/* Cabeçalho da secção com o título e a contagem de tarefas */}
+        <div className="flex items-center gap-3 px-2 pt-2">
+          <span className="text-xs font-black uppercase tracking-widest [color:var(--lifinity-primary)]">
+            {title}
+          </span>
+          <span className="text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-text-muted)]">
+            ({taskList.length})
+          </span>
+        </div>
+
+        {renderTaskList(taskList)}
+      </div>
+    );
+  };
+
+  // Conta quantos filtros (alem da pesquisa) estao ativos, para o badge do botao "Filtros"
+  const activeFilterCount = [filterStatus, filterPriority, filterGroup, filterFriend]
+    .filter((value) => value !== 'all').length;
 
   return (
     <div className="space-y-8">
@@ -854,17 +1139,18 @@ const openCompleteConfirmation = (task) => {
       </div>
 
       <div className="space-y-6">
-        {/* BARRA DE FILTROS E PESQUISA */}
+        {/* BARRA SUPERIOR: pesquisa + botao Filtros + acoes (sempre visivel) */}
         <div
           className={`${cardClass} p-4 rounded-2xl flex flex-wrap gap-4 items-center justify-between`}
         >
-          <div className="flex flex-wrap gap-2 items-center">
-            <div className="relative">
+          <div className="flex flex-wrap gap-3 items-center flex-1 min-w-0">
+            {/* PESQUISA (sempre visivel, ocupa o espaco flexivel) */}
+            <div className="relative flex-1 min-w-48">
               <input
                 aria-label="Procurar atividade"
                 type="text"
                 placeholder="Procurar atividade..."
-                className={`pl-10 pr-4 py-3 rounded-xl text-xs font-bold w-64 ${inputClass}`}
+                className={`pl-10 pr-4 py-3 rounded-xl text-xs font-bold w-full ${inputClass}`}
                 value={searchTask}
                 onChange={(e) => setSearchTask(e.target.value)}
               />
@@ -887,82 +1173,41 @@ const openCompleteConfirmation = (task) => {
               </svg>
             </div>
 
-            <select
-              aria-label="Filtrar por estado"
-              className={`rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest ${selectClass}`}
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
+            {/* BOTAO FILTROS: abre/fecha o painel; badge com nº de filtros ativos */}
+            <button
+              type="button"
+              onClick={() => setShowFilters((current) => !current)}
+              className={`${buttonSecondaryClass} flex items-center gap-2`}
+              aria-expanded={showFilters}
+              aria-label="Mostrar ou esconder filtros"
             >
-              <option className={optionClass} value="all">
-                Todos os Estados
-              </option>
-              <option className={optionClass} value="pending">
-                Pendentes
-              </option>
-              <option className={optionClass} value="completed">
-                Concluídas
-              </option>
-              <option className={optionClass} value="lost">
-                Perdidas
-              </option>
-            </select>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 5h18M6 12h12M10 19h4"
+                />
+              </svg>
 
-            <select
-              aria-label="Filtrar por prioridade"
-              className={`rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest ${selectClass}`}
-              value={filterPriority}
-              onChange={(e) => setFilterPriority(e.target.value)}
-            >
-              <option className={optionClass} value="all">
-                Todas as Prioridades
-              </option>
-              <option className={optionClass} value="alta">
-                Prioridade Alta
-              </option>
-              <option className={optionClass} value="media">
-                Prioridade Média
-              </option>
-              <option className={optionClass} value="baixa">
-                Prioridade Baixa
-              </option>
-            </select>
+              <span>Filtros</span>
 
-            {/* Filtro por grupo: usa a lista de grupos ja carregada */}
-            <select
-              aria-label="Filtrar por grupo"
-              className={`rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest ${selectClass}`}
-              value={filterGroup}
-              onChange={(e) => setFilterGroup(e.target.value)}
-            >
-              <option className={optionClass} value="all">
-                Todos os Grupos
-              </option>
-              {groups.map((group) => (
-                <option className={optionClass} key={group.idgroup} value={group.idgroup}>
-                  {group.name}
-                </option>
-              ))}
-            </select>
-
-            {/* Filtro por amigo: usa a lista de amigos ja carregada */}
-            <select
-              aria-label="Filtrar por amigo"
-              className={`rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest ${selectClass}`}
-              value={filterFriend}
-              onChange={(e) => setFilterFriend(e.target.value)}
-            >
-              <option className={optionClass} value="all">
-                Todos os Amigos
-              </option>
-              {friends.map((friend) => (
-                <option className={optionClass} key={friend.iduser} value={friend.iduser}>
-                  {friend.username}
-                </option>
-              ))}
-            </select>
+              {activeFilterCount > 0 && (
+                <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full text-[10px] font-black bg-[var(--lifinity-primary)] [color:var(--lifinity-on-primary)]">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             {completedVisibleTasks.length > 0 && (
               <button
                 onClick={handleClearCompleted}
@@ -1005,189 +1250,182 @@ const openCompleteConfirmation = (task) => {
           </div>
         </div>
 
+        {/* PAINEL DE FILTROS (recolhivel): 4 selects numa grelha responsiva */}
+        {showFilters && (
+          <div className="lifinity-card-soft p-5 rounded-2xl space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+              <select
+                aria-label="Filtrar por estado"
+                className={`w-full rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest ${selectClass}`}
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+              >
+                <option className={optionClass} value="all">
+                  Todos os Estados
+                </option>
+                <option className={optionClass} value="pending">
+                  Pendentes
+                </option>
+                <option className={optionClass} value="completed">
+                  Concluídas
+                </option>
+                <option className={optionClass} value="lost">
+                  Perdidas
+                </option>
+              </select>
+
+              <select
+                aria-label="Filtrar por prioridade"
+                className={`w-full rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest ${selectClass}`}
+                value={filterPriority}
+                onChange={(e) => setFilterPriority(e.target.value)}
+              >
+                <option className={optionClass} value="all">
+                  Todas as Prioridades
+                </option>
+                <option className={optionClass} value="alta">
+                  Prioridade Alta
+                </option>
+                <option className={optionClass} value="media">
+                  Prioridade Média
+                </option>
+                <option className={optionClass} value="baixa">
+                  Prioridade Baixa
+                </option>
+              </select>
+
+              {/* Filtro por grupo: usa a lista de grupos ja carregada */}
+              <select
+                aria-label="Filtrar por grupo"
+                className={`w-full rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest ${selectClass}`}
+                value={filterGroup}
+                onChange={(e) => setFilterGroup(e.target.value)}
+              >
+                <option className={optionClass} value="all">
+                  Todos os Grupos
+                </option>
+                {groups.map((group) => (
+                  <option className={optionClass} key={group.idgroup} value={group.idgroup}>
+                    {group.name}
+                  </option>
+                ))}
+              </select>
+
+              {/* Filtro por amigo: usa a lista de amigos ja carregada */}
+              <select
+                aria-label="Filtrar por amigo"
+                className={`w-full rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest ${selectClass}`}
+                value={filterFriend}
+                onChange={(e) => setFilterFriend(e.target.value)}
+              >
+                <option className={optionClass} value="all">
+                  Todos os Amigos
+                </option>
+                {friends.map((friend) => (
+                  <option className={optionClass} key={friend.iduser} value={friend.iduser}>
+                    {friend.username}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Limpar filtros: repoe os 4 selects a 'all' (nao mexe na pesquisa) */}
+            {activeFilterCount > 0 && (
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFilterStatus('all');
+                    setFilterPriority('all');
+                    setFilterGroup('all');
+                    setFilterFriend('all');
+                  }}
+                  className="text-xs font-black uppercase tracking-widest transition-colors [color:var(--lifinity-danger)] hover:opacity-80"
+                >
+                  Limpar filtros
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* LISTAGEM FILTRADA */}
         <div className={`${cardClass} rounded-2xl overflow-hidden`}>
           <div className="p-4 space-y-3">
-            {filteredTasks.length === 0 ? (
-              <div className="p-20 text-center font-bold italic uppercase text-xs tracking-widest [color:var(--lifinity-text-muted)]">
-                Nenhuma atividade encontrada com estes filtros.
-              </div>
-            ) : (
-              filteredTasks.map((task) => {
-                const taskOverdue = isTaskOverdue(task);
-                const taskIsOwner = isTaskOwner(task);
-                const taskCanBeHidden = task.status === 'concluida' || taskOverdue;
-                const taskCanBeEdited = taskIsOwner && canEditTask(task);
-                const dueDateLabel = formatDueDate(task.due_date);
+            {(() => {
+              // Nome do amigo selecionado (para os títulos do modo B)
+              const selectedFriend = friends.find(
+                (friend) => String(friend.iduser) === String(filterFriend)
+              );
+              const selectedFriendName = selectedFriend?.username || 'este amigo';
 
-                return (
-                  <div
-                    key={task.idtask}
-                    className={`flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5 p-6 rounded-2xl transition-all border ${
-                      task.status === 'concluida'
-                        ? 'bg-[var(--lifinity-surface-soft)] opacity-60 border-[var(--lifinity-border)]'
-                        : taskOverdue
-                          ? 'lifinity-danger-surface hover:bg-[var(--lifinity-danger-surface)]'
-                          : 'bg-[var(--lifinity-surface-soft)] border-[var(--lifinity-border)] hover:bg-[var(--lifinity-surface-hover)] shadow-sm'
-                    }`}
-                  >
-                    <div className="flex flex-col gap-2">
-                      <span
-                        className={`font-black text-lg tracking-tight leading-tight ${
-                          task.status === 'concluida'
-                            ? '[color:var(--lifinity-text-muted)] line-through italic'
-                            : taskOverdue
-                              ? '[color:var(--lifinity-danger)]'
-                              : '[color:var(--lifinity-text)]'
-                        }`}
-                      >
-                        {task.title}
-                      </span>
-
-                      <span
-                        className={`text-sm font-medium ${
-                          task.status === 'concluida'
-                            ? '[color:var(--lifinity-text-muted)] line-through italic'
-                            : '[color:var(--lifinity-text-muted)]'
-                        }`}
-                      >
-                        {task.description || 'Sem descrição detalhada.'}
-                      </span>
-
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {task.task_origin && (
-                          <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)]">
-                            {task.task_origin === 'created_by_me'
-                              ? 'Criada por mim'
-                              : task.task_origin === 'assigned_to_me'
-                                ? `Recebida de ${task.creator_username || 'utilizador'}`
-                                : task.task_origin === 'group_task'
-                                  ? `Grupo: ${task.group_names || 'grupo'}`
-                                  : 'Atividade'}
-                          </span>
-                        )}
-                        {dueDateLabel && (
-                          <span
-                            className={`text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border ${
-                              taskOverdue
-                                ? 'lifinity-danger-surface'
-                                : 'bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)]'
-                            }`}
-                          >
-                            Prazo: {dueDateLabel}
-                          </span>
-                        )}
-
-                        {taskCanBeEdited && (
-                          <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-[var(--lifinity-success-surface)] [color:var(--lifinity-success)] border-[var(--lifinity-border)]">
-                            Editável
-                          </span>
-                        )}
-
-                        {!taskCanBeEdited && task.status !== 'concluida' && (
-                          <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)] opacity-70">
-                            Edição bloqueada
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3 xl:justify-end">
-                      <span
-                        className={`text-xs font-black uppercase px-4 py-2 rounded-xl tracking-widest border ${
-                          task.status === 'concluida'
-                            ? 'bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)]'
-                            : taskOverdue
-                              ? 'lifinity-danger-surface'
-                              : task.priority === 'alta'
-                                ? 'lifinity-danger-surface'
-                                : task.priority === 'media'
-                                  ? 'bg-[var(--lifinity-warning-surface)] [color:var(--lifinity-warning)] border-[var(--lifinity-border)]'
-                                  : 'bg-[var(--lifinity-primary-muted)] [color:var(--lifinity-primary-strong)] border-[var(--lifinity-border)]'
-                        }`}
-                      >
-                        {task.status === 'concluida'
-                          ? 'Finalizado'
-                          : taskOverdue
-                            ? 'Perdida'
-                            : task.priority}
-                      </span>
-
-                      {taskCanBeEdited && (
-                        <button
-                          onClick={() => openEditModal(task)}
-                          className="lifinity-button-secondary px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest"
-                        >
-                          Editar
-                        </button>
-                      )}
-
-
-                      {task.status !== 'concluida' && !taskOverdue && (
-                        taskToComplete?.idtask === task.idtask ? (
-                          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--lifinity-border)] bg-[var(--lifinity-success-surface)] px-3 py-2">
-                            <span className="text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-success)]">
-                              Concluir?
-                            </span>
-
-                            <button
-                              type="button"
-                              onClick={closeCompleteConfirmation}
-                              className="lifinity-button-secondary px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest"
-                            >
-                              Cancelar
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={confirmCompleteTask}
-                              className="lifinity-button-primary px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest"
-                            >
-                              Confirmar
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => openCompleteConfirmation(task)}
-                            className="lifinity-button-secondary px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest"
-                          >
-                            Concluir
-                          </button>
+              // Constrói as secções a apresentar conforme o modo de visualização.
+              // As secções operam SEMPRE sobre filteredTasks (já filtrado).
+              const sections =
+                filterFriend === 'all'
+                  ? [
+                      // MODO A — sem filtro de amigo: três secções por origem
+                      {
+                        title: 'As minhas tarefas',
+                        tasks: filteredTasks.filter(
+                          (task) => getTaskCategory(task) === 'to_complete_mine'
                         )
-                      )}
+                      },
+                      {
+                        title: 'Recebidas de outros',
+                        tasks: filteredTasks.filter(
+                          (task) => getTaskCategory(task) === 'to_complete_received'
+                        )
+                      },
+                      {
+                        title: 'Atribuídas por mim',
+                        tasks: filteredTasks.filter(
+                          (task) => getTaskCategory(task) === 'created_for_others'
+                        )
+                      }
+                    ]
+                  : [
+                      // MODO B — com filtro de amigo: duas secções (recebidas dele / enviadas a ele)
+                      {
+                        title: `Recebidas de ${selectedFriendName}`,
+                        // Tarefas criadas por esse amigo (ele é o criador)
+                        tasks: filteredTasks.filter(
+                          (task) => String(task.iduser) === String(filterFriend)
+                        )
+                      },
+                      {
+                        title: `Enviadas a ${selectedFriendName}`,
+                        // Tarefas que eu criei e atribuí a esse amigo
+                        tasks: filteredTasks.filter((task) => {
+                          if (task.task_origin !== 'created_by_me') return false;
+                          const assigneeIdList = (task.assignee_ids || '')
+                            .split(',')
+                            .filter(Boolean);
+                          return assigneeIdList.includes(String(filterFriend));
+                        })
+                      }
+                    ];
 
-                      {(taskIsOwner || taskCanBeHidden) && (
-                          <button
-                            onClick={() => handleDeleteTask(task)}
-                            className="transition-all p-2 [color:var(--lifinity-text-muted)] hover:[color:var(--lifinity-danger)]"
-                            title={
-                              task.status === 'concluida' || taskOverdue
-                                ? 'Ocultar atividade'
-                                : 'Eliminar atividade'
-                            }
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="20"
-                              height="20"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              />
-                            </svg>
-                          </button>
-                        )}
-                    </div>
+              // Se nenhuma secção tiver tarefas, mostra a mensagem de "sem tarefas".
+              const hasAnyTask = sections.some((section) => section.tasks.length > 0);
+
+              if (!hasAnyTask) {
+                return (
+                  <div className="p-20 text-center font-bold italic uppercase text-xs tracking-widest [color:var(--lifinity-text-muted)]">
+                    Nenhuma atividade encontrada com estes filtros.
                   </div>
                 );
-              })
-            )}
+              }
+
+              // Renderiza as secções (renderSection ignora as vazias devolvendo null).
+              return (
+                <div className="space-y-6">
+                  {sections.map((section) =>
+                    renderSection(section.title, section.tasks)
+                  )}
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>
