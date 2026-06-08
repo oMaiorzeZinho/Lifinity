@@ -34,6 +34,28 @@ const taskHiddenForUserCondition = `
     )
 `;
 
+// Valida o due_date enviado ao criar/editar uma tarefa:
+// - vazio/nulo e permitido (tarefa sem prazo) -> { value: null };
+// - se vier preenchido, tem de ser uma data valida e nao pode estar no passado;
+// - devolve { error } com a mensagem do 400 quando a validacao falha.
+const validateDueDate = (due_date) => {
+    if (due_date === undefined || due_date === null || String(due_date).trim() === "") {
+        return { value: null };
+    }
+
+    const parsedDate = new Date(due_date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+        return { error: "Data de prazo inválida." };
+    }
+
+    if (parsedDate.getTime() < Date.now()) {
+        return { error: "O prazo não pode ser uma data passada." };
+    }
+
+    return { value: due_date };
+};
+
 // 1. Listar todas as tarefas do utilizador logado
 exports.getTasks = async (req, res) => {
     try {
@@ -181,10 +203,15 @@ exports.createTask = async (req, res) => {
             });
         }
 
-        const normalizedDueDate =
-            due_date && String(due_date).trim() !== ""
-                ? due_date
-                : null;
+        const dueDateValidation = validateDueDate(due_date);
+
+        if (dueDateValidation.error) {
+            return res.status(400).json({
+                message: dueDateValidation.error
+            });
+        }
+
+        const normalizedDueDate = dueDateValidation.value;
 
         console.log("--- A Inserir Nova Tarefa na BD ---");
 
@@ -409,6 +436,22 @@ exports.completeTask = async (req, res) => {
             });
         }
 
+        // Update atomico: a condicao "status != 'concluida'" garante que, se
+        // duas pessoas tentarem concluir ao mesmo tempo, so a primeira consegue.
+        const [updateResult] = await db.query(
+            "UPDATE TASK SET status = 'concluida', completed_at = NOW(), completed_by = ? WHERE idtask = ? AND status != 'concluida'",
+            [iduser, idtask]
+        );
+
+        // Se nao alterou nenhuma linha, a tarefa ja tinha sido concluida
+        // entretanto (corrida entre pedidos) - nao atribui XP nem duplica
+        // historico/notificacoes.
+        if (updateResult.affectedRows === 0) {
+            return res.status(400).json({
+                message: "Esta tarefa já foi concluída."
+            });
+        }
+
         const today = new Date().toISOString().split('T')[0];
         const createdAt = new Date(task.created_at).toISOString().split('T')[0];
         const isSameDay = today === createdAt;
@@ -418,11 +461,6 @@ exports.completeTask = async (req, res) => {
             task.priority,
             isSameDay,
             currentStreak
-        );
-
-        await db.query(
-            "UPDATE TASK SET status = 'concluida', completed_at = NOW(), completed_by = ? WHERE idtask = ?",
-            [iduser, idtask]
         );
 
         // Se quem concluiu nao for o criador, notifica o criador da tarefa
@@ -510,11 +548,20 @@ exports.updateTask = async (req, res) => {
             });
         }
 
+        const dueDateValidation = validateDueDate(due_date);
+
+        if (dueDateValidation.error) {
+            return res.status(400).json({
+                message: dueDateValidation.error
+            });
+        }
+
         // Procurar tarefa e confirmar se pertence ao utilizador autenticado
         const [tasks] = await db.query(
             `SELECT *,
                     (due_date IS NOT NULL AND due_date < NOW() AND status != 'concluida') AS is_lost,
-                    (SELECT COUNT(*) > 0 FROM TASK_ASSIGNEE ta WHERE ta.idtask = TASK.idtask) AS has_assignees
+                    (SELECT COUNT(*) > 0 FROM TASK_ASSIGNEE ta WHERE ta.idtask = TASK.idtask) AS has_assignees,
+                    (SELECT COUNT(*) > 0 FROM GROUP_TASK gt WHERE gt.idtask = TASK.idtask) AS has_groups
              FROM TASK
              WHERE idtask = ? AND iduser = ?`,
             [idtask, iduser]
@@ -542,11 +589,13 @@ exports.updateTask = async (req, res) => {
         }
 
         // Regra de edicao depende do tipo de tarefa:
-        // - tarefa PESSOAL (sem assignees): so editavel ate 1 hora depois da criacao.
-        // - tarefa PARA OUTROS (com assignees): editavel ate ser concluida (sem limite de tempo).
+        // - tarefa PESSOAL (sem assignees nem grupos): so editavel ate 1 hora depois da criacao.
+        // - tarefa PARA OUTROS (com assignees e/ou grupos): editavel ate ser concluida (sem limite de tempo).
         const hasAssignees = Number(task.has_assignees) > 0;
+        const hasGroups = Number(task.has_groups) > 0;
+        const isForOthers = hasAssignees || hasGroups;
 
-        if (!hasAssignees) {
+        if (!isForOthers) {
             const createdAt = new Date(task.created_at);
             const now = new Date();
             const diffInMs = now.getTime() - createdAt.getTime();
@@ -559,9 +608,7 @@ exports.updateTask = async (req, res) => {
             }
         }
 
-        const normalizedDueDate = due_date && due_date.trim() !== ""
-            ? due_date
-            : null;
+        const normalizedDueDate = dueDateValidation.value;
 
         await db.query(
             `UPDATE TASK
@@ -602,6 +649,7 @@ exports.deleteTask = async (req, res) => {
             `SELECT
                 t.idtask,
                 t.iduser,
+                t.title,
                 t.status,
                 (t.due_date IS NOT NULL AND t.due_date < NOW() AND t.status != 'concluida') AS is_lost,
                 EXISTS (
@@ -657,10 +705,56 @@ exports.deleteTask = async (req, res) => {
             return res.status(403).json({ message: "Nao podes eliminar uma tarefa de outro utilizador." });
         }
 
+        // Tarefa pendente partilhada (com assignees e/ou grupos): recolhe os
+        // destinatarios ANTES de apagar, porque o DELETE em cascata remove os
+        // registos de TASK_ASSIGNEE/GROUP_TASK e deixariamos de os conseguir identificar.
+        let sharedRecipientIds = [];
+
+        if (isShared) {
+            const recipientIds = new Set();
+
+            const [assigneeRecipients] = await db.query(
+                "SELECT iduser FROM TASK_ASSIGNEE WHERE idtask = ?",
+                [idtask]
+            );
+            assigneeRecipients.forEach((row) => recipientIds.add(Number(row.iduser)));
+
+            const [groupMemberRecipients] = await db.query(
+                `SELECT DISTINCT gm.iduser
+                 FROM GROUP_TASK gt
+                 INNER JOIN GROUP_MEMBER gm ON gm.idgroup = gt.idgroup
+                 WHERE gt.idtask = ?`,
+                [idtask]
+            );
+            groupMemberRecipients.forEach((row) => recipientIds.add(Number(row.iduser)));
+
+            recipientIds.delete(Number(iduser));
+            sharedRecipientIds = [...recipientIds];
+        }
+
         await db.query(
             "DELETE FROM TASK WHERE idtask = ? AND iduser = ?",
             [idtask, iduser]
         );
+
+        // Avisa quem recebeu a tarefa de que o criador a removeu (ela desaparece
+        // tambem da lista deles, por causa do ON DELETE CASCADE).
+        if (sharedRecipientIds.length > 0) {
+            const [creatorRows] = await db.query(
+                "SELECT username FROM USER WHERE iduser = ?",
+                [iduser]
+            );
+            const creatorUsername = creatorRows[0]?.username || 'utilizador';
+
+            await createNotifications({
+                recipients: sharedRecipientIds,
+                type: 'tarefa',
+                message: `A tarefa "${task.title}" foi removida por ${creatorUsername}.`,
+                entity_type: 'task',
+                entity_id: Number(idtask),
+                link: '/dashboard/tasks'
+            });
+        }
 
         res.json({ message: "Tarefa eliminada com sucesso." });
     } catch (err) {

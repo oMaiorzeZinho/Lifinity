@@ -203,9 +203,10 @@ const canEditTask = (task) => {
   if (isTaskOverdue(task)) return false;
   if (!task.created_at) return false;
 
-  // Tarefas atribuídas a outros: editáveis até serem concluídas, sem limite de tempo.
+  // Tarefas para outros (assignees e/ou grupos): editáveis até serem concluídas, sem limite de tempo.
   const hasAssignees = Boolean(Number(task.has_assignees));
-  if (hasAssignees) return true;
+  const hasGroups = Boolean(Number(task.has_groups));
+  if (hasAssignees || hasGroups) return true;
 
   // Tarefas pessoais: só editáveis até 1 hora depois da criação.
   const createdAt = new Date(task.created_at);
@@ -473,11 +474,23 @@ const openCompleteConfirmation = (task) => {
     const isLost = isTaskOverdue(task);
     const shouldHide = isCompleted || isLost;
 
-    const confirmMessage = shouldHide
-      ? `Tens a certeza que queres ocultar esta atividade ${
-          isLost ? 'perdida' : 'concluída'
-        } da lista?`
-      : 'Tens a certeza que queres eliminar esta atividade?';
+    // Tarefa pendente, do criador, atribuída a amigos e/ou grupos: ao eliminar
+    // desaparece também da lista dos destinatários (e eles são notificados).
+    const isOwner = Number(task.iduser) === Number(user.iduser);
+    const isShared = Boolean(Number(task.has_assignees)) || Boolean(Number(task.has_groups));
+
+    let confirmMessage;
+
+    if (shouldHide) {
+      confirmMessage = `Tens a certeza que queres ocultar esta atividade ${
+        isLost ? 'perdida' : 'concluída'
+      } da lista?`;
+    } else if (isOwner && isShared) {
+      confirmMessage =
+        'Esta tarefa foi atribuída a outras pessoas. Se a eliminares, ela será removida para todos os destinatários e eles serão notificados. Tens a certeza?';
+    } else {
+      confirmMessage = 'Tens a certeza que queres eliminar esta atividade?';
+    }
 
     if (!window.confirm(confirmMessage)) return;
 
