@@ -76,6 +76,21 @@ exports.getTasks = async (req, res) => {
                     WHERE ta.idtask = t.idtask
                 ) AS assignee_ids,
 
+                -- Nomes (username) dos amigos a quem a tarefa foi atribuida
+                (
+                    SELECT GROUP_CONCAT(DISTINCT u.username SEPARATOR ', ')
+                    FROM TASK_ASSIGNEE ta
+                    INNER JOIN USER u ON u.iduser = ta.iduser
+                    WHERE ta.idtask = t.idtask
+                ) AS assignee_names,
+
+                -- Nome de quem concluiu a tarefa (se ja tiver sido concluida)
+                (
+                    SELECT u.username
+                    FROM USER u
+                    WHERE u.iduser = t.completed_by
+                ) AS completed_by_name,
+
                 (
                     SELECT GROUP_CONCAT(DISTINCT ge.name SEPARATOR ', ')
                     FROM GROUP_TASK gt
@@ -406,9 +421,27 @@ exports.completeTask = async (req, res) => {
         );
 
         await db.query(
-            "UPDATE TASK SET status = 'concluida', completed_at = NOW() WHERE idtask = ?",
-            [idtask]
+            "UPDATE TASK SET status = 'concluida', completed_at = NOW(), completed_by = ? WHERE idtask = ?",
+            [iduser, idtask]
         );
+
+        // Se quem concluiu nao for o criador, notifica o criador da tarefa
+        if (Number(task.iduser) !== Number(iduser)) {
+            const [completerRows] = await db.query(
+                "SELECT username FROM USER WHERE iduser = ?",
+                [iduser]
+            );
+            const completerUsername = completerRows[0]?.username || 'utilizador';
+
+            await createNotifications({
+                recipients: [task.iduser],
+                type: 'tarefa',
+                message: `A tarefa "${task.title}" foi concluída por ${completerUsername}.`,
+                entity_type: 'task',
+                entity_id: Number(idtask),
+                link: '/dashboard/tasks'
+            });
+        }
 
         const [userStats] = await db.query(
             "SELECT xp FROM USER WHERE iduser = ?",

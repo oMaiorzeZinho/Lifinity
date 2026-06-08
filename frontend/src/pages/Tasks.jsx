@@ -858,6 +858,33 @@ const openCompleteConfirmation = (task) => {
       !taskOverdue &&
       (!taskHasAssignees || taskIsAssignee);
 
+    // Etiquetas de origem/destino a mostrar no cartão. Para tarefas que criei e
+    // enviei a outros, mostra para quem foram (grupo e/ou amigos) em vez de
+    // "Criada por mim"; as restantes mantêm a etiqueta de origem habitual.
+    const taskHasGroups = Boolean(Number(task.has_groups));
+    const taskHasRecipients = taskHasAssignees || taskHasGroups;
+
+    const originLabels = [];
+
+    if (task.task_origin === 'created_by_me') {
+      if (taskHasRecipients) {
+        if (taskHasGroups) {
+          originLabels.push(`Grupo: ${task.group_names || 'grupo'}`);
+        }
+        if (taskHasAssignees) {
+          originLabels.push(`Para: ${task.assignee_names || 'amigo'}`);
+        }
+      } else {
+        originLabels.push('Criada por mim');
+      }
+    } else if (task.task_origin === 'assigned_to_me') {
+      originLabels.push(`Recebida de ${task.creator_username || 'utilizador'}`);
+    } else if (task.task_origin === 'group_task') {
+      originLabels.push(`Grupo: ${task.group_names || 'grupo'}`);
+    } else if (task.task_origin) {
+      originLabels.push('Atividade');
+    }
+
     return (
       <div
         key={task.idtask}
@@ -893,15 +920,23 @@ const openCompleteConfirmation = (task) => {
           </span>
 
           <div className="flex flex-wrap gap-2 mt-2">
-            {task.task_origin && (
-              <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)]">
-                {task.task_origin === 'created_by_me'
-                  ? 'Criada por mim'
-                  : task.task_origin === 'assigned_to_me'
-                    ? `Recebida de ${task.creator_username || 'utilizador'}`
-                    : task.task_origin === 'group_task'
-                      ? `Grupo: ${task.group_names || 'grupo'}`
-                      : 'Atividade'}
+            {/* Etiquetas de origem/destino: para tarefas que criei e enviei a outros,
+                mostra para quem foram (em vez de "Criada por mim"); as restantes
+                mantêm a etiqueta de origem habitual. */}
+            {originLabels.map((label, index) => (
+              <span
+                key={`origin-${index}`}
+                className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border-[var(--lifinity-border)]"
+              >
+                {label}
+              </span>
+            ))}
+
+            {/* Em qualquer tarefa concluída, mostra quem a concluiu (útil para
+                acompanhar tarefas que atribuí a outros) */}
+            {task.status === 'concluida' && task.completed_by_name && (
+              <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-[var(--lifinity-success-surface)] [color:var(--lifinity-success)] border-[var(--lifinity-border)]">
+                Concluída por {task.completed_by_name}
               </span>
             )}
 
