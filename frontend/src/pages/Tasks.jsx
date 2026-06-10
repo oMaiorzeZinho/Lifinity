@@ -332,29 +332,55 @@ const TaskCalendar = ({
     const taskCanBeHidden = isDone || taskOverdue;
     const taskCanBeDeleted = taskIsOwner || taskCanBeHidden;
 
-    // Badge neutro (origem, prazo, criação)
-    const neutralBadgeClass =
-      'text-[10px] font-bold uppercase px-2 py-0.5 rounded-full tracking-wider border text-(--lifinity-text-muted)';
-    const neutralBadgeStyle = { borderColor: 'rgba(174,194,180,0.2)' };
+    // Classe base dos badges (forma de pílula); as cores vêm de style inline
+    // hardcoded para garantir contraste e não serem sobrescritas pelo Tailwind.
+    const badgeBaseClass =
+      'text-[10px] font-bold uppercase px-2 py-0.5 rounded-full tracking-wider';
 
-    // Cor do badge de prioridade consoante o nível
-    const priorityBadgeClass = {
-      alta: 'text-(--lifinity-danger)',
-      media: 'text-(--lifinity-warning)',
-      baixa: 'text-(--lifinity-success)'
-    };
-    const priorityBadgeBorder = {
-      alta: 'rgba(248,113,113,0.4)',
-      media: 'rgba(250,204,21,0.4)',
-      baixa: 'rgba(134,239,172,0.4)'
+    // Badge genérico (origem, prazo, criação, finalizado): fundo escuro, texto claro
+    const neutralBadgeStyle = {
+      background: 'rgba(255,255,255,0.07)',
+      color: '#c8dece',
+      border: '1px solid rgba(255,255,255,0.15)'
     };
 
-    // Fundo sólido do card; tarefas perdidas ganham borda esquerda vermelha
+    // Estilo do badge por prioridade: fundo semitransparente + texto e borda da cor
+    const priorityBadgeStyle = {
+      alta: {
+        background: 'rgba(239,68,68,0.15)',
+        color: '#fca5a5',
+        border: '1px solid rgba(239,68,68,0.35)'
+      },
+      media: {
+        background: 'rgba(234,179,8,0.15)',
+        color: '#fde047',
+        border: '1px solid rgba(234,179,8,0.35)'
+      },
+      baixa: {
+        background: 'rgba(134,239,172,0.15)',
+        color: '#86efac',
+        border: '1px solid rgba(134,239,172,0.35)'
+      }
+    };
+
+    // Badge de tarefa perdida (mesmas cores que prioridade alta)
+    const lostBadgeStyle = {
+      background: 'rgba(239,68,68,0.15)',
+      color: '#fca5a5',
+      border: '1px solid rgba(239,68,68,0.35)'
+    };
+
+    // Estilo base dos botões de ação (sem cor — definida inline por botão)
+    const actionButtonClass =
+      'text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg';
+
+    // Fundo do card ligeiramente mais claro que o painel (#1a2620), para criar
+    // separação visual clara. Tarefas perdidas ganham borda esquerda vermelha.
     const cardStyle = {
-      background: '#243020',
+      background: '#1e3028',
       border: '1px solid rgba(174,194,180,0.2)',
       ...(taskOverdue && !isDone
-        ? { borderLeft: '2px solid rgba(248,113,113,0.5)' }
+        ? { borderLeft: '2px solid rgba(239,68,68,0.5)' }
         : {})
     };
 
@@ -366,16 +392,15 @@ const TaskCalendar = ({
       >
         {/* Título da tarefa */}
         <p
-          className={`text-sm font-bold text-(--lifinity-text) ${
-            isDone ? 'line-through' : ''
-          }`}
+          className={`text-sm font-bold ${isDone ? 'line-through' : ''}`}
+          style={{ color: '#e8f5e9' }}
         >
           {task.title}
         </p>
 
         {/* Descrição (máximo 2 linhas) */}
         {task.description && (
-          <p className="text-xs mt-1 text-(--lifinity-text-muted) line-clamp-2">
+          <p className="text-xs mt-1 line-clamp-2" style={{ color: '#a5c9ac' }}>
             {task.description}
           </p>
         )}
@@ -383,7 +408,7 @@ const TaskCalendar = ({
         {/* Badges de origem, prazo, criação e estado/prioridade */}
         <div className="flex flex-wrap gap-2 mt-3">
           {task.task_origin && (
-            <span className={neutralBadgeClass} style={neutralBadgeStyle}>
+            <span className={badgeBaseClass} style={neutralBadgeStyle}>
               {task.task_origin === 'created_by_me'
                 ? 'Criada por mim'
                 : task.task_origin === 'assigned_to_me'
@@ -395,37 +420,29 @@ const TaskCalendar = ({
           )}
 
           {dueDateLabel && (
-            <span className={neutralBadgeClass} style={neutralBadgeStyle}>
+            <span className={badgeBaseClass} style={neutralBadgeStyle}>
               Prazo: {dueDateLabel}
             </span>
           )}
 
           {creationDateLabel && (
-            <span className={neutralBadgeClass} style={neutralBadgeStyle}>
+            <span className={badgeBaseClass} style={neutralBadgeStyle}>
               Criada a {creationDateLabel}
             </span>
           )}
 
           {isDone ? (
-            <span className={neutralBadgeClass} style={neutralBadgeStyle}>
+            <span className={badgeBaseClass} style={neutralBadgeStyle}>
               Finalizado
             </span>
           ) : taskOverdue ? (
-            <span
-              className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full tracking-wider border text-(--lifinity-danger)"
-              style={{ borderColor: 'rgba(248,113,113,0.4)' }}
-            >
+            <span className={badgeBaseClass} style={lostBadgeStyle}>
               Perdida
             </span>
           ) : (
             <span
-              className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full tracking-wider border ${
-                priorityBadgeClass[task.priority] || priorityBadgeClass.media
-              }`}
-              style={{
-                borderColor:
-                  priorityBadgeBorder[task.priority] || priorityBadgeBorder.media
-              }}
+              className={badgeBaseClass}
+              style={priorityBadgeStyle[task.priority] || priorityBadgeStyle.media}
             >
               {task.priority}
             </span>
@@ -441,16 +458,24 @@ const TaskCalendar = ({
                   <button
                     type="button"
                     onClick={onCancelComplete}
-                    className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg border text-(--lifinity-text-muted)"
-                    style={{ borderColor: 'rgba(174,194,180,0.2)' }}
+                    className={actionButtonClass}
+                    style={{
+                      color: '#a5c9ac',
+                      border: '1px solid rgba(165,201,172,0.3)',
+                      background: 'rgba(165,201,172,0.06)'
+                    }}
                   >
                     Cancelar
                   </button>
                   <button
                     type="button"
                     onClick={onConfirmComplete}
-                    className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg border text-(--lifinity-success)"
-                    style={{ borderColor: 'rgba(134,239,172,0.4)' }}
+                    className={actionButtonClass}
+                    style={{
+                      color: '#86efac',
+                      border: '1px solid rgba(134,239,172,0.4)',
+                      background: 'rgba(134,239,172,0.08)'
+                    }}
                   >
                     Confirmar
                   </button>
@@ -459,8 +484,12 @@ const TaskCalendar = ({
                 <button
                   type="button"
                   onClick={() => onComplete(task)}
-                  className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg border text-(--lifinity-success)"
-                  style={{ borderColor: 'rgba(134,239,172,0.4)' }}
+                  className={actionButtonClass}
+                  style={{
+                    color: '#86efac',
+                    border: '1px solid rgba(134,239,172,0.4)',
+                    background: 'rgba(134,239,172,0.08)'
+                  }}
                 >
                   Concluir
                 </button>
@@ -473,8 +502,12 @@ const TaskCalendar = ({
                   onEdit(task);
                   setSelectedDay(null);
                 }}
-                className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg border text-(--lifinity-text-muted)"
-                style={{ borderColor: 'rgba(174,194,180,0.2)' }}
+                className={actionButtonClass}
+                style={{
+                  color: '#a5c9ac',
+                  border: '1px solid rgba(165,201,172,0.3)',
+                  background: 'rgba(165,201,172,0.06)'
+                }}
               >
                 Editar
               </button>
@@ -488,7 +521,8 @@ const TaskCalendar = ({
                   setSelectedDay(null);
                 }}
                 aria-label="Apagar atividade"
-                className="p-1.5 rounded-lg text-(--lifinity-text-muted) hover:text-(--lifinity-danger) transition-colors"
+                className="p-1.5 rounded-lg transition-opacity hover:opacity-80"
+                style={{ color: '#fca5a5' }}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -687,8 +721,14 @@ const TaskCalendar = ({
             }`}
             style={{ background: '#1a2620', borderLeft: '1px solid rgba(174,194,180,0.3)' }}
           >
-            <div className="flex items-start justify-between gap-4 pb-4 border-b border-(--lifinity-border)">
-              <h3 className="text-base font-bold tracking-tight text-(--lifinity-text)">
+            <div
+              className="flex items-start justify-between gap-4 pb-4 border-b"
+              style={{ borderColor: 'rgba(255,255,255,0.1)' }}
+            >
+              <h3
+                className="text-base font-bold tracking-tight"
+                style={{ color: '#e8f5e9' }}
+              >
                 {selectedDay
                   ? selectedDay.toLocaleDateString('pt-PT', {
                       weekday: 'long',
@@ -703,7 +743,8 @@ const TaskCalendar = ({
                 type="button"
                 onClick={() => setSelectedDay(null)}
                 aria-label="Fechar painel"
-                className="lifinity-button-secondary w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black shrink-0"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black shrink-0"
+                style={{ color: '#a5c9ac' }}
               >
                 ✕
               </button>
