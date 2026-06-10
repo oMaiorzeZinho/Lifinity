@@ -292,75 +292,226 @@ const getDateKey = (date) => {
   return `${year}-${month}-${day}`;
 };
 
-// Cartão de tarefa do painel lateral do calendário, com cores de alto contraste
-// (fundo sólido + texto claro) para garantir legibilidade sobre o fundo do painel.
-const renderPanelTaskCard = (task) => {
-  const taskOverdue = isTaskOverdue(task);
-  const dueDateLabel = formatDueDate(task.due_date);
-  const creationDateLabel = formatCreationDate(task.created_at);
-
-  // Badges com fundo e texto contrastantes
-  const badgeClass =
-    'text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest bg-(--lifinity-border) text-(--lifinity-text)';
-
-  return (
-    <div
-      key={task.idtask}
-      className="rounded-2xl p-4"
-      style={{ background: '#243020', border: '1px solid rgba(174,194,180,0.2)' }}
-    >
-      {/* Título da tarefa: texto claro e a negrito */}
-      <p className="font-bold text-base text-(--lifinity-text)">
-        {task.title}
-      </p>
-
-      {/* Descrição: texto secundário, mas legível */}
-      <p className="text-sm mt-1 text-(--lifinity-text-muted)">
-        {task.description || 'Sem descrição detalhada.'}
-      </p>
-
-      <div className="flex flex-wrap gap-2 mt-3">
-        {task.task_origin && (
-          <span className={badgeClass}>
-            {task.task_origin === 'created_by_me'
-              ? 'Criada por mim'
-              : task.task_origin === 'assigned_to_me'
-                ? `Recebida de ${task.creator_username || 'utilizador'}`
-                : task.task_origin === 'group_task'
-                  ? `Grupo: ${task.group_names || 'grupo'}`
-                  : 'Atividade'}
-          </span>
-        )}
-
-        {dueDateLabel && (
-          <span className={badgeClass}>
-            Prazo: {dueDateLabel}
-          </span>
-        )}
-
-        {creationDateLabel && (
-          <span className={badgeClass}>
-            Criada a {creationDateLabel}
-          </span>
-        )}
-
-        <span className={badgeClass}>
-          {task.status === 'concluida'
-            ? 'Finalizado'
-            : taskOverdue
-              ? 'Perdida'
-              : task.priority}
-        </span>
-      </div>
-    </div>
-  );
-};
-
 // Componente da vista de calendário mensal: grelha do mês + painel lateral com as
-// tarefas do dia selecionado.
-const TaskCalendar = ({ tasks }) => {
+// tarefas do dia selecionado. Recebe as funções de ação da página principal
+// (concluir/editar/apagar) por props, para não duplicar lógica de negócio.
+const TaskCalendar = ({
+  tasks,
+  currentUser,
+  onComplete,
+  onConfirmComplete,
+  onCancelComplete,
+  taskToComplete,
+  onEdit,
+  onDelete,
+  canEdit,
+  isOverdue
+}) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(null);
+
+  // Cartão de tarefa do painel lateral: cores sólidas de alto contraste e botões
+  // de ação (concluir/editar/apagar) com as mesmas validações da lista principal.
+  const renderPanelTaskCard = (task) => {
+    const taskOverdue = isOverdue(task);
+    const isDone = task.status === 'concluida';
+    const dueDateLabel = formatDueDate(task.due_date);
+    const creationDateLabel = formatCreationDate(task.created_at);
+
+    // Permissões — replicam exatamente a lógica do renderTaskCard da lista
+    const taskIsOwner = Number(task.iduser) === Number(currentUser.iduser);
+    const taskHasAssignees = Boolean(Number(task.has_assignees));
+    const taskIsAssignee = (task.assignee_ids || '')
+      .split(',')
+      .filter(Boolean)
+      .includes(String(currentUser.iduser));
+
+    const taskCanBeCompleted =
+      !isDone && !taskOverdue && (!taskHasAssignees || taskIsAssignee);
+    const taskCanBeEdited = taskIsOwner && canEdit(task);
+    const taskCanBeHidden = isDone || taskOverdue;
+    const taskCanBeDeleted = taskIsOwner || taskCanBeHidden;
+
+    // Badge neutro (origem, prazo, criação)
+    const neutralBadgeClass =
+      'text-[10px] font-bold uppercase px-2 py-0.5 rounded-full tracking-wider border text-(--lifinity-text-muted)';
+    const neutralBadgeStyle = { borderColor: 'rgba(174,194,180,0.2)' };
+
+    // Cor do badge de prioridade consoante o nível
+    const priorityBadgeClass = {
+      alta: 'text-(--lifinity-danger)',
+      media: 'text-(--lifinity-warning)',
+      baixa: 'text-(--lifinity-success)'
+    };
+    const priorityBadgeBorder = {
+      alta: 'rgba(248,113,113,0.4)',
+      media: 'rgba(250,204,21,0.4)',
+      baixa: 'rgba(134,239,172,0.4)'
+    };
+
+    // Fundo sólido do card; tarefas perdidas ganham borda esquerda vermelha
+    const cardStyle = {
+      background: '#243020',
+      border: '1px solid rgba(174,194,180,0.2)',
+      ...(taskOverdue && !isDone
+        ? { borderLeft: '2px solid rgba(248,113,113,0.5)' }
+        : {})
+    };
+
+    return (
+      <div
+        key={task.idtask}
+        className={`rounded-2xl p-4 ${isDone ? 'opacity-60' : ''}`}
+        style={cardStyle}
+      >
+        {/* Título da tarefa */}
+        <p
+          className={`text-sm font-bold text-(--lifinity-text) ${
+            isDone ? 'line-through' : ''
+          }`}
+        >
+          {task.title}
+        </p>
+
+        {/* Descrição (máximo 2 linhas) */}
+        {task.description && (
+          <p className="text-xs mt-1 text-(--lifinity-text-muted) line-clamp-2">
+            {task.description}
+          </p>
+        )}
+
+        {/* Badges de origem, prazo, criação e estado/prioridade */}
+        <div className="flex flex-wrap gap-2 mt-3">
+          {task.task_origin && (
+            <span className={neutralBadgeClass} style={neutralBadgeStyle}>
+              {task.task_origin === 'created_by_me'
+                ? 'Criada por mim'
+                : task.task_origin === 'assigned_to_me'
+                  ? `Recebida de ${task.creator_username || 'utilizador'}`
+                  : task.task_origin === 'group_task'
+                    ? `Grupo: ${task.group_names || 'grupo'}`
+                    : 'Atividade'}
+            </span>
+          )}
+
+          {dueDateLabel && (
+            <span className={neutralBadgeClass} style={neutralBadgeStyle}>
+              Prazo: {dueDateLabel}
+            </span>
+          )}
+
+          {creationDateLabel && (
+            <span className={neutralBadgeClass} style={neutralBadgeStyle}>
+              Criada a {creationDateLabel}
+            </span>
+          )}
+
+          {isDone ? (
+            <span className={neutralBadgeClass} style={neutralBadgeStyle}>
+              Finalizado
+            </span>
+          ) : taskOverdue ? (
+            <span
+              className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full tracking-wider border text-(--lifinity-danger)"
+              style={{ borderColor: 'rgba(248,113,113,0.4)' }}
+            >
+              Perdida
+            </span>
+          ) : (
+            <span
+              className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full tracking-wider border ${
+                priorityBadgeClass[task.priority] || priorityBadgeClass.media
+              }`}
+              style={{
+                borderColor:
+                  priorityBadgeBorder[task.priority] || priorityBadgeBorder.media
+              }}
+            >
+              {task.priority}
+            </span>
+          )}
+        </div>
+
+        {/* Ações: concluir (com confirmação inline), editar e apagar */}
+        {(taskCanBeCompleted || taskCanBeEdited || taskCanBeDeleted) && (
+          <div className="flex flex-wrap items-center justify-end gap-2 mt-4">
+            {taskCanBeCompleted &&
+              (taskToComplete?.idtask === task.idtask ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={onCancelComplete}
+                    className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg border text-(--lifinity-text-muted)"
+                    style={{ borderColor: 'rgba(174,194,180,0.2)' }}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onConfirmComplete}
+                    className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg border text-(--lifinity-success)"
+                    style={{ borderColor: 'rgba(134,239,172,0.4)' }}
+                  >
+                    Confirmar
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onComplete(task)}
+                  className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg border text-(--lifinity-success)"
+                  style={{ borderColor: 'rgba(134,239,172,0.4)' }}
+                >
+                  Concluir
+                </button>
+              ))}
+
+            {taskCanBeEdited && (
+              <button
+                type="button"
+                onClick={() => {
+                  onEdit(task);
+                  setSelectedDay(null);
+                }}
+                className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg border text-(--lifinity-text-muted)"
+                style={{ borderColor: 'rgba(174,194,180,0.2)' }}
+              >
+                Editar
+              </button>
+            )}
+
+            {taskCanBeDeleted && (
+              <button
+                type="button"
+                onClick={async () => {
+                  await onDelete(task);
+                  setSelectedDay(null);
+                }}
+                aria-label="Apagar atividade"
+                className="p-1.5 rounded-lg text-(--lifinity-text-muted) hover:text-(--lifinity-danger) transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   // Agrupa as tarefas por dia ('YYYY-MM-DD'), usando o campo due_date.
   // Tarefas sem due_date não entram no calendário (continuam visíveis na lista).
@@ -536,8 +687,8 @@ const TaskCalendar = ({ tasks }) => {
             }`}
             style={{ background: '#1a2620', borderLeft: '1px solid rgba(174,194,180,0.3)' }}
           >
-            <div className="flex items-start justify-between gap-4">
-              <h3 className="text-lg font-black tracking-tight capitalize text-(--lifinity-text)">
+            <div className="flex items-start justify-between gap-4 pb-4 border-b border-(--lifinity-border)">
+              <h3 className="text-base font-bold tracking-tight text-(--lifinity-text)">
                 {selectedDay
                   ? selectedDay.toLocaleDateString('pt-PT', {
                       weekday: 'long',
@@ -1711,7 +1862,18 @@ const openCompleteConfirmation = (task) => {
 
         {/* VISTA EM CALENDÁRIO: grelha mensal com painel lateral por dia */}
         {viewMode === 'calendar' && (
-          <TaskCalendar tasks={filteredTasks} />
+          <TaskCalendar
+            tasks={filteredTasks}
+            currentUser={user}
+            onComplete={openCompleteConfirmation}
+            onConfirmComplete={confirmCompleteTask}
+            onCancelComplete={closeCompleteConfirmation}
+            taskToComplete={taskToComplete}
+            onEdit={openEditModal}
+            onDelete={handleDeleteTask}
+            canEdit={canEditTask}
+            isOverdue={isTaskOverdue}
+          />
         )}
 
         {/* LISTAGEM FILTRADA (vista em lista) */}
