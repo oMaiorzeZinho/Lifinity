@@ -4,6 +4,7 @@ const router = express.Router();
 const chatController = require('../controllers/chatController');
 const verifyToken = require('../middlewares/authMiddleware');
 
+router.get('/unread-count', verifyToken, chatController.getUnreadCount);
 router.get('/conversations', verifyToken, chatController.getConversations);
 router.post('/conversations/private', verifyToken, chatController.createPrivateConversation);
 router.post('/conversations/group', verifyToken, chatController.createGroupConversation);

@@ -363,10 +363,42 @@ exports.getMessages = async (req, res) => {
             [idconversation]
         );
 
+        // Marca a conversa como lida por este membro (para o contador de não lidas)
+        await db.query(
+            `UPDATE CONVERSATION_MEMBER
+             SET last_read_at = NOW()
+             WHERE idconversation = ?
+               AND iduser = ?`,
+            [idconversation, iduser]
+        );
+
         res.json(messages);
     } catch (err) {
         console.error('Erro ao listar mensagens:', err);
         res.status(500).json({ message: 'Erro ao listar mensagens.' });
+    }
+};
+
+// Contar mensagens não lidas em todas as conversas do utilizador
+exports.getUnreadCount = async (req, res) => {
+    try {
+        const iduser = req.user.iduser;
+
+        const [rows] = await db.query(
+            `SELECT COUNT(*) AS count
+             FROM MESSAGE m
+             INNER JOIN CONVERSATION_MEMBER cm ON cm.idconversation = m.idconversation
+             WHERE cm.iduser = ?
+               AND m.idsender IS NOT NULL
+               AND m.idsender != ?
+               AND (cm.last_read_at IS NULL OR m.created_at > cm.last_read_at)`,
+            [iduser, iduser]
+        );
+
+        res.json({ count: Number(rows[0]?.count || 0) });
+    } catch (err) {
+        console.error('Erro ao contar mensagens nao lidas:', err);
+        res.status(500).json({ message: 'Erro ao contar mensagens nao lidas.' });
     }
 };
 
@@ -653,23 +685,9 @@ exports.sendMessage = async (req, res) => {
         );
 
         const sentMessage = messages[0];
-        const isGroup = membership.type === 'group';
-        const notificationMessage = messageType === 'verse'
-            ? `${sentMessage.sender_username || 'Alguem'} enviou um versiculo.`
-            : isGroup
-                ? `${sentMessage.sender_username || 'Alguem'} enviou uma mensagem no grupo "${membership.name || 'Grupo'}".`
-                : `${sentMessage.sender_username || 'Alguem'} enviou-te uma mensagem.`;
 
-        await createNotifications({
-            recipients: memberIds,
-            type: 'sistema',
-            message: notificationMessage,
-            entity_type: 'conversation',
-            entity_id: Number(idconversation),
-            link: `/dashboard/chat?conversation=${idconversation}`,
-            excludeUserId: iduser
-        });
-
+        // Mensagens de chat já não criam notificações no sino —
+        // as não lidas são contadas pelo widget de chat (last_read_at)
         await safeUnlockAchievementsForUser(iduser);
 
         res.status(201).json(sentMessage);

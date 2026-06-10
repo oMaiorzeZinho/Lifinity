@@ -642,7 +642,7 @@ const Community = () => {
       )}
 
       {/* AÇÕES PRINCIPAIS */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* CRIAR GRUPO */}
         <div className={`${cardClass} p-6 rounded-4xl`}>
           <p className="lifinity-muted-label mb-2 italic">
@@ -734,28 +734,6 @@ const Community = () => {
           </div>
         </div>
 
-        {/* CONVERSAS */}
-        <div className={`${cardClass} p-6 rounded-4xl`}>
-          <p className="lifinity-muted-label mb-2 italic">
-            Conversas
-          </p>
-
-          <h3 className="text-2xl font-black tracking-tight text-(--lifinity-text) mb-2">
-            Chat da comunidade
-          </h3>
-
-          <p className="font-medium text-sm mb-6 text-(--lifinity-text-muted)">
-            Abre as tuas conversas com amigos, grupos e o Assistente Lifinity.
-          </p>
-
-          <button
-            type="button"
-            onClick={() => navigate('/dashboard/chat')}
-            className={buttonSecondaryClass}
-          >
-            Abrir Chat
-          </button>
-        </div>
       </div>
 
       {/* GRUPOS */}

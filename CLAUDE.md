@@ -214,3 +214,4 @@ Este projeto é a minha prova final de curso. Representa 3 anos de estudo e dete
 - [2026-06-10] Corrigido contraste do painel lateral do calendário: texto branco, badges coloridos, cards com fundo contrastante.
 - [2026-06-10] Corrigido bug de tarefa duplicada (amigo+grupo); adicionado assignee_names na API; badges "Para: X" e "Grupo: X" nos cards de tarefas atribuídas.
 - [2026-06-10] Painel lateral do calendário: adicionados badges de origem (Criada por mim, Recebida de X, Grupo, Para: X) consistentes com a lista principal.
+- [2026-06-10] FASE A1: widget de chat flutuante com badge de não lidas (last_read_at em CONVERSATION_MEMBER); mensagens removidas das notificações do sino; card Conversas removido da Comunidade.

@@ -177,6 +177,9 @@ const Chat = () => {
       });
 
       setMessages(response.data);
+
+      // Avisa o widget de chat para atualizar o contador de nao lidas
+      window.dispatchEvent(new Event('lifinity-chat-read'));
     } catch (err) {
       console.error('Erro ao carregar mensagens:', err);
       setError(err.response?.data?.message || 'Nao foi possivel carregar esta conversa.');

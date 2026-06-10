@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, Outlet, Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import DailyVerseWidget from '../components/DailyVerseWidget';
+import ChatWidget from '../components/ChatWidget';
 import AccountSettingsModal from '../components/AccountSettingsModal';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -505,7 +506,11 @@ const DashboardLayout = () => {
         <Outlet />
       </main>
 
-      {!isInspirationPage && !isChatPage && <DailyVerseWidget />}
+      {/* Widgets flutuantes (chat + versículo) lado a lado no canto inferior direito */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-row items-end gap-3">
+        {!isChatPage && <ChatWidget />}
+        {!isInspirationPage && <DailyVerseWidget />}
+      </div>
       {settingsOpen && (
         <AccountSettingsModal
           user={user}

@@ -223,6 +223,7 @@ CREATE TABLE CONVERSATION_MEMBER (
     iduser INT,
     role ENUM('admin', 'membro') DEFAULT 'membro',
     joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_read_at DATETIME NULL,
     PRIMARY KEY (idconversation, iduser),
     KEY idx_conversation_member_user (iduser),
     FOREIGN KEY (idconversation) REFERENCES CONVERSATION(idconversation) ON DELETE CASCADE,
