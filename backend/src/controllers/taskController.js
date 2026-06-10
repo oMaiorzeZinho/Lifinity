@@ -87,6 +87,14 @@ exports.getTasks = async (req, res) => {
                       AND gm.iduser = ?
                 ) AS group_names,
 
+                -- Nomes dos destinatarios diretos (amigos), para mostrar "Para: X, Y"
+                (
+                    SELECT GROUP_CONCAT(DISTINCT u.username ORDER BY u.username SEPARATOR ', ')
+                    FROM TASK_ASSIGNEE ta
+                    INNER JOIN USER u ON u.iduser = ta.iduser
+                    WHERE ta.idtask = t.idtask
+                ) AS assignee_names,
+
                 -- Indica (0/1) se a tarefa tem destinatarios diretos (amigos)
                 (
                     SELECT COUNT(*) > 0
@@ -266,6 +274,10 @@ exports.createTask = async (req, res) => {
 
         const idtask = result.insertId;
 
+        // IMPORTANTE: os relacionamentos TASK_ASSIGNEE (amigo individual) e GROUP_TASK
+        // (grupo) sao independentes. Se um amigo for, ao mesmo tempo, destinatario
+        // individual E membro de um grupo selecionado, devem ser criados AMBOS os
+        // relacionamentos — nao deduplicamos assignees que ja sejam membros de grupos.
         if (assigneeIds.length > 0) {
             const placeholders = assigneeIds.map(() => '(?, ?, ?)').join(', ');
             const values = assigneeIds.flatMap((assigneeId) => [idtask, assigneeId, iduser]);

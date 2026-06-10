@@ -1402,6 +1402,25 @@ const openCompleteConfirmation = (task) => {
               </span>
             )}
 
+            {/* Para tarefas que EU criei e atribuí, mostra para quem foram enviadas:
+                um badge "Para: X, Y" com os amigos e/ou "Grupo: X" com os grupos. */}
+            {task.task_origin === 'created_by_me' &&
+              (Number(task.has_assignees) === 1 || Number(task.has_groups) === 1) && (
+                <>
+                  {task.assignee_names && (
+                    <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-(--lifinity-surface-soft) text-(--lifinity-text-muted) border-(--lifinity-border)">
+                      Para: {task.assignee_names}
+                    </span>
+                  )}
+
+                  {task.group_names && (
+                    <span className="text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border bg-(--lifinity-surface-soft) text-(--lifinity-text-muted) border-(--lifinity-border)">
+                      Grupo: {task.group_names}
+                    </span>
+                  )}
+                </>
+              )}
+
             {dueDateLabel && (
               <span
                 className={`text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest border ${

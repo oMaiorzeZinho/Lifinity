@@ -212,3 +212,4 @@ Este projeto é a minha prova final de curso. Representa 3 anos de estudo e dete
 - [2026-06-10] Corrigido painel lateral do calendário: fundo agora é sólido (cor hardcoded) em vez de translúcido.
 - [2026-06-10] Painel lateral do calendário: ações funcionais (concluir/editar/apagar) com as mesmas validações da lista, e redesign visual dos cards.
 - [2026-06-10] Corrigido contraste do painel lateral do calendário: texto branco, badges coloridos, cards com fundo contrastante.
+- [2026-06-10] Corrigido bug de tarefa duplicada (amigo+grupo); adicionado assignee_names na API; badges "Para: X" e "Grupo: X" nos cards de tarefas atribuídas.
