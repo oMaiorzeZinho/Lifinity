@@ -1,0 +1,1 @@
+Tive algumas ideias. No browser (e depois no android) invés de aparecerem as tarefas todas em lista, vamos colocar um calendário lá. Com cada dia do mês e cada mês do ano, enfim. E quando o utilizador clicasse num dia, apareciam as tarefas de lá, e teria filtros e etc.
