@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -266,6 +267,243 @@ const formatCreationDate = (dateString) => {
   return date.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' });
 };
 
+// --- VISTA DE CALENDÁRIO ---
+
+// Nomes dos meses e dos dias da semana em português, para o cabeçalho do calendário
+const MONTH_NAMES_PT = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+];
+
+const WEEKDAY_LABELS_PT = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+// Cor do ponto indicador de cada tarefa, consoante a sua prioridade
+const priorityDotClass = {
+  alta: 'bg-(--lifinity-danger)',
+  media: 'bg-(--lifinity-warning)',
+  baixa: 'bg-(--lifinity-success)'
+};
+
+// Devolve a chave 'YYYY-MM-DD' (em hora local) de uma data
+const getDateKey = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// Componente da vista de calendário mensal: grelha do mês + painel lateral com as
+// tarefas do dia selecionado. Recebe as tarefas já filtradas e a função que
+// desenha cada cartão de tarefa, para reutilizar exatamente o mesmo visual da lista.
+const TaskCalendar = ({ tasks, renderTaskCard }) => {
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState(null);
+
+  // Agrupa as tarefas por dia ('YYYY-MM-DD'), usando o campo due_date.
+  // Tarefas sem due_date não entram no calendário (continuam visíveis na lista).
+  const tasksByDay = new Map();
+
+  tasks.forEach((task) => {
+    if (!task.due_date) return;
+
+    const dueDate = new Date(task.due_date);
+    if (Number.isNaN(dueDate.getTime())) return;
+
+    const key = getDateKey(dueDate);
+
+    if (!tasksByDay.has(key)) {
+      tasksByDay.set(key, []);
+    }
+
+    tasksByDay.get(key).push(task);
+  });
+
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const startWeekday = new Date(year, month, 1).getDay();
+
+  const today = new Date();
+  const todayKey = getDateKey(today);
+
+  // Células da grelha: primeiro as células de preenchimento (antes do dia 1),
+  // depois um número por cada dia do mês.
+  const cells = [];
+
+  for (let i = 0; i < startWeekday; i++) {
+    cells.push(null);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    cells.push(day);
+  }
+
+  const goToPreviousMonth = () => setCurrentMonth(new Date(year, month - 1, 1));
+  const goToNextMonth = () => setCurrentMonth(new Date(year, month + 1, 1));
+
+  const selectedDayKey = selectedDay ? getDateKey(selectedDay) : null;
+  const selectedDayTasks = selectedDayKey ? tasksByDay.get(selectedDayKey) || [] : [];
+
+  return (
+    <div className={`${cardClass} rounded-2xl overflow-hidden`}>
+      {/* CABEÇALHO: mês/ano atual e navegação entre meses */}
+      <div className="flex items-center justify-between p-6 border-b border-(--lifinity-border)">
+        <button
+          type="button"
+          onClick={goToPreviousMonth}
+          aria-label="Mês anterior"
+          className="lifinity-button-secondary w-10 h-10 rounded-xl flex items-center justify-center text-lg font-black"
+        >
+          ‹
+        </button>
+
+        <h3 className="text-lg font-black uppercase tracking-widest text-(--lifinity-text)">
+          {MONTH_NAMES_PT[month]} {year}
+        </h3>
+
+        <button
+          type="button"
+          onClick={goToNextMonth}
+          aria-label="Mês seguinte"
+          className="lifinity-button-secondary w-10 h-10 rounded-xl flex items-center justify-center text-lg font-black"
+        >
+          ›
+        </button>
+      </div>
+
+      {/* CABEÇALHO DOS DIAS DA SEMANA */}
+      <div className="grid grid-cols-7 px-4 pt-4">
+        {WEEKDAY_LABELS_PT.map((weekday) => (
+          <div
+            key={weekday}
+            className="text-center text-[10px] font-black uppercase tracking-widest pb-2 text-(--lifinity-text-muted)"
+          >
+            {weekday}
+          </div>
+        ))}
+      </div>
+
+      {/* GRELHA DE DIAS DO MÊS */}
+      <div className="grid grid-cols-7 gap-2 p-4">
+        {cells.map((day, index) => {
+          // Células vazias de preenchimento antes do dia 1
+          if (day === null) {
+            return (
+              <div
+                key={`empty-${index}`}
+                className="aspect-square rounded-xl bg-(--lifinity-surface-soft) opacity-30"
+              />
+            );
+          }
+
+          const cellDate = new Date(year, month, day);
+          const key = getDateKey(cellDate);
+          const dayTasks = tasksByDay.get(key) || [];
+          const isToday = key === todayKey;
+
+          // Tarefas perdidas: não concluídas e com prazo já ultrapassado
+          const hasLostTask = dayTasks.some(
+            (task) => task.status !== 'concluida' && isTaskOverdue(task)
+          );
+
+          // No máximo 3 pontos visíveis, com "..." para o restante
+          const visibleDots = dayTasks.slice(0, 3);
+          const extraCount = dayTasks.length - visibleDots.length;
+
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => dayTasks.length > 0 && setSelectedDay(cellDate)}
+              disabled={dayTasks.length === 0}
+              className={`aspect-square rounded-xl p-2 flex flex-col items-start gap-1 border transition-all ${
+                isToday
+                  ? 'border-(--lifinity-primary) bg-(--lifinity-primary-muted)'
+                  : hasLostTask
+                    ? 'border-(--lifinity-danger) bg-(--lifinity-surface-soft) opacity-80'
+                    : 'border-(--lifinity-border) bg-(--lifinity-surface-soft)'
+              } ${dayTasks.length > 0 ? 'hover:bg-(--lifinity-surface-hover) cursor-pointer' : 'cursor-default'}`}
+            >
+              <span
+                className={`text-xs font-black ${
+                  isToday ? 'text-(--lifinity-primary-strong)' : 'text-(--lifinity-text)'
+                }`}
+              >
+                {day}
+              </span>
+
+              <div className="flex flex-wrap items-center gap-1 mt-auto">
+                {visibleDots.map((task) => (
+                  <span
+                    key={task.idtask}
+                    className={`w-2 h-2 rounded-full ${priorityDotClass[task.priority] || priorityDotClass.media}`}
+                  />
+                ))}
+
+                {extraCount > 0 && (
+                  <span className="text-[9px] font-black text-(--lifinity-text-muted)">
+                    ...
+                  </span>
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* OVERLAY + PAINEL LATERAL: renderizados num portal para o <body>, para que o
+          "position: fixed" cubra o ecrã todo e não fique preso dentro do cartão
+          (que tem backdrop-filter e cria um novo "containing block"). */}
+      {createPortal(
+        <>
+          {/* OVERLAY: escurece o fundo e fecha o painel lateral ao clicar fora */}
+          <div
+            className={`fixed inset-0 bg-(--lifinity-overlay) backdrop-blur-sm z-40 transition-opacity ${
+              selectedDay ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+            }`}
+            onClick={() => setSelectedDay(null)}
+          />
+
+          {/* PAINEL LATERAL: tarefas do dia selecionado, desliza a partir da direita */}
+          <div
+            className={`fixed top-0 right-0 h-full w-full sm:w-[380px] z-50 ${cardClass} rounded-none sm:rounded-l-3xl overflow-y-auto p-6 space-y-4 transition-transform duration-300 ease-out ${
+              selectedDay ? 'translate-x-0' : 'translate-x-full'
+            }`}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <h3 className="text-lg font-black tracking-tight capitalize text-(--lifinity-text)">
+                {selectedDay
+                  ? selectedDay.toLocaleDateString('pt-PT', {
+                      weekday: 'long',
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric'
+                    })
+                  : ''}
+              </h3>
+
+              <button
+                type="button"
+                onClick={() => setSelectedDay(null)}
+                aria-label="Fechar painel"
+                className="lifinity-button-secondary w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black shrink-0"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {selectedDayTasks.map(renderTaskCard)}
+            </div>
+          </div>
+        </>,
+        document.body
+      )}
+    </div>
+  );
+};
+
 const Tasks = () => {
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user');
@@ -299,6 +537,8 @@ const Tasks = () => {
   const [searchTask, setSearchTask] = useState('');
   // Controla a visibilidade do painel de filtros recolhivel
   const [showFilters, setShowFilters] = useState(false);
+  // Alterna entre a vista em lista e a vista em calendário mensal
+  const [viewMode, setViewMode] = useState('list');
   const csvFileInputRef = useRef(null);
 
   const navigate = useNavigate();
@@ -1144,6 +1384,61 @@ const openCompleteConfirmation = (task) => {
           className={`${cardClass} p-4 rounded-2xl flex flex-wrap gap-4 items-center justify-between`}
         >
           <div className="flex flex-wrap gap-3 items-center flex-1 min-w-0">
+            {/* TOGGLE LISTA / CALENDÁRIO */}
+            <div className="flex items-center gap-1 p-1 rounded-xl border border-(--lifinity-border) bg-(--lifinity-surface-soft)">
+              <button
+                type="button"
+                onClick={() => setViewMode('list')}
+                aria-pressed={viewMode === 'list'}
+                className={`flex items-center gap-2 px-4 py-3 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
+                  viewMode === 'list'
+                    ? 'bg-(--lifinity-primary) text-(--lifinity-on-primary)'
+                    : 'text-(--lifinity-text-muted) hover:text-(--lifinity-text)'
+                }`}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                <span>Lista</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setViewMode('calendar')}
+                aria-pressed={viewMode === 'calendar'}
+                className={`flex items-center gap-2 px-4 py-3 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
+                  viewMode === 'calendar'
+                    ? 'bg-(--lifinity-primary) text-(--lifinity-on-primary)'
+                    : 'text-(--lifinity-text-muted) hover:text-(--lifinity-text)'
+                }`}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M8 7V3m8 4V3M5 11h14M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+                <span>Calendário</span>
+              </button>
+            </div>
+
             {/* PESQUISA (sempre visivel, ocupa o espaco flexivel) */}
             <div className="relative flex-1 min-w-48">
               <input
@@ -1349,7 +1644,13 @@ const openCompleteConfirmation = (task) => {
           </div>
         )}
 
-        {/* LISTAGEM FILTRADA */}
+        {/* VISTA EM CALENDÁRIO: grelha mensal com painel lateral por dia */}
+        {viewMode === 'calendar' && (
+          <TaskCalendar tasks={filteredTasks} renderTaskCard={renderTaskCard} />
+        )}
+
+        {/* LISTAGEM FILTRADA (vista em lista) */}
+        {viewMode === 'list' && (
         <div className={`${cardClass} rounded-2xl overflow-hidden`}>
           <div className="p-4 space-y-3">
             {(() => {
@@ -1428,6 +1729,7 @@ const openCompleteConfirmation = (task) => {
             })()}
           </div>
         </div>
+        )}
       </div>
 
       {/* MODAL CRIAR / EDITAR TAREFA */}
