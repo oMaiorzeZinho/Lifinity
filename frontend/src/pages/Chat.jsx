@@ -87,6 +87,7 @@ const Chat = () => {
   const [error, setError] = useState('');
   const [publicProfileUserId, setPublicProfileUserId] = useState(null);
   const assistantSendingRef = useRef(false);
+  const messagesEndRef = useRef(null);
 
   const navigate = useNavigate();
   const selectedConversationId = searchParams.get('conversation');
@@ -221,6 +222,10 @@ const Chat = () => {
     setShowMembers(false);
     setAddMemberIds([]);
   }, [fetchMessages, selectedConversationId]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   useEffect(() => {
     if (showMembers && isGroupSelected) {
@@ -427,8 +432,8 @@ const Chat = () => {
   }
 
   return (
-    <div className="space-y-8">
-      <div className={`${cardClass} p-8 rounded-[2rem]`}>
+    <div className="flex flex-col gap-8 lg:h-[calc(100vh-8rem)] lg:overflow-hidden">
+      <div className={`${cardClass} p-8 rounded-[2rem] lg:shrink-0`}>
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-5">
           <div>
             <p className="lifinity-muted-label mb-2">
@@ -453,14 +458,14 @@ const Chat = () => {
       </div>
 
       {error && (
-        <div className="lifinity-card-soft lifinity-danger-surface p-5 rounded-2xl font-bold text-sm">
+        <div className="lifinity-card-soft lifinity-danger-surface p-5 rounded-2xl font-bold text-sm lg:shrink-0">
           {error}
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6">
-        <aside className={`${cardClass} rounded-[2rem] overflow-hidden h-fit`}>
-          <div className="p-6 border-b border-[var(--lifinity-border)]">
+      <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6 lg:flex-1 lg:min-h-0">
+        <aside className={`${cardClass} rounded-[2rem] overflow-hidden lg:flex lg:flex-col lg:min-h-0`}>
+          <div className="p-6 border-b border-[var(--lifinity-border)] lg:shrink-0">
             <p className="lifinity-muted-label mb-2">
               Lista
             </p>
@@ -469,7 +474,7 @@ const Chat = () => {
             </h3>
           </div>
 
-          <div className="p-4 space-y-3">
+          <div className="p-4 space-y-3 lg:flex-1 lg:overflow-y-auto lg:min-h-0">
             <button
               type="button"
               onClick={openAssistantConversation}
@@ -534,8 +539,8 @@ const Chat = () => {
           </div>
         </aside>
 
-        <section className={`${cardClass} rounded-[2rem] overflow-hidden min-h-[640px] flex flex-col`}>
-          <div className="p-6 border-b border-[var(--lifinity-border)]">
+        <section className={`${cardClass} rounded-[2rem] overflow-hidden min-h-[640px] lg:min-h-0 lg:h-full flex flex-col`}>
+          <div className="p-6 border-b border-[var(--lifinity-border)] lg:shrink-0">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
               <div>
                 <p className="lifinity-muted-label mb-2">
@@ -576,7 +581,7 @@ const Chat = () => {
           </div>
 
           {showMembers && isGroupSelected && (
-            <div className="border-b border-[var(--lifinity-border)] bg-[var(--lifinity-surface-soft)] p-5 space-y-5">
+            <div className="border-b border-[var(--lifinity-border)] bg-[var(--lifinity-surface-soft)] p-5 space-y-5 lg:shrink-0 lg:max-h-[45%] lg:overflow-y-auto">
               <div>
                 <p className="lifinity-muted-label mb-3">
                   Membros
@@ -678,7 +683,7 @@ const Chat = () => {
             </div>
           )}
 
-          <div className="flex-1 p-6 overflow-y-auto space-y-4">
+          <div className="flex-1 p-6 overflow-y-auto space-y-4 lg:min-h-0">
             {!selectedConversationId ? (
               <div className="h-full min-h-96 flex items-center justify-center text-center font-bold text-xs tracking-widest [color:var(--lifinity-text-muted)]">
                 Escolhe uma conversa na lista.
@@ -741,11 +746,12 @@ const Chat = () => {
                 );
               })
             )}
+            <div ref={messagesEndRef} />
           </div>
 
           <form
             onSubmit={handleSendMessage}
-            className="p-5 border-t border-[var(--lifinity-border)] bg-[var(--lifinity-surface-soft)] flex flex-col md:flex-row gap-3"
+            className="p-5 border-t border-[var(--lifinity-border)] bg-[var(--lifinity-surface-soft)] flex flex-col md:flex-row gap-3 lg:shrink-0"
           >
             <label htmlFor="chat-message" className="sr-only">
               Mensagem

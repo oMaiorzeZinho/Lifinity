@@ -203,3 +203,7 @@ Apresentar o plano de trabalho inicial com fases e marcos.
 Começar pela Fase 1: Planeamento.
 LEMBRETE FINAL
 Este projeto é a minha prova final de curso. Representa 3 anos de estudo e determinará a minha nota de conclusão. Trata cada detalhe com seriedade, rigor e dedicação. O meu objetivo é tirar a melhor nota possível e sair orgulhoso do resultado.
+
+## Alterações recentes
+
+- [2026-06-10] Corrigido scroll do chat: área de mensagens agora tem scroll interno, input fixo em baixo, scroll automático para última mensagem.

@@ -505,7 +505,7 @@ const DashboardLayout = () => {
         <Outlet />
       </main>
 
-      {!isInspirationPage && <DailyVerseWidget />}
+      {!isInspirationPage && !isChatPage && <DailyVerseWidget />}
       {settingsOpen && (
         <AccountSettingsModal
           user={user}
