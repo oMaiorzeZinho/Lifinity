@@ -158,6 +158,7 @@ exports.getMyGroups = async (req, res) => {
                 g.name,
                 g.description,
                 g.invite_code,
+                g.is_locked,
                 g.idowner,
                 gm.role,
                 g.created_at,
@@ -277,7 +278,7 @@ exports.joinGroupByCode = async (req, res) => {
         }
 
         const [groups] = await db.query(
-            'SELECT idgroup, name FROM GROUP_ENTITY WHERE invite_code = ?',
+            'SELECT idgroup, name, is_locked FROM GROUP_ENTITY WHERE invite_code = ?',
             [inviteCode.trim().toUpperCase()]
         );
 
@@ -294,6 +295,12 @@ exports.joinGroupByCode = async (req, res) => {
 
         if (alreadyMember.length > 0) {
             return res.status(400).json({ message: 'Ja pertences a este grupo.' });
+        }
+
+        // Grupo trancado pelo admin: nao aceita novas entradas por codigo
+        // (membros existentes ja foram validados acima e nao sao afetados)
+        if (Number(group.is_locked) === 1) {
+            return res.status(403).json({ message: 'Este grupo está trancado e não aceita novas entradas.' });
         }
 
         await db.query(
@@ -704,5 +711,47 @@ exports.deleteGroup = async (req, res) => {
     } catch (err) {
         console.error('Erro ao apagar grupo:', err);
         res.status(500).json({ message: 'Erro ao apagar grupo.' });
+    }
+};
+
+// Trancar/destrancar um grupo (so o dono pode); impede novas entradas por codigo
+exports.toggleGroupLock = async (req, res) => {
+    try {
+        const iduser = req.user.iduser;
+        const { idgroup } = req.params;
+
+        const [groups] = await db.query(
+            'SELECT idowner FROM GROUP_ENTITY WHERE idgroup = ?',
+            [idgroup]
+        );
+
+        if (groups.length === 0) {
+            return res.status(404).json({ message: 'Grupo nao encontrado.' });
+        }
+
+        if (Number(req.user.iduser) !== Number(groups[0].idowner)) {
+            return res.status(403).json({ message: 'Apenas o administrador pode trancar o grupo.' });
+        }
+
+        // Alterna o estado e le o novo valor para devolver ao cliente
+        await db.query(
+            'UPDATE GROUP_ENTITY SET is_locked = NOT is_locked WHERE idgroup = ?',
+            [idgroup]
+        );
+
+        const [updated] = await db.query(
+            'SELECT is_locked FROM GROUP_ENTITY WHERE idgroup = ?',
+            [idgroup]
+        );
+
+        const isLocked = Number(updated[0].is_locked);
+
+        res.json({
+            is_locked: isLocked,
+            message: isLocked === 1 ? 'Grupo trancado.' : 'Grupo destrancado.'
+        });
+    } catch (err) {
+        console.error('Erro ao trancar/destrancar grupo:', err);
+        res.status(500).json({ message: 'Erro ao trancar/destrancar grupo.' });
     }
 };

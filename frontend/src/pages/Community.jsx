@@ -474,6 +474,26 @@ const Community = () => {
     }
   };
 
+  const handleToggleGroupLock = async (group) => {
+    setOpenActionMenu(null);
+
+    try {
+      const token = getToken();
+
+      const response = await axios.put(
+        `${API_URL}/groups/${group.idgroup}/lock`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      await fetchGroups();
+      showMessage(response.data?.message || 'Estado do grupo atualizado.');
+    } catch (err) {
+      console.error('Erro ao trancar/destrancar grupo:', err);
+      showMessage(err.response?.data?.message || 'Erro ao trancar/destrancar grupo.');
+    }
+  };
+
   // Abre o modal de moderacao para um membro, no modo indicado ('mute' ou 'kick')
   const openModeration = (member, mode) => {
     setOpenActionMenu(null);
@@ -786,9 +806,17 @@ const Community = () => {
                       {group.role === 'admin' ? 'Administrador' : 'Membro'}
                     </p>
 
-                    <h4 className="text-2xl font-black tracking-tight text-(--lifinity-text)">
-                      {group.name}
-                    </h4>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="text-2xl font-black tracking-tight text-(--lifinity-text)">
+                        {group.name}
+                      </h4>
+
+                      {Number(group.is_locked) === 1 && (
+                        <span className="px-2 py-1 rounded-lg bg-(--lifinity-surface-soft) border border-(--lifinity-border) text-(--lifinity-text-muted) text-[9px] font-black uppercase tracking-widest">
+                          🔒 Trancado
+                        </span>
+                      )}
+                    </div>
 
                     <p className="text-sm font-medium mt-2 text-(--lifinity-text-muted)">
                       {group.description || 'Sem descrição.'}
@@ -865,6 +893,17 @@ const Community = () => {
                           >
                             Sair do grupo
                           </button>
+
+                          {(group.role === 'admin' ||
+                            Number(group.idowner) === Number(currentUserId)) && (
+                            <button
+                              type="button"
+                              onClick={() => handleToggleGroupLock(group)}
+                              className={menuItemClass}
+                            >
+                              {Number(group.is_locked) === 1 ? 'Destrancar grupo' : 'Trancar grupo'}
+                            </button>
+                          )}
 
                           {(group.role === 'admin' ||
                             Number(group.idowner) === Number(currentUserId)) && (

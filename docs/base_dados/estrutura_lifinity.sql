@@ -33,6 +33,7 @@ CREATE TABLE GROUP_ENTITY (
     name VARCHAR(100) NOT NULL,
     description TEXT,
     invite_code VARCHAR(12) UNIQUE,
+    is_locked TINYINT(1) NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (idowner) REFERENCES USER(iduser) ON DELETE SET NULL
 );
@@ -276,5 +277,5 @@ CREATE TABLE IF NOT EXISTS ASSISTANT_MESSAGE (
     FOREIGN KEY (iduser) REFERENCES USER(iduser) ON DELETE CASCADE
 );
 
--- Última Atualização: 16-05 às 22:28
+-- Última Atualização: 10-06 às 22:28
 

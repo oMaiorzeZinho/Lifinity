@@ -13,6 +13,7 @@ router.delete('/:idgroup/leave', verifyToken, groupController.leaveGroup);
 router.put('/:idgroup/members/:iduser/mute', verifyToken, groupController.muteGroupMember);
 router.put('/:idgroup/members/:iduser/unmute', verifyToken, groupController.unmuteGroupMember);
 router.delete('/:idgroup/members/:iduser', verifyToken, groupController.kickGroupMember);
+router.put('/:idgroup/lock', verifyToken, groupController.toggleGroupLock);
 router.delete('/:idgroup', verifyToken, groupController.deleteGroup);
 
 module.exports = router;
