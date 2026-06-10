@@ -539,12 +539,29 @@ const Inspiration = () => {
                 value={selectedTheme}
                 onChange={(e) => setSelectedTheme(e.target.value)}
                 className="lifinity-input rounded-2xl px-4 py-3 text-[10px] font-black uppercase tracking-widest cursor-pointer"
+                style={{
+                  background: 'var(--lifinity-option-bg, #28352d)',
+                  color: 'var(--lifinity-option-text, #f3f7f1)'
+                }}
               >
-                <option value="all">
+                <option
+                  value="all"
+                  style={{
+                    background: 'var(--lifinity-option-bg, #28352d)',
+                    color: 'var(--lifinity-option-text, #f3f7f1)'
+                  }}
+                >
                   Todos os Temas
                 </option>
                 {themes.map((theme) => (
-                  <option key={theme} value={theme}>
+                  <option
+                    key={theme}
+                    value={theme}
+                    style={{
+                      background: 'var(--lifinity-option-bg, #28352d)',
+                      color: 'var(--lifinity-option-text, #f3f7f1)'
+                    }}
+                  >
                     {theme}
                   </option>
                 ))}

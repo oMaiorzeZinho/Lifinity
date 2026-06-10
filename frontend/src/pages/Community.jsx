@@ -796,7 +796,7 @@ const Community = () => {
             {groups.map((group) => (
               <div
                 key={group.idgroup}
-                className={`group lifinity-card-soft relative p-6 rounded-3xl hover:bg-(--lifinity-primary-muted) transition-all ${
+                className={`group lifinity-card-soft relative overflow-visible p-6 rounded-3xl hover:bg-(--lifinity-primary-muted) transition-all ${
                   openActionMenu === `group-${group.idgroup}` ? 'z-[90]' : 'z-0'
                 }`}
               >
@@ -959,7 +959,7 @@ const Community = () => {
                   return (
                     <div
                       key={member.iduser}
-                      className={`lifinity-card-soft relative rounded-2xl p-5 ${
+                      className={`lifinity-card-soft relative overflow-visible rounded-2xl p-5 ${
                         openActionMenu === `member-${member.iduser}` ? 'z-[90]' : 'z-0'
                       }`}
                     >
@@ -1149,7 +1149,7 @@ const Community = () => {
                 {friendRequests.map((request) => (
                   <div
                     key={request.idfriendship}
-                    className={`lifinity-card-soft relative p-5 rounded-2xl ${
+                    className={`lifinity-card-soft relative overflow-visible p-5 rounded-2xl ${
                       openActionMenu === `request-${request.idfriendship}` ? 'z-[90]' : 'z-0'
                     }`}
                   >
@@ -1243,7 +1243,7 @@ const Community = () => {
                 {friends.map((friend) => (
                   <div
                     key={friend.iduser}
-                    className={`lifinity-card-soft relative p-5 rounded-2xl ${
+                    className={`lifinity-card-soft relative overflow-visible p-5 rounded-2xl ${
                       openActionMenu === `friend-${friend.iduser}` ? 'z-[90]' : 'z-0'
                     }`}
                   >

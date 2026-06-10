@@ -216,3 +216,4 @@ Este projeto é a minha prova final de curso. Representa 3 anos de estudo e dete
 - [2026-06-10] Painel lateral do calendário: adicionados badges de origem (Criada por mim, Recebida de X, Grupo, Para: X) consistentes com a lista principal.
 - [2026-06-10] FASE A1: widget de chat flutuante com badge de não lidas (last_read_at em CONVERSATION_MEMBER); mensagens removidas das notificações do sino; card Conversas removido da Comunidade.
 - [2026-06-10] FASE A2: admin pode trancar/destrancar grupos (is_locked em GROUP_ENTITY); entrada por código bloqueada em grupos trancados; badge visual de grupo trancado.
+- [2026-06-10] Corrigidos: dropdown de menus cortado nos cards da Comunidade; dropdown de temas ilegível na Inspiração.
