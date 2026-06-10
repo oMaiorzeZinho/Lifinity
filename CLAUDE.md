@@ -209,3 +209,4 @@ Este projeto é a minha prova final de curso. Representa 3 anos de estudo e dete
 - [2026-06-10] Corrigido scroll do chat: área de mensagens agora tem scroll interno, input fixo em baixo, scroll automático para última mensagem.
 - [2026-06-10] Adicionada vista de calendário mensal na página de tarefas: toggle Lista/Calendário, grelha mensal com indicadores de prioridade, painel lateral deslizante ao clicar num dia.
 - [2026-06-10] Melhorada legibilidade do painel lateral do calendário: contraste dos cards, badges e texto corrigidos.
+- [2026-06-10] Corrigido painel lateral do calendário: fundo agora é sólido (cor hardcoded) em vez de translúcido.

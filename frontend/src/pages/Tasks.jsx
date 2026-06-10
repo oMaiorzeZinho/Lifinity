@@ -306,7 +306,8 @@ const renderPanelTaskCard = (task) => {
   return (
     <div
       key={task.idtask}
-      className="rounded-2xl p-4 bg-(--lifinity-surface-strong) border border-(--lifinity-border)"
+      className="rounded-2xl p-4"
+      style={{ background: '#243020', border: '1px solid rgba(174,194,180,0.2)' }}
     >
       {/* Título da tarefa: texto claro e a negrito */}
       <p className="font-bold text-base text-(--lifinity-text)">
@@ -530,9 +531,10 @@ const TaskCalendar = ({ tasks }) => {
           {/* PAINEL LATERAL: tarefas do dia selecionado, desliza a partir da direita.
               Fundo sólido (sem blur) para garantir contraste com o texto. */}
           <div
-            className={`fixed top-0 right-0 h-full w-full sm:w-[380px] z-50 bg-(--lifinity-surface) border-l border-(--lifinity-border) rounded-none sm:rounded-l-3xl overflow-y-auto p-6 space-y-4 transition-transform duration-300 ease-out ${
+            className={`fixed top-0 right-0 h-full w-full sm:w-[380px] z-50 rounded-none sm:rounded-l-3xl overflow-y-auto p-6 space-y-4 transition-transform duration-300 ease-out ${
               selectedDay ? 'translate-x-0' : 'translate-x-full'
             }`}
+            style={{ background: '#1a2620', borderLeft: '1px solid rgba(174,194,180,0.3)' }}
           >
             <div className="flex items-start justify-between gap-4">
               <h3 className="text-lg font-black tracking-tight capitalize text-(--lifinity-text)">
