@@ -292,10 +292,72 @@ const getDateKey = (date) => {
   return `${year}-${month}-${day}`;
 };
 
+// Cartão de tarefa do painel lateral do calendário, com cores de alto contraste
+// (fundo sólido + texto claro) para garantir legibilidade sobre o fundo do painel.
+const renderPanelTaskCard = (task) => {
+  const taskOverdue = isTaskOverdue(task);
+  const dueDateLabel = formatDueDate(task.due_date);
+  const creationDateLabel = formatCreationDate(task.created_at);
+
+  // Badges com fundo e texto contrastantes
+  const badgeClass =
+    'text-[10px] font-black uppercase px-3 py-2 rounded-xl tracking-widest bg-(--lifinity-border) text-(--lifinity-text)';
+
+  return (
+    <div
+      key={task.idtask}
+      className="rounded-2xl p-4 bg-(--lifinity-surface-strong) border border-(--lifinity-border)"
+    >
+      {/* Título da tarefa: texto claro e a negrito */}
+      <p className="font-bold text-base text-(--lifinity-text)">
+        {task.title}
+      </p>
+
+      {/* Descrição: texto secundário, mas legível */}
+      <p className="text-sm mt-1 text-(--lifinity-text-muted)">
+        {task.description || 'Sem descrição detalhada.'}
+      </p>
+
+      <div className="flex flex-wrap gap-2 mt-3">
+        {task.task_origin && (
+          <span className={badgeClass}>
+            {task.task_origin === 'created_by_me'
+              ? 'Criada por mim'
+              : task.task_origin === 'assigned_to_me'
+                ? `Recebida de ${task.creator_username || 'utilizador'}`
+                : task.task_origin === 'group_task'
+                  ? `Grupo: ${task.group_names || 'grupo'}`
+                  : 'Atividade'}
+          </span>
+        )}
+
+        {dueDateLabel && (
+          <span className={badgeClass}>
+            Prazo: {dueDateLabel}
+          </span>
+        )}
+
+        {creationDateLabel && (
+          <span className={badgeClass}>
+            Criada a {creationDateLabel}
+          </span>
+        )}
+
+        <span className={badgeClass}>
+          {task.status === 'concluida'
+            ? 'Finalizado'
+            : taskOverdue
+              ? 'Perdida'
+              : task.priority}
+        </span>
+      </div>
+    </div>
+  );
+};
+
 // Componente da vista de calendário mensal: grelha do mês + painel lateral com as
-// tarefas do dia selecionado. Recebe as tarefas já filtradas e a função que
-// desenha cada cartão de tarefa, para reutilizar exatamente o mesmo visual da lista.
-const TaskCalendar = ({ tasks, renderTaskCard }) => {
+// tarefas do dia selecionado.
+const TaskCalendar = ({ tasks }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(null);
 
@@ -465,9 +527,10 @@ const TaskCalendar = ({ tasks, renderTaskCard }) => {
             onClick={() => setSelectedDay(null)}
           />
 
-          {/* PAINEL LATERAL: tarefas do dia selecionado, desliza a partir da direita */}
+          {/* PAINEL LATERAL: tarefas do dia selecionado, desliza a partir da direita.
+              Fundo sólido (sem blur) para garantir contraste com o texto. */}
           <div
-            className={`fixed top-0 right-0 h-full w-full sm:w-[380px] z-50 ${cardClass} rounded-none sm:rounded-l-3xl overflow-y-auto p-6 space-y-4 transition-transform duration-300 ease-out ${
+            className={`fixed top-0 right-0 h-full w-full sm:w-[380px] z-50 bg-(--lifinity-surface) border-l border-(--lifinity-border) rounded-none sm:rounded-l-3xl overflow-y-auto p-6 space-y-4 transition-transform duration-300 ease-out ${
               selectedDay ? 'translate-x-0' : 'translate-x-full'
             }`}
           >
@@ -494,7 +557,7 @@ const TaskCalendar = ({ tasks, renderTaskCard }) => {
             </div>
 
             <div className="space-y-3">
-              {selectedDayTasks.map(renderTaskCard)}
+              {selectedDayTasks.map(renderPanelTaskCard)}
             </div>
           </div>
         </>,
@@ -1646,7 +1709,7 @@ const openCompleteConfirmation = (task) => {
 
         {/* VISTA EM CALENDÁRIO: grelha mensal com painel lateral por dia */}
         {viewMode === 'calendar' && (
-          <TaskCalendar tasks={filteredTasks} renderTaskCard={renderTaskCard} />
+          <TaskCalendar tasks={filteredTasks} />
         )}
 
         {/* LISTAGEM FILTRADA (vista em lista) */}
