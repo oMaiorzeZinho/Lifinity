@@ -419,6 +419,20 @@ const TaskCalendar = ({
             </span>
           )}
 
+          {/* Para tarefas que EU criei e atribuí, mostra para quem foram enviadas:
+              "Para: X, Y" com os amigos e/ou "Grupo: X" com os grupos. */}
+          {task.task_origin === 'created_by_me' && task.assignee_names && (
+            <span className={badgeBaseClass} style={neutralBadgeStyle}>
+              Para: {task.assignee_names}
+            </span>
+          )}
+
+          {task.task_origin === 'created_by_me' && task.group_names && (
+            <span className={badgeBaseClass} style={neutralBadgeStyle}>
+              Grupo: {task.group_names}
+            </span>
+          )}
+
           {dueDateLabel && (
             <span className={badgeBaseClass} style={neutralBadgeStyle}>
               Prazo: {dueDateLabel}
