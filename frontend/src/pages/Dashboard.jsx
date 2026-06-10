@@ -218,8 +218,8 @@ const DashboardLayout = () => {
   const navLinkClass = (isActive) =>
     `px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${
       isActive
-        ? 'bg-[var(--lifinity-primary)] [color:var(--lifinity-on-primary)] shadow-sm'
-        : '[color:var(--lifinity-text-muted)] hover:[color:var(--lifinity-text)] hover:bg-[var(--lifinity-surface-soft)]'
+        ? 'bg-(--lifinity-primary) text-(--lifinity-on-primary) shadow-sm'
+        : 'text-(--lifinity-text-muted) hover:text-(--lifinity-text) hover:bg-(--lifinity-surface-soft)'
     }`;
   return (
     <div
@@ -269,7 +269,7 @@ const DashboardLayout = () => {
             />
 
             <h1
-              className="text-xl font-black tracking-tight transition-colors [color:var(--lifinity-text)]"
+              className="text-xl font-black tracking-tight transition-colors text-(--lifinity-text)"
             >
               LIFINITY
             </h1>
@@ -318,11 +318,11 @@ const DashboardLayout = () => {
           <div className="flex items-center gap-4">
             <Link to="/dashboard/profile" className="text-right hidden lg:block group">
               <p
-                className="text-sm font-black uppercase tracking-tight transition-colors [color:var(--lifinity-text)] group-hover:[color:var(--lifinity-primary-strong)]"
+                className="text-sm font-black uppercase tracking-tight transition-colors text-(--lifinity-text) group-hover:text-(--lifinity-primary-strong)"
               >
                 {user.username}
               </p>
-              <p className="text-xs font-bold uppercase tracking-widest [color:var(--lifinity-text-muted)]">
+              <p className="text-xs font-bold uppercase tracking-widest text-(--lifinity-text-muted)">
                 Nível {user.level}
               </p>
             </Link>
@@ -330,7 +330,7 @@ const DashboardLayout = () => {
             <div className="relative">
               <button
                 onClick={toggleNotifications}
-                className="lifinity-button-secondary relative w-10 h-10 rounded-xl flex items-center justify-center hover:[color:var(--lifinity-primary-strong)]"
+                className="lifinity-button-secondary relative w-10 h-10 rounded-xl flex items-center justify-center hover:text-(--lifinity-primary-strong)"
                 title="Notificacoes"
                 aria-label="Notificacoes"
                 aria-expanded={notificationsOpen}
@@ -352,7 +352,7 @@ const DashboardLayout = () => {
                 </svg>
 
                 {unreadCount > 0 && (
-                  <span className="absolute -right-1.5 -top-1.5 min-w-5 h-5 px-1 rounded-full bg-[var(--lifinity-danger)] [color:var(--lifinity-on-primary)] text-[10px] font-black flex items-center justify-center border border-[var(--lifinity-border)]">
+                  <span className="absolute -right-1.5 -top-1.5 min-w-5 h-5 px-1 rounded-full bg-(--lifinity-danger) text-(--lifinity-on-primary) text-[10px] font-black flex items-center justify-center border border-(--lifinity-border)">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
@@ -377,7 +377,7 @@ const DashboardLayout = () => {
 
                     <button
                       onClick={markAllNotificationsAsRead}
-                      className="text-[10px] font-black uppercase tracking-widest transition-colors [color:var(--lifinity-primary)] hover:[color:var(--lifinity-primary-strong)]"
+                      className="text-[10px] font-black uppercase tracking-widest transition-colors text-(--lifinity-primary) hover:text-(--lifinity-primary-strong)"
                     >
                       Ler todas
                     </button>
@@ -385,19 +385,19 @@ const DashboardLayout = () => {
 
                   <div className="max-h-96 overflow-y-auto">
                     {notificationsLoading && (
-                      <p className="px-4 py-6 text-center text-xs font-bold uppercase tracking-widest [color:var(--lifinity-text-muted)]">
+                      <p className="px-4 py-6 text-center text-xs font-bold uppercase tracking-widest text-(--lifinity-text-muted)">
                         A carregar...
                       </p>
                     )}
 
                     {!notificationsLoading && notificationError && (
-                      <p className="px-4 py-4 text-xs font-bold [color:var(--lifinity-danger)]">
+                      <p className="px-4 py-4 text-xs font-bold text-(--lifinity-danger)">
                         {notificationError}
                       </p>
                     )}
 
                     {!notificationsLoading && !notificationError && notifications.length === 0 && (
-                      <p className="px-4 py-6 text-center text-xs font-bold uppercase tracking-widest [color:var(--lifinity-text-muted)]">
+                      <p className="px-4 py-6 text-center text-xs font-bold uppercase tracking-widest text-(--lifinity-text-muted)">
                         Sem notificacoes.
                       </p>
                     )}
@@ -409,7 +409,7 @@ const DashboardLayout = () => {
                         <button
                           key={notification.idnotification}
                           onClick={() => handleNotificationClick(notification)}
-                          className={`w-full text-left px-4 py-3 border-b transition-colors hover:bg-[var(--lifinity-surface-hover)] ${
+                          className={`w-full text-left px-4 py-3 border-b transition-colors hover:bg-(--lifinity-surface-hover) ${
                             isUnread ? '' : 'opacity-65'
                           }`}
                           style={{ borderColor: 'var(--lifinity-border)' }}
@@ -417,17 +417,17 @@ const DashboardLayout = () => {
                           <div className="flex items-start gap-3">
                             <span
                               className={`mt-1.5 h-2.5 w-2.5 rounded-full flex-none ${
-                                isUnread ? 'bg-[var(--lifinity-primary)]' : 'bg-[var(--lifinity-text-muted)]'
+                                isUnread ? 'bg-(--lifinity-primary)' : 'bg-(--lifinity-text-muted)'
                               }`}
                             ></span>
                             <div className="min-w-0">
-                              <p className="text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-text-muted)]">
+                              <p className="text-[10px] font-black uppercase tracking-widest text-(--lifinity-text-muted)">
                                 {notification.type}
                               </p>
                               <p className="text-sm font-bold leading-snug">
                                 {notification.message}
                               </p>
-                              <p className="mt-1 text-[10px] font-bold uppercase tracking-widest [color:var(--lifinity-text-muted)]">
+                              <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-(--lifinity-text-muted)">
                                 {new Date(notification.created_at).toLocaleString('pt-PT', {
                                   day: '2-digit',
                                   month: '2-digit',
@@ -447,7 +447,7 @@ const DashboardLayout = () => {
 
             <button
               onClick={() => setSettingsOpen(true)}
-              className="lifinity-button-secondary w-10 h-10 rounded-xl flex items-center justify-center hover:[color:var(--lifinity-primary-strong)]"
+              className="lifinity-button-secondary w-10 h-10 rounded-xl flex items-center justify-center hover:text-(--lifinity-primary-strong)"
               title="Configuracoes"
               aria-label="Abrir configuracoes"
             >
@@ -478,7 +478,7 @@ const DashboardLayout = () => {
                 localStorage.clear();
                 navigate('/login');
               }}
-              className="lifinity-button-secondary w-10 h-10 rounded-xl flex items-center justify-center hover:[color:var(--lifinity-danger)]"
+              className="lifinity-button-secondary w-10 h-10 rounded-xl flex items-center justify-center hover:text-(--lifinity-danger)"
               title="Terminar sessão"
             >
               <svg

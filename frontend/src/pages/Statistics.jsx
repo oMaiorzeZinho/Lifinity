@@ -22,7 +22,7 @@ const selectClass =
   'lifinity-select w-full rounded-2xl px-5 py-4 text-xs font-black uppercase tracking-widest cursor-pointer';
 
 const mutedTextClass =
-  '[color:var(--lifinity-text-muted)]';
+  'text-(--lifinity-text-muted)';
 
 const chartAxisColor = 'var(--lifinity-text-muted)';
 const chartGridColor = 'var(--lifinity-border)';
@@ -31,28 +31,28 @@ const metricOptions = {
   xpGained: {
     label: 'XP ganho',
     description: 'Mostra a evolução do XP ganho no período escolhido.',
-    colorClass: '[color:var(--lifinity-primary-strong)]',
+    colorClass: 'text-(--lifinity-primary-strong)',
     stroke: '#2f6f4f',
     fill: '#6f8f7b'
   },
   tasksCompleted: {
     label: 'Atividades concluídas',
     description: 'Mostra quantas atividades foram concluídas ao longo do tempo.',
-    colorClass: '[color:var(--lifinity-primary-strong)]',
+    colorClass: 'text-(--lifinity-primary-strong)',
     stroke: '#2f6f4f',
     fill: '#9bbca7'
   },
   tasksCreated: {
     label: 'Atividades criadas',
     description: 'Mostra quantas atividades foram criadas no período escolhido.',
-    colorClass: '[color:var(--lifinity-text)]',
+    colorClass: 'text-(--lifinity-text)',
     stroke: '#6f8f7b',
     fill: '#aab9ae'
   },
   tasksLost: {
     label: 'Atividades perdidas',
     description: 'Mostra atividades cujo prazo terminou sem conclusão.',
-    colorClass: '[color:var(--lifinity-danger)]',
+    colorClass: 'text-(--lifinity-danger)',
     stroke: '#f87171',
     fill: '#ef4444'
   }
@@ -96,7 +96,7 @@ const CustomTooltip = ({ active, payload, label, selectedMetric }) => {
         {payload.map((item) => (
           <p
             key={item.dataKey}
-            className="text-sm font-black flex items-center gap-2 [color:var(--lifinity-text)]"
+            className="text-sm font-black flex items-center gap-2 text-(--lifinity-text)"
           >
             <span
               className="h-2.5 w-2.5 rounded-full"
@@ -406,7 +406,7 @@ const Statistics = () => {
     <div className="space-y-8">
       {/* HERO */}
       <div
-        className="relative overflow-hidden rounded-[2.5rem] shadow-[var(--lifinity-shadow)] border border-[var(--lifinity-border)] min-h-72 flex items-end"
+        className="relative overflow-hidden rounded-[2.5rem] shadow-(--lifinity-shadow) border border-(--lifinity-border) min-h-72 flex items-end"
         style={{
           backgroundImage: "url('/images/statistics-banner.jpg')",
           backgroundSize: 'cover',
@@ -415,14 +415,14 @@ const Statistics = () => {
       >
         <div className="absolute inset-0 lifinity-hero-overlay"></div>
 
-        <div className="relative z-10 p-8 md:p-10 max-w-4xl [color:var(--lifinity-text)]">
+        <div className="relative z-10 p-8 md:p-10 max-w-4xl text-(--lifinity-text)">
           <p className="lifinity-muted-label mb-3">
             Produtividade e Evolução
           </p>
           <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-none mb-4">
             Estatísticas do teu progresso
           </h2>
-          <p className="text-sm md:text-base font-medium leading-relaxed [color:var(--lifinity-text-muted)]">
+          <p className="text-sm md:text-base font-medium leading-relaxed text-(--lifinity-text-muted)">
             Analisa atividades concluídas, XP ganho, atividades perdidas e evolução ao
             longo do tempo. Estes dados ajudam-te a perceber padrões e a melhorar
             a tua organização diária.
@@ -442,19 +442,19 @@ const Statistics = () => {
       {/* ALERTA DE ATIVIDADES PERDIDAS */}
       <div className="lifinity-card-soft lifinity-danger-surface rounded-3xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-widest mb-1 [color:var(--lifinity-danger)]">
+          <p className="text-[10px] font-black uppercase tracking-widest mb-1 text-(--lifinity-danger)">
             Atividades perdidas no período
           </p>
-          <p className="text-sm font-bold [color:var(--lifinity-text-muted)]">
+          <p className="text-sm font-bold text-(--lifinity-text-muted)">
             Atividades cujo prazo terminou sem conclusão.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <p className="text-4xl font-black tracking-tighter [color:var(--lifinity-danger)]">
+          <p className="text-4xl font-black tracking-tighter text-(--lifinity-danger)">
             {summary.lostTasks}
           </p>
-          <span className="text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-danger)]">
+          <span className="text-[10px] font-black uppercase tracking-widest text-(--lifinity-danger)">
             perdidas
           </span>
         </div>
@@ -463,11 +463,11 @@ const Statistics = () => {
       {/* FILTROS E GRÁFICO */}
       <div className="grid grid-cols-1 xl:grid-cols-[360px_1fr] gap-6">
         {/* FILTROS */}
-        <div className={`${cardClass} p-6 rounded-[2rem] h-fit`}>
+        <div className={`${cardClass} p-6 rounded-4xl h-fit`}>
           <p className="lifinity-muted-label mb-2">
             Filtros
           </p>
-          <h3 className="text-2xl font-black tracking-tight mb-6 [color:var(--lifinity-text)]">
+          <h3 className="text-2xl font-black tracking-tight mb-6 text-(--lifinity-text)">
             Personalizar gráfico
           </h3>
 
@@ -543,7 +543,7 @@ const Statistics = () => {
               </select>
             </div>
 
-            <div className="pt-5 border-t border-[var(--lifinity-border)]">
+            <div className="pt-5 border-t border-(--lifinity-border)">
               <label
                 htmlFor="statistics-comparison-mode"
                 className="lifinity-muted-label block mb-2"
@@ -632,7 +632,7 @@ const Statistics = () => {
                   )}
 
                   {optionsError && (
-                    <p className="text-xs font-bold mt-3 leading-relaxed [color:var(--lifinity-danger)]">
+                    <p className="text-xs font-bold mt-3 leading-relaxed text-(--lifinity-danger)">
                       {optionsError}
                     </p>
                   )}
@@ -643,7 +643,7 @@ const Statistics = () => {
         </div>
 
         {/* GRÁFICO PRINCIPAL */}
-        <div className={`${cardClass} p-6 rounded-[2rem] overflow-hidden`}>
+        <div className={`${cardClass} p-6 rounded-4xl overflow-hidden`}>
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-8">
             <div>
               <p className="lifinity-muted-label mb-2">
@@ -665,15 +665,15 @@ const Statistics = () => {
               </p>
               {hasComparison ? (
                 <div className="mt-2 space-y-1">
-                  <p className="text-2xl font-black tracking-tighter [color:var(--lifinity-text)]">
+                  <p className="text-2xl font-black tracking-tighter text-(--lifinity-text)">
                     Eu: {formatMetricValue(totalMetricValue.me)}
                   </p>
-                  <p className="text-sm font-black tracking-tight [color:var(--lifinity-primary-strong)]">
+                  <p className="text-sm font-black tracking-tight text-(--lifinity-primary-strong)">
                     {comparisonLabel}: {formatMetricValue(totalMetricValue.comparison)}
                   </p>
                 </div>
               ) : (
-                <p className="text-3xl font-black tracking-tighter mt-1 [color:var(--lifinity-text)]">
+                <p className="text-3xl font-black tracking-tighter mt-1 text-(--lifinity-text)">
                   {formatMetricValue(totalMetricValue.me)}
                 </p>
               )}
@@ -686,11 +686,11 @@ const Statistics = () => {
 
       {/* INSIGHTS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className={`${cardClass} p-6 rounded-[2rem]`}>
+        <div className={`${cardClass} p-6 rounded-4xl`}>
           <p className="lifinity-muted-label mb-2">
             Melhor dia
           </p>
-          <h3 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)]">
+          <h3 className="text-2xl font-black tracking-tight text-(--lifinity-text)">
             {bestDay ? bestDay.label : '--'}
           </h3>
           <p className={`font-medium mt-3 ${mutedTextClass}`}>
@@ -698,11 +698,11 @@ const Statistics = () => {
           </p>
         </div>
 
-        <div className={`${cardClass} p-6 rounded-[2rem]`}>
+        <div className={`${cardClass} p-6 rounded-4xl`}>
           <p className="lifinity-muted-label mb-2">
             Atividades pendentes
           </p>
-          <h3 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)]">
+          <h3 className="text-2xl font-black tracking-tight text-(--lifinity-text)">
             {summary.pendingTasks}
           </h3>
           <p className={`font-medium mt-3 ${mutedTextClass}`}>
@@ -710,11 +710,11 @@ const Statistics = () => {
           </p>
         </div>
 
-        <div className={`${cardClass} p-6 rounded-[2rem]`}>
+        <div className={`${cardClass} p-6 rounded-4xl`}>
           <p className="lifinity-muted-label mb-2">
             Comparacoes
           </p>
-          <h3 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)]">
+          <h3 className="text-2xl font-black tracking-tight text-(--lifinity-text)">
             Amigos e grupos
           </h3>
           <p className={`font-medium mt-3 ${mutedTextClass}`}>

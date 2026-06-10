@@ -10,10 +10,10 @@ const softCardClass =
   'lifinity-card-soft';
 
 const mutedTextClass =
-  '[color:var(--lifinity-text-muted)]';
+  'text-(--lifinity-text-muted)';
 
 const statValueClass =
-  'text-3xl font-black tracking-tighter [color:var(--lifinity-primary-strong)]';
+  'text-3xl font-black tracking-tighter text-(--lifinity-primary-strong)';
 
 const categoryLabels = {
   level: 'Nivel',
@@ -79,25 +79,25 @@ const PublicProfileModal = ({ iduser, isOpen, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--lifinity-overlay)] p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-(--lifinity-overlay) p-4 backdrop-blur-sm"
       onClick={onClose}
       role="presentation"
     >
       <div
-        className={`${cardClass} max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[2rem]`}
+        className={`${cardClass} max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-4xl`}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="public-profile-title"
       >
-        <div className="flex items-start justify-between gap-4 border-b border-[var(--lifinity-border)] p-6">
+        <div className="flex items-start justify-between gap-4 border-b border-(--lifinity-border) p-6">
           <div>
             <p className="lifinity-muted-label mb-2">
               Perfil publico
             </p>
             <h3
               id="public-profile-title"
-              className="text-2xl font-black tracking-tight [color:var(--lifinity-text)]"
+              className="text-2xl font-black tracking-tight text-(--lifinity-text)"
             >
               {profile?.username || 'A carregar...'}
             </h3>
@@ -118,7 +118,7 @@ const PublicProfileModal = ({ iduser, isOpen, onClose }) => {
             A carregar perfil...
           </div>
         ) : error ? (
-          <div className="p-10 text-center text-sm font-bold [color:var(--lifinity-danger)]">
+          <div className="p-10 text-center text-sm font-bold text-(--lifinity-danger)">
             {error}
           </div>
         ) : profile ? (
@@ -129,16 +129,16 @@ const PublicProfileModal = ({ iduser, isOpen, onClose }) => {
                   <img
                     src={profile.avatar}
                     alt=""
-                    className="h-20 w-20 rounded-3xl border border-[var(--lifinity-border)] object-cover"
+                    className="h-20 w-20 rounded-3xl border border-(--lifinity-border) object-cover"
                   />
                 ) : (
-                  <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-[var(--lifinity-border)] bg-[var(--lifinity-primary-muted)] text-3xl font-black [color:var(--lifinity-text)]">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-(--lifinity-border) bg-(--lifinity-primary-muted) text-3xl font-black text-(--lifinity-text)">
                     {profile.username?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
                 )}
 
                 <div>
-                  <h4 className="text-3xl font-black tracking-tight [color:var(--lifinity-text)]">
+                  <h4 className="text-3xl font-black tracking-tight text-(--lifinity-text)">
                     {profile.username}
                   </h4>
                   <p className={`mt-2 text-sm font-bold ${mutedTextClass}`}>
@@ -151,7 +151,7 @@ const PublicProfileModal = ({ iduser, isOpen, onClose }) => {
                 <p className="lifinity-muted-label">
                   Nivel
                 </p>
-                <p className="text-4xl font-black tracking-tighter [color:var(--lifinity-primary-strong)]">
+                <p className="text-4xl font-black tracking-tighter text-(--lifinity-primary-strong)">
                   {profile.level || 1}
                 </p>
               </div>
@@ -184,7 +184,7 @@ const PublicProfileModal = ({ iduser, isOpen, onClose }) => {
             </div>
 
             <div>
-              <h5 className="mb-3 text-lg font-black tracking-tight [color:var(--lifinity-text)]">
+              <h5 className="mb-3 text-lg font-black tracking-tight text-(--lifinity-text)">
                 Conquistas destacadas
               </h5>
 
@@ -193,12 +193,12 @@ const PublicProfileModal = ({ iduser, isOpen, onClose }) => {
                   {profile.highlightedBadges.map((badge, index) => (
                     <div
                       key={badge.idbadge}
-                      className="rounded-2xl border border-[var(--lifinity-primary)] bg-[var(--lifinity-primary-muted)] p-4"
+                      className="rounded-2xl border border-(--lifinity-primary) bg-(--lifinity-primary-muted) p-4"
                     >
-                      <p className="mb-2 text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-primary-strong)]">
+                      <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-(--lifinity-primary-strong)">
                         {badge.position ? `Destaque ${badge.position}` : `Recente ${index + 1}`}
                       </p>
-                      <p className="font-black [color:var(--lifinity-text)]">
+                      <p className="font-black text-(--lifinity-text)">
                         {badge.name}
                       </p>
                       <p className={`mt-2 text-xs font-medium ${mutedTextClass}`}>
@@ -218,7 +218,7 @@ const PublicProfileModal = ({ iduser, isOpen, onClose }) => {
             </div>
 
             <div>
-              <h5 className="mb-3 text-lg font-black tracking-tight [color:var(--lifinity-text)]">
+              <h5 className="mb-3 text-lg font-black tracking-tight text-(--lifinity-text)">
                 Grupos em comum
               </h5>
 
@@ -229,7 +229,7 @@ const PublicProfileModal = ({ iduser, isOpen, onClose }) => {
                       key={group.idgroup}
                       className={`${softCardClass} rounded-2xl p-4`}
                     >
-                      <p className="font-black [color:var(--lifinity-text)]">
+                      <p className="font-black text-(--lifinity-text)">
                         {group.name}
                       </p>
                       {group.description && (

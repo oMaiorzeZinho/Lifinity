@@ -11,7 +11,7 @@ const innerCardClass =
   'lifinity-card-soft rounded-2xl';
 
 const statValueClass =
-  'text-3xl font-black tracking-tighter [color:var(--lifinity-primary-strong)]';
+  'text-3xl font-black tracking-tighter text-(--lifinity-primary-strong)';
 
 const buttonSecondaryClass =
   'lifinity-button-secondary w-full px-5 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest';
@@ -269,7 +269,7 @@ const Profile = () => {
     <div className="space-y-8">
       {/* HERO */}
       <div
-        className="relative overflow-hidden rounded-[2.5rem] shadow-[var(--lifinity-shadow)] border border-[var(--lifinity-border)] min-h-72 flex items-end"
+        className="relative overflow-hidden rounded-[2.5rem] shadow-(--lifinity-shadow) border border-(--lifinity-border) min-h-72 flex items-end"
         style={{
           backgroundImage: "url('/images/profile-bg.jpg')",
           backgroundSize: 'cover',
@@ -278,10 +278,10 @@ const Profile = () => {
       >
         <div className="absolute inset-0 lifinity-hero-overlay"></div>
 
-        <div className="relative z-10 p-8 md:p-10 w-full [color:var(--lifinity-text)]">
+        <div className="relative z-10 p-8 md:p-10 w-full text-(--lifinity-text)">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
             <div className="flex items-center gap-6">
-              <div className="w-24 h-24 rounded-3xl bg-[var(--lifinity-primary-muted)] border border-[var(--lifinity-border)] flex items-center justify-center text-4xl font-black shadow-xl backdrop-blur-xl [color:var(--lifinity-text)]">
+              <div className="w-24 h-24 rounded-3xl bg-(--lifinity-primary-muted) border border-(--lifinity-border) flex items-center justify-center text-4xl font-black shadow-xl backdrop-blur-xl text-(--lifinity-text)">
                 {user.username?.charAt(0)?.toUpperCase() || 'U'}
               </div>
 
@@ -294,7 +294,7 @@ const Profile = () => {
                   {user.username}
                 </h2>
 
-                <p className="font-bold mt-3 [color:var(--lifinity-text-muted)]">
+                <p className="font-bold mt-3 text-(--lifinity-text-muted)">
                   {user.email || 'Email não disponível'}
                 </p>
               </div>
@@ -305,11 +305,11 @@ const Profile = () => {
                 Nível atual
               </p>
 
-              <p className="text-5xl font-black tracking-tighter [color:var(--lifinity-primary-strong)]">
+              <p className="text-5xl font-black tracking-tighter text-(--lifinity-primary-strong)">
                 {levelData.level}
               </p>
 
-              <p className="text-sm font-bold mt-2 [color:var(--lifinity-text-muted)]">
+              <p className="text-sm font-bold mt-2 text-(--lifinity-text-muted)">
                 {user.xp || 0} XP acumulados
               </p>
             </div>
@@ -318,18 +318,18 @@ const Profile = () => {
       </div>
 
       {/* PROGRESSO */}
-      <div className={`${cardClass} p-8 rounded-[2rem]`}>
+      <div className={`${cardClass} p-8 rounded-4xl`}>
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-6">
           <div>
             <p className="lifinity-muted-label mb-2">
               Evolução
             </p>
 
-            <h3 className="text-3xl font-black tracking-tighter [color:var(--lifinity-text)]">
+            <h3 className="text-3xl font-black tracking-tighter text-(--lifinity-text)">
               Progresso para o próximo nível
             </h3>
 
-            <p className="font-medium mt-2 [color:var(--lifinity-text-muted)]">
+            <p className="font-medium mt-2 text-(--lifinity-text-muted)">
               O teu nível aumenta conforme completas atividades e ganhas XP.
             </p>
           </div>
@@ -344,14 +344,14 @@ const Profile = () => {
           </div>
         </div>
 
-        <div className="w-full bg-[var(--lifinity-surface-soft)] h-4 rounded-full overflow-hidden">
+        <div className="w-full bg-(--lifinity-surface-soft) h-4 rounded-full overflow-hidden">
           <div
-            className="bg-[var(--lifinity-primary)] h-full transition-all duration-1000 shadow-[0_0_15px_rgba(47,111,79,0.28)]"
+            className="bg-(--lifinity-primary) h-full transition-all duration-1000 shadow-[0_0_15px_rgba(47,111,79,0.28)]"
             style={{ width: `${levelData.progress}%` }}
           ></div>
         </div>
 
-        <div className="flex justify-between mt-3 text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-text-muted)]">
+        <div className="flex justify-between mt-3 text-[10px] font-black uppercase tracking-widest text-(--lifinity-text-muted)">
           <span>Nível {levelData.level}</span>
           <span>Nível {levelData.level + 1}</span>
         </div>
@@ -366,7 +366,7 @@ const Profile = () => {
           <p className={statValueClass}>
             {user.xp || 0}
           </p>
-          <p className="text-xs font-bold mt-2 [color:var(--lifinity-text-muted)]">
+          <p className="text-xs font-bold mt-2 text-(--lifinity-text-muted)">
             Pontos acumulados na plataforma.
           </p>
         </div>
@@ -378,7 +378,7 @@ const Profile = () => {
           <p className={statValueClass}>
             {taskSummary.completionRate}%
           </p>
-          <p className="text-xs font-bold mt-2 [color:var(--lifinity-text-muted)]">
+          <p className="text-xs font-bold mt-2 text-(--lifinity-text-muted)">
             {taskSummary.completedTasks} concluídas hoje.
           </p>
         </div>
@@ -390,7 +390,7 @@ const Profile = () => {
           <p className={statValueClass}>
             {groups.length}
           </p>
-          <p className="text-xs font-bold mt-2 [color:var(--lifinity-text-muted)]">
+          <p className="text-xs font-bold mt-2 text-(--lifinity-text-muted)">
             Espaços de colaboração.
           </p>
         </div>
@@ -402,23 +402,23 @@ const Profile = () => {
           <p className={statValueClass}>
             {friends.length}
           </p>
-          <p className="text-xs font-bold mt-2 [color:var(--lifinity-text-muted)]">
+          <p className="text-xs font-bold mt-2 text-(--lifinity-text-muted)">
             Ligações na comunidade.
           </p>
         </div>
       </div>
 
       {/* CONQUISTAS */}
-      <div className={`${cardClass} rounded-[2rem] overflow-hidden`}>
-        <div className="p-6 md:p-8 border-b border-[var(--lifinity-border)] flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
+      <div className={`${cardClass} rounded-4xl overflow-hidden`}>
+        <div className="p-6 md:p-8 border-b border-(--lifinity-border) flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
           <div>
             <p className="lifinity-muted-label mb-2">
               Medalhas
             </p>
-            <h3 className="text-3xl font-black tracking-tighter [color:var(--lifinity-text)]">
+            <h3 className="text-3xl font-black tracking-tighter text-(--lifinity-text)">
               Conquistas em destaque
             </h3>
-            <p className="font-medium mt-2 [color:var(--lifinity-text-muted)]">
+            <p className="font-medium mt-2 text-(--lifinity-text-muted)">
               Mantem o perfil limpo com ate 3 conquistas destacadas.
             </p>
           </div>
@@ -442,7 +442,7 @@ const Profile = () => {
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-5">
             <div>
               {displayedHighlights.length === 0 ? (
-                <div className={`${innerCardClass} p-5 text-sm font-bold [color:var(--lifinity-text-muted)]`}>
+                <div className={`${innerCardClass} p-5 text-sm font-bold text-(--lifinity-text-muted)`}>
                   Ainda nao tens conquistas desbloqueadas para destacar.
                 </div>
               ) : (
@@ -450,15 +450,15 @@ const Profile = () => {
                   {displayedHighlights.slice(0, 3).map((achievement, index) => (
                     <div
                       key={achievement.idbadge}
-                      className="p-5 rounded-2xl bg-[var(--lifinity-primary-muted)] border border-[var(--lifinity-primary)] shadow-sm"
+                      className="p-5 rounded-2xl bg-(--lifinity-primary-muted) border border-(--lifinity-primary) shadow-sm"
                     >
-                      <p className="text-[10px] font-black uppercase tracking-widest mb-3 [color:var(--lifinity-primary-strong)]">
+                      <p className="text-[10px] font-black uppercase tracking-widest mb-3 text-(--lifinity-primary-strong)">
                         Destaque {achievement.position || index + 1}
                       </p>
-                      <h5 className="text-lg font-black [color:var(--lifinity-text)]">
+                      <h5 className="text-lg font-black text-(--lifinity-text)">
                         {achievement.name}
                       </h5>
-                      <p className="text-sm font-medium mt-2 [color:var(--lifinity-text-muted)]">
+                      <p className="text-sm font-medium mt-2 text-(--lifinity-text-muted)">
                         {achievement.description}
                       </p>
                     </div>
@@ -475,7 +475,7 @@ const Profile = () => {
                 <p className={statValueClass}>
                   {unlockedAchievements.length}
                 </p>
-                <p className="text-xs font-bold mt-2 [color:var(--lifinity-text-muted)]">
+                <p className="text-xs font-bold mt-2 text-(--lifinity-text-muted)">
                   de {achievements.length} conquistas.
                 </p>
               </div>
@@ -494,15 +494,15 @@ const Profile = () => {
 
       {/* DETALHES DA CONTA */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className={`${cardClass} lg:col-span-2 rounded-[2rem] overflow-hidden`}>
-          <div className="p-6 md:p-8 border-b border-[var(--lifinity-border)]">
+        <div className={`${cardClass} lg:col-span-2 rounded-4xl overflow-hidden`}>
+          <div className="p-6 md:p-8 border-b border-(--lifinity-border)">
             <p className="lifinity-muted-label mb-2">
               Conta
             </p>
-            <h3 className="text-3xl font-black tracking-tighter [color:var(--lifinity-text)]">
+            <h3 className="text-3xl font-black tracking-tighter text-(--lifinity-text)">
               Informações pessoais
             </h3>
-            <p className="font-medium mt-2 [color:var(--lifinity-text-muted)]">
+            <p className="font-medium mt-2 text-(--lifinity-text-muted)">
               Dados principais associados ao teu perfil Lifinity.
             </p>
           </div>
@@ -512,7 +512,7 @@ const Profile = () => {
               <p className="lifinity-muted-label mb-1">
                 Nome de utilizador
               </p>
-              <p className="text-lg font-black [color:var(--lifinity-text)]">
+              <p className="text-lg font-black text-(--lifinity-text)">
                 {user.username}
               </p>
             </div>
@@ -521,7 +521,7 @@ const Profile = () => {
               <p className="lifinity-muted-label mb-1">
                 Email
               </p>
-              <p className="text-lg font-black break-all [color:var(--lifinity-text)]">
+              <p className="text-lg font-black break-all text-(--lifinity-text)">
                 {user.email || 'Não disponível'}
               </p>
             </div>
@@ -530,7 +530,7 @@ const Profile = () => {
               <p className="lifinity-muted-label mb-1">
                 Nível
               </p>
-              <p className="text-lg font-black [color:var(--lifinity-text)]">
+              <p className="text-lg font-black text-(--lifinity-text)">
                 {levelData.level}
               </p>
             </div>
@@ -539,7 +539,7 @@ const Profile = () => {
               <p className="lifinity-muted-label mb-1">
                 Estado
               </p>
-              <p className="text-lg font-black [color:var(--lifinity-primary-strong)]">
+              <p className="text-lg font-black text-(--lifinity-primary-strong)">
                 Conta ativa
               </p>
             </div>
@@ -547,11 +547,11 @@ const Profile = () => {
         </div>
 
         {/* AÇÕES */}
-        <div className={`${cardClass} p-6 rounded-[2rem] h-fit`}>
+        <div className={`${cardClass} p-6 rounded-4xl h-fit`}>
           <p className="lifinity-muted-label mb-2">
             Ações
           </p>
-          <h3 className="text-2xl font-black tracking-tight mb-4 [color:var(--lifinity-text)]">
+          <h3 className="text-2xl font-black tracking-tight mb-4 text-(--lifinity-text)">
             Gestão do perfil
           </h3>
 
@@ -575,7 +575,7 @@ const Profile = () => {
             <button
               type="button"
               onClick={handleLogout}
-              className="lifinity-danger-item w-full px-5 py-4 rounded-2xl border border-[var(--lifinity-border)] text-[10px] font-black uppercase tracking-widest"
+              className="lifinity-danger-item w-full px-5 py-4 rounded-2xl border border-(--lifinity-border) text-[10px] font-black uppercase tracking-widest"
             >
               Terminar sessão
             </button>
@@ -584,17 +584,17 @@ const Profile = () => {
       </div>
 
       {achievementsModalOpen && (
-        <div className="fixed inset-0 bg-[var(--lifinity-overlay)] backdrop-blur-sm z-50 flex items-center justify-center p-6">
-          <div className={`${cardClass} w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-[2rem]`}>
-            <div className="p-6 md:p-8 border-b border-[var(--lifinity-border)] flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
+        <div className="fixed inset-0 bg-(--lifinity-overlay) backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <div className={`${cardClass} w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-4xl`}>
+            <div className="p-6 md:p-8 border-b border-(--lifinity-border) flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
               <div>
                 <p className="lifinity-muted-label mb-2">
                   Medalhas
                 </p>
-                <h3 className="text-3xl font-black tracking-tighter [color:var(--lifinity-text)]">
+                <h3 className="text-3xl font-black tracking-tighter text-(--lifinity-text)">
                   Gerir conquistas
                 </h3>
-                <p className="font-medium mt-2 [color:var(--lifinity-text-muted)]">
+                <p className="font-medium mt-2 text-(--lifinity-text-muted)">
                   Escolhe ate 3 conquistas desbloqueadas para destacar no teu perfil.
                 </p>
               </div>
@@ -631,22 +631,22 @@ const Profile = () => {
                   <p className="lifinity-muted-label">
                     Selecionadas
                   </p>
-                  <p className="text-sm font-bold mt-1 [color:var(--lifinity-text-muted)]">
+                  <p className="text-sm font-bold mt-1 text-(--lifinity-text-muted)">
                     Clica em conquistas desbloqueadas para definir a ordem de destaque.
                   </p>
                 </div>
-                <p className="text-2xl font-black [color:var(--lifinity-primary-strong)]">
+                <p className="text-2xl font-black text-(--lifinity-primary-strong)">
                   {selectedHighlightIds.length}/3
                 </p>
               </div>
 
               <div>
-                <h4 className="text-xl font-black tracking-tight mb-4 [color:var(--lifinity-text)]">
+                <h4 className="text-xl font-black tracking-tight mb-4 text-(--lifinity-text)">
                   Desbloqueadas
                 </h4>
 
                 {unlockedAchievements.length === 0 ? (
-                  <div className={`${innerCardClass} p-5 text-sm font-bold [color:var(--lifinity-text-muted)]`}>
+                  <div className={`${innerCardClass} p-5 text-sm font-bold text-(--lifinity-text-muted)`}>
                     Continua a usar o Lifinity para desbloquear as primeiras conquistas.
                   </div>
                 ) : (
@@ -664,8 +664,8 @@ const Profile = () => {
                           disabled={selectionLimitReached}
                           className={`text-left p-5 rounded-2xl border transition-all ${
                             isSelected
-                              ? 'bg-[var(--lifinity-primary-muted)] border-[var(--lifinity-primary)] shadow-sm'
-                              : 'lifinity-card-soft border-[var(--lifinity-border)] hover:bg-[var(--lifinity-primary-muted)]'
+                              ? 'bg-(--lifinity-primary-muted) border-(--lifinity-primary) shadow-sm'
+                              : 'lifinity-card-soft border-(--lifinity-border) hover:bg-(--lifinity-primary-muted)'
                           } disabled:opacity-55 disabled:cursor-not-allowed`}
                         >
                           <div className="flex items-start justify-between gap-4">
@@ -673,7 +673,7 @@ const Profile = () => {
                               <p className="lifinity-muted-label mb-2">
                                 {achievementCategoryLabels[achievement.category] || achievement.category || 'Conquista'}
                               </p>
-                              <h5 className="text-lg font-black [color:var(--lifinity-text)]">
+                              <h5 className="text-lg font-black text-(--lifinity-text)">
                                 {achievement.name}
                               </h5>
                             </div>
@@ -685,10 +685,10 @@ const Profile = () => {
                             )}
                           </div>
 
-                          <p className="text-sm font-medium mt-3 [color:var(--lifinity-text-muted)]">
+                          <p className="text-sm font-medium mt-3 text-(--lifinity-text-muted)">
                             {achievement.description}
                           </p>
-                          <p className="text-[10px] font-black uppercase tracking-widest mt-4 [color:var(--lifinity-text-muted)]">
+                          <p className="text-[10px] font-black uppercase tracking-widest mt-4 text-(--lifinity-text-muted)">
                             Desbloqueada em{' '}
                             {achievement.earned_at
                               ? new Date(achievement.earned_at).toLocaleDateString('pt-PT')
@@ -703,7 +703,7 @@ const Profile = () => {
 
               {lockedAchievements.length > 0 && (
                 <div>
-                  <h4 className="text-xl font-black tracking-tight mb-4 [color:var(--lifinity-text)]">
+                  <h4 className="text-xl font-black tracking-tight mb-4 text-(--lifinity-text)">
                     Bloqueadas
                   </h4>
 
@@ -711,15 +711,15 @@ const Profile = () => {
                     {lockedAchievements.map((achievement) => (
                       <div
                         key={achievement.idbadge}
-                        className="p-5 rounded-2xl bg-[var(--lifinity-surface-soft)] border border-[var(--lifinity-border)] opacity-55"
+                        className="p-5 rounded-2xl bg-(--lifinity-surface-soft) border border-(--lifinity-border) opacity-55"
                       >
-                        <p className="text-[10px] font-black uppercase tracking-widest mb-2 [color:var(--lifinity-text-muted)]">
+                        <p className="text-[10px] font-black uppercase tracking-widest mb-2 text-(--lifinity-text-muted)">
                           {achievementCategoryLabels[achievement.category] || achievement.category || 'Conquista'}
                         </p>
-                        <h5 className="text-lg font-black [color:var(--lifinity-text-muted)]">
+                        <h5 className="text-lg font-black text-(--lifinity-text-muted)">
                           {achievement.name}
                         </h5>
-                        <p className="text-sm font-medium mt-3 [color:var(--lifinity-text-muted)]">
+                        <p className="text-sm font-medium mt-3 text-(--lifinity-text-muted)">
                           {achievement.description}
                         </p>
                       </div>

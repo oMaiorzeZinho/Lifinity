@@ -11,16 +11,16 @@ const softCardClass =
   'lifinity-card-soft';
 
 const mutedTextClass =
-  '[color:var(--lifinity-text-muted)]';
+  'text-(--lifinity-text-muted)';
 
 const statValueClass =
-  'text-3xl font-black tracking-tighter [color:var(--lifinity-primary-strong)]';
+  'text-3xl font-black tracking-tighter text-(--lifinity-primary-strong)';
 
 const progressTrackClass =
-  'w-full bg-[var(--lifinity-surface-soft)] h-2 rounded-full overflow-hidden';
+  'w-full bg-(--lifinity-surface-soft) h-2 rounded-full overflow-hidden';
 
 const progressBarClass =
-  'bg-[var(--lifinity-primary)] h-full rounded-full';
+  'bg-(--lifinity-primary) h-full rounded-full';
 
 const getProgressWidth = (xp, maxXP) => {
   if (!maxXP || maxXP <= 0) return 0;
@@ -112,7 +112,7 @@ const Ranking = () => {
     <div className="space-y-8">
       {/* HERO */}
       <div
-        className="relative overflow-hidden rounded-3xl border border-[var(--lifinity-border)] shadow-[var(--lifinity-shadow)]"
+        className="relative overflow-hidden rounded-3xl border border-(--lifinity-border) shadow-(--lifinity-shadow)"
         style={{
           backgroundImage: "url('/images/ranking-bg.jpg')",
           backgroundSize: 'cover',
@@ -122,7 +122,7 @@ const Ranking = () => {
       >
         <div className="absolute inset-0 lifinity-hero-overlay"></div>
 
-        <div className="relative z-10 p-8 md:p-10 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 [color:var(--lifinity-text)]">
+        <div className="relative z-10 p-8 md:p-10 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 text-(--lifinity-text)">
           <div>
             <p className="lifinity-muted-label mb-4">
               Gamificação Lifinity
@@ -143,7 +143,7 @@ const Ranking = () => {
               A tua posição
             </p>
 
-            <p className="text-4xl font-black tracking-tighter [color:var(--lifinity-primary-strong)]">
+            <p className="text-4xl font-black tracking-tighter text-(--lifinity-primary-strong)">
               {currentUserPosition ? `${currentUserPosition}.º` : '--'}
             </p>
 
@@ -213,13 +213,13 @@ const Ranking = () => {
 
       {/* TOP 3 */}
       <div className={`${cardClass} rounded-3xl overflow-hidden`}>
-        <div className="p-6 md:p-8 border-b border-[var(--lifinity-border)] flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+        <div className="p-6 md:p-8 border-b border-(--lifinity-border) flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
           <div>
             <p className="lifinity-muted-label mb-2">
               Pódio
             </p>
 
-            <h3 className="text-3xl font-black tracking-tighter [color:var(--lifinity-text)]">
+            <h3 className="text-3xl font-black tracking-tighter text-(--lifinity-text)">
               Top 3 Utilizadores
             </h3>
 
@@ -251,20 +251,20 @@ const Ranking = () => {
                   key={item.iduser}
                   className={`relative overflow-hidden rounded-3xl border p-6 transition-all ${
                     position === 1
-                      ? 'bg-[var(--lifinity-primary-muted)] border-[var(--lifinity-primary)] shadow-sm'
+                      ? 'bg-(--lifinity-primary-muted) border-(--lifinity-primary) shadow-sm'
                       : position === 2
-                        ? 'lifinity-card-soft border-[var(--lifinity-border)]'
-                        : 'bg-[var(--lifinity-surface-soft)] border-[var(--lifinity-border)]'
+                        ? 'lifinity-card-soft border-(--lifinity-border)'
+                        : 'bg-(--lifinity-surface-soft) border-(--lifinity-border)'
                   }`}
                 >
                   <div className="flex items-start justify-between mb-8">
                     <div
                       className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black ${
                         position === 1
-                          ? 'bg-[var(--lifinity-warning)] [color:var(--lifinity-on-primary)]'
+                          ? 'bg-(--lifinity-warning) text-(--lifinity-on-primary)'
                           : position === 2
-                            ? 'bg-[var(--lifinity-primary-strong)] [color:var(--lifinity-on-primary)]'
-                            : 'bg-[var(--lifinity-primary)] [color:var(--lifinity-on-primary)]'
+                            ? 'bg-(--lifinity-primary-strong) text-(--lifinity-on-primary)'
+                            : 'bg-(--lifinity-primary) text-(--lifinity-on-primary)'
                       }`}
                     >
                       {position}
@@ -281,7 +281,7 @@ const Ranking = () => {
                     {position}.º lugar
                   </p>
 
-                  <h4 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)]">
+                  <h4 className="text-2xl font-black tracking-tight text-(--lifinity-text)">
                     {item.username}
                   </h4>
 
@@ -289,7 +289,7 @@ const Ranking = () => {
                     Nível {item.level || 1}
                   </p>
 
-                  <p className="text-4xl font-black tracking-tighter mt-6 [color:var(--lifinity-primary-strong)]">
+                  <p className="text-4xl font-black tracking-tighter mt-6 text-(--lifinity-primary-strong)">
                     {item.xp || 0}
                   </p>
 
@@ -318,7 +318,7 @@ const Ranking = () => {
           <p className="lifinity-muted-label mb-3">
             Como funciona?
           </p>
-          <h4 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)]">
+          <h4 className="text-2xl font-black tracking-tight text-(--lifinity-text)">
             Sistema de XP
           </h4>
           <p className={`text-sm font-medium mt-3 leading-relaxed ${mutedTextClass}`}>
@@ -331,7 +331,7 @@ const Ranking = () => {
           <p className="lifinity-muted-label mb-3">
             Concluir atividade
           </p>
-          <h4 className="text-2xl font-black tracking-tight [color:var(--lifinity-primary-strong)]">
+          <h4 className="text-2xl font-black tracking-tight text-(--lifinity-primary-strong)">
             + XP
           </h4>
           <p className={`text-sm font-medium mt-3 leading-relaxed ${mutedTextClass}`}>
@@ -343,7 +343,7 @@ const Ranking = () => {
           <p className="lifinity-muted-label mb-3">
             Subir nível
           </p>
-          <h4 className="text-2xl font-black tracking-tight [color:var(--lifinity-primary-strong)]">
+          <h4 className="text-2xl font-black tracking-tight text-(--lifinity-primary-strong)">
             Níveis
           </h4>
           <p className={`text-sm font-medium mt-3 leading-relaxed ${mutedTextClass}`}>
@@ -355,7 +355,7 @@ const Ranking = () => {
           <p className="lifinity-muted-label mb-3">
             Competição saudável
           </p>
-          <h4 className="text-2xl font-black tracking-tight [color:var(--lifinity-primary-strong)]">
+          <h4 className="text-2xl font-black tracking-tight text-(--lifinity-primary-strong)">
             Ranking
           </h4>
           <p className={`text-sm font-medium mt-3 leading-relaxed ${mutedTextClass}`}>
@@ -366,12 +366,12 @@ const Ranking = () => {
 
       {/* LISTA COMPLETA */}
       <div className={`${cardClass} rounded-3xl overflow-hidden`}>
-        <div className="p-6 md:p-8 border-b border-[var(--lifinity-border)]">
+        <div className="p-6 md:p-8 border-b border-(--lifinity-border)">
           <p className="lifinity-muted-label mb-2">
             Classificação
           </p>
 
-          <h3 className="text-3xl font-black tracking-tighter [color:var(--lifinity-text)]">
+          <h3 className="text-3xl font-black tracking-tighter text-(--lifinity-text)">
             Lista Completa
           </h3>
 
@@ -395,20 +395,20 @@ const Ranking = () => {
                   key={item.iduser}
                   className={`flex flex-col md:flex-row md:items-center md:justify-between gap-5 p-5 rounded-2xl border transition-all ${
                     isCurrentUser
-                      ? 'bg-[var(--lifinity-primary-muted)] border-[var(--lifinity-primary)] shadow-sm'
-                      : 'lifinity-card-soft border-[var(--lifinity-border)] hover:bg-[var(--lifinity-primary-muted)]'
+                      ? 'bg-(--lifinity-primary-muted) border-(--lifinity-primary) shadow-sm'
+                      : 'lifinity-card-soft border-(--lifinity-border) hover:bg-(--lifinity-primary-muted)'
                   }`}
                 >
                   <div className="flex items-center gap-4">
                     <div
                       className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black ${
                         position === 1
-                          ? 'bg-[var(--lifinity-warning)] [color:var(--lifinity-on-primary)]'
+                          ? 'bg-(--lifinity-warning) text-(--lifinity-on-primary)'
                           : position === 2
-                            ? 'bg-[var(--lifinity-primary-strong)] [color:var(--lifinity-on-primary)]'
+                            ? 'bg-(--lifinity-primary-strong) text-(--lifinity-on-primary)'
                             : position === 3
-                              ? 'bg-[var(--lifinity-primary)] [color:var(--lifinity-on-primary)]'
-                              : 'bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text-muted)] border border-[var(--lifinity-border)]'
+                              ? 'bg-(--lifinity-primary) text-(--lifinity-on-primary)'
+                              : 'bg-(--lifinity-surface-soft) text-(--lifinity-text-muted) border border-(--lifinity-border)'
                       }`}
                     >
                       {position}
@@ -416,7 +416,7 @@ const Ranking = () => {
 
                     <div>
                       <div className="flex items-center gap-3">
-                        <h4 className="text-lg font-black [color:var(--lifinity-text)]">
+                        <h4 className="text-lg font-black text-(--lifinity-text)">
                           {item.username}
                         </h4>
 
@@ -450,7 +450,7 @@ const Ranking = () => {
                     </div>
 
                     <div className="text-right">
-                      <p className="text-2xl font-black tracking-tighter [color:var(--lifinity-primary-strong)]">
+                      <p className="text-2xl font-black tracking-tighter text-(--lifinity-primary-strong)">
                         {item.xp || 0}
                       </p>
                       <p className={`text-xs font-black uppercase tracking-widest ${mutedTextClass}`}>

@@ -174,12 +174,12 @@ const AccountSettingsModal = ({ user, setUser, theme, setTheme, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-[var(--lifinity-overlay)] backdrop-blur-sm z-50 flex items-center justify-center p-6">
+    <div className="fixed inset-0 bg-(--lifinity-overlay) backdrop-blur-sm z-50 flex items-center justify-center p-6">
       <div className="lifinity-card w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl p-8 space-y-6">
         <div className="flex items-start justify-between gap-5">
           <div>
             <p className="lifinity-muted-label">Conta</p>
-            <h2 className="mt-2 text-2xl font-black [color:var(--lifinity-text)]">
+            <h2 className="mt-2 text-2xl font-black text-(--lifinity-text)">
               Configuracoes
             </h2>
           </div>
@@ -209,7 +209,7 @@ const AccountSettingsModal = ({ user, setUser, theme, setTheme, onClose }) => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <p className="lifinity-muted-label">Aparencia</p>
-              <p className="mt-2 text-sm font-bold [color:var(--lifinity-text-secondary)]">
+              <p className="mt-2 text-sm font-bold text-(--lifinity-text-secondary)">
                 Tema atual: {isLightTheme ? 'claro' : 'escuro'}
               </p>
             </div>
@@ -228,7 +228,7 @@ const AccountSettingsModal = ({ user, setUser, theme, setTheme, onClose }) => {
         <form onSubmit={handleUpdateUsername} className="lifinity-card-soft rounded-2xl p-5 space-y-4">
           <div>
             <p className="lifinity-muted-label">Nome de utilizador</p>
-            <p className="mt-2 text-sm font-bold [color:var(--lifinity-text-secondary)]">
+            <p className="mt-2 text-sm font-bold text-(--lifinity-text-secondary)">
               Atual: {user?.username || 'Utilizador'}
             </p>
           </div>
@@ -246,10 +246,10 @@ const AccountSettingsModal = ({ user, setUser, theme, setTheme, onClose }) => {
           </label>
 
           {usernameError && (
-            <p className="text-sm font-bold [color:var(--lifinity-danger)]">{usernameError}</p>
+            <p className="text-sm font-bold text-(--lifinity-danger)">{usernameError}</p>
           )}
           {usernameMessage && (
-            <p className="text-sm font-bold [color:var(--lifinity-success)]">{usernameMessage}</p>
+            <p className="text-sm font-bold text-(--lifinity-success)">{usernameMessage}</p>
           )}
 
           <button
@@ -303,10 +303,10 @@ const AccountSettingsModal = ({ user, setUser, theme, setTheme, onClose }) => {
           </div>
 
           {passwordError && (
-            <p className="text-sm font-bold [color:var(--lifinity-danger)]">{passwordError}</p>
+            <p className="text-sm font-bold text-(--lifinity-danger)">{passwordError}</p>
           )}
           {passwordMessage && (
-            <p className="text-sm font-bold [color:var(--lifinity-success)]">{passwordMessage}</p>
+            <p className="text-sm font-bold text-(--lifinity-success)">{passwordMessage}</p>
           )}
 
           <button
@@ -321,7 +321,7 @@ const AccountSettingsModal = ({ user, setUser, theme, setTheme, onClose }) => {
         <form onSubmit={handleDeleteAccount} className="lifinity-card-soft lifinity-danger-surface rounded-2xl p-5 space-y-4">
           <div>
             <p className="lifinity-muted-label">Zona critica</p>
-            <h3 className="mt-2 text-lg font-black [color:var(--lifinity-danger)]">
+            <h3 className="mt-2 text-lg font-black text-(--lifinity-danger)">
               Apagar conta
             </h3>
           </div>
@@ -353,13 +353,13 @@ const AccountSettingsModal = ({ user, setUser, theme, setTheme, onClose }) => {
           </div>
 
           {deleteError && (
-            <p className="text-sm font-bold [color:var(--lifinity-danger)]">{deleteError}</p>
+            <p className="text-sm font-bold text-(--lifinity-danger)">{deleteError}</p>
           )}
 
           <button
             type="submit"
             disabled={deletingAccount}
-            className="lifinity-danger-item px-5 py-4 rounded-2xl border border-[var(--lifinity-border)] text-xs font-black uppercase tracking-widest disabled:opacity-60 disabled:cursor-not-allowed"
+            className="lifinity-danger-item px-5 py-4 rounded-2xl border border-(--lifinity-border) text-xs font-black uppercase tracking-widest disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {deletingAccount ? 'A apagar...' : 'Apagar conta'}
           </button>

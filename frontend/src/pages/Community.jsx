@@ -570,7 +570,7 @@ const Community = () => {
   if (loading) {
     return (
       <div className={`${cardClass} p-10 rounded-3xl text-center`}>
-        <p className="font-black uppercase tracking-widest text-xs [color:var(--lifinity-text-muted)]">
+        <p className="font-black uppercase tracking-widest text-xs text-(--lifinity-text-muted)">
           A carregar comunidade...
         </p>
       </div>
@@ -581,7 +581,7 @@ const Community = () => {
     <div className="space-y-8">
       {/* HERO */}
       <div
-        className="relative overflow-hidden rounded-[2.5rem] border border-[var(--lifinity-border)] min-h-72 flex items-end shadow-[var(--lifinity-shadow)]"
+        className="relative overflow-hidden rounded-[2.5rem] border border-(--lifinity-border) min-h-72 flex items-end shadow-(--lifinity-shadow)"
         style={{
           backgroundImage: "url('/images/community-bg.jpg')",
           backgroundSize: 'cover',
@@ -590,8 +590,8 @@ const Community = () => {
       >
         <div className="absolute inset-0 lifinity-hero-overlay"></div>
 
-        <div className="relative z-10 p-8 md:p-10 [color:var(--lifinity-text)] w-full">
-          <p className="text-[10px] font-black uppercase tracking-[0.25em] mb-3 [color:var(--lifinity-primary-strong)]">
+        <div className="relative z-10 p-8 md:p-10 text-(--lifinity-text) w-full">
+          <p className="text-[10px] font-black uppercase tracking-[0.25em] mb-3 text-(--lifinity-primary-strong)">
             Comunidade Lifinity
           </p>
 
@@ -601,7 +601,7 @@ const Community = () => {
                 Grupos, amigos e colaboração
               </h2>
 
-              <p className="max-w-3xl font-medium leading-relaxed [color:var(--lifinity-text-secondary)]">
+              <p className="max-w-3xl font-medium leading-relaxed text-(--lifinity-text-secondary)">
                 Cria grupos, entra por código de convite, adiciona amigos e prepara
                 o Lifinity para atividades partilhadas, estatísticas comparativas e
                 conversas e progresso em conjunto.
@@ -610,19 +610,19 @@ const Community = () => {
 
             <div className="grid grid-cols-2 gap-3 min-w-64">
               <div className="lifinity-card-soft rounded-3xl p-5">
-                <p className="text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-primary-strong)]">
+                <p className="text-[10px] font-black uppercase tracking-widest text-(--lifinity-primary-strong)">
                   Grupos
                 </p>
-                <p className="text-4xl font-black tracking-tighter mt-1 [color:var(--lifinity-text)]">
+                <p className="text-4xl font-black tracking-tighter mt-1 text-(--lifinity-text)">
                   {groups.length}
                 </p>
               </div>
 
               <div className="lifinity-card-soft rounded-3xl p-5">
-                <p className="text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-primary-strong)]">
+                <p className="text-[10px] font-black uppercase tracking-widest text-(--lifinity-primary-strong)">
                   Amigos
                 </p>
-                <p className="text-4xl font-black tracking-tighter mt-1 [color:var(--lifinity-text)]">
+                <p className="text-4xl font-black tracking-tighter mt-1 text-(--lifinity-text)">
                   {friends.length}
                 </p>
               </div>
@@ -633,7 +633,7 @@ const Community = () => {
 
       {message && (
         <div
-          className="lifinity-card-soft p-5 rounded-2xl font-bold text-sm [color:var(--lifinity-text)]"
+          className="lifinity-card-soft p-5 rounded-2xl font-bold text-sm text-(--lifinity-text)"
           role="status"
           aria-live="polite"
         >
@@ -644,16 +644,16 @@ const Community = () => {
       {/* AÇÕES PRINCIPAIS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {/* CRIAR GRUPO */}
-        <div className={`${cardClass} p-6 rounded-[2rem]`}>
+        <div className={`${cardClass} p-6 rounded-4xl`}>
           <p className="lifinity-muted-label mb-2 italic">
             Criar grupo
           </p>
 
-          <h3 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)] mb-2">
+          <h3 className="text-2xl font-black tracking-tight text-(--lifinity-text) mb-2">
             Novo espaço de colaboração
           </h3>
 
-          <p className="font-medium text-sm mb-6 [color:var(--lifinity-text-muted)]">
+          <p className="font-medium text-sm mb-6 text-(--lifinity-text-muted)">
             Cria um grupo e partilha o código de convite com colegas ou amigos.
           </p>
 
@@ -691,16 +691,16 @@ const Community = () => {
         </div>
 
         {/* ENTRAR POR CÓDIGO */}
-        <div className={`${cardClass} p-6 rounded-[2rem]`}>
+        <div className={`${cardClass} p-6 rounded-4xl`}>
           <p className="lifinity-muted-label mb-2 italic">
             Convite
           </p>
 
-          <h3 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)] mb-2">
+          <h3 className="text-2xl font-black tracking-tight text-(--lifinity-text) mb-2">
             Entrar num grupo
           </h3>
 
-          <p className="font-medium text-sm mb-6 [color:var(--lifinity-text-muted)]">
+          <p className="font-medium text-sm mb-6 text-(--lifinity-text-muted)">
             Usa o código recebido para entrares num grupo já existente.
           </p>
 
@@ -727,7 +727,7 @@ const Community = () => {
           </form>
 
           <div className="lifinity-card-soft mt-6 p-5 rounded-2xl">
-            <p className="text-xs font-bold leading-relaxed [color:var(--lifinity-text-muted)]">
+            <p className="text-xs font-bold leading-relaxed text-(--lifinity-text-muted)">
               Os grupos juntam atividades partilhadas, estatísticas por grupo,
               chat e partilha de versículos.
             </p>
@@ -735,16 +735,16 @@ const Community = () => {
         </div>
 
         {/* CONVERSAS */}
-        <div className={`${cardClass} p-6 rounded-[2rem]`}>
+        <div className={`${cardClass} p-6 rounded-4xl`}>
           <p className="lifinity-muted-label mb-2 italic">
             Conversas
           </p>
 
-          <h3 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)] mb-2">
+          <h3 className="text-2xl font-black tracking-tight text-(--lifinity-text) mb-2">
             Chat da comunidade
           </h3>
 
-          <p className="font-medium text-sm mb-6 [color:var(--lifinity-text-muted)]">
+          <p className="font-medium text-sm mb-6 text-(--lifinity-text-muted)">
             Abre as tuas conversas com amigos, grupos e o Assistente Lifinity.
           </p>
 
@@ -760,17 +760,17 @@ const Community = () => {
 
       {/* GRUPOS */}
       <div className={`${cardClass} rounded-[2.5rem] overflow-visible`}>
-        <div className="p-6 md:p-8 border-b border-[var(--lifinity-border)] flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+        <div className="p-6 md:p-8 border-b border-(--lifinity-border) flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
           <div>
             <p className="lifinity-muted-label mb-2 italic">
               Os meus grupos
             </p>
 
-            <h3 className="text-3xl font-black tracking-tighter [color:var(--lifinity-text)]">
+            <h3 className="text-3xl font-black tracking-tighter text-(--lifinity-text)">
               Espaços de colaboração
             </h3>
 
-            <p className="font-medium mt-2 [color:var(--lifinity-text-muted)]">
+            <p className="font-medium mt-2 text-(--lifinity-text-muted)">
               Gere grupos criados ou grupos onde já entraste através de convite.
             </p>
           </div>
@@ -790,7 +790,7 @@ const Community = () => {
         </div>
 
         {groups.length === 0 ? (
-          <div className="p-14 text-center font-bold italic uppercase text-xs tracking-widest [color:var(--lifinity-text-muted)]">
+          <div className="p-14 text-center font-bold italic uppercase text-xs tracking-widest text-(--lifinity-text-muted)">
             Ainda não pertences a nenhum grupo.
           </div>
         ) : (
@@ -798,36 +798,36 @@ const Community = () => {
             {groups.map((group) => (
               <div
                 key={group.idgroup}
-                className={`group lifinity-card-soft relative p-6 rounded-3xl hover:bg-[var(--lifinity-primary-muted)] transition-all ${
+                className={`group lifinity-card-soft relative p-6 rounded-3xl hover:bg-(--lifinity-primary-muted) transition-all ${
                   openActionMenu === `group-${group.idgroup}` ? 'z-[90]' : 'z-0'
                 }`}
               >
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest mb-2 [color:var(--lifinity-primary-strong)]">
+                    <p className="text-[10px] font-black uppercase tracking-widest mb-2 text-(--lifinity-primary-strong)">
                       {group.role === 'admin' ? 'Administrador' : 'Membro'}
                     </p>
 
-                    <h4 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)]">
+                    <h4 className="text-2xl font-black tracking-tight text-(--lifinity-text)">
                       {group.name}
                     </h4>
 
-                    <p className="text-sm font-medium mt-2 [color:var(--lifinity-text-muted)]">
+                    <p className="text-sm font-medium mt-2 text-(--lifinity-text-muted)">
                       {group.description || 'Sem descrição.'}
                     </p>
 
-                    <p className="text-[10px] font-black uppercase tracking-widest mt-4 [color:var(--lifinity-text-muted)]">
+                    <p className="text-[10px] font-black uppercase tracking-widest mt-4 text-(--lifinity-text-muted)">
                       {group.member_count} membro(s)
                     </p>
                   </div>
 
                   <div className="flex items-start gap-3">
                     <div className="lifinity-card-soft rounded-2xl p-4 min-w-40">
-                    <p className="text-[10px] font-black uppercase tracking-widest mb-1 [color:var(--lifinity-text-muted)]">
+                    <p className="text-[10px] font-black uppercase tracking-widest mb-1 text-(--lifinity-text-muted)">
                       Código
                     </p>
 
-                    <p className="text-lg font-black tracking-widest [color:var(--lifinity-text)]">
+                    <p className="text-lg font-black tracking-widest text-(--lifinity-text)">
                       {group.invite_code}
                     </p>
 
@@ -910,17 +910,17 @@ const Community = () => {
         )}
 
         {selectedGroup && (
-          <div className="border-t border-[var(--lifinity-border)] p-6 bg-[var(--lifinity-surface-soft)]">
+          <div className="border-t border-(--lifinity-border) p-6 bg-(--lifinity-surface-soft)">
             <p className="lifinity-muted-label mb-2 italic">
               Membros do grupo
             </p>
 
-            <h4 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)] mb-5">
+            <h4 className="text-2xl font-black tracking-tight text-(--lifinity-text) mb-5">
               {selectedGroup.name}
             </h4>
 
             {groupMembers.length === 0 ? (
-              <div className="p-10 text-center font-bold italic uppercase text-xs tracking-widest [color:var(--lifinity-text-muted)]">
+              <div className="p-10 text-center font-bold italic uppercase text-xs tracking-widest text-(--lifinity-text-muted)">
                 Ainda não existem membros para apresentar.
               </div>
             ) : (
@@ -950,7 +950,7 @@ const Community = () => {
                         <button
                           type="button"
                           onClick={() => openPublicProfile(member.iduser)}
-                          className="text-left text-lg font-black [color:var(--lifinity-text)] hover:[color:var(--lifinity-primary-strong)] transition-colors"
+                          className="text-left text-lg font-black text-(--lifinity-text) hover:text-(--lifinity-primary-strong) transition-colors"
                         >
                           {member.username}
                         </button>
@@ -1011,18 +1011,18 @@ const Community = () => {
                         )}
                       </div>
 
-                      <p className="text-[10px] font-black uppercase tracking-widest mt-1 [color:var(--lifinity-text-muted)]">
+                      <p className="text-[10px] font-black uppercase tracking-widest mt-1 text-(--lifinity-text-muted)">
                         Nível {member.level} • {member.xp} XP
                       </p>
 
                       <div className="flex items-center gap-2 mt-4">
-                        <p className="text-[10px] font-black uppercase tracking-widest [color:var(--lifinity-primary-strong)]">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-(--lifinity-primary-strong)">
                           {member.role}
                         </p>
 
                         {/* Etiqueta de membro suspenso (estilo danger) */}
                         {memberMuted && (
-                          <span className="lifinity-danger-item px-2 py-1 rounded-lg border border-[var(--lifinity-border)] text-[9px] font-black uppercase tracking-widest">
+                          <span className="lifinity-danger-item px-2 py-1 rounded-lg border border-(--lifinity-border) text-[9px] font-black uppercase tracking-widest">
                             Suspenso
                           </span>
                         )}
@@ -1039,12 +1039,12 @@ const Community = () => {
       {/* AMIGOS */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* PESQUISA */}
-        <div className={`${cardClass} xl:col-span-1 p-6 rounded-[2rem] h-fit`}>
+        <div className={`${cardClass} xl:col-span-1 p-6 rounded-4xl h-fit`}>
           <p className="lifinity-muted-label mb-2 italic">
             Procurar pessoas
           </p>
 
-          <h3 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)] mb-6">
+          <h3 className="text-2xl font-black tracking-tight text-(--lifinity-text) mb-6">
             Adicionar amigos
           </h3>
 
@@ -1068,7 +1068,7 @@ const Community = () => {
 
           <div className="mt-6 space-y-3">
             {searchResults.length === 0 ? (
-              <p className="text-xs font-bold uppercase tracking-widest text-center py-4 [color:var(--lifinity-text-muted)]">
+              <p className="text-xs font-bold uppercase tracking-widest text-center py-4 text-(--lifinity-text-muted)">
                 Sem resultados pesquisados.
               </p>
             ) : (
@@ -1080,12 +1080,12 @@ const Community = () => {
                   <button
                     type="button"
                     onClick={() => openPublicProfile(user.iduser)}
-                    className="text-left font-black [color:var(--lifinity-text)] hover:[color:var(--lifinity-primary-strong)] transition-colors"
+                    className="text-left font-black text-(--lifinity-text) hover:text-(--lifinity-primary-strong) transition-colors"
                   >
                     {user.username}
                   </button>
 
-                  <p className="text-[10px] font-black uppercase tracking-widest mt-1 [color:var(--lifinity-text-muted)]">
+                  <p className="text-[10px] font-black uppercase tracking-widest mt-1 text-(--lifinity-text-muted)">
                     Nível {user.level} • {user.xp} XP
                   </p>
 
@@ -1112,19 +1112,19 @@ const Community = () => {
 
         {/* PEDIDOS E AMIGOS */}
         <div className="xl:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className={`${cardClass} rounded-[2rem] overflow-visible`}>
-            <div className="p-6 border-b border-[var(--lifinity-border)]">
+          <div className={`${cardClass} rounded-4xl overflow-visible`}>
+            <div className="p-6 border-b border-(--lifinity-border)">
               <p className="lifinity-muted-label mb-2 italic">
                 Pedidos
               </p>
 
-              <h3 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)]">
+              <h3 className="text-2xl font-black tracking-tight text-(--lifinity-text)">
                 Pedidos recebidos
               </h3>
             </div>
 
             {friendRequests.length === 0 ? (
-              <div className="p-10 text-center font-bold italic uppercase text-xs tracking-widest [color:var(--lifinity-text-muted)]">
+              <div className="p-10 text-center font-bold italic uppercase text-xs tracking-widest text-(--lifinity-text-muted)">
                 Não tens pedidos pendentes.
               </div>
             ) : (
@@ -1139,12 +1139,12 @@ const Community = () => {
                     <button
                       type="button"
                       onClick={() => openPublicProfile(request.iduser)}
-                      className="text-left text-lg font-black [color:var(--lifinity-text)] hover:[color:var(--lifinity-primary-strong)] transition-colors"
+                      className="text-left text-lg font-black text-(--lifinity-text) hover:text-(--lifinity-primary-strong) transition-colors"
                     >
                       {request.username}
                     </button>
 
-                    <p className="text-[10px] font-black uppercase tracking-widest mt-1 [color:var(--lifinity-text-muted)]">
+                    <p className="text-[10px] font-black uppercase tracking-widest mt-1 text-(--lifinity-text-muted)">
                       Nível {request.level} • {request.xp} XP
                     </p>
 
@@ -1206,19 +1206,19 @@ const Community = () => {
             )}
           </div>
 
-          <div className={`${cardClass} rounded-[2rem] overflow-visible`}>
-            <div className="p-6 border-b border-[var(--lifinity-border)]">
+          <div className={`${cardClass} rounded-4xl overflow-visible`}>
+            <div className="p-6 border-b border-(--lifinity-border)">
               <p className="lifinity-muted-label mb-2 italic">
                 Rede pessoal
               </p>
 
-              <h3 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)]">
+              <h3 className="text-2xl font-black tracking-tight text-(--lifinity-text)">
                 Os meus amigos
               </h3>
             </div>
 
             {friends.length === 0 ? (
-              <div className="p-10 text-center font-bold italic uppercase text-xs tracking-widest [color:var(--lifinity-text-muted)]">
+              <div className="p-10 text-center font-bold italic uppercase text-xs tracking-widest text-(--lifinity-text-muted)">
                 Ainda não tens amigos adicionados.
               </div>
             ) : (
@@ -1235,12 +1235,12 @@ const Community = () => {
                         <button
                           type="button"
                           onClick={() => openPublicProfile(friend.iduser)}
-                          className="text-left text-lg font-black [color:var(--lifinity-text)] hover:[color:var(--lifinity-primary-strong)] transition-colors"
+                          className="text-left text-lg font-black text-(--lifinity-text) hover:text-(--lifinity-primary-strong) transition-colors"
                         >
                           {friend.username}
                         </button>
 
-                    <p className="text-[10px] font-black uppercase tracking-widest mt-1 [color:var(--lifinity-text-muted)]">
+                    <p className="text-[10px] font-black uppercase tracking-widest mt-1 text-(--lifinity-text-muted)">
                       Nível {friend.level} • {friend.xp} XP
                     </p>
 
@@ -1307,11 +1307,11 @@ const Community = () => {
                     </div>
 
                     <div className="hidden">
-                      <span className="px-3 py-2 rounded-xl bg-[var(--lifinity-primary-muted)] border border-[var(--lifinity-border)] [color:var(--lifinity-primary-strong)] text-[10px] font-black uppercase tracking-widest">
+                      <span className="px-3 py-2 rounded-xl bg-(--lifinity-primary-muted) border border-(--lifinity-border) text-(--lifinity-primary-strong) text-[10px] font-black uppercase tracking-widest">
                         Progresso partilhado
                       </span>
 
-                      <span className="px-3 py-2 rounded-xl bg-[var(--lifinity-surface-soft)] border border-[var(--lifinity-border)] [color:var(--lifinity-text-muted)] text-[10px] font-black uppercase tracking-widest">
+                      <span className="px-3 py-2 rounded-xl bg-(--lifinity-surface-soft) border border-(--lifinity-border) text-(--lifinity-text-muted) text-[10px] font-black uppercase tracking-widest">
                         Chat
                       </span>
                     </div>
@@ -1324,48 +1324,48 @@ const Community = () => {
       </div>
 
       {/* RESUMO DA COMUNIDADE */}
-      <div className={`${cardClass} p-6 rounded-[2rem]`}>
+      <div className={`${cardClass} p-6 rounded-4xl`}>
         <p className="lifinity-muted-label mb-2 italic">
           Comunidade ativa
         </p>
 
-        <h3 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)] mb-4">
+        <h3 className="text-2xl font-black tracking-tight text-(--lifinity-text) mb-4">
           O que podes fazer aqui
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="lifinity-card-soft p-5 rounded-2xl">
-            <p className="text-[10px] font-black uppercase tracking-widest mb-2 [color:var(--lifinity-primary-strong)]">
+            <p className="text-[10px] font-black uppercase tracking-widest mb-2 text-(--lifinity-primary-strong)">
               Atividades de grupo
             </p>
-            <p className="text-sm font-medium [color:var(--lifinity-text-muted)]">
+            <p className="text-sm font-medium text-(--lifinity-text-muted)">
               Criar atividades destinadas a grupos ou membros específicos.
             </p>
           </div>
 
           <div className="lifinity-card-soft p-5 rounded-2xl">
-            <p className="text-[10px] font-black uppercase tracking-widest mb-2 [color:var(--lifinity-primary-strong)]">
+            <p className="text-[10px] font-black uppercase tracking-widest mb-2 text-(--lifinity-primary-strong)">
               Estatísticas comparadas
             </p>
-            <p className="text-sm font-medium [color:var(--lifinity-text-muted)]">
+            <p className="text-sm font-medium text-(--lifinity-text-muted)">
               Comparar progresso com amigos ou médias de grupos.
             </p>
           </div>
 
           <div className="lifinity-card-soft p-5 rounded-2xl">
-            <p className="text-[10px] font-black uppercase tracking-widest mb-2 [color:var(--lifinity-primary-strong)]">
+            <p className="text-[10px] font-black uppercase tracking-widest mb-2 text-(--lifinity-primary-strong)">
               Partilha de inspiração
             </p>
-            <p className="text-sm font-medium [color:var(--lifinity-text-muted)]">
+            <p className="text-sm font-medium text-(--lifinity-text-muted)">
               Enviar versículos favoritos para amigos ou grupos.
             </p>
           </div>
 
           <div className="lifinity-card-soft p-5 rounded-2xl">
-            <p className="text-[10px] font-black uppercase tracking-widest mb-2 [color:var(--lifinity-text-muted)]">
+            <p className="text-[10px] font-black uppercase tracking-widest mb-2 text-(--lifinity-text-muted)">
               Chat
             </p>
-            <p className="text-sm font-medium [color:var(--lifinity-text-muted)]">
+            <p className="text-sm font-medium text-(--lifinity-text-muted)">
               Conversas integradas com amigos e grupos.
             </p>
           </div>
@@ -1375,25 +1375,25 @@ const Community = () => {
       {/* MODAL DE MODERACAO (suspender / expulsar membro) */}
       {moderationTarget && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--lifinity-overlay)] p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-(--lifinity-overlay) p-4 backdrop-blur-sm"
           onClick={closeModeration}
           role="presentation"
         >
           <div
-            className="lifinity-card w-full max-w-lg rounded-[2rem]"
+            className="lifinity-card w-full max-w-lg rounded-4xl"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
             aria-labelledby="moderation-title"
           >
-            <div className="border-b border-[var(--lifinity-border)] p-6">
+            <div className="border-b border-(--lifinity-border) p-6">
               <p className="lifinity-muted-label mb-2 italic">
                 {moderationMode === 'mute' ? 'Suspender membro' : 'Expulsar membro'}
               </p>
 
               <h3
                 id="moderation-title"
-                className="text-2xl font-black tracking-tight [color:var(--lifinity-text)]"
+                className="text-2xl font-black tracking-tight text-(--lifinity-text)"
               >
                 {moderationMode === 'mute' ? 'Suspender' : 'Expulsar'} {moderationTarget.username}
               </h3>
@@ -1440,7 +1440,7 @@ const Community = () => {
               )}
             </div>
 
-            <div className="flex items-center justify-end gap-3 border-t border-[var(--lifinity-border)] p-6">
+            <div className="flex items-center justify-end gap-3 border-t border-(--lifinity-border) p-6">
               <button
                 type="button"
                 onClick={closeModeration}

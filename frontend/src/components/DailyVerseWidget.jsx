@@ -57,20 +57,20 @@ const DailyVerseWidget = () => {
       {!isOpen ? (
         <button
           onClick={() => setIsOpen(true)}
-          className="lifinity-button-secondary rounded-2xl px-5 py-4 shadow-[var(--lifinity-shadow)]"
+          className="lifinity-button-secondary rounded-2xl px-5 py-4 shadow-(--lifinity-shadow)"
         >
           <p className="lifinity-muted-label">
             Versículo do Dia
           </p>
         </button>
       ) : (
-        <div className="lifinity-card w-80 sm:w-90 rounded-[2rem] overflow-hidden">
-          <div className="p-5 border-b border-[var(--lifinity-border)] flex items-center justify-between gap-4">
+        <div className="lifinity-card w-80 sm:w-90 rounded-4xl overflow-hidden">
+          <div className="p-5 border-b border-(--lifinity-border) flex items-center justify-between gap-4">
             <div>
               <p className="lifinity-muted-label">
                 Versículo do Dia
               </p>
-              <p className="text-xs font-bold mt-1 [color:var(--lifinity-text-muted)]">
+              <p className="text-xs font-bold mt-1 text-(--lifinity-text-muted)">
                 {verse.book} {verse.chapter}:{verse.verse}
               </p>
             </div>
@@ -86,7 +86,7 @@ const DailyVerseWidget = () => {
           </div>
 
           <div className="p-5 space-y-4">
-            <p className="font-bold leading-relaxed text-sm [color:var(--lifinity-text)]">
+            <p className="font-bold leading-relaxed text-sm text-(--lifinity-text)">
               “{verse.text}”
             </p>
 
@@ -95,8 +95,8 @@ const DailyVerseWidget = () => {
                 onClick={toggleFavorite}
                 className={`text-2xl transition-all ${
                   verse.isFavorite
-                    ? '[color:var(--lifinity-warning)] scale-110'
-                    : '[color:var(--lifinity-text-muted)] hover:[color:var(--lifinity-warning)]'
+                    ? 'text-(--lifinity-warning) scale-110'
+                    : 'text-(--lifinity-text-muted) hover:text-(--lifinity-warning)'
                 }`}
                 title="Adicionar aos favoritos"
                 aria-label="Adicionar aos favoritos"

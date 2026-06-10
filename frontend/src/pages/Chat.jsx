@@ -433,16 +433,16 @@ const Chat = () => {
 
   return (
     <div className="flex flex-col gap-8 lg:h-[calc(100vh-8rem)] lg:overflow-hidden">
-      <div className={`${cardClass} p-8 rounded-[2rem] lg:shrink-0`}>
+      <div className={`${cardClass} p-8 rounded-4xl lg:shrink-0`}>
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-5">
           <div>
             <p className="lifinity-muted-label mb-2">
               Conversas
             </p>
-            <h2 className="text-4xl font-black tracking-tighter [color:var(--lifinity-text)]">
+            <h2 className="text-4xl font-black tracking-tighter text-(--lifinity-text)">
               Chat
             </h2>
-            <p className="font-medium mt-3 [color:var(--lifinity-text-muted)]">
+            <p className="font-medium mt-3 text-(--lifinity-text-muted)">
               Conversa com amigos, grupos e Assistente Lifinity no mesmo lugar.
             </p>
           </div>
@@ -464,12 +464,12 @@ const Chat = () => {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6 lg:flex-1 lg:min-h-0">
-        <aside className={`${cardClass} rounded-[2rem] overflow-hidden lg:flex lg:flex-col lg:min-h-0`}>
-          <div className="p-6 border-b border-[var(--lifinity-border)] lg:shrink-0">
+        <aside className={`${cardClass} rounded-4xl overflow-hidden lg:flex lg:flex-col lg:min-h-0`}>
+          <div className="p-6 border-b border-(--lifinity-border) lg:shrink-0">
             <p className="lifinity-muted-label mb-2">
               Lista
             </p>
-            <h3 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)]">
+            <h3 className="text-2xl font-black tracking-tight text-(--lifinity-text)">
               As tuas conversas
             </h3>
           </div>
@@ -480,23 +480,23 @@ const Chat = () => {
               onClick={openAssistantConversation}
               className={`w-full p-5 rounded-2xl border text-left transition-all ${
                 isAssistantSelected
-                  ? 'bg-[var(--lifinity-primary-muted)] border-[var(--lifinity-primary)] shadow-sm'
-                  : 'lifinity-card-soft border-[var(--lifinity-border)] hover:bg-[var(--lifinity-primary-muted)]'
+                  ? 'bg-(--lifinity-primary-muted) border-(--lifinity-primary) shadow-sm'
+                  : 'lifinity-card-soft border-(--lifinity-border) hover:bg-(--lifinity-primary-muted)'
               }`}
             >
-              <p className="text-lg font-black [color:var(--lifinity-text)]">
+              <p className="text-lg font-black text-(--lifinity-text)">
                 Assistente Lifinity
               </p>
-              <p className="text-[10px] font-black uppercase tracking-widest mt-1 [color:var(--lifinity-primary-strong)]">
+              <p className="text-[10px] font-black uppercase tracking-widest mt-1 text-(--lifinity-primary-strong)">
                 Sempre disponivel
               </p>
-              <p className="text-sm font-medium mt-4 line-clamp-2 [color:var(--lifinity-text-muted)]">
+              <p className="text-sm font-medium mt-4 line-clamp-2 text-(--lifinity-text-muted)">
                 Ajuda com atividades, foco, motivacao e organizacao.
               </p>
             </button>
 
             {conversations.length === 0 ? (
-              <div className={`${softCardClass} p-6 rounded-2xl text-center font-bold text-xs tracking-widest [color:var(--lifinity-text-muted)]`}>
+              <div className={`${softCardClass} p-6 rounded-2xl text-center font-bold text-xs tracking-widest text-(--lifinity-text-muted)`}>
                 Ainda nao tens conversas.
               </div>
             ) : (
@@ -512,24 +512,24 @@ const Chat = () => {
                     onClick={() => openConversation(conversation.idconversation)}
                     className={`w-full p-5 rounded-2xl border text-left transition-all ${
                       isSelected
-                        ? 'bg-[var(--lifinity-primary-muted)] border-[var(--lifinity-primary)] shadow-sm'
-                        : 'lifinity-card-soft border-[var(--lifinity-border)] hover:bg-[var(--lifinity-primary-muted)]'
+                        ? 'bg-(--lifinity-primary-muted) border-(--lifinity-primary) shadow-sm'
+                        : 'lifinity-card-soft border-(--lifinity-border) hover:bg-(--lifinity-primary-muted)'
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       {conversation.type === 'group' && (
-                        <span className="shrink-0 rounded-lg bg-[var(--lifinity-primary-muted)] border border-[var(--lifinity-border)] px-2 py-1 text-[9px] font-black uppercase tracking-widest [color:var(--lifinity-primary-strong)]">
+                        <span className="shrink-0 rounded-lg bg-(--lifinity-primary-muted) border border-(--lifinity-border) px-2 py-1 text-[9px] font-black uppercase tracking-widest text-(--lifinity-primary-strong)">
                           Grupo
                         </span>
                       )}
-                      <p className="text-lg font-black truncate [color:var(--lifinity-text)]">
+                      <p className="text-lg font-black truncate text-(--lifinity-text)">
                         {getConversationTitle(conversation)}
                       </p>
                     </div>
-                    <p className="text-[10px] font-black uppercase tracking-widest mt-1 [color:var(--lifinity-text-muted)]">
+                    <p className="text-[10px] font-black uppercase tracking-widest mt-1 text-(--lifinity-text-muted)">
                       {getConversationSubtitle(conversation)}
                     </p>
-                    <p className="text-sm font-medium mt-4 line-clamp-2 [color:var(--lifinity-text-muted)]">
+                    <p className="text-sm font-medium mt-4 line-clamp-2 text-(--lifinity-text-muted)">
                       {getConversationPreview(conversation)}
                     </p>
                   </button>
@@ -539,20 +539,20 @@ const Chat = () => {
           </div>
         </aside>
 
-        <section className={`${cardClass} rounded-[2rem] overflow-hidden min-h-[640px] lg:min-h-0 lg:h-full flex flex-col`}>
-          <div className="p-6 border-b border-[var(--lifinity-border)] lg:shrink-0">
+        <section className={`${cardClass} rounded-4xl overflow-hidden min-h-160 lg:min-h-0 lg:h-full flex flex-col`}>
+          <div className="p-6 border-b border-(--lifinity-border) lg:shrink-0">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
               <div>
                 <p className="lifinity-muted-label mb-2">
                   Conversa ativa
                 </p>
-                <h3 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)]">
+                <h3 className="text-2xl font-black tracking-tight text-(--lifinity-text)">
                   {isAssistantSelected
                     ? 'Assistente Lifinity'
                     : getConversationTitle(selectedConversation)}
                 </h3>
                 {selectedConversation && (
-                  <p className="text-[10px] font-black uppercase tracking-widest mt-2 [color:var(--lifinity-text-muted)]">
+                  <p className="text-[10px] font-black uppercase tracking-widest mt-2 text-(--lifinity-text-muted)">
                     {getConversationSubtitle(selectedConversation)}
                   </p>
                 )}
@@ -561,7 +561,7 @@ const Chat = () => {
                     <button
                       type="button"
                       onClick={() => openPublicProfile(selectedConversation.other_user_id)}
-                      className="mt-3 text-[10px] font-black uppercase tracking-widest transition-colors [color:var(--lifinity-primary)] hover:[color:var(--lifinity-primary-strong)]"
+                      className="mt-3 text-[10px] font-black uppercase tracking-widest transition-colors text-(--lifinity-primary) hover:text-(--lifinity-primary-strong)"
                     >
                       Ver perfil publico
                     </button>
@@ -581,14 +581,14 @@ const Chat = () => {
           </div>
 
           {showMembers && isGroupSelected && (
-            <div className="border-b border-[var(--lifinity-border)] bg-[var(--lifinity-surface-soft)] p-5 space-y-5 lg:shrink-0 lg:max-h-[45%] lg:overflow-y-auto">
+            <div className="border-b border-(--lifinity-border) bg-(--lifinity-surface-soft) p-5 space-y-5 lg:shrink-0 lg:max-h-[45%] lg:overflow-y-auto">
               <div>
                 <p className="lifinity-muted-label mb-3">
                   Membros
                 </p>
 
                 {membersLoading ? (
-                  <p className="font-bold text-xs tracking-widest [color:var(--lifinity-text-muted)]">
+                  <p className="font-bold text-xs tracking-widest text-(--lifinity-text-muted)">
                     A carregar membros...
                   </p>
                 ) : (
@@ -610,11 +610,11 @@ const Chat = () => {
                             <button
                               type="button"
                               onClick={() => openPublicProfile(member.iduser)}
-                              className="text-left text-sm font-black transition-colors [color:var(--lifinity-text)] hover:[color:var(--lifinity-primary-strong)]"
+                              className="text-left text-sm font-black transition-colors text-(--lifinity-text) hover:text-(--lifinity-primary-strong)"
                             >
                               {member.username}
                             </button>
-                            <p className="text-[10px] font-black uppercase tracking-widest mt-1 [color:var(--lifinity-text-muted)]">
+                            <p className="text-[10px] font-black uppercase tracking-widest mt-1 text-(--lifinity-text-muted)">
                               {member.role} · Nivel {member.level || 1}
                             </p>
                           </div>
@@ -624,7 +624,7 @@ const Chat = () => {
                               type="button"
                               onClick={() => handleRemoveMember(member)}
                               disabled={memberSubmitting}
-                              className="lifinity-danger-item px-3 py-2 rounded-xl border border-[var(--lifinity-border)] text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
+                              className="lifinity-danger-item px-3 py-2 rounded-xl border border-(--lifinity-border) text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
                             >
                               Remover
                             </button>
@@ -638,7 +638,7 @@ const Chat = () => {
 
               {isLifinityGroupSelected ? (
                 <div className={`${softCardClass} rounded-2xl p-4`}>
-                  <p className="text-xs font-bold leading-relaxed [color:var(--lifinity-primary-strong)]">
+                  <p className="text-xs font-bold leading-relaxed text-(--lifinity-primary-strong)">
                     Os membros deste chat sao geridos pelo grupo Lifinity.
                   </p>
                 </div>
@@ -649,7 +649,7 @@ const Chat = () => {
                   </p>
 
                   {friendsAvailableToAdd.length === 0 ? (
-                    <p className="font-bold text-xs tracking-widest [color:var(--lifinity-text-muted)]">
+                    <p className="font-bold text-xs tracking-widest text-(--lifinity-text-muted)">
                       Nao ha amigos disponiveis para adicionar.
                     </p>
                   ) : (
@@ -657,7 +657,7 @@ const Chat = () => {
                       {friendsAvailableToAdd.map((friend) => (
                         <label
                           key={friend.iduser}
-                          className={`${softCardClass} rounded-2xl p-4 flex items-center gap-3 font-bold text-sm cursor-pointer hover:bg-[var(--lifinity-primary-muted)] transition-all [color:var(--lifinity-text)]`}
+                          className={`${softCardClass} rounded-2xl p-4 flex items-center gap-3 font-bold text-sm cursor-pointer hover:bg-(--lifinity-primary-muted) transition-all text-(--lifinity-text)`}
                         >
                           <input
                             type="checkbox"
@@ -685,15 +685,15 @@ const Chat = () => {
 
           <div className="flex-1 p-6 overflow-y-auto space-y-4 lg:min-h-0">
             {!selectedConversationId ? (
-              <div className="h-full min-h-96 flex items-center justify-center text-center font-bold text-xs tracking-widest [color:var(--lifinity-text-muted)]">
+              <div className="h-full min-h-96 flex items-center justify-center text-center font-bold text-xs tracking-widest text-(--lifinity-text-muted)">
                 Escolhe uma conversa na lista.
               </div>
             ) : messagesLoading ? (
-              <div className="h-full min-h-96 flex items-center justify-center text-center font-bold text-xs tracking-widest [color:var(--lifinity-text-muted)]">
+              <div className="h-full min-h-96 flex items-center justify-center text-center font-bold text-xs tracking-widest text-(--lifinity-text-muted)">
                 A carregar mensagens...
               </div>
             ) : messages.length === 0 ? (
-              <div className="h-full min-h-96 flex items-center justify-center text-center font-bold text-xs tracking-widest [color:var(--lifinity-text-muted)]">
+              <div className="h-full min-h-96 flex items-center justify-center text-center font-bold text-xs tracking-widest text-(--lifinity-text-muted)">
                 {isAssistantSelected
                   ? 'Ainda nao falaste com o assistente.'
                   : 'Ainda nao ha mensagens nesta conversa.'}
@@ -706,12 +706,12 @@ const Chat = () => {
                 const isAssistantMessage = isAssistantSelected && !isMine;
                 const isVerseMessage = message.message_type === 'verse';
                 const messageBubbleClass = isMine
-                  ? 'bg-[var(--lifinity-primary)] [color:var(--lifinity-on-primary)] border-[var(--lifinity-primary)] shadow-sm'
+                  ? 'bg-(--lifinity-primary) text-(--lifinity-on-primary) border-(--lifinity-primary) shadow-sm'
                   : isAssistantMessage
-                    ? 'bg-[var(--lifinity-primary-muted)] [color:var(--lifinity-text)] border-[var(--lifinity-border)]'
+                    ? 'bg-(--lifinity-primary-muted) text-(--lifinity-text) border-(--lifinity-border)'
                     : isVerseMessage
-                      ? 'bg-[var(--lifinity-surface-soft)] [color:var(--lifinity-text)] border-[var(--lifinity-primary)]'
-                      : 'bg-[var(--lifinity-surface-strong)] [color:var(--lifinity-text)] border-[var(--lifinity-border)]';
+                      ? 'bg-(--lifinity-surface-soft) text-(--lifinity-text) border-(--lifinity-primary)'
+                      : 'bg-(--lifinity-surface-strong) text-(--lifinity-text) border-(--lifinity-border)';
 
                 return (
                   <div
@@ -722,12 +722,12 @@ const Chat = () => {
                       className={`max-w-[85%] md:max-w-[75%] rounded-2xl px-5 py-4 border ${messageBubbleClass}`}
                     >
                       {isGroupSelected && !isMine && (
-                        <p className="text-[10px] font-black uppercase tracking-widest mb-2 [color:var(--lifinity-primary-strong)]">
+                        <p className="text-[10px] font-black uppercase tracking-widest mb-2 text-(--lifinity-primary-strong)">
                           {message.sender_username || 'Utilizador'}
                         </p>
                       )}
                       {isVerseMessage && (
-                        <p className="text-[10px] font-black uppercase tracking-widest mb-2 [color:var(--lifinity-primary-strong)]">
+                        <p className="text-[10px] font-black uppercase tracking-widest mb-2 text-(--lifinity-primary-strong)">
                           Versiculo
                         </p>
                       )}
@@ -736,7 +736,7 @@ const Chat = () => {
                       </p>
                       <p
                         className={`text-[10px] font-black uppercase tracking-widest mt-3 ${
-                          isMine ? 'opacity-75 [color:var(--lifinity-on-primary)]' : '[color:var(--lifinity-text-muted)]'
+                          isMine ? 'opacity-75 text-(--lifinity-on-primary)' : 'text-(--lifinity-text-muted)'
                         }`}
                       >
                         {formatMessageTime(message.created_at)}
@@ -751,7 +751,7 @@ const Chat = () => {
 
           <form
             onSubmit={handleSendMessage}
-            className="p-5 border-t border-[var(--lifinity-border)] bg-[var(--lifinity-surface-soft)] flex flex-col md:flex-row gap-3 lg:shrink-0"
+            className="p-5 border-t border-(--lifinity-border) bg-(--lifinity-surface-soft) flex flex-col md:flex-row gap-3 lg:shrink-0"
           >
             <label htmlFor="chat-message" className="sr-only">
               Mensagem
@@ -787,14 +787,14 @@ const Chat = () => {
       </div>
 
       {showGroupModal && (
-        <div className="fixed inset-0 z-50 bg-[var(--lifinity-overlay)] backdrop-blur-sm flex items-center justify-center p-4">
-          <div className={`${cardClass} w-full max-w-xl rounded-[2rem] overflow-hidden`}>
-            <div className="p-6 border-b border-[var(--lifinity-border)] flex items-start justify-between gap-4">
+        <div className="fixed inset-0 z-50 bg-(--lifinity-overlay) backdrop-blur-sm flex items-center justify-center p-4">
+          <div className={`${cardClass} w-full max-w-xl rounded-4xl overflow-hidden`}>
+            <div className="p-6 border-b border-(--lifinity-border) flex items-start justify-between gap-4">
               <div>
                 <p className="lifinity-muted-label mb-2">
                   Novo grupo
                 </p>
-                <h3 className="text-2xl font-black tracking-tight [color:var(--lifinity-text)]">
+                <h3 className="text-2xl font-black tracking-tight text-(--lifinity-text)">
                   Criar conversa de grupo
                 </h3>
               </div>
@@ -831,7 +831,7 @@ const Chat = () => {
                 </p>
 
                 {friends.length === 0 ? (
-                  <div className={`${softCardClass} p-6 text-center font-bold text-xs tracking-widest rounded-2xl [color:var(--lifinity-text-muted)]`}>
+                  <div className={`${softCardClass} p-6 text-center font-bold text-xs tracking-widest rounded-2xl text-(--lifinity-text-muted)`}>
                     Ainda nao tens amigos para adicionar.
                   </div>
                 ) : (
@@ -839,7 +839,7 @@ const Chat = () => {
                     {friends.map((friend) => (
                       <label
                         key={friend.iduser}
-                        className={`${softCardClass} rounded-2xl p-4 flex items-center gap-3 font-bold text-sm cursor-pointer hover:bg-[var(--lifinity-primary-muted)] transition-all [color:var(--lifinity-text)]`}
+                        className={`${softCardClass} rounded-2xl p-4 flex items-center gap-3 font-bold text-sm cursor-pointer hover:bg-(--lifinity-primary-muted) transition-all text-(--lifinity-text)`}
                       >
                         <input
                           type="checkbox"
