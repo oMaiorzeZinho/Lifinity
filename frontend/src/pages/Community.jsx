@@ -757,7 +757,14 @@ const Community = () => {
       </div>
 
       {/* GRUPOS */}
-      <div className={`${cardClass} rounded-[2.5rem] overflow-visible`}>
+      <div
+        className={`${cardClass} rounded-[2.5rem] overflow-visible ${
+          openActionMenu &&
+          (openActionMenu.startsWith('group-') || openActionMenu.startsWith('member-'))
+            ? 'relative z-50'
+            : ''
+        }`}
+      >
         <div className="p-6 md:p-8 border-b border-(--lifinity-border) flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
           <div>
             <p className="lifinity-muted-label mb-2 italic">
@@ -1129,7 +1136,11 @@ const Community = () => {
 
         {/* PEDIDOS E AMIGOS */}
         <div className="xl:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className={`${cardClass} rounded-4xl overflow-visible`}>
+          <div
+            className={`${cardClass} rounded-4xl overflow-visible ${
+              openActionMenu && openActionMenu.startsWith('request-') ? 'relative z-50' : ''
+            }`}
+          >
             <div className="p-6 border-b border-(--lifinity-border)">
               <p className="lifinity-muted-label mb-2 italic">
                 Pedidos
@@ -1223,7 +1234,11 @@ const Community = () => {
             )}
           </div>
 
-          <div className={`${cardClass} rounded-4xl overflow-visible`}>
+          <div
+            className={`${cardClass} rounded-4xl overflow-visible ${
+              openActionMenu && openActionMenu.startsWith('friend-') ? 'relative z-50' : ''
+            }`}
+          >
             <div className="p-6 border-b border-(--lifinity-border)">
               <p className="lifinity-muted-label mb-2 italic">
                 Rede pessoal
