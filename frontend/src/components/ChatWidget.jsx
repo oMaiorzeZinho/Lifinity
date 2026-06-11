@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -9,22 +9,27 @@ const ChatWidget = () => {
 
   const navigate = useNavigate();
 
-  const fetchUnreadCount = useCallback(async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      const response = await axios.get(`${API_URL}/chat/unread-count`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      setUnreadCount(Number(response.data?.count || 0));
-    } catch (err) {
-      console.error('Erro ao carregar mensagens nao lidas:', err);
-    }
-  }, []);
-
   useEffect(() => {
+    // Evita atualizar o estado depois de o componente desmontar
+    let cancelled = false;
+
+    const fetchUnreadCount = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const response = await axios.get(`${API_URL}/chat/unread-count`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!cancelled) {
+          setUnreadCount(Number(response.data?.count || 0));
+        }
+      } catch (err) {
+        console.error('Erro ao carregar mensagens nao lidas:', err);
+      }
+    };
+
     fetchUnreadCount();
 
     // Polling a cada 30s + atualizacao imediata quando uma conversa e lida
@@ -32,10 +37,11 @@ const ChatWidget = () => {
     window.addEventListener('lifinity-chat-read', fetchUnreadCount);
 
     return () => {
+      cancelled = true;
       clearInterval(interval);
       window.removeEventListener('lifinity-chat-read', fetchUnreadCount);
     };
-  }, [fetchUnreadCount]);
+  }, []);
 
   return (
     <button

@@ -32,7 +32,7 @@ const getPublicUserById = async (iduser, executor = db) => {
 exports.getRanking = async (req, res) => {
     try {
         const [results] = await db.query(
-            "SELECT iduser, username, xp, level FROM USER ORDER BY xp DESC LIMIT 10"
+            "SELECT iduser, username, xp, level, avatar FROM USER ORDER BY xp DESC LIMIT 10"
         );
 
         res.json(results);

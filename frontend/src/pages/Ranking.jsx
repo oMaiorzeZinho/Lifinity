@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { getImageUrl } from '../utils/imageUrl';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -26,6 +27,82 @@ const getProgressWidth = (xp, maxXP) => {
   if (!maxXP || maxXP <= 0) return 0;
   return Math.max(8, Math.round((xp / maxXP) * 100));
 };
+
+// Peças de xadrez em SVG (silhuetas flat, estilo Staunton simplificado).
+// fill="currentColor" faz a cor vir do style/className usado em cada posição.
+const ChessPiece = ({ piece, className, style }) => (
+  <svg
+    viewBox="0 0 45 45"
+    fill="currentColor"
+    className={className}
+    style={style}
+    aria-hidden="true"
+  >
+    {piece === 'queen' && (
+      <>
+        {/* Bolinhas no topo da coroa */}
+        <circle cx="7" cy="11" r="2.4" />
+        <circle cx="15" cy="8" r="2.4" />
+        <circle cx="22.5" cy="7" r="2.4" />
+        <circle cx="30" cy="8" r="2.4" />
+        <circle cx="38" cy="11" r="2.4" />
+        {/* Coroa em zigue-zague + corpo */}
+        <path d="M 7 14 L 12 25 L 15 11 L 19 24 L 22.5 10 L 26 24 L 30 11 L 33 25 L 38 14 L 35 31 L 10 31 Z" />
+        {/* Base */}
+        <path d="M 10 33 L 35 33 L 37 37 Q 37.5 40.5 34 40.5 L 11 40.5 Q 7.5 40.5 8 37 Z" />
+      </>
+    )}
+
+    {piece === 'rook' && (
+      <>
+        {/* Ameias (topo da torre) */}
+        <path d="M 9 8 L 14 8 L 14 11.5 L 19 11.5 L 19 8 L 26 8 L 26 11.5 L 31 11.5 L 31 8 L 36 8 L 36 15 L 33 18.5 L 12 18.5 L 9 15 Z" />
+        {/* Corpo ligeiramente afunilado */}
+        <path d="M 12.5 20.5 L 32.5 20.5 L 33.5 30.5 L 11.5 30.5 Z" />
+        {/* Base */}
+        <path d="M 10 32.5 L 35 32.5 L 37 37 Q 37.5 40.5 34 40.5 L 11 40.5 Q 7.5 40.5 8 37 Z" />
+      </>
+    )}
+
+    {piece === 'bishop' && (
+      <>
+        {/* Esfera no topo da mitra */}
+        <circle cx="22.5" cy="7.5" r="2.6" />
+        {/* Mitra em forma de gota */}
+        <path d="M 22.5 11 Q 30.5 17 30.5 24 Q 30.5 30 22.5 31 Q 14.5 30 14.5 24 Q 14.5 17 22.5 11 Z" />
+        {/* Colarinho */}
+        <path d="M 16 32.5 L 29 32.5 L 30 35.5 L 15 35.5 Z" />
+        {/* Base */}
+        <path d="M 11 37.5 L 34 37.5 L 36 40 Q 36 42 33 42 L 12 42 Q 9 42 9 40 Z" />
+      </>
+    )}
+  </svg>
+);
+
+// Peça e cor de cada lugar do pódio: dourado / prata / bronze
+const podiumConfig = {
+  1: {
+    piece: 'queen',
+    color: '#facc15',
+    filter: 'drop-shadow(0 0 8px rgba(250, 204, 21, 0.45))'
+  },
+  2: { piece: 'rook', color: '#c8d0d4', filter: 'none' },
+  3: { piece: 'bishop', color: '#cd8f52', filter: 'none' }
+};
+
+// Avatar do utilizador com fallback para a inicial do username
+const RankingAvatar = ({ item }) =>
+  item.avatar ? (
+    <img
+      src={getImageUrl(item.avatar)}
+      alt=""
+      className="w-12 h-12 rounded-2xl object-cover border border-(--lifinity-border)"
+    />
+  ) : (
+    <div className="w-12 h-12 rounded-2xl bg-(--lifinity-primary-muted) border border-(--lifinity-border) flex items-center justify-center font-black text-(--lifinity-text)">
+      {item.username?.charAt(0)?.toUpperCase() || 'U'}
+    </div>
+  );
 
 const Ranking = () => {
   const [ranking, setRanking] = useState([]);
@@ -257,53 +334,35 @@ const Ranking = () => {
                         : 'bg-(--lifinity-surface-soft) border-(--lifinity-border)'
                   }`}
                 >
-                  <div className="flex items-start justify-between mb-8">
-                    <div
-                      className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black ${
-                        position === 1
-                          ? 'bg-(--lifinity-warning) text-(--lifinity-on-primary)'
-                          : position === 2
-                            ? 'bg-(--lifinity-primary-strong) text-(--lifinity-on-primary)'
-                            : 'bg-(--lifinity-primary) text-(--lifinity-on-primary)'
-                      }`}
-                    >
-                      {position}
+                  <div className="flex flex-col items-center text-center gap-4">
+                    {/* Peça de xadrez da posição (rainha/torre/bispo) */}
+                    <ChessPiece
+                      piece={podiumConfig[position].piece}
+                      className="w-20 h-20"
+                      style={{
+                        color: podiumConfig[position].color,
+                        filter: podiumConfig[position].filter
+                      }}
+                    />
+
+                    {/* Avatar + nome lado a lado */}
+                    <div className="flex items-center gap-3 justify-center">
+                      <RankingAvatar item={item} />
+
+                      <h4 className="text-2xl font-black tracking-tight text-(--lifinity-text)">
+                        {item.username}
+                      </h4>
+
+                      {isCurrentUser && (
+                        <span className="lifinity-badge text-xs">
+                          Tu
+                        </span>
+                      )}
                     </div>
 
-                    {isCurrentUser && (
-                      <span className="lifinity-badge text-xs">
-                        Tu
-                      </span>
-                    )}
-                  </div>
-
-                  <p className="lifinity-muted-label mb-2">
-                    {position}.º lugar
-                  </p>
-
-                  <h4 className="text-2xl font-black tracking-tight text-(--lifinity-text)">
-                    {item.username}
-                  </h4>
-
-                  <p className={`text-xs font-bold uppercase tracking-widest mt-2 ${mutedTextClass}`}>
-                    Nível {item.level || 1}
-                  </p>
-
-                  <p className="text-4xl font-black tracking-tighter mt-6 text-(--lifinity-primary-strong)">
-                    {item.xp || 0}
-                  </p>
-
-                  <p className={`text-xs font-black uppercase tracking-widest ${mutedTextClass}`}>
-                    pontos XP
-                  </p>
-
-                  <div className={`${progressTrackClass} mt-5`}>
-                    <div
-                      className={progressBarClass}
-                      style={{
-                        width: `${getProgressWidth(Number(item.xp || 0), maxXP)}%`
-                      }}
-                    ></div>
+                    <p className={`text-xs font-black uppercase tracking-widest ${mutedTextClass}`}>
+                      Nível {item.level || 1}
+                    </p>
                   </div>
                 </div>
               );
@@ -400,18 +459,17 @@ const Ranking = () => {
                   }`}
                 >
                   <div className="flex items-center gap-4">
-                    <div
-                      className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black ${
-                        position === 1
-                          ? 'bg-(--lifinity-warning) text-(--lifinity-on-primary)'
-                          : position === 2
-                            ? 'bg-(--lifinity-primary-strong) text-(--lifinity-on-primary)'
-                            : position === 3
-                              ? 'bg-(--lifinity-primary) text-(--lifinity-on-primary)'
-                              : 'bg-(--lifinity-surface-soft) text-(--lifinity-text-muted) border border-(--lifinity-border)'
-                      }`}
-                    >
-                      {position}
+                    {/* Avatar com a peça de xadrez no canto para o top 3 */}
+                    <div className="relative">
+                      <RankingAvatar item={item} />
+
+                      {position <= 3 && (
+                        <ChessPiece
+                          piece={podiumConfig[position].piece}
+                          className="absolute -top-2 -right-2 w-5 h-5"
+                          style={{ color: podiumConfig[position].color }}
+                        />
+                      )}
                     </div>
 
                     <div>
@@ -419,6 +477,13 @@ const Ranking = () => {
                         <h4 className="text-lg font-black text-(--lifinity-text)">
                           {item.username}
                         </h4>
+
+                        {/* Fora do pódio, a posição aparece em texto ao lado do nome */}
+                        {position > 3 && (
+                          <span className="lifinity-muted-label">
+                            {position}.º
+                          </span>
+                        )}
 
                         {isCurrentUser && (
                           <span className="lifinity-badge text-xs">
@@ -435,9 +500,12 @@ const Ranking = () => {
 
                   <div className="flex items-center gap-6 min-w-72">
                     <div className="flex-1">
-                      <p className={`text-xs font-black uppercase tracking-widest mb-2 ${mutedTextClass}`}>
-                        Progresso relativo ao líder
-                      </p>
+                      {/* O líder não mostra o texto (a barra dele está sempre a 100%) */}
+                      {position !== 1 && (
+                        <p className={`text-xs font-black uppercase tracking-widest mb-2 ${mutedTextClass}`}>
+                          Progresso relativo ao líder
+                        </p>
+                      )}
 
                       <div className={progressTrackClass}>
                         <div
