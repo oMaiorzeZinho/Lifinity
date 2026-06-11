@@ -14,6 +14,7 @@ const chatRoutes = require('./src/routes/chatRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
 const assistantRoutes = require('./src/routes/assistantRoutes');
 const achievementRoutes = require('./src/routes/achievementRoutes');
+const contactRoutes = require('./src/routes/contactRoutes');
 
 //Criação de uma instância do Express (a aplicação)
 const app = express();
@@ -51,6 +52,8 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/assistant', assistantRoutes);
 app.use('/api/achievements', achievementRoutes);
 app.use('/api/notifications', notificationRoutes);
+// Rota pública do formulário de contacto
+app.use('/api/contact', contactRoutes);
 
 //Mandar o servidor começar a "ouvir" os pedidos
 app.listen(PORT, () => {

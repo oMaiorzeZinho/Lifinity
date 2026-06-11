@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken'); // Importamos o JWT
 const db = require('../config/db');
+const { sendEmail } = require('../services/emailService');
 
 // Lógica do Registo
 exports.register = async (req, res) => {
@@ -13,6 +14,24 @@ exports.register = async (req, res) => {
             'INSERT INTO USER (username, email, password) VALUES (?, ?, ?)',
             [username, email, hashedPassword]
         );
+
+        // Email de boas-vindas: sem await bloqueante — se falhar, o registo
+        // continua a funcionar exatamente igual (só fica um log de erro)
+        sendEmail({
+            to: email,
+            subject: 'Bem-vindo ao Lifinity! 🌱',
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px;">
+                    <h2 style="color: #2f6f4f;">Olá, ${username}! 👋</h2>
+                    <p>Bem-vindo ao <strong>Lifinity</strong> — a tua nova casa para organizar o dia a dia.</p>
+                    <p>Começa por criar as tuas primeiras tarefas, conclui-as para ganhar XP e sobe de nível enquanto crias hábitos consistentes.</p>
+                    <p>Convida amigos, junta-te a grupos e acompanha o teu progresso no ranking.</p>
+                    <p style="margin-top: 24px;">Bons hábitos,<br /><strong>Equipa Lifinity</strong></p>
+                </div>
+            `
+        }).catch((err) => {
+            console.error('Erro ao enviar email de boas-vindas:', err.message);
+        });
 
         res.status(201).json({ message: 'Utilizador registado com sucesso!', userId: result.insertId });
     } catch (error) {

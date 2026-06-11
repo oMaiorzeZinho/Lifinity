@@ -221,3 +221,4 @@ Este projeto é a minha prova final de curso. Representa 3 anos de estudo e dete
 - [2026-06-11] Perfil público mostra a cover do utilizador como fundo do card principal.
 - [2026-06-11] FASE B3+B4: perfil reorganizado (sem cards de stats, configurações movidas da dashboard para o perfil); bio/status do utilizador (coluna bio, editor no perfil, visível no perfil público).
 - [2026-06-11] FASE D: ranking redesenhado — peças de xadrez SVG no pódio (rainha/torre/bispo), avatares no pódio e na lista, líder sem "progresso relativo ao líder".
+- [2026-06-11] FASE E: serviço de email (nodemailer, modo simulação sem credenciais); página Contacte-nos pública e no dashboard com formulário validado e anti-spam; email de boas-vindas no registo.

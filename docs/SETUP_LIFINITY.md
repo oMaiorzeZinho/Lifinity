@@ -157,6 +157,13 @@ DB_USER=root
 DB_PASSWORD=
 DB_NAME=lifinity_db
 JWT_SECRET=lifinity_secret_key
+
+# Email (formulário de contacto e boas-vindas no registo)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASS=
+CONTACT_EMAIL=
 ```
 
 Notas:
@@ -165,6 +172,12 @@ Notas:
 - Normalmente a password está vazia.
 - Se o MySQL tiver password, alterar `DB_PASSWORD`.
 - O `JWT_SECRET` pode ser qualquer texto seguro, mas deve existir.
+
+Notas sobre o email:
+
+- `SMTP_USER` / `SMTP_PASS` são as credenciais SMTP (no Gmail, usar uma "palavra-passe de aplicação", não a password normal da conta).
+- `CONTACT_EMAIL` é o endereço que recebe as mensagens do formulário "Contacte-nos".
+- **Se `SMTP_USER` ou `SMTP_PASS` ficarem vazios, a aplicação funciona na mesma**: os emails entram em "modo simulação" e são apenas mostrados no console do backend, sem envio real.
 
 ---
 

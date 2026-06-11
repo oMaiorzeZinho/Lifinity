@@ -204,6 +204,16 @@ const Login = () => {
                   Criar conta gratuita
                 </Link>
               </div>
+
+              {/* Link discreto para a página pública de contacto */}
+              <p className="mt-4 text-center">
+                <Link
+                  to="/contact"
+                  className="text-xs font-bold text-slate-400 hover:text-white transition-colors"
+                >
+                  Contacte-nos
+                </Link>
+              </p>
             </section>
           </div>
         </main>

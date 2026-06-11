@@ -198,6 +198,7 @@ const DashboardLayout = () => {
   const isStatisticsPage = location.pathname === '/dashboard/statistics';
   const isProfilePage = location.pathname === '/dashboard/profile';
   const isChatPage = location.pathname === '/dashboard/chat';
+  const isContactPage = location.pathname === '/dashboard/contact';
   const isLightTheme = theme === 'light';
 
   const accentOpacity = isLightTheme ? 0.22 : 0.15;
@@ -319,6 +320,13 @@ const DashboardLayout = () => {
               className={navLinkClass(isCommunityPage)}
             >
               Comunidade
+            </Link>
+
+            <Link
+              to="/dashboard/contact"
+              className={navLinkClass(isContactPage)}
+            >
+              Contacto
             </Link>
           </nav>
 
