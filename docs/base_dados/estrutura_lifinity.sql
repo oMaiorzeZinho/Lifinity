@@ -17,6 +17,7 @@ CREATE TABLE USER (
     level INT DEFAULT 1,
     avatar VARCHAR(255),
     cover_image VARCHAR(255) NULL,
+    bio VARCHAR(300) NULL,
     current_streak INT DEFAULT 0,
     last_streak_date DATE DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 

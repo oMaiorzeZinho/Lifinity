@@ -170,6 +170,18 @@ const PublicProfileModal = ({ iduser, isOpen, onClose }) => {
               </div>
             </div>
 
+            {/* Secção "Sobre" — só aparece se o utilizador tiver bio */}
+            {profile.bio && profile.bio.trim() !== '' && (
+              <div className={`${softCardClass} rounded-2xl p-5`}>
+                <p className="lifinity-muted-label mb-3">
+                  Sobre
+                </p>
+                <p className={`text-sm font-medium whitespace-pre-wrap ${mutedTextClass}`}>
+                  {profile.bio}
+                </p>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className={`${softCardClass} rounded-2xl p-5`}>
                 <p className="lifinity-muted-label">

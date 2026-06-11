@@ -219,3 +219,5 @@ Este projeto é a minha prova final de curso. Representa 3 anos de estudo e dete
 - [2026-06-10] Corrigidos: dropdown de menus cortado nos cards da Comunidade; dropdown de temas ilegível na Inspiração.
 - [2026-06-11] FASE B1+B2: upload de avatar e cover (multer, /uploads estático, cover_image na USER); modais de upload no perfil; avatar no hero, header e perfil público.
 - [2026-06-11] Perfil público mostra a cover do utilizador como fundo do card principal.
+- [2026-06-11] FASE B3+B4: perfil reorganizado (sem cards de stats, configurações movidas da dashboard para o perfil); bio/status do utilizador (coluna bio, editor no perfil, visível no perfil público).
+- [2026-06-11] Perfil público mostra a cover do utilizador como fundo do card principal.

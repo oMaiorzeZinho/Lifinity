@@ -3,7 +3,6 @@ import { useNavigate, Outlet, Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import DailyVerseWidget from '../components/DailyVerseWidget';
 import ChatWidget from '../components/ChatWidget';
-import AccountSettingsModal from '../components/AccountSettingsModal';
 import { getImageUrl } from '../utils/imageUrl';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -22,7 +21,6 @@ const DashboardLayout = () => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [notificationError, setNotificationError] = useState('');
-  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -150,6 +148,13 @@ const DashboardLayout = () => {
   useEffect(() => {
     localStorage.setItem('lifinity-theme', theme);
   }, [theme]);
+
+  // Sincroniza o tema quando alterado a partir do perfil (AccountSettingsModal no Profile.jsx)
+  useEffect(() => {
+    const handleThemeUpdated = (e) => setTheme(e.detail);
+    window.addEventListener('lifinity-theme-updated', handleThemeUpdated);
+    return () => window.removeEventListener('lifinity-theme-updated', handleThemeUpdated);
+  }, []);
 
   useEffect(() => {
     fetchUnreadCount();
@@ -463,34 +468,6 @@ const DashboardLayout = () => {
             </div>
 
             <button
-              onClick={() => setSettingsOpen(true)}
-              className="lifinity-button-secondary w-10 h-10 rounded-xl flex items-center justify-center hover:text-(--lifinity-primary-strong)"
-              title="Configuracoes"
-              aria-label="Abrir configuracoes"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2.5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.094c.55 0 1.02.398 1.11.94l.149.894c.063.38.32.697.665.87.075.037.148.077.22.118.334.193.73.218 1.092.083l.853-.32a1.125 1.125 0 011.37.49l.547.948c.275.477.178 1.084-.232 1.451l-.675.607a1.125 1.125 0 00-.327 1.157c.021.08.04.162.057.244.08.377.315.704.643.906l.774.478c.468.289.668.87.49 1.391l-.338 1.04a1.125 1.125 0 01-1.206.754l-.9-.113a1.125 1.125 0 00-1.055.48 7.32 7.32 0 01-.157.194 1.125 1.125 0 00-.154 1.151l.36.833c.219.505.034 1.095-.44 1.374l-.943.555a1.125 1.125 0 01-1.454-.244l-.579-.698a1.125 1.125 0 00-1.133-.367 6.996 6.996 0 01-.25.041 1.125 1.125 0 00-.915.637l-.393.817a1.125 1.125 0 01-1.332.598l-1.05-.298a1.125 1.125 0 01-.79-1.182l.083-.905a1.125 1.125 0 00-.514-1.038 6.98 6.98 0 01-.204-.148 1.125 1.125 0 00-1.158-.116l-.817.39a1.125 1.125 0 01-1.39-.39l-.595-.919a1.125 1.125 0 01.18-1.462l.67-.614c.285-.262.412-.657.33-1.036a6.507 6.507 0 01-.045-.25 1.125 1.125 0 00-.665-.89l-.831-.365a1.125 1.125 0 01-.642-1.313l.26-1.064a1.125 1.125 0 011.153-.832l.908.052c.386.022.756-.155.982-.47.049-.069.1-.137.153-.202.24-.302.31-.71.19-1.077l-.282-.863a1.125 1.125 0 01.548-1.347l.966-.512a1.125 1.125 0 011.439.313l.556.719c.236.305.616.462.997.407.083-.012.167-.022.251-.03.384-.036.723-.273.886-.622l.382-.824z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-            </button>
-
-            <button
               onClick={() => {
                 localStorage.clear();
                 navigate('/login');
@@ -527,15 +504,6 @@ const DashboardLayout = () => {
         {!isChatPage && <ChatWidget />}
         {!isInspirationPage && <DailyVerseWidget />}
       </div>
-      {settingsOpen && (
-        <AccountSettingsModal
-          user={user}
-          setUser={setUser}
-          theme={theme}
-          setTheme={setTheme}
-          onClose={() => setSettingsOpen(false)}
-        />
-      )}
       </div>
     </div>
   );

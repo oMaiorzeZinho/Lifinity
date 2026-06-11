@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const db = require('../config/db');
 
-const PUBLIC_USER_FIELDS = "iduser, username, email, xp, level, avatar, cover_image, created_at";
+const PUBLIC_USER_FIELDS = "iduser, username, email, xp, level, avatar, cover_image, bio, created_at";
 
 // Raiz da pasta de uploads (backend/uploads)
 const UPLOADS_ROOT = path.join(__dirname, '..', '..', 'uploads');
@@ -266,6 +266,35 @@ const updateUserImage = (column, folder, successMessage) => async (req, res) => 
 // Atualizar imagem de perfil (avatar)
 exports.updateAvatar = updateUserImage('avatar', 'avatars', 'Imagem de perfil atualizada.');
 
+// Atualizar a bio/descrição do utilizador
+exports.updateBio = async (req, res) => {
+    try {
+        const iduser = req.user.iduser;
+        // Bio pode ser vazia (limpa o status) — apenas valida o comprimento máximo
+        const bio = typeof req.body.bio === 'string' ? req.body.bio.trim() : '';
+
+        if (bio.length > 300) {
+            return res.status(400).json({ message: 'A descrição não pode ter mais de 300 caracteres.' });
+        }
+
+        await db.query(
+            'UPDATE USER SET bio = ? WHERE iduser = ?',
+            [bio === '' ? null : bio, iduser]
+        );
+
+        const updatedUser = await getPublicUserById(iduser);
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'Utilizador nao encontrado.' });
+        }
+
+        res.json({ message: 'Descrição atualizada.', user: updatedUser });
+    } catch (err) {
+        console.error('Erro ao atualizar bio:', err);
+        res.status(500).json({ message: 'Erro ao atualizar a descrição.' });
+    }
+};
+
 // Atualizar imagem de fundo (cover)
 exports.updateCover = updateUserImage('cover_image', 'covers', 'Imagem de fundo atualizada.');
 
@@ -280,7 +309,7 @@ exports.getPublicProfile = async (req, res) => {
         }
 
         const [users] = await db.query(
-            `SELECT iduser, username, level, avatar, cover_image, created_at
+            `SELECT iduser, username, level, avatar, cover_image, bio, created_at
              FROM USER
              WHERE iduser = ?
              LIMIT 1`,

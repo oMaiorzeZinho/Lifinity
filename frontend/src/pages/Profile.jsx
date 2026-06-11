@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import ImageUploadModal from '../components/ImageUploadModal';
+import AccountSettingsModal from '../components/AccountSettingsModal';
 import { getImageUrl } from '../utils/imageUrl';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -62,15 +63,6 @@ const Profile = () => {
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  const [taskSummary, setTaskSummary] = useState({
-    totalTasks: 0,
-    completedTasks: 0,
-    pendingTasks: 0,
-    completionRate: 0
-  });
-
-  const [groups, setGroups] = useState([]);
-  const [friends, setFriends] = useState([]);
   const [achievements, setAchievements] = useState([]);
   const [selectedHighlightIds, setSelectedHighlightIds] = useState([]);
   const [achievementError, setAchievementError] = useState('');
@@ -82,11 +74,31 @@ const Profile = () => {
   const [imageMenuOpen, setImageMenuOpen] = useState(false);
   const [uploadModal, setUploadModal] = useState(null);
 
+  // Modal de configurações da conta
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // Tema — lido do localStorage para passar ao AccountSettingsModal
+  const [theme, setTheme] = useState(() =>
+    localStorage.getItem('lifinity-theme') === 'light' ? 'light' : 'dark'
+  );
+
+  // Bio: texto local + estados de feedback
+  const [bioText, setBioText] = useState('');
+  const [savingBio, setSavingBio] = useState(false);
+  const [bioMessage, setBioMessage] = useState('');
+  const [bioError, setBioError] = useState('');
+
   const navigate = useNavigate();
 
   const levelData = useMemo(() => {
     return getLevelData(user?.xp || 0);
   }, [user]);
+
+  // Quando o tema muda via AccountSettingsModal, persiste no localStorage e notifica o Dashboard
+  useEffect(() => {
+    localStorage.setItem('lifinity-theme', theme);
+    window.dispatchEvent(new CustomEvent('lifinity-theme-updated', { detail: theme }));
+  }, [theme]);
 
   const fetchProfileData = useCallback(async () => {
     try {
@@ -98,25 +110,12 @@ const Profile = () => {
         return;
       }
 
-      setUser(JSON.parse(savedUser));
+      const parsedUser = JSON.parse(savedUser);
+      setUser(parsedUser);
+      // Inicializa o campo de bio com o valor guardado
+      setBioText(parsedUser.bio || '');
 
       const headers = { Authorization: `Bearer ${token}` };
-
-      const [summaryResponse, groupsResponse, friendsResponse] = await Promise.all([
-        axios.get(`${API_URL}/tasks/summary`, {
-          headers
-        }),
-        axios.get(`${API_URL}/groups`, {
-          headers
-        }),
-        axios.get(`${API_URL}/friends`, {
-          headers
-        })
-      ]);
-
-      setTaskSummary(summaryResponse.data);
-      setGroups(groupsResponse.data);
-      setFriends(friendsResponse.data);
 
       try {
         await axios.post(`${API_URL}/achievements/check`, {}, { headers });
@@ -155,7 +154,9 @@ const Profile = () => {
       const refreshedUser = localStorage.getItem('user');
 
       if (refreshedUser) {
-        setUser(JSON.parse(refreshedUser));
+        const parsed = JSON.parse(refreshedUser);
+        setUser(parsed);
+        setBioText(parsed.bio || '');
       }
     };
 
@@ -171,6 +172,45 @@ const Profile = () => {
   const handleLogout = () => {
     localStorage.clear();
     navigate('/login');
+  };
+
+  // Guarda a bio via PUT /users/me/bio
+  const handleSaveBio = async () => {
+    try {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      setBioMessage('');
+      setBioError('');
+      setSavingBio(true);
+
+      const response = await axios.put(
+        `${API_URL}/users/me/bio`,
+        { bio: bioText },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const updatedUser = response.data?.user;
+
+      if (updatedUser) {
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        setBioText(updatedUser.bio || '');
+        window.dispatchEvent(new Event('lifinity-user-updated'));
+      }
+
+      setBioMessage(response.data?.message || 'Descrição atualizada.');
+    } catch (err) {
+      setBioError(
+        err?.response?.data?.message || 'Nao foi possivel guardar a descrição.'
+      );
+    } finally {
+      setSavingBio(false);
+    }
   };
 
   const unlockedAchievements = useMemo(() => {
@@ -373,57 +413,6 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className={`${cardClass} p-6 rounded-3xl`}>
-          <p className="lifinity-muted-label mb-1">
-            XP Total
-          </p>
-          <p className={statValueClass}>
-            {user.xp || 0}
-          </p>
-          <p className="text-xs font-bold mt-2 text-(--lifinity-text-muted)">
-            Pontos acumulados na plataforma.
-          </p>
-        </div>
-
-        <div className={`${cardClass} p-6 rounded-3xl`}>
-          <p className="lifinity-muted-label mb-1">
-            Produtividade Hoje
-          </p>
-          <p className={statValueClass}>
-            {taskSummary.completionRate}%
-          </p>
-          <p className="text-xs font-bold mt-2 text-(--lifinity-text-muted)">
-            {taskSummary.completedTasks} concluídas hoje.
-          </p>
-        </div>
-
-        <div className={`${cardClass} p-6 rounded-3xl`}>
-          <p className="lifinity-muted-label mb-1">
-            Grupos
-          </p>
-          <p className={statValueClass}>
-            {groups.length}
-          </p>
-          <p className="text-xs font-bold mt-2 text-(--lifinity-text-muted)">
-            Espaços de colaboração.
-          </p>
-        </div>
-
-        <div className={`${cardClass} p-6 rounded-3xl`}>
-          <p className="lifinity-muted-label mb-1">
-            Amigos
-          </p>
-          <p className={statValueClass}>
-            {friends.length}
-          </p>
-          <p className="text-xs font-bold mt-2 text-(--lifinity-text-muted)">
-            Ligações na comunidade.
-          </p>
-        </div>
-      </div>
-
       {/* CONQUISTAS */}
       <div className={`${cardClass} rounded-4xl overflow-hidden`}>
         <div className="p-6 md:p-8 border-b border-(--lifinity-border) flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
@@ -508,57 +497,57 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* DETALHES DA CONTA */}
+      {/* SOBRE MIM + AÇÕES */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* SOBRE MIM — editor de bio/status */}
         <div className={`${cardClass} lg:col-span-2 rounded-4xl overflow-hidden`}>
           <div className="p-6 md:p-8 border-b border-(--lifinity-border)">
             <p className="lifinity-muted-label mb-2">
               Conta
             </p>
             <h3 className="text-3xl font-black tracking-tighter text-(--lifinity-text)">
-              Informações pessoais
+              Sobre mim
             </h3>
             <p className="font-medium mt-2 text-(--lifinity-text-muted)">
-              Dados principais associados ao teu perfil Lifinity.
+              Escreve uma breve descrição que aparece no teu perfil público.
             </p>
           </div>
 
-          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className={`${innerCardClass} p-5`}>
-              <p className="lifinity-muted-label mb-1">
-                Nome de utilizador
-              </p>
-              <p className="text-lg font-black text-(--lifinity-text)">
-                {user.username}
-              </p>
+          <div className="p-6 space-y-4">
+            <div className="relative">
+              <textarea
+                className="lifinity-input rounded-2xl px-4 py-4 text-sm font-bold w-full resize-none"
+                rows={5}
+                maxLength={300}
+                placeholder="Conta algo sobre ti..."
+                value={bioText}
+                onChange={(e) => {
+                  setBioText(e.target.value);
+                  setBioMessage('');
+                  setBioError('');
+                }}
+              />
+              {/* Contador de caracteres */}
+              <span className="absolute bottom-3 right-4 text-[10px] font-black uppercase tracking-widest text-(--lifinity-text-muted)">
+                {bioText.length}/300
+              </span>
             </div>
 
-            <div className={`${innerCardClass} p-5`}>
-              <p className="lifinity-muted-label mb-1">
-                Email
-              </p>
-              <p className="text-lg font-black break-all text-(--lifinity-text)">
-                {user.email || 'Não disponível'}
-              </p>
-            </div>
+            {bioMessage && (
+              <p className="text-sm font-bold text-(--lifinity-primary-strong)">{bioMessage}</p>
+            )}
+            {bioError && (
+              <p className="text-sm font-bold text-(--lifinity-danger)">{bioError}</p>
+            )}
 
-            <div className={`${innerCardClass} p-5`}>
-              <p className="lifinity-muted-label mb-1">
-                Nível
-              </p>
-              <p className="text-lg font-black text-(--lifinity-text)">
-                {levelData.level}
-              </p>
-            </div>
-
-            <div className={`${innerCardClass} p-5`}>
-              <p className="lifinity-muted-label mb-1">
-                Estado
-              </p>
-              <p className="text-lg font-black text-(--lifinity-primary-strong)">
-                Conta ativa
-              </p>
-            </div>
+            <button
+              type="button"
+              onClick={handleSaveBio}
+              disabled={savingBio}
+              className="lifinity-button-primary px-5 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {savingBio ? 'A guardar...' : 'Guardar descrição'}
+            </button>
           </div>
         </div>
 
@@ -604,10 +593,10 @@ const Profile = () => {
 
             <button
               type="button"
-              onClick={() => navigate('/dashboard/statistics')}
+              onClick={() => setSettingsOpen(true)}
               className={buttonSecondaryClass}
             >
-              Ver estatísticas
+              Configurações
             </button>
 
             <button
@@ -637,6 +626,17 @@ const Profile = () => {
         endpoint="/users/me/cover"
         currentImage={user.cover_image}
       />
+
+      {/* Modal de configurações da conta (tema, username, password, apagar conta) */}
+      {settingsOpen && (
+        <AccountSettingsModal
+          user={user}
+          setUser={setUser}
+          theme={theme}
+          setTheme={setTheme}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
 
       {achievementsModalOpen && (
         <div className="fixed inset-0 bg-(--lifinity-overlay) backdrop-blur-sm z-50 flex items-center justify-center p-6">

@@ -9,6 +9,7 @@ router.get('/search', verifyToken, userController.searchUsers);
 router.put('/me/password', verifyToken, userController.updatePassword);
 router.put('/me/username', verifyToken, userController.updateUsername);
 // Upload de imagens: o handleUploadErrors converte erros do multer (tamanho/formato) em JSON
+router.put('/me/bio', verifyToken, userController.updateBio);
 router.put('/me/avatar', verifyToken, handleUploadErrors(uploadAvatar.single('image')), userController.updateAvatar);
 router.put('/me/cover', verifyToken, handleUploadErrors(uploadCover.single('image')), userController.updateCover);
 router.delete('/me', verifyToken, userController.deleteAccount);
