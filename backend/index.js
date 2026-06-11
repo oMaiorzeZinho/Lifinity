@@ -1,5 +1,6 @@
 const express = require('express'); //Importação da biblioteca Express (O motor do servidor)
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const authRoutes = require('./src/routes/authRoutes');
@@ -27,6 +28,9 @@ app.use(cors({
     credentials: true // Permite o envio de cookies e credenciais
 })); // Permite pedidos do frontend
 app.use(express.json()); //Permite que o servidor entenda ficheiros JSON
+
+// Servir as imagens enviadas pelos utilizadores (avatars e covers)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Usar as rotas de autenticação
 app.use('/api/auth', authRoutes);

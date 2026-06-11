@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import ImageUploadModal from '../components/ImageUploadModal';
+import { getImageUrl } from '../utils/imageUrl';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -75,6 +77,10 @@ const Profile = () => {
   const [savingHighlights, setSavingHighlights] = useState(false);
   const [achievementsModalOpen, setAchievementsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Controlo dos uploads de imagem: menu expandido + modal aberto ('avatar' | 'cover' | null)
+  const [imageMenuOpen, setImageMenuOpen] = useState(false);
+  const [uploadModal, setUploadModal] = useState(null);
 
   const navigate = useNavigate();
 
@@ -271,7 +277,9 @@ const Profile = () => {
       <div
         className="relative overflow-hidden rounded-[2.5rem] shadow-(--lifinity-shadow) border border-(--lifinity-border) min-h-72 flex items-end"
         style={{
-          backgroundImage: "url('/images/profile-bg.jpg')",
+          backgroundImage: user.cover_image
+            ? `url('${getImageUrl(user.cover_image)}')`
+            : "url('/images/profile-bg.jpg')",
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
@@ -281,9 +289,17 @@ const Profile = () => {
         <div className="relative z-10 p-8 md:p-10 w-full text-(--lifinity-text)">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
             <div className="flex items-center gap-6">
-              <div className="w-24 h-24 rounded-3xl bg-(--lifinity-primary-muted) border border-(--lifinity-border) flex items-center justify-center text-4xl font-black shadow-xl backdrop-blur-xl text-(--lifinity-text)">
-                {user.username?.charAt(0)?.toUpperCase() || 'U'}
-              </div>
+              {user.avatar ? (
+                <img
+                  src={getImageUrl(user.avatar)}
+                  alt="Avatar"
+                  className="w-24 h-24 rounded-3xl object-cover border border-(--lifinity-border) shadow-xl"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-3xl bg-(--lifinity-primary-muted) border border-(--lifinity-border) flex items-center justify-center text-4xl font-black shadow-xl backdrop-blur-xl text-(--lifinity-text)">
+                  {user.username?.charAt(0)?.toUpperCase() || 'U'}
+                </div>
+              )}
 
               <div>
                 <p className="lifinity-muted-label mb-2">
@@ -558,11 +574,33 @@ const Profile = () => {
           <div className="space-y-3">
             <button
               type="button"
-              onClick={() => navigate('/dashboard/tasks')}
+              onClick={() => setImageMenuOpen((open) => !open)}
               className={buttonPrimaryClass}
+              aria-expanded={imageMenuOpen}
             >
-              Ver atividades
+              Mudar imagens
             </button>
+
+            {/* Opções de upload: aparecem ao clicar em "Mudar imagens" */}
+            {imageMenuOpen && (
+              <div className="lifinity-card-soft rounded-2xl p-3 space-y-2">
+                <button
+                  type="button"
+                  onClick={() => setUploadModal('avatar')}
+                  className={buttonSecondaryClass}
+                >
+                  Imagem de perfil
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setUploadModal('cover')}
+                  className={buttonSecondaryClass}
+                >
+                  Imagem de fundo
+                </button>
+              </div>
+            )}
 
             <button
               type="button"
@@ -582,6 +620,23 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      {/* Modais de upload de imagem (perfil e fundo) */}
+      <ImageUploadModal
+        isOpen={uploadModal === 'avatar'}
+        onClose={() => setUploadModal(null)}
+        title="Imagem de perfil"
+        endpoint="/users/me/avatar"
+        currentImage={user.avatar}
+      />
+
+      <ImageUploadModal
+        isOpen={uploadModal === 'cover'}
+        onClose={() => setUploadModal(null)}
+        title="Imagem de fundo"
+        endpoint="/users/me/cover"
+        currentImage={user.cover_image}
+      />
 
       {achievementsModalOpen && (
         <div className="fixed inset-0 bg-(--lifinity-overlay) backdrop-blur-sm z-50 flex items-center justify-center p-6">

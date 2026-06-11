@@ -4,6 +4,7 @@ import axios from 'axios';
 import DailyVerseWidget from '../components/DailyVerseWidget';
 import ChatWidget from '../components/ChatWidget';
 import AccountSettingsModal from '../components/AccountSettingsModal';
+import { getImageUrl } from '../utils/imageUrl';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -317,15 +318,30 @@ const DashboardLayout = () => {
           </nav>
 
           <div className="flex items-center gap-4">
-            <Link to="/dashboard/profile" className="text-right hidden lg:block group">
-              <p
-                className="text-sm font-black uppercase tracking-tight transition-colors text-(--lifinity-text) group-hover:text-(--lifinity-primary-strong)"
-              >
-                {user.username}
-              </p>
-              <p className="text-xs font-bold uppercase tracking-widest text-(--lifinity-text-muted)">
-                Nível {user.level}
-              </p>
+            <Link to="/dashboard/profile" className="hidden lg:flex items-center gap-3 group">
+              <div className="text-right">
+                <p
+                  className="text-sm font-black uppercase tracking-tight transition-colors text-(--lifinity-text) group-hover:text-(--lifinity-primary-strong)"
+                >
+                  {user.username}
+                </p>
+                <p className="text-xs font-bold uppercase tracking-widest text-(--lifinity-text-muted)">
+                  Nível {user.level}
+                </p>
+              </div>
+
+              {/* Avatar pequeno no header (inicial como fallback) */}
+              {user.avatar ? (
+                <img
+                  src={getImageUrl(user.avatar)}
+                  alt="Avatar"
+                  className="w-10 h-10 rounded-xl object-cover border border-(--lifinity-border)"
+                />
+              ) : (
+                <div className="lifinity-button-secondary w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black">
+                  {user.username?.charAt(0)?.toUpperCase() || 'U'}
+                </div>
+              )}
             </Link>
 
             <div className="relative">

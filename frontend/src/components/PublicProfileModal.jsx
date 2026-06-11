@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { getImageUrl } from '../utils/imageUrl';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -127,7 +128,7 @@ const PublicProfileModal = ({ iduser, isOpen, onClose }) => {
               <div className="flex items-center gap-5">
                 {profile.avatar ? (
                   <img
-                    src={profile.avatar}
+                    src={getImageUrl(profile.avatar)}
                     alt=""
                     className="h-20 w-20 rounded-3xl border border-(--lifinity-border) object-cover"
                   />

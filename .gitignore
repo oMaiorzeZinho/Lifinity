@@ -31,5 +31,11 @@ android/.idea/
 
 .idea/deviceManager.xml
 
+# Imagens enviadas pelos utilizadores (a estrutura vai para o git, as imagens nao)
+backend/uploads/avatars/*
+backend/uploads/covers/*
+!backend/uploads/avatars/.gitkeep
+!backend/uploads/covers/.gitkeep
+
 # Claude Code memory (privado, nao vai para o GitHub)
 .claude/

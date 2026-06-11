@@ -1,7 +1,12 @@
 const bcrypt = require('bcryptjs');
+const fs = require('fs');
+const path = require('path');
 const db = require('../config/db');
 
-const PUBLIC_USER_FIELDS = "iduser, username, email, xp, level, avatar, created_at";
+const PUBLIC_USER_FIELDS = "iduser, username, email, xp, level, avatar, cover_image, created_at";
+
+// Raiz da pasta de uploads (backend/uploads)
+const UPLOADS_ROOT = path.join(__dirname, '..', '..', 'uploads');
 
 const normalizeUsername = (username) => {
     if (typeof username !== "string") {
@@ -205,6 +210,65 @@ exports.deleteAccount = async (req, res) => {
     }
 };
 
+// Apaga do disco um ficheiro antigo guardado em /uploads (silencioso se falhar)
+const deleteOldUploadedFile = (storedPath) => {
+    if (!storedPath || !String(storedPath).startsWith('/uploads/')) return;
+
+    const relativePath = String(storedPath).replace('/uploads/', '');
+    const filePath = path.join(UPLOADS_ROOT, relativePath);
+
+    try {
+        fs.unlinkSync(filePath);
+    } catch (err) {
+        // Ficheiro pode ja nao existir — nao e um erro grave
+    }
+};
+
+// Fabrica as funções de atualização de imagem (avatar e cover usam a mesma lógica)
+const updateUserImage = (column, folder, successMessage) => async (req, res) => {
+    try {
+        const iduser = req.user.iduser;
+
+        // O multer coloca o ficheiro em req.file; sem ficheiro nao ha nada a guardar
+        if (!req.file) {
+            return res.status(400).json({ message: 'Nenhuma imagem enviada.' });
+        }
+
+        // Le a imagem antiga para apagar o ficheiro fisico (evita lixo no disco)
+        const [users] = await db.query(
+            `SELECT ${column} FROM USER WHERE iduser = ? LIMIT 1`,
+            [iduser]
+        );
+
+        if (users.length === 0) {
+            return res.status(404).json({ message: 'Utilizador nao encontrado.' });
+        }
+
+        deleteOldUploadedFile(users[0][column]);
+
+        // Guarda o caminho relativo na BD (servido por express.static em /uploads)
+        const newPath = `/uploads/${folder}/${req.file.filename}`;
+
+        await db.query(
+            `UPDATE USER SET ${column} = ? WHERE iduser = ?`,
+            [newPath, iduser]
+        );
+
+        const updatedUser = await getPublicUserById(iduser);
+
+        res.json({ message: successMessage, user: updatedUser });
+    } catch (err) {
+        console.error(`Erro ao atualizar ${column}:`, err);
+        res.status(500).json({ message: 'Erro ao atualizar a imagem.' });
+    }
+};
+
+// Atualizar imagem de perfil (avatar)
+exports.updateAvatar = updateUserImage('avatar', 'avatars', 'Imagem de perfil atualizada.');
+
+// Atualizar imagem de fundo (cover)
+exports.updateCover = updateUserImage('cover_image', 'covers', 'Imagem de fundo atualizada.');
+
 // Obter perfil publico simples de um utilizador
 exports.getPublicProfile = async (req, res) => {
     try {
@@ -216,7 +280,7 @@ exports.getPublicProfile = async (req, res) => {
         }
 
         const [users] = await db.query(
-            `SELECT iduser, username, level, avatar, created_at
+            `SELECT iduser, username, level, avatar, cover_image, created_at
              FROM USER
              WHERE iduser = ?
              LIMIT 1`,
