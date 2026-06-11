@@ -124,7 +124,19 @@ const PublicProfileModal = ({ iduser, isOpen, onClose }) => {
           </div>
         ) : profile ? (
           <div className="space-y-6 p-6">
-            <div className={`${softCardClass} flex flex-col gap-5 rounded-3xl p-6 md:flex-row md:items-center md:justify-between`}>
+            <div
+              className={`${softCardClass} flex flex-col gap-5 rounded-3xl p-6 md:flex-row md:items-center md:justify-between`}
+              style={
+                profile.cover_image
+                  ? {
+                      // Gradiente escuro por cima da cover para manter o texto legível
+                      backgroundImage: `linear-gradient(rgba(8,13,10,0.55), rgba(8,13,10,0.75)), url('${getImageUrl(profile.cover_image)}')`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center'
+                    }
+                  : undefined
+              }
+            >
               <div className="flex items-center gap-5">
                 {profile.avatar ? (
                   <img
