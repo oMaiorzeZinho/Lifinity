@@ -610,12 +610,12 @@ const TaskCalendar = ({
   return (
     <div className={`${cardClass} rounded-2xl overflow-hidden`}>
       {/* CABEÇALHO: mês/ano atual e navegação entre meses */}
-      <div className="flex items-center justify-between p-6 border-b border-(--lifinity-border)">
+      <div className="flex items-center justify-between px-6 py-3 border-b border-(--lifinity-border)">
         <button
           type="button"
           onClick={goToPreviousMonth}
           aria-label="Mês anterior"
-          className="lifinity-button-secondary w-10 h-10 rounded-xl flex items-center justify-center text-lg font-black"
+          className="lifinity-button-secondary w-8 h-8 rounded-lg flex items-center justify-center text-base font-black"
         >
           ‹
         </button>
@@ -628,33 +628,34 @@ const TaskCalendar = ({
           type="button"
           onClick={goToNextMonth}
           aria-label="Mês seguinte"
-          className="lifinity-button-secondary w-10 h-10 rounded-xl flex items-center justify-center text-lg font-black"
+          className="lifinity-button-secondary w-8 h-8 rounded-lg flex items-center justify-center text-base font-black"
         >
           ›
         </button>
       </div>
 
       {/* CABEÇALHO DOS DIAS DA SEMANA */}
-      <div className="grid grid-cols-7 px-4 pt-4">
+      <div className="grid grid-cols-7 px-3 pt-2">
         {WEEKDAY_LABELS_PT.map((weekday) => (
           <div
             key={weekday}
-            className="text-center text-[10px] font-black uppercase tracking-widest pb-2 text-(--lifinity-text-muted)"
+            className="text-center text-[10px] font-black uppercase tracking-widest py-1.5 text-(--lifinity-text-muted)"
           >
             {weekday}
           </div>
         ))}
       </div>
 
-      {/* GRELHA DE DIAS DO MÊS */}
-      <div className="grid grid-cols-7 gap-2 p-4">
+      {/* GRELHA DE DIAS DO MÊS: células com altura fixa baixa (em vez de
+          aspect-square) para o mês inteiro caber num ecrã 1080p sem scroll */}
+      <div className="grid grid-cols-7 gap-1.5 p-3">
         {cells.map((day, index) => {
           // Células vazias de preenchimento antes do dia 1
           if (day === null) {
             return (
               <div
                 key={`empty-${index}`}
-                className="aspect-square rounded-xl bg-(--lifinity-surface-soft) opacity-30"
+                className="min-h-[72px] xl:min-h-[84px] rounded-xl bg-(--lifinity-surface-soft) opacity-30"
               />
             );
           }
@@ -679,7 +680,7 @@ const TaskCalendar = ({
               type="button"
               onClick={() => dayTasks.length > 0 && setSelectedDay(cellDate)}
               disabled={dayTasks.length === 0}
-              className={`aspect-square rounded-xl p-2 flex flex-col items-start gap-1 border transition-all ${
+              className={`min-h-[72px] xl:min-h-[84px] rounded-xl p-1.5 flex flex-col items-start gap-1 border transition-all ${
                 isToday
                   ? 'border-(--lifinity-primary) bg-(--lifinity-primary-muted)'
                   : hasLostTask
@@ -695,11 +696,11 @@ const TaskCalendar = ({
                 {day}
               </span>
 
-              <div className="flex flex-wrap items-center gap-1 mt-auto">
+              <div className="flex flex-wrap items-center gap-0.5 mt-auto">
                 {visibleDots.map((task) => (
                   <span
                     key={task.idtask}
-                    className={`w-2 h-2 rounded-full ${priorityDotClass[task.priority] || priorityDotClass.media}`}
+                    className={`w-1.5 h-1.5 rounded-full ${priorityDotClass[task.priority] || priorityDotClass.media}`}
                   />
                 ))}
 

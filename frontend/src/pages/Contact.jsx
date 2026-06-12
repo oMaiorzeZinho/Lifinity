@@ -88,8 +88,8 @@ const Contact = () => {
         </p>
       </div>
 
-      {/* FORMULÁRIO */}
-      <div className={`${cardClass} p-6 md:p-8 rounded-4xl max-w-3xl`}>
+      {/* FORMULÁRIO: largura limitada e centrado horizontalmente sob o hero */}
+      <div className={`${cardClass} p-6 md:p-8 rounded-4xl max-w-2xl mx-auto`}>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>

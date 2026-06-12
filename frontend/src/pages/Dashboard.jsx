@@ -321,16 +321,22 @@ const DashboardLayout = () => {
             >
               Comunidade
             </Link>
-
-            <Link
-              to="/dashboard/contact"
-              className={navLinkClass(isContactPage)}
-            >
-              Contacto
-            </Link>
           </nav>
 
           <div className="flex items-center gap-4">
+            {/* Contacto fica fora da pílula de navegação central — lá dentro
+                fazia a navbar transbordar com scrollbar horizontal */}
+            <Link
+              to="/dashboard/contact"
+              className={`px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+                isContactPage
+                  ? 'bg-(--lifinity-primary-muted) text-(--lifinity-primary-strong)'
+                  : 'text-(--lifinity-text-muted) hover:text-(--lifinity-text) hover:bg-(--lifinity-surface-soft)'
+              }`}
+            >
+              Contacto
+            </Link>
+
             <Link to="/dashboard/profile" className="hidden lg:flex items-center gap-3 group">
               <div className="text-right">
                 <p
