@@ -223,3 +223,4 @@ Este projeto é a minha prova final de curso. Representa 3 anos de estudo e dete
 - [2026-06-11] FASE D: ranking redesenhado — peças de xadrez SVG no pódio (rainha/torre/bispo), avatares no pódio e na lista, líder sem "progresso relativo ao líder".
 - [2026-06-11] FASE E: serviço de email (nodemailer, modo simulação sem credenciais); página Contacte-nos pública e no dashboard com formulário validado e anti-spam; email de boas-vindas no registo.
 - [2026-06-12] Calendário compactado para caber o mês inteiro no ecrã; formulário de contacto centrado; link Contacto movido para o canto direito do header.
+- [2026-06-12] Calendário: altura dinâmica que preenche o viewport (5 ou 6 semanas) e títulos das tarefas visíveis nas células (pills por prioridade + bolinhas para excedentes).

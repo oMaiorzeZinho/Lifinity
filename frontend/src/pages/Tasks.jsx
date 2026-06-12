@@ -284,6 +284,14 @@ const priorityDotClass = {
   baixa: 'bg-(--lifinity-success)'
 };
 
+// Mini-pills com o título da tarefa dentro das células do calendário:
+// fundo subtil + texto legível na cor da prioridade (inline, independente do tema)
+const priorityPillStyle = {
+  alta: { background: 'rgba(239,68,68,0.18)', color: '#fca5a5' },
+  media: { background: 'rgba(234,179,8,0.18)', color: '#fde047' },
+  baixa: { background: 'rgba(134,239,172,0.18)', color: '#86efac' }
+};
+
 // Devolve a chave 'YYYY-MM-DD' (em hora local) de uma data
 const getDateKey = (date) => {
   const year = date.getFullYear();
@@ -646,16 +654,17 @@ const TaskCalendar = ({
         ))}
       </div>
 
-      {/* GRELHA DE DIAS DO MÊS: células com altura fixa baixa (em vez de
-          aspect-square) para o mês inteiro caber num ecrã 1080p sem scroll */}
-      <div className="grid grid-cols-7 gap-1.5 p-3">
+      {/* GRELHA DE DIAS DO MÊS: altura relativa ao viewport com linhas iguais
+          (auto-rows-fr), para que tanto meses de 5 como de 6 semanas estiquem
+          até perto do fundo do ecrã, deixando só uma pequena folga */}
+      <div className="grid grid-cols-7 auto-rows-fr gap-1.5 p-3 h-[calc(100vh-530px)] min-h-[520px]">
         {cells.map((day, index) => {
           // Células vazias de preenchimento antes do dia 1
           if (day === null) {
             return (
               <div
                 key={`empty-${index}`}
-                className="min-h-[72px] xl:min-h-[84px] rounded-xl bg-(--lifinity-surface-soft) opacity-30"
+                className="rounded-xl bg-(--lifinity-surface-soft) opacity-30"
               />
             );
           }
@@ -670,9 +679,30 @@ const TaskCalendar = ({
             (task) => task.status !== 'concluida' && isTaskOverdue(task)
           );
 
-          // No máximo 3 pontos visíveis, com "..." para o restante
-          const visibleDots = dayTasks.slice(0, 3);
-          const extraCount = dayTasks.length - visibleDots.length;
+          // Até 3 pills com título (a 3.ª só em ecrãs xl); o que não couber
+          // vira bolinha — daí duas listas de excedentes, uma por breakpoint
+          const visiblePills = dayTasks.slice(0, 3);
+          const restBelowXl = dayTasks.slice(2);
+          const restXl = dayTasks.slice(3);
+
+          // Linha de bolinhas dos excedentes: uma por tarefa, máximo 5 + "…"
+          const renderOverflowDots = (rest, responsiveClass) =>
+            rest.length > 0 && (
+              <div className={`${responsiveClass} items-center gap-0.5 shrink-0`}>
+                {rest.slice(0, 5).map((task) => (
+                  <span
+                    key={task.idtask}
+                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${priorityDotClass[task.priority] || priorityDotClass.media}`}
+                  />
+                ))}
+
+                {rest.length > 5 && (
+                  <span className="text-[9px] font-black leading-none text-(--lifinity-text-muted)">
+                    …
+                  </span>
+                )}
+              </div>
+            );
 
           return (
             <button
@@ -680,7 +710,7 @@ const TaskCalendar = ({
               type="button"
               onClick={() => dayTasks.length > 0 && setSelectedDay(cellDate)}
               disabled={dayTasks.length === 0}
-              className={`min-h-[72px] xl:min-h-[84px] rounded-xl p-1.5 flex flex-col items-start gap-1 border transition-all ${
+              className={`rounded-xl p-1.5 flex flex-col items-start gap-0.5 border transition-all overflow-hidden ${
                 isToday
                   ? 'border-(--lifinity-primary) bg-(--lifinity-primary-muted)'
                   : hasLostTask
@@ -689,27 +719,27 @@ const TaskCalendar = ({
               } ${dayTasks.length > 0 ? 'hover:bg-(--lifinity-surface-hover) cursor-pointer' : 'cursor-default'}`}
             >
               <span
-                className={`text-xs font-black ${
+                className={`text-xs font-black leading-none ${
                   isToday ? 'text-(--lifinity-primary-strong)' : 'text-(--lifinity-text)'
                 }`}
               >
                 {day}
               </span>
 
-              <div className="flex flex-wrap items-center gap-0.5 mt-auto">
-                {visibleDots.map((task) => (
-                  <span
-                    key={task.idtask}
-                    className={`w-1.5 h-1.5 rounded-full ${priorityDotClass[task.priority] || priorityDotClass.media}`}
-                  />
-                ))}
+              {visiblePills.map((task, pillIndex) => (
+                <span
+                  key={task.idtask}
+                  className={`w-full truncate text-[10px] font-bold leading-none px-1.5 py-0.5 rounded-md text-left shrink-0 ${
+                    pillIndex === 2 ? 'hidden xl:block' : ''
+                  } ${task.status === 'concluida' ? 'opacity-60 line-through' : ''}`}
+                  style={priorityPillStyle[task.priority] || priorityPillStyle.media}
+                >
+                  {task.title}
+                </span>
+              ))}
 
-                {extraCount > 0 && (
-                  <span className="text-[9px] font-black text-(--lifinity-text-muted)">
-                    ...
-                  </span>
-                )}
-              </div>
+              {renderOverflowDots(restBelowXl, 'flex xl:hidden')}
+              {renderOverflowDots(restXl, 'hidden xl:flex')}
             </button>
           );
         })}
