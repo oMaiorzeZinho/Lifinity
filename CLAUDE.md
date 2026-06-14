@@ -222,5 +222,6 @@ Este projeto é a minha prova final de curso. Representa 3 anos de estudo e dete
 - [2026-06-11] FASE B3+B4: perfil reorganizado (sem cards de stats, configurações movidas da dashboard para o perfil); bio/status do utilizador (coluna bio, editor no perfil, visível no perfil público).
 - [2026-06-11] FASE D: ranking redesenhado — peças de xadrez SVG no pódio (rainha/torre/bispo), avatares no pódio e na lista, líder sem "progresso relativo ao líder".
 - [2026-06-11] FASE E: serviço de email (nodemailer, modo simulação sem credenciais); página Contacte-nos pública e no dashboard com formulário validado e anti-spam; email de boas-vindas no registo.
+- [2026-06-14] Android: BASE_URL movido para `buildConfigField API_BASE_URL` no build.gradle.kts (mudar IP num só sítio); ApiClient usa `BuildConfig.API_BASE_URL` e timeouts de 30s (connect/read/write); Login e Register distinguem ConnectException/SocketTimeoutException com mensagem clara e fazem Log.e da classe da exceção no Logcat.
 - [2026-06-12] Calendário compactado para caber o mês inteiro no ecrã; formulário de contacto centrado; link Contacto movido para o canto direito do header.
 - [2026-06-12] Calendário: altura dinâmica que preenche o viewport (5 ou 6 semanas) e títulos das tarefas visíveis nas células (pills por prioridade + bolinhas para excedentes).

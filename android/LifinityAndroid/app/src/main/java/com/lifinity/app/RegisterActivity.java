@@ -3,6 +3,7 @@ package com.lifinity.app;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,11 +19,15 @@ import com.lifinity.app.models.RegisterRequest;
 import com.lifinity.app.models.RegisterResponse;
 import com.lifinity.app.network.ApiClient;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class RegisterActivity extends AppCompatActivity {
+    private static final String TAG = "RegisterActivity";
     private EditText usernameInput;
     private EditText emailInput;
     private EditText passwordInput;
@@ -115,7 +120,17 @@ public class RegisterActivity extends AppCompatActivity {
                 }
 
                 setLoading(false);
-                showError("Nao foi possivel criar a conta. Confirma que o backend esta ativo.");
+
+                // Distingue falhas de ligacao (servidor em baixo, rede errada ou IP errado)
+                // de outros erros, e regista sempre a classe da excecao no Logcat.
+                if (t instanceof ConnectException || t instanceof SocketTimeoutException) {
+                    Log.e(TAG, "Falha de ligacao ao servidor no registo", t);
+                    showError("Não foi possível ligar ao servidor. Confirma que o backend está ativo, "
+                            + "que estás na mesma rede Wi-Fi do PC e que o IP está correto.");
+                } else {
+                    Log.e(TAG, "Erro inesperado no registo: " + t.getClass().getName(), t);
+                    showError("Ocorreu um erro ao criar a conta. Tenta novamente.");
+                }
             }
         });
     }

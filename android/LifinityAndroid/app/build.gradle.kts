@@ -18,6 +18,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // URL base da API. Mudar AQUI o IP sempre que se trocar de rede —
+        // tem de corresponder ao IP local do PC na rede Wi-Fi (descoberto com "ipconfig").
+        // O telemovel e o PC tem de estar na MESMA rede Wi-Fi.
+        // Para o emulador, usar "http://10.0.2.2:3000/api/".
+        buildConfigField("String", "API_BASE_URL", "\"http://192.168.11.101:3000/api/\"")
     }
 
     buildTypes {

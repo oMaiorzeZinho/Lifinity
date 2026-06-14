@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,11 +19,15 @@ import com.lifinity.app.models.LoginRequest;
 import com.lifinity.app.models.LoginResponse;
 import com.lifinity.app.network.ApiClient;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
+    private static final String TAG = "LoginActivity";
     private static final String PREFS_NAME = "lifinity_prefs";
     private static final String KEY_TOKEN = "token";
     private static final String KEY_USER = "user";
@@ -104,7 +109,17 @@ public class LoginActivity extends AppCompatActivity {
                 }
 
                 setLoading(false);
-                showError("Não foi possível ligar ao servidor. Confirma que o backend está ativo.");
+
+                // Distingue falhas de ligacao (servidor em baixo, rede errada ou IP errado)
+                // de outros erros, e regista sempre a classe da excecao no Logcat.
+                if (t instanceof ConnectException || t instanceof SocketTimeoutException) {
+                    Log.e(TAG, "Falha de ligacao ao servidor no login", t);
+                    showError("Não foi possível ligar ao servidor. Confirma que o backend está ativo, "
+                            + "que estás na mesma rede Wi-Fi do PC e que o IP está correto.");
+                } else {
+                    Log.e(TAG, "Erro inesperado no login: " + t.getClass().getName(), t);
+                    showError("Ocorreu um erro ao iniciar sessão. Tenta novamente.");
+                }
             }
         });
     }
