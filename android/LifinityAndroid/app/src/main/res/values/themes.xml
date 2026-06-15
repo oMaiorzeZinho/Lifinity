@@ -5,14 +5,43 @@
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:statusBarColor">@color/lifinity_bg</item>
         <item name="android:navigationBarColor">@color/lifinity_bg</item>
+        <item name="android:colorBackground">@color/lifinity_bg</item>
+
+        <!-- Acento da marca (menta) — substitui o roxo/rosa por defeito do Material3 -->
         <item name="colorPrimary">@color/lifinity_primary</item>
-        <item name="colorPrimaryContainer">@color/lifinity_surface2</item>
         <item name="colorOnPrimary">@color/lifinity_text_on_primary</item>
+        <item name="colorPrimaryContainer">@color/lifinity_surface2</item>
+        <item name="colorOnPrimaryContainer">@color/lifinity_text</item>
+
+        <item name="colorSecondary">@color/lifinity_primary</item>
+        <item name="colorOnSecondary">@color/lifinity_text_on_primary</item>
+        <item name="colorSecondaryContainer">@color/lifinity_surface2</item>
+        <item name="colorOnSecondaryContainer">@color/lifinity_text</item>
+
+        <!-- Terciário: por defeito é rosa/malva no Material3 -> forçar menta -->
+        <item name="colorTertiary">@color/lifinity_primary</item>
+        <item name="colorOnTertiary">@color/lifinity_text_on_primary</item>
+
         <item name="colorSurface">@color/lifinity_surface</item>
         <item name="colorOnSurface">@color/lifinity_text</item>
-        <item name="android:colorBackground">@color/lifinity_bg</item>
+        <item name="colorSurfaceVariant">@color/lifinity_surface2</item>
+        <item name="colorOnSurfaceVariant">@color/lifinity_text_secondary</item>
         <item name="colorError">@color/lifinity_coral</item>
+
+        <!-- Controlos (switches, checkboxes, cursores, foco de inputs, ripples) -->
+        <item name="colorControlActivated">@color/lifinity_primary</item>
+        <item name="colorControlHighlight">#33FFFFFF</item>
+        <item name="android:textColorHighlight">#557EE0A2</item>
+
+        <!-- Compatibilidade AppCompat (widgets que ainda usam colorAccent) -->
+        <item name="colorAccent">@color/lifinity_primary</item>
     </style>
 
     <style name="Theme.Lifinity" parent="Base.Theme.Lifinity" />
+
+    <!-- Tema de arranque: mostra a logo centrada sobre o fundo escuro durante o
+         cold start. Herda tudo do Theme.Lifinity; só troca o windowBackground. -->
+    <style name="Theme.Lifinity.Splash" parent="Theme.Lifinity">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
 </resources>

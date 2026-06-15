@@ -1,7 +1,38 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- Tema escuro: a app já é toda em verde escuro, por isso o modo night usa
+         exatamente os mesmos acentos da marca que o modo claro. Sem estes overrides,
+         o Material3 caía nas cores por defeito (roxo/rosa) — origem dos "botões rosa". -->
     <style name="Base.Theme.Lifinity" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="android:fontFamily">sans-serif-rounded</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">@color/lifinity_bg</item>
+        <item name="android:navigationBarColor">@color/lifinity_bg</item>
+        <item name="android:colorBackground">@color/lifinity_bg</item>
+
+        <!-- Acento da marca (menta) -->
+        <item name="colorPrimary">@color/lifinity_primary</item>
+        <item name="colorOnPrimary">@color/lifinity_text_on_primary</item>
+        <item name="colorPrimaryContainer">@color/lifinity_surface2</item>
+        <item name="colorOnPrimaryContainer">@color/lifinity_text</item>
+
+        <item name="colorSecondary">@color/lifinity_primary</item>
+        <item name="colorOnSecondary">@color/lifinity_text_on_primary</item>
+        <item name="colorSecondaryContainer">@color/lifinity_surface2</item>
+        <item name="colorOnSecondaryContainer">@color/lifinity_text</item>
+
+        <item name="colorTertiary">@color/lifinity_primary</item>
+        <item name="colorOnTertiary">@color/lifinity_text_on_primary</item>
+
+        <item name="colorSurface">@color/lifinity_surface</item>
+        <item name="colorOnSurface">@color/lifinity_text</item>
+        <item name="colorSurfaceVariant">@color/lifinity_surface2</item>
+        <item name="colorOnSurfaceVariant">@color/lifinity_text_secondary</item>
+        <item name="colorError">@color/lifinity_coral</item>
+
+        <item name="colorControlActivated">@color/lifinity_primary</item>
+        <item name="colorControlHighlight">#33FFFFFF</item>
+        <item name="android:textColorHighlight">#557EE0A2</item>
+
+        <item name="colorAccent">@color/lifinity_primary</item>
     </style>
 </resources>

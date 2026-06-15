@@ -22,27 +22,16 @@
             android:orientation="vertical"
             android:padding="28dp">
 
+            <!-- Logo Lifinity (lockup completo: símbolo + marca) — sem tint, proporção preservada -->
             <ImageView
-                android:layout_width="78dp"
-                android:layout_height="78dp"
+                android:layout_width="wrap_content"
+                android:layout_height="76dp"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="16dp"
-                android:background="@drawable/bg_pill_mint"
+                android:layout_marginBottom="8dp"
+                android:adjustViewBounds="true"
                 android:contentDescription="Lifinity"
-                android:padding="16dp"
-                android:scaleType="centerInside"
-                android:src="@drawable/lifinity_logo"
-                android:tint="@color/lifinity_primary" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:letterSpacing="0.04"
-                android:text="Lifinity"
-                android:textColor="@color/lifinity_primary"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:scaleType="fitCenter"
+                android:src="@drawable/lifinity_logo" />
 
             <TextView
                 android:layout_width="match_parent"

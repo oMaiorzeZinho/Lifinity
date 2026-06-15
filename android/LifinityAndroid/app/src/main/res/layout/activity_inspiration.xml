@@ -27,24 +27,14 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
+            <!-- Logo Lifinity (lockup completo) — sem tint, proporção preservada -->
             <ImageView
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:background="@drawable/bg_pill_mint"
-                android:contentDescription="Lifinity"
-                android:padding="6dp"
-                android:scaleType="centerInside"
-                android:src="@drawable/lifinity_logo"
-                android:tint="@color/lifinity_primary" />
-
-            <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="Lifinity"
-                android:textColor="@color/lifinity_text"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:layout_height="34dp"
+                android:adjustViewBounds="true"
+                android:contentDescription="Lifinity"
+                android:scaleType="fitCenter"
+                android:src="@drawable/lifinity_logo" />
         </LinearLayout>
 
         <TextView

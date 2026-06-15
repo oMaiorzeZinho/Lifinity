@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ecrã de arranque (splash) clássico via windowBackground:
+     verde escuro da identidade (#18271C) com a logo Lifinity centrada.
+     Abordagem sem Java e sem dependências — funciona em todas as versões. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <color android:color="@color/lifinity_bg" />
+    </item>
+    <item
+        android:width="220dp"
+        android:height="124dp"
+        android:gravity="center">
+        <bitmap
+            android:src="@drawable/lifinity_logo"
+            android:gravity="fill" />
+    </item>
+</layer-list>
