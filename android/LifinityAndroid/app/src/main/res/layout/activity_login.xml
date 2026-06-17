@@ -20,7 +20,7 @@
             android:background="@drawable/bg_card_clay"
             android:elevation="10dp"
             android:orientation="vertical"
-            android:padding="28dp">
+            android:padding="@dimen/space_card_hero">
 
             <!-- Logo Lifinity (lockup completo: símbolo + marca) — sem tint, proporção preservada -->
             <ImageView
@@ -40,7 +40,7 @@
                 android:gravity="center"
                 android:text="Entrar na conta"
                 android:textColor="@color/lifinity_text"
-                android:textSize="30sp"
+                android:textSize="@dimen/text_screen_title"
                 android:textStyle="bold" />
 
             <TextView
@@ -50,7 +50,7 @@
                 android:gravity="center"
                 android:text="Usa os teus dados para aceder ao Lifinity."
                 android:textColor="@color/lifinity_text_secondary"
-                android:textSize="15sp" />
+                android:textSize="@dimen/text_subtitle" />
 
             <EditText
                 android:id="@+id/emailInput"
@@ -110,17 +110,18 @@
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
+            <!-- Ação secundária (discreta): contorno ghost, mais baixa e sem elevação,
+                 para recuar perante o botão primário "Entrar". -->
             <Button
                 android:id="@+id/createAccountButton"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/height_button"
-                android:layout_marginTop="14dp"
-                android:background="@drawable/btn_secondary_clay"
-                android:elevation="6dp"
+                android:layout_height="@dimen/height_button_secondary"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/btn_ghost_clay"
                 android:text="Criar conta"
                 android:textAllCaps="false"
-                android:textColor="@color/lifinity_text"
-                android:textSize="16sp"
+                android:textColor="@color/lifinity_primary"
+                android:textSize="@dimen/text_body"
                 android:textStyle="bold" />
 
             <ProgressBar

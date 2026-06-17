@@ -15,10 +15,12 @@
     <color name="lifinity_inset">#16241A</color>
     <color name="lifinity_inset2">#1B2B1F</color>
 
-    <!-- Acento menta -->
-    <color name="lifinity_primary">#7EE0A2</color>
-    <color name="lifinity_primary_light">#8EEDB0</color>
-    <color name="lifinity_primary_dark">#57B87E</color>
+    <!-- Acento menta — suavizado (~12% menos saturado/intenso que o #7EE0A2 original,
+         mantendo a mesma família de cor para um tom mais calmo e maduro;
+         o texto escuro por cima (lifinity_text_on_primary) mantém contraste AA >= 4.5:1) -->
+    <color name="lifinity_primary">#74CF97</color>
+    <color name="lifinity_primary_light">#84DBA5</color>
+    <color name="lifinity_primary_dark">#52A877</color>
 
     <!-- Texto sobre menta -->
     <color name="lifinity_text_on_primary">#0E2C1B</color>
@@ -44,6 +46,6 @@
     <color name="lifinity_input_hint">#6F8A78</color>
     <color name="lifinity_input_text">#EEF6F0</color>
     <color name="lifinity_border">#2F4435</color>
-    <color name="lifinity_primary_pressed">#57B87E</color>
+    <color name="lifinity_primary_pressed">#52A877</color>
     <color name="lifinity_danger_pressed">#D8815F</color>
 </resources>

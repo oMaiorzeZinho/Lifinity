@@ -58,8 +58,8 @@
         <!-- Botão estatísticas -->
         <TextView
             android:id="@+id/tasksStatsButton"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/size_header_icon"
+            android:layout_height="@dimen/size_header_icon"
             android:layout_marginEnd="10dp"
             android:background="@drawable/bg_card_soft_clay"
             android:elevation="4dp"
@@ -70,8 +70,8 @@
         <!-- Botão notificações -->
         <TextView
             android:id="@+id/headerNotificationBell"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="@dimen/size_header_icon"
+            android:layout_height="@dimen/size_header_icon"
             android:background="@drawable/bg_card_soft_clay"
             android:elevation="4dp"
             android:gravity="center"
@@ -102,7 +102,7 @@
                 android:layout_marginBottom="4dp"
                 android:text="Atividades"
                 android:textColor="@color/lifinity_text"
-                android:textSize="27sp"
+                android:textSize="@dimen/text_screen_title"
                 android:textStyle="bold" />
 
             <TextView

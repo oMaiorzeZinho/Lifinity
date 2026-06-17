@@ -33,7 +33,7 @@
             android:layout_marginTop="4dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textColor="#AAAAAA"
+            android:textColor="@color/lifinity_text_secondary"
             android:textSize="13sp"
             tools:text="Então, para amanhã?" />
     </LinearLayout>
@@ -50,7 +50,7 @@
             android:id="@+id/convDateText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#888888"
+            android:textColor="@color/lifinity_text_faint"
             android:textSize="11sp"
             tools:text="14:30" />
 

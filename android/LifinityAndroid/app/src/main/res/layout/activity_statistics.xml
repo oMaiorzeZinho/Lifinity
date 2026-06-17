@@ -20,8 +20,8 @@
 
         <TextView
             android:id="@+id/statisticsBackButton"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
+            android:layout_width="@dimen/size_header_icon"
+            android:layout_height="@dimen/size_header_icon"
             android:background="@drawable/bg_card_soft_clay"
             android:elevation="4dp"
             android:gravity="center"
@@ -191,7 +191,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:textColor="#FF6B6B"
+                    android:textColor="@color/lifinity_coral"
                     android:textSize="36sp"
                     android:textStyle="bold"
                     tools:text="2" />

@@ -19,14 +19,14 @@
             android:background="@drawable/bg_card_clay"
             android:elevation="10dp"
             android:orientation="vertical"
-            android:padding="26dp">
+            android:padding="@dimen/space_card_hero">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Editar atividade"
                 android:textColor="@color/lifinity_text"
-                android:textSize="30sp"
+                android:textSize="@dimen/text_screen_title"
                 android:textStyle="bold" />
 
             <TextView
@@ -35,7 +35,7 @@
                 android:layout_marginTop="6dp"
                 android:text="Atualiza os dados desta atividade."
                 android:textColor="@color/lifinity_text_secondary"
-                android:textSize="15sp" />
+                android:textSize="@dimen/text_subtitle" />
 
             <EditText
                 android:id="@+id/editTaskTitleInput"

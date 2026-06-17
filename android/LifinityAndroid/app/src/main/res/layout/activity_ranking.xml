@@ -55,8 +55,8 @@
 
         <TextView
             android:id="@+id/headerNotificationBell"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="@dimen/size_header_icon"
+            android:layout_height="@dimen/size_header_icon"
             android:background="@drawable/bg_card_soft_clay"
             android:elevation="4dp"
             android:gravity="center"
@@ -85,7 +85,7 @@
                 android:layout_marginBottom="4dp"
                 android:text="Ranking"
                 android:textColor="@color/lifinity_text"
-                android:textSize="27sp"
+                android:textSize="@dimen/text_screen_title"
                 android:textStyle="bold" />
 
             <TextView

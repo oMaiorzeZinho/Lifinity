@@ -1,0 +1,79 @@
+# 📚 Índice — Estudo do Lifinity
+
+Documento de estudo pessoal e exaustivo do projeto Lifinity. Cada ligação abre a explicação **bloco a bloco** do ficheiro correspondente. Organizado por área.
+
+> Estado: **Base de Dados + Backend completos; Frontend parcial (config, entrada, componentes); Android e páginas do frontend por fazer.** Ver `_PROGRESSO.md` para o ponto exato e o próximo ficheiro a documentar.
+
+---
+
+## 🗄️ Base de Dados
+- [estrutura_lifinity.sql](base_dados/estrutura_lifinity.sql.md) — esquema completo (22 tabelas + seed de badges)
+
+## ⚙️ Backend — infraestrutura e config
+- [package.json](backend/package.json.md) — dependências do backend
+- [binding.gyp](backend/binding.gyp.md) — build do módulo C (node-gyp)
+- [index.js](backend/index.js.md) — arranque do servidor / orquestrador
+- [src/config/db.js](backend/src/config/db.js.md) — pool de ligações MySQL
+- [src/middlewares/authMiddleware.js](backend/src/middlewares/authMiddleware.js.md) — proteção de rotas com JWT
+- [src/middlewares/uploadMiddleware.js](backend/src/middlewares/uploadMiddleware.js.md) — upload de imagens (multer)
+- [src/services/emailService.js](backend/src/services/emailService.js.md) — envio de emails (com modo simulação)
+- [src/utils/gamification.js](backend/src/utils/gamification.js.md) — fórmula de XP/nível (JS, fallback)
+- [src/utils/achievements.js](backend/src/utils/achievements.js.md) — motor de conquistas
+
+## 🧩 Módulo C nativo
+- [src/native/gamification.c](backend/src/native/gamification.c.md) — N-API: recompensa, nível e estatísticas
+
+## 🛣️ Backend — rotas
+- [authRoutes.js](backend/src/routes/authRoutes.js.md) · [taskRoutes.js](backend/src/routes/taskRoutes.js.md) · [userRoutes.js](backend/src/routes/userRoutes.js.md) · [statisticsRoutes.js](backend/src/routes/statisticsRoutes.js.md) · [inspirationRoutes.js](backend/src/routes/inspirationRoutes.js.md)
+- [friendRoutes.js](backend/src/routes/friendRoutes.js.md) · [groupRoutes.js](backend/src/routes/groupRoutes.js.md) · [chatRoutes.js](backend/src/routes/chatRoutes.js.md) · [achievementRoutes.js](backend/src/routes/achievementRoutes.js.md) · [notificationRoutes.js](backend/src/routes/notificationRoutes.js.md) · [assistantRoutes.js](backend/src/routes/assistantRoutes.js.md) · [contactRoutes.js](backend/src/routes/contactRoutes.js.md)
+
+## 🧠 Backend — controladores
+- [authController.js](backend/src/controllers/authController.js.md) — registo e login
+- [taskController.js](backend/src/controllers/taskController.js.md) — tarefas (o central; usa o C)
+- [userController.js](backend/src/controllers/userController.js.md) — perfil, ranking, conta, uploads
+- [statisticsController.js](backend/src/controllers/statisticsController.js.md) — estatísticas e comparações
+- [inspirationController.js](backend/src/controllers/inspirationController.js.md) — versículos
+- [friendController.js](backend/src/controllers/friendController.js.md) — amizades
+- [groupController.js](backend/src/controllers/groupController.js.md) — grupos e moderação
+- [chatController.js](backend/src/controllers/chatController.js.md) — chat
+- [achievementController.js](backend/src/controllers/achievementController.js.md) — conquistas (endpoints)
+- [notificationController.js](backend/src/controllers/notificationController.js.md) — notificações
+- [assistantController.js](backend/src/controllers/assistantController.js.md) — assistente IA (Gemini)
+- [contactController.js](backend/src/controllers/contactController.js.md) — formulário de contacto
+
+## 🎨 Frontend — config e entrada
+- [package.json](frontend/package.json.md) · [vite.config.js](frontend/vite.config.js.md) · [tailwind.config.js](frontend/tailwind.config.js.md) · [postcss.config.js](frontend/postcss.config.js.md) · [index.html](frontend/index.html.md)
+- [src/main.jsx](frontend/src/main.jsx.md) — ponto de entrada do React
+- [src/App.jsx](frontend/src/App.jsx.md) — routing (lazy + Suspense)
+- [src/utils/imageUrl.js](frontend/src/utils/imageUrl.js.md) — URLs de imagens
+- ⏳ *Por fazer:* `eslint.config.js`, `src/index.css` (tema clay)
+
+## 🧱 Frontend — componentes
+- [ChatWidget.jsx](frontend/src/components/ChatWidget.jsx.md) — badge de não lidas
+- [DailyVerseWidget.jsx](frontend/src/components/DailyVerseWidget.jsx.md) — versículo do dia
+- [ImageUploadModal.jsx](frontend/src/components/ImageUploadModal.jsx.md) — upload de imagem
+- [AccountSettingsModal.jsx](frontend/src/components/AccountSettingsModal.jsx.md) — configurações da conta
+- [PublicProfileModal.jsx](frontend/src/components/PublicProfileModal.jsx.md) — perfil público
+
+## 📄 Frontend — páginas ⏳ (por fazer)
+- `Login.jsx`, `Register.jsx`, `Home.jsx`, `Dashboard.jsx`, `Tasks.jsx`, `Ranking.jsx`, `Statistics.jsx`, `Inspiration.jsx`, `Community.jsx`, `Profile.jsx`, `Chat.jsx`, `Contact.jsx`
+
+## 📱 Android
+- [res/values/ — colors · dimens · themes](android/res/values/_VALUES.md) — paleta da marca, escala de tamanhos/tipografia, tema; inclui as **decisões do refinamento visual de 2026-06-17** (menta suavizada, escala consistente).
+- [res/drawable/ — drawables clay](android/res/drawable/_DRAWABLES_CLAY.md) — padrão clay (cartões, inputs, botões, pills) + `btn_ghost_clay` (hierarquia de botões).
+- ⏳ *Por fazer:* Config (`build.gradle.kts`, `libs.versions.toml`, `AndroidManifest.xml`), `network/ApiClient.java`, `api/*` (Retrofit), `models/*`, activities, adapters, restantes layouts XML.
+
+---
+
+## 📜 Outras partes
+- [**_COMMITS.md**](_COMMITS.md) — Parte 2: explicação cronológica de **todos os commits** (por fases) ✅
+- [**_PROGRESSO.md**](_PROGRESSO.md) — rastreador do que está feito / por fazer (retomar a partir daqui)
+
+---
+
+## 🔑 Conceitos transversais (para reler rápido)
+- **Gamificação:** XP/nível calculados em **C** (`gamification.c`, via `taskController`/`statisticsController`); fallback JS em `utils/gamification.js`; histórico em `XP_HISTORY`; conquistas em `utils/achievements.js`.
+- **Autenticação:** JWT criado no `authController` (login), validado no `authMiddleware`; token guardado no `localStorage` do frontend e enviado como `Authorization: Bearer`.
+- **Tarefas:** 3 tipos (pessoal / atribuída / de grupo), com visibilidade e arquivo por-utilizador — toda a lógica em `taskController`.
+- **Social:** amigos (`friendController`), grupos + moderação (`groupController`), chat (`chatController`), notificações (`notificationController`).
+- **Frontend sem store global:** comunicação por **eventos `window`** (`lifinity-user-updated`, `lifinity-chat-read`) e estado em `localStorage`. Tema "clay/escuro" em `index.css` (variáveis `--lifinity-*`).

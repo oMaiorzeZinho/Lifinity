@@ -1,22 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- ============================================================
+     Escala visual central do Lifinity (Android).
+     Tudo o que é "tamanho" e "espaço" vive aqui para que os ecrãs
+     fiquem coerentes (uma só mão a desenhar). Os layouts devem usar
+     estes tokens em vez de valores soltos.
+     ============================================================ -->
 <resources>
-    <!-- Espaçamento -->
+    <!-- ===== Espaçamento (escala 6 / 10 / 14 / 20 / 28) ===== -->
+    <dimen name="space_xs">6dp</dimen>
+    <dimen name="space_sm">10dp</dimen>
+    <dimen name="space_md">14dp</dimen>
+    <dimen name="space_lg">20dp</dimen>
+    <dimen name="space_xl">28dp</dimen>
+
+    <!-- Margem lateral de ecrã (consistente em toda a app) -->
     <dimen name="space_screen">20dp</dimen>
+    <!-- Padding interior dos cartões clay grandes (hero/formulário) -->
+    <dimen name="space_card_hero">24dp</dimen>
+    <!-- Padding interior dos cartões clay padrão -->
     <dimen name="space_card">18dp</dimen>
+    <!-- Folga vertical entre elementos da lista -->
     <dimen name="space_gap">14dp</dimen>
 
-    <!-- Raios clay — design: cartão 30dp, suave 22dp, controlo/input 16dp -->
+    <!-- ===== Escala tipográfica (aplicar em vez de sp soltos) ===== -->
+    <dimen name="text_screen_title">26sp</dimen>   <!-- título grande de ecrã/formulário -->
+    <dimen name="text_toolbar_title">20sp</dimen>  <!-- título em barra com botão voltar -->
+    <dimen name="text_card_title">20sp</dimen>     <!-- título dentro de cartão -->
+    <dimen name="text_subtitle">14sp</dimen>       <!-- subtítulo/descrição sob o título -->
+    <dimen name="text_body">15sp</dimen>           <!-- corpo de texto -->
+    <dimen name="text_caption">13sp</dimen>        <!-- texto auxiliar/secundário -->
+    <dimen name="text_label">11sp</dimen>          <!-- rótulos MAIÚSCULOS de secção -->
+
+    <!-- ===== Raios clay — cartão 30dp, suave 22dp, controlo/input 16dp ===== -->
     <dimen name="radius_card">30dp</dimen>
     <dimen name="radius_card_soft">22dp</dimen>
     <dimen name="radius_control">16dp</dimen>
     <dimen name="radius_pill">999dp</dimen>
 
-    <!-- Alturas de controlos (alvos de toque ≥ 44dp) -->
-    <dimen name="height_button">52dp</dimen>
+    <!-- ===== Alturas de controlos (alvos de toque >= 44dp) ===== -->
+    <dimen name="height_button">52dp</dimen>            <!-- botão primário (ação principal) -->
+    <dimen name="height_button_secondary">46dp</dimen>  <!-- botão secundário discreto (mais baixo) -->
     <dimen name="height_input">52dp</dimen>
     <dimen name="height_button_icon">48dp</dimen>
 
-    <!-- Avatares -->
+    <!-- Botão circular/quadrado de ícone nos cabeçalhos (sino, definições, voltar) -->
+    <dimen name="size_header_icon">40dp</dimen>
+
+    <!-- ===== Avatares ===== -->
     <dimen name="size_avatar_large">80dp</dimen>
     <dimen name="size_avatar_medium">48dp</dimen>
     <dimen name="size_avatar_small">40dp</dimen>

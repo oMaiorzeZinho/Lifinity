@@ -39,8 +39,8 @@
 
         <TextView
             android:id="@+id/headerNotificationBell"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="@dimen/size_header_icon"
+            android:layout_height="@dimen/size_header_icon"
             android:layout_marginEnd="10dp"
             android:background="@drawable/bg_card_soft_clay"
             android:elevation="4dp"
@@ -50,8 +50,8 @@
 
         <TextView
             android:id="@+id/headerSettingsIcon"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="@dimen/size_header_icon"
+            android:layout_height="@dimen/size_header_icon"
             android:background="@drawable/bg_card_soft_clay"
             android:elevation="4dp"
             android:gravity="center"
@@ -170,7 +170,7 @@
                         android:paddingEnd="14dp"
                         android:paddingTop="8dp"
                         android:paddingBottom="8dp"
-                        android:textColor="#0E2C1B"
+                        android:textColor="@color/lifinity_text_on_primary"
                         android:textSize="13sp"
                         android:textStyle="bold"
                         android:text="XP" />
@@ -186,7 +186,7 @@
                         android:paddingEnd="14dp"
                         android:paddingTop="8dp"
                         android:paddingBottom="8dp"
-                        android:textColor="#0E2C1B"
+                        android:textColor="@color/lifinity_text_on_primary"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         tools:text="2043" />
@@ -668,7 +668,7 @@
             <Button
                 android:id="@+id/profileLogoutButton"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="@dimen/height_button"
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/btn_danger_clay"
                 android:elevation="8dp"

@@ -31,7 +31,7 @@
         <!-- Controlos (switches, checkboxes, cursores, foco de inputs, ripples) -->
         <item name="colorControlActivated">@color/lifinity_primary</item>
         <item name="colorControlHighlight">#33FFFFFF</item>
-        <item name="android:textColorHighlight">#557EE0A2</item>
+        <item name="android:textColorHighlight">#5574CF97</item>
 
         <!-- Compatibilidade AppCompat (widgets que ainda usam colorAccent) -->
         <item name="colorAccent">@color/lifinity_primary</item>
