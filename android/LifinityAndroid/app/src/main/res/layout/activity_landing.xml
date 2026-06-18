@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ecrã de boas-vindas público (paridade com a Home.jsx da web): apresenta a marca,
+     uma frase de apresentação, as funcionalidades principais em cartões clay e dois
+     botões de ação (Criar conta / Entrar). É o primeiro ecrã quando NÃO há sessão. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_app_clay"
+    android:fillViewport="true"
+    tools:context=".LandingActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/space_screen">
+
+        <!-- ===== HERO (marca + apresentação + CTAs) ===== -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_card_clay"
+            android:elevation="10dp"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:padding="@dimen/space_card_hero">
+
+            <!-- Logo Lifinity (lockup completo) — sem tint, proporção preservada -->
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="64dp"
+                android:layout_marginTop="6dp"
+                android:adjustViewBounds="true"
+                android:contentDescription="Lifinity"
+                android:scaleType="fitCenter"
+                android:src="@drawable/lifinity_logo" />
+
+            <!-- Pequena etiqueta de contexto -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:background="@drawable/bg_pill_mint"
+                android:letterSpacing="0.1"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:text="GESTÃO E MOTIVAÇÃO DIÁRIA"
+                android:textColor="@color/lifinity_primary"
+                android:textSize="@dimen/text_label"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:lineSpacingExtra="2dp"
+                android:text="Organiza a tua vida de forma mais calma, focada e motivadora."
+                android:textColor="@color/lifinity_text"
+                android:textSize="@dimen/text_screen_title"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:text="Tarefas, gamificação, estatísticas, comunidade, inspiração diária e um assistente — tudo num só lugar."
+                android:textColor="@color/lifinity_text_secondary"
+                android:textSize="@dimen/text_body" />
+
+            <!-- CTA principal: Criar conta -->
+            <Button
+                android:id="@+id/landingRegisterButton"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/height_button"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/btn_primary_clay"
+                android:elevation="8dp"
+                android:text="Criar conta"
+                android:textAllCaps="false"
+                android:textColor="@color/lifinity_text_on_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <!-- CTA secundária discreta: Entrar -->
+            <Button
+                android:id="@+id/landingLoginButton"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/height_button_secondary"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/btn_ghost_clay"
+                android:text="Entrar"
+                android:textAllCaps="false"
+                android:textColor="@color/lifinity_primary"
+                android:textSize="@dimen/text_body"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- ===== FUNCIONALIDADES ===== -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="12dp"
+            android:letterSpacing="0.13"
+            android:text="FUNCIONALIDADES"
+            android:textColor="@color/lifinity_text_secondary"
+            android:textSize="@dimen/text_label"
+            android:textStyle="bold" />
+
+        <!-- Cartão: Gestão de tarefas -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_card_soft_clay"
+            android:elevation="5dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:background="@drawable/bg_pill_mint"
+                android:gravity="center"
+                android:text="&#128203;"
+                android:textSize="20sp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Gestão de tarefas"
+                    android:textColor="@color/lifinity_text"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Cria tarefas, define prioridades e mantém o teu dia organizado."
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="@dimen/text_caption" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Cartão: Gamificação -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_card_soft_clay"
+            android:elevation="5dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:background="@drawable/bg_pill_mint"
+                android:gravity="center"
+                android:text="&#127918;"
+                android:textSize="20sp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Gamificação"
+                    android:textColor="@color/lifinity_text"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Ganha XP, sobe de nível e transforma objetivos diários em evolução."
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="@dimen/text_caption" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Cartão: Estatísticas -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_card_soft_clay"
+            android:elevation="5dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:background="@drawable/bg_pill_mint"
+                android:gravity="center"
+                android:text="&#128202;"
+                android:textSize="20sp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Estatísticas"
+                    android:textColor="@color/lifinity_text"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Acompanha gráficos, produtividade e a tua evolução ao longo do tempo."
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="@dimen/text_caption" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Cartão: Comunidade -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_card_soft_clay"
+            android:elevation="5dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:background="@drawable/bg_pill_mint"
+                android:gravity="center"
+                android:text="&#128101;"
+                android:textSize="20sp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Comunidade"
+                    android:textColor="@color/lifinity_text"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Cria grupos, adiciona amigos e colabora com outros utilizadores."
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="@dimen/text_caption" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Cartão: Inspiração diária -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_card_soft_clay"
+            android:elevation="5dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:background="@drawable/bg_pill_mint"
+                android:gravity="center"
+                android:text="&#10024;"
+                android:textSize="20sp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Inspiração diária"
+                    android:textColor="@color/lifinity_text"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Recebe versículos e mensagens motivacionais e guarda favoritos."
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="@dimen/text_caption" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Cartão: Assistente -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_card_soft_clay"
+            android:elevation="5dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:background="@drawable/bg_pill_mint"
+                android:gravity="center"
+                android:text="&#129302;"
+                android:textSize="20sp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Assistente inteligente"
+                    android:textColor="@color/lifinity_text"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Um assistente ajuda-te a planear, sugere tarefas e dá apoio motivacional."
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="@dimen/text_caption" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ===== CTA FINAL ===== -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_card_clay"
+            android:elevation="10dp"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:padding="@dimen/space_card_hero">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Pronto para começar?"
+                android:textColor="@color/lifinity_text"
+                android:textSize="@dimen/text_card_title"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="Cria a tua conta gratuita e transforma organização em progresso visível."
+                android:textColor="@color/lifinity_text_secondary"
+                android:textSize="@dimen/text_subtitle" />
+
+            <Button
+                android:id="@+id/landingRegisterButtonBottom"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/height_button"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/btn_primary_clay"
+                android:elevation="8dp"
+                android:text="Criar conta"
+                android:textAllCaps="false"
+                android:textColor="@color/lifinity_text_on_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/landingLoginButtonBottom"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/height_button_secondary"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/btn_ghost_clay"
+                android:text="Já tenho conta"
+                android:textAllCaps="false"
+                android:textColor="@color/lifinity_primary"
+                android:textSize="@dimen/text_body"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

@@ -2,15 +2,19 @@ package com.lifinity.app;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -35,9 +39,12 @@ import com.lifinity.app.network.ApiClient;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -79,6 +86,25 @@ public class TasksActivity extends AppCompatActivity {
     private Call<JsonObject> hideCompletedVisibleTasksCall;
     private final Gson gson = new Gson();
 
+    // ===== Vista de calendário =====
+    private Button viewListButton;
+    private Button viewCalendarButton;
+    private LinearLayout filtersRow;
+    private LinearLayout listLabelRow;
+    private LinearLayout calendarContainer;
+    private GridLayout calendarGrid;
+    private TextView calendarMonthLabel;
+    private boolean calendarMode = false;
+    // Mês atualmente apresentado no calendário (fixado no dia 1).
+    private final Calendar calendarMonth = Calendar.getInstance();
+    // Diálogo das tarefas de um dia (para fechar quando se faz uma ação).
+    private AlertDialog dayDialog;
+
+    private static final String[] MONTH_NAMES_PT = {
+            "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,12 +123,33 @@ public class TasksActivity extends AppCompatActivity {
                 startActivity(new Intent(this, StatisticsActivity.class)));
         setupFilters();
         setupBottomNav();
+        setupViewToggle();
         HeaderHelper.setupBell(this);
         bindUserHeader();
 
         taskAdapter = new TaskAdapter(this::confirmCompleteTask, this::showTaskOptions);
         tasksRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         tasksRecyclerView.setAdapter(taskAdapter);
+    }
+
+    /** Liga o segmento Lista/Calendário e a navegação entre meses. */
+    private void setupViewToggle() {
+        // Mês inicial: o mês atual, fixado no dia 1.
+        calendarMonth.set(Calendar.DAY_OF_MONTH, 1);
+
+        viewListButton.setOnClickListener(v -> setCalendarMode(false));
+        viewCalendarButton.setOnClickListener(v -> setCalendarMode(true));
+
+        findViewById(R.id.calendarPrevButton).setOnClickListener(v -> {
+            calendarMonth.add(Calendar.MONTH, -1);
+            buildCalendar();
+        });
+        findViewById(R.id.calendarNextButton).setOnClickListener(v -> {
+            calendarMonth.add(Calendar.MONTH, 1);
+            buildCalendar();
+        });
+
+        updateViewModeToggle();
     }
 
     @Override
@@ -141,6 +188,14 @@ public class TasksActivity extends AppCompatActivity {
         summaryPendingCount = findViewById(R.id.summaryPendingCount);
         summaryCompletedCount = findViewById(R.id.summaryCompletedCount);
         summaryLostCount = findViewById(R.id.summaryLostCount);
+
+        viewListButton = findViewById(R.id.tasksViewListButton);
+        viewCalendarButton = findViewById(R.id.tasksViewCalendarButton);
+        filtersRow = findViewById(R.id.tasksFiltersRow);
+        listLabelRow = findViewById(R.id.tasksListLabelRow);
+        calendarContainer = findViewById(R.id.tasksCalendarContainer);
+        calendarGrid = findViewById(R.id.tasksCalendarGrid);
+        calendarMonthLabel = findViewById(R.id.calendarMonthLabel);
     }
 
     private void bindUserHeader() {
@@ -423,6 +478,13 @@ public class TasksActivity extends AppCompatActivity {
 
         if (tasksCountLabel != null) tasksCountLabel.setText(String.valueOf(filteredTasks.size()));
 
+        // Em modo calendário, a lista fica oculta; basta reconstruir a grelha
+        // com os dados frescos (o calendário usa sempre todas as tarefas com prazo).
+        if (calendarMode) {
+            buildCalendar();
+            return;
+        }
+
         if (filteredTasks.isEmpty()) showFilteredEmpty();
         else showList();
     }
@@ -544,6 +606,233 @@ public class TasksActivity extends AppCompatActivity {
         tasksRecyclerView.setVisibility(View.VISIBLE);
     }
 
+    // ===================== VISTA DE CALENDÁRIO =====================
+
+    /** Alterna entre a vista de lista e a vista de calendário. */
+    private void setCalendarMode(boolean calendar) {
+        calendarMode = calendar;
+        updateViewModeToggle();
+
+        if (calendar) {
+            // Esconde os controlos e a lista; mostra o calendário.
+            searchInput.setVisibility(View.GONE);
+            filtersRow.setVisibility(View.GONE);
+            listLabelRow.setVisibility(View.GONE);
+            tasksRecyclerView.setVisibility(View.GONE);
+            if (emptyCard != null) emptyCard.setVisibility(View.GONE);
+            errorText.setVisibility(View.GONE);
+            calendarContainer.setVisibility(View.VISIBLE);
+            buildCalendar();
+        } else {
+            // Volta à lista e reaplica os filtros.
+            calendarContainer.setVisibility(View.GONE);
+            searchInput.setVisibility(View.VISIBLE);
+            filtersRow.setVisibility(View.VISIBLE);
+            listLabelRow.setVisibility(View.VISIBLE);
+            applyFilters();
+        }
+    }
+
+    /** Aplica o estilo ativo/inativo aos dois botões do segmento. */
+    private void updateViewModeToggle() {
+        Button active = calendarMode ? viewCalendarButton : viewListButton;
+        Button inactive = calendarMode ? viewListButton : viewCalendarButton;
+
+        active.setBackgroundResource(R.drawable.btn_primary_clay);
+        active.setTextColor(getColor(R.color.lifinity_text_on_primary));
+
+        inactive.setBackgroundResource(android.R.color.transparent);
+        inactive.setTextColor(getColor(R.color.lifinity_text_secondary));
+    }
+
+    /** Constrói a grelha mensal: agrupa as tarefas com prazo por dia e desenha as células. */
+    private void buildCalendar() {
+        if (calendarGrid == null) return;
+        calendarGrid.removeAllViews();
+
+        int year = calendarMonth.get(Calendar.YEAR);
+        int month = calendarMonth.get(Calendar.MONTH); // 0-based
+        calendarMonthLabel.setText(MONTH_NAMES_PT[month] + " " + year);
+
+        // Agrupa as tarefas por dia (chave yyyy-MM-dd) usando o prazo (due_date).
+        // Tarefas sem prazo não entram no calendário (continuam só na lista).
+        Map<String, List<Task>> tasksByDay = new HashMap<>();
+        for (Task task : allTasks) {
+            Date due = parseDate(task.getDueDate());
+            if (due == null) continue;
+            String key = dayKey(due);
+            List<Task> dayList = tasksByDay.get(key);
+            if (dayList == null) {
+                dayList = new ArrayList<>();
+                tasksByDay.put(key, dayList);
+            }
+            dayList.add(task);
+        }
+
+        Calendar first = Calendar.getInstance();
+        first.clear();
+        first.set(year, month, 1);
+        int daysInMonth = first.getActualMaximum(Calendar.DAY_OF_MONTH);
+        // Domingo primeiro (como na web): DAY_OF_WEEK SUNDAY=1 -> deslocamento 0.
+        int startOffset = first.get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY;
+
+        String todayKey = dayKey(new Date());
+        int cellHeight = dp(64);
+        int cellMargin = dp(2);
+
+        // Células de preenchimento antes do dia 1.
+        for (int i = 0; i < startOffset; i++) {
+            calendarGrid.addView(makeEmptyCell(cellHeight, cellMargin));
+        }
+
+        for (int day = 1; day <= daysInMonth; day++) {
+            Calendar cellCal = Calendar.getInstance();
+            cellCal.clear();
+            cellCal.set(year, month, day);
+            Date cellDate = cellCal.getTime();
+            String key = dayKey(cellDate);
+            List<Task> dayTasks = tasksByDay.get(key);
+            boolean isToday = key.equals(todayKey);
+            calendarGrid.addView(makeDayCell(day, cellDate, dayTasks, isToday, cellHeight, cellMargin));
+        }
+    }
+
+    /** Célula vazia (preenchimento antes do primeiro dia do mês). */
+    private View makeEmptyCell(int height, int margin) {
+        View view = new View(this);
+        GridLayout.LayoutParams lp = new GridLayout.LayoutParams();
+        lp.width = 0;
+        lp.height = height;
+        lp.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
+        lp.setMargins(margin, margin, margin, margin);
+        view.setLayoutParams(lp);
+        return view;
+    }
+
+    /** Célula de um dia: número + até 2 pills de tarefa (+N) e bordo de estado. */
+    private View makeDayCell(int day, Date date, List<Task> dayTasks, boolean isToday, int height, int margin) {
+        LinearLayout cell = new LinearLayout(this);
+        cell.setOrientation(LinearLayout.VERTICAL);
+        cell.setPadding(dp(4), dp(4), dp(4), dp(4));
+
+        boolean hasTasks = dayTasks != null && !dayTasks.isEmpty();
+        boolean hasLost = false;
+        if (hasTasks) {
+            for (Task task : dayTasks) {
+                if (isTaskLost(task)) { hasLost = true; break; }
+            }
+        }
+
+        // Fundo arredondado; bordo menta se for hoje, coral se houver tarefa perdida.
+        GradientDrawable bg = new GradientDrawable();
+        bg.setCornerRadius(dp(10));
+        bg.setColor(getColor(R.color.lifinity_inset));
+        if (isToday) {
+            bg.setStroke(dp(2), getColor(R.color.lifinity_primary));
+        } else if (hasLost) {
+            bg.setStroke(dp(1), getColor(R.color.lifinity_coral));
+        } else {
+            bg.setStroke(dp(1), getColor(R.color.lifinity_border));
+        }
+        cell.setBackground(bg);
+
+        TextView dayNumber = new TextView(this);
+        dayNumber.setText(String.valueOf(day));
+        dayNumber.setTextSize(12);
+        dayNumber.setTypeface(dayNumber.getTypeface(), android.graphics.Typeface.BOLD);
+        dayNumber.setTextColor(getColor(isToday ? R.color.lifinity_primary : R.color.lifinity_text));
+        cell.addView(dayNumber);
+
+        if (hasTasks) {
+            int shown = Math.min(dayTasks.size(), 2);
+            for (int i = 0; i < shown; i++) {
+                cell.addView(makeTaskPill(dayTasks.get(i)));
+            }
+            if (dayTasks.size() > shown) {
+                TextView more = new TextView(this);
+                more.setText("+" + (dayTasks.size() - shown));
+                more.setTextSize(9);
+                more.setTextColor(getColor(R.color.lifinity_text_secondary));
+                cell.addView(more);
+            }
+            cell.setOnClickListener(v -> openDayTasksDialog(date, dayTasks));
+        }
+
+        GridLayout.LayoutParams lp = new GridLayout.LayoutParams();
+        lp.width = 0;
+        lp.height = height;
+        lp.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
+        lp.setMargins(margin, margin, margin, margin);
+        cell.setLayoutParams(lp);
+        return cell;
+    }
+
+    /** Mini-pill com o título da tarefa, colorida pela prioridade. */
+    private TextView makeTaskPill(Task task) {
+        TextView pill = new TextView(this);
+        pill.setText(!TextUtils.isEmpty(task.getTitle()) ? task.getTitle() : "Tarefa");
+        pill.setMaxLines(1);
+        pill.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        pill.setTextSize(9);
+        pill.setPadding(dp(4), dp(1), dp(4), dp(1));
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(2);
+        pill.setLayoutParams(lp);
+
+        String priority = task.getPriority() == null ? "" : task.getPriority().trim().toLowerCase(Locale.US);
+        int bgRes;
+        switch (priority) {
+            case "alta": bgRes = R.drawable.bg_pill_alta; break;
+            case "baixa": bgRes = R.drawable.bg_pill_baixa; break;
+            default: bgRes = R.drawable.bg_pill_media; break;
+        }
+        pill.setBackgroundResource(bgRes);
+        pill.setTextColor(getColor(R.color.lifinity_text_on_primary));
+        return pill;
+    }
+
+    /** Diálogo com as tarefas do dia selecionado; reutiliza o TaskAdapter (mesmas
+     *  ações e validações da lista: concluir / editar / ocultar-eliminar). */
+    private void openDayTasksDialog(Date date, List<Task> dayTasks) {
+        RecyclerView recyclerView = new RecyclerView(this);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        int pad = dp(8);
+        recyclerView.setPadding(pad, pad, pad, pad);
+        recyclerView.setClipToPadding(false);
+
+        TaskAdapter dayAdapter = new TaskAdapter(
+                task -> { if (dayDialog != null) dayDialog.dismiss(); confirmCompleteTask(task); },
+                task -> { if (dayDialog != null) dayDialog.dismiss(); showTaskOptions(task); }
+        );
+        dayAdapter.setTasks(dayTasks);
+        recyclerView.setAdapter(dayAdapter);
+
+        String title = new SimpleDateFormat("EEEE, d 'de' MMMM", new Locale("pt", "PT")).format(date);
+
+        dayDialog = new AlertDialog.Builder(this)
+                .setTitle(capitalize(title))
+                .setView(recyclerView)
+                .setPositiveButton("Fechar", null)
+                .create();
+        dayDialog.show();
+    }
+
+    private String dayKey(Date date) {
+        return new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(date);
+    }
+
+    private int dp(int value) {
+        return (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, value, getResources().getDisplayMetrics());
+    }
+
+    private String capitalize(String value) {
+        if (TextUtils.isEmpty(value)) return value;
+        return value.substring(0, 1).toUpperCase(new Locale("pt", "PT")) + value.substring(1);
+    }
+
     private void openLoginActivity() {
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
@@ -571,6 +860,7 @@ public class TasksActivity extends AppCompatActivity {
         if (completeTaskCall != null) completeTaskCall.cancel();
         if (deleteTaskCall != null) deleteTaskCall.cancel();
         if (hideCompletedVisibleTasksCall != null) hideCompletedVisibleTasksCall.cancel();
+        if (dayDialog != null && dayDialog.isShowing()) dayDialog.dismiss();
         super.onDestroy();
     }
 }

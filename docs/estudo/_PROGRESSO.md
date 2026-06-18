@@ -154,11 +154,18 @@
 - [ ] `models/UpdatePasswordRequest.java`
 - [ ] `models/DeleteAccountRequest.java`
 
+> **Nota (2026-06-18):** funcionalidades novas Landing/Amigos/Grupos/Calendário explicadas em conjunto
+> em `android/FUNCIONALIDADES_LANDING_AMIGOS_GRUPOS_CALENDARIO.md` (LandingActivity, FriendsActivity,
+> GroupsActivity, adapters e models de amigos/grupos, e o calendário no TasksActivity).
+
 ### Android — activities e helpers (21)
-- [ ] `MainActivity.java`
+- [~] `MainActivity.java` *(routing para a Landing documentado na nota acima)*
 - [ ] `LoginActivity.java`
 - [ ] `RegisterActivity.java`
-- [ ] `TasksActivity.java`
+- [~] `TasksActivity.java` *(vista de calendário documentada na nota acima)*
+- [x] `LandingActivity.java` *(ver nota 2026-06-18)*
+- [x] `FriendsActivity.java` *(ver nota 2026-06-18)*
+- [x] `GroupsActivity.java` *(ver nota 2026-06-18)*
 - [ ] `CreateTaskActivity.java`
 - [ ] `EditTaskActivity.java`
 - [ ] `RankingActivity.java`

@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ecrã de Amigos (paridade com a secção de amigos da Community.jsx da web):
+     pesquisar utilizadores e enviar pedido, ver pedidos recebidos (aceitar/recusar)
+     e listar/remover amigos. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_app_clay"
+    android:orientation="vertical"
+    tools:context=".FriendsActivity">
+
+    <!-- ===== CABEÇALHO COM BOTÃO VOLTAR ===== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="12dp">
+
+        <TextView
+            android:id="@+id/friendsBackButton"
+            android:layout_width="@dimen/size_header_icon"
+            android:layout_height="@dimen/size_header_icon"
+            android:background="@drawable/bg_card_soft_clay"
+            android:elevation="4dp"
+            android:gravity="center"
+            android:text="‹"
+            android:textColor="@color/lifinity_text"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_weight="1"
+            android:text="Amigos"
+            android:textColor="@color/lifinity_text"
+            android:textSize="@dimen/text_toolbar_title"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="24dp">
+
+            <!-- ===== ADICIONAR AMIGO ===== -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card_clay"
+                android:elevation="10dp"
+                android:orientation="vertical"
+                android:padding="@dimen/space_card_hero">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Adicionar amigo"
+                    android:textColor="@color/lifinity_text"
+                    android:textSize="@dimen/text_card_title"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="Procura por nome de utilizador (mínimo 2 letras)."
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="@dimen/text_subtitle" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/friendsSearchInput"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/height_input"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_input_clay"
+                        android:hint="Username"
+                        android:imeOptions="actionSearch"
+                        android:inputType="text"
+                        android:paddingStart="18dp"
+                        android:paddingEnd="18dp"
+                        android:singleLine="true"
+                        android:textColor="@color/lifinity_input_text"
+                        android:textColorHint="@color/lifinity_input_hint"
+                        android:textSize="15sp" />
+
+                    <Button
+                        android:id="@+id/friendsSearchButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/height_input"
+                        android:layout_marginStart="10dp"
+                        android:background="@drawable/btn_primary_clay"
+                        android:elevation="6dp"
+                        android:paddingStart="22dp"
+                        android:paddingEnd="22dp"
+                        android:text="Procurar"
+                        android:textAllCaps="false"
+                        android:textColor="@color/lifinity_text_on_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/friendsSearchStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="13sp"
+                    android:visibility="gone"
+                    tools:text="Sem resultados."
+                    tools:visibility="visible" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/friendsSearchRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:nestedScrollingEnabled="false"
+                    android:visibility="gone"
+                    tools:listitem="@layout/item_friend"
+                    tools:visibility="visible" />
+            </LinearLayout>
+
+            <!-- ===== PEDIDOS RECEBIDOS ===== -->
+            <LinearLayout
+                android:id="@+id/friendsRequestsSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="12dp"
+                    android:letterSpacing="0.13"
+                    android:text="PEDIDOS RECEBIDOS"
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="@dimen/text_label"
+                    android:textStyle="bold" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/friendsRequestsRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    tools:listitem="@layout/item_friend_request" />
+            </LinearLayout>
+
+            <!-- ===== OS MEUS AMIGOS ===== -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="12dp"
+                android:letterSpacing="0.13"
+                android:text="OS MEUS AMIGOS"
+                android:textColor="@color/lifinity_text_secondary"
+                android:textSize="@dimen/text_label"
+                android:textStyle="bold" />
+
+            <ProgressBar
+                android:id="@+id/friendsProgressBar"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:indeterminateTint="@color/lifinity_primary"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/friendsErrorText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:textColor="@color/lifinity_danger"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:text="Não foi possível carregar amigos."
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/friendsEmptyText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card_soft_clay"
+                android:gravity="center"
+                android:padding="20dp"
+                android:text="Ainda não tens amigos. Procura um utilizador acima para começar."
+                android:textColor="@color/lifinity_text_secondary"
+                android:textSize="14sp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/friendsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:visibility="gone"
+                tools:listitem="@layout/item_friend"
+                tools:visibility="visible" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

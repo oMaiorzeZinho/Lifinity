@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -49,11 +48,13 @@ public class CommunityActivity extends AppCompatActivity {
         findViewById(R.id.communityAssistant).setOnClickListener(v ->
                 startActivity(new Intent(this, AssistantActivity.class)));
 
-        // Amigos e Grupos ainda não estão implementados.
+        // Amigos -> ecrã de amigos (pesquisar, pedidos, lista)
         findViewById(R.id.communityFriends).setOnClickListener(v ->
-                Toast.makeText(this, "Em breve", Toast.LENGTH_SHORT).show());
+                startActivity(new Intent(this, FriendsActivity.class)));
+
+        // Grupos -> ecrã de grupos (criar, entrar, gerir)
         findViewById(R.id.communityGroups).setOnClickListener(v ->
-                Toast.makeText(this, "Em breve", Toast.LENGTH_SHORT).show());
+                startActivity(new Intent(this, GroupsActivity.class)));
     }
 
     private String getToken() {

@@ -53,6 +53,12 @@
             android:name=".CommunityActivity"
             android:exported="false" />
         <activity
+            android:name=".FriendsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".GroupsActivity"
+            android:exported="false" />
+        <activity
             android:name=".EditTaskActivity"
             android:exported="false" />
         <activity
@@ -60,6 +66,9 @@
             android:exported="false" />
         <activity
             android:name=".TasksActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LandingActivity"
             android:exported="false" />
         <activity
             android:name=".LoginActivity"

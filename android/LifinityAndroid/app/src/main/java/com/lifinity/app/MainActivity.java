@@ -17,9 +17,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Sem token → ecrã de login; com token → ecrã de tarefas (hub principal)
+        // Sem token → ecrã de boas-vindas (Landing, que leva a Login/Registo);
+        // com token → ecrã de tarefas (hub principal).
         if (TextUtils.isEmpty(getToken())) {
-            openLoginActivity();
+            openLandingActivity();
         } else {
             openTasksActivity();
         }
@@ -29,8 +30,8 @@ public class MainActivity extends AppCompatActivity {
         return getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getString(KEY_TOKEN, null);
     }
 
-    private void openLoginActivity() {
-        Intent intent = new Intent(this, LoginActivity.class);
+    private void openLandingActivity() {
+        Intent intent = new Intent(this, LandingActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
