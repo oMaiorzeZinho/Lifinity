@@ -146,13 +146,17 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- FAB central (sobreposto, emerge acima da barra) -->
+    <!-- FAB central: emerge acima da barra. Com a barra (72dp) alinhada ao fundo
+         do FrameLayout (80dp), o topo da barra fica a ~8dp; a margem negativa sobe
+         o FAB para o seu centro assentar sobre essa aresta (metade acima, metade
+         sobreposta, como um FAB central clássico). Depende do clipChildren="false"
+         no FrameLayout e nos contentores-pai (já garantido) para não ser cortado. -->
     <Button
         android:id="@+id/navFab"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_gravity="top|center_horizontal"
-        android:layout_marginTop="0dp"
+        android:layout_marginTop="-20dp"
         android:background="@drawable/bg_fab_clay"
         android:elevation="20dp"
         android:text="+"

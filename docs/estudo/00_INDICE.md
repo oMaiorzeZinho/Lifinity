@@ -62,6 +62,7 @@ Documento de estudo pessoal e exaustivo do projeto Lifinity. Cada ligação abre
 - [res/values/ — colors · dimens · themes](android/res/values/_VALUES.md) — paleta da marca, escala de tamanhos/tipografia, tema; inclui as **decisões do refinamento visual de 2026-06-17** (menta suavizada, escala consistente).
 - [res/drawable/ — drawables clay](android/res/drawable/_DRAWABLES_CLAY.md) — padrão clay (cartões, inputs, botões, pills) + `btn_ghost_clay` (hierarquia de botões).
 - [Landing, Amigos/Grupos e Calendário](android/FUNCIONALIDADES_LANDING_AMIGOS_GRUPOS_CALENDARIO.md) — três funcionalidades novas (2026-06-18): ecrã de boas-vindas, ecrãs de amigos e grupos, e vista de calendário nas tarefas.
+- [Correções visuais (2026-06-18)](android/CORRECOES_VISUAIS_2026-06-18.md) — ícone de opções da tarefa, FAB "+" a emergir da barra, e ações da Inspiração mais leves.
 - ⏳ *Por fazer:* Config (`build.gradle.kts`, `libs.versions.toml`, `AndroidManifest.xml`), `network/ApiClient.java`, `api/*` (Retrofit), `models/*`, activities, adapters, restantes layouts XML.
 
 ---

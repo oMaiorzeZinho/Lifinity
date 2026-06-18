@@ -129,6 +129,10 @@
             android:textSize="15sp"
             android:textStyle="bold" />
 
+        <!-- Botão de mais opções (a lógica abre o menu no TaskAdapter — não mexer).
+             Usa três pontos "•••" (bullets, que rendam em qualquer fonte, ao
+             contrário do ⋮ U+22EE que aparecia como quadrado vazio) e texto claro
+             de alto contraste para o ícone ser sempre visível. -->
         <Button
             android:id="@+id/taskOptionsButton"
             android:layout_width="48dp"
@@ -136,9 +140,11 @@
             android:layout_marginStart="10dp"
             android:background="@drawable/btn_secondary_clay"
             android:elevation="4dp"
-            android:text="&#8942;"
+            android:letterSpacing="0.08"
+            android:text="&#8226;&#8226;&#8226;"
             android:textAllCaps="false"
-            android:textColor="@color/lifinity_text_secondary"
-            android:textSize="20sp" />
+            android:textColor="@color/lifinity_text"
+            android:textSize="18sp"
+            android:textStyle="bold" />
     </LinearLayout>
 </LinearLayout>

@@ -201,6 +201,9 @@
                         android:textSize="15sp"
                         android:textStyle="bold" />
 
+                    <!-- Ícone de copiar: emoji de prancheta (renderiza de forma
+                         fiável em qualquer fonte, ao contrário do ⧉ U+29C9 que
+                         podia aparecer como quadrado vazio). -->
                     <Button
                         android:id="@+id/copyVerseButton"
                         android:layout_width="52dp"
@@ -208,37 +211,46 @@
                         android:layout_marginStart="10dp"
                         android:background="@drawable/btn_secondary_clay"
                         android:elevation="4dp"
-                        android:text="⧉"
+                        android:text="&#128203;"
                         android:textAllCaps="false"
                         android:textColor="@color/lifinity_text"
-                        android:textSize="20sp" />
+                        android:textSize="18sp" />
                 </LinearLayout>
 
-                <Button
-                    android:id="@+id/randomVerseButton"
+                <!-- Ações secundárias lado a lado e mais leves (ghost), para a secção
+                     respirar em vez de empilhar botões pesados. O "♥ Guardar" acima
+                     continua a ser a ação principal forte. Ids e onClick mantêm-se. -->
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/height_button"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:background="@drawable/btn_secondary_clay"
-                    android:elevation="6dp"
-                    android:text="Versículo aleatório"
-                    android:textAllCaps="false"
-                    android:textColor="@color/lifinity_text"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
+                    android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/dailyVerseButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/height_button"
-                    android:layout_marginTop="10dp"
-                    android:background="@drawable/btn_secondary_clay"
-                    android:elevation="6dp"
-                    android:text="Voltar ao diário"
-                    android:textAllCaps="false"
-                    android:textColor="@color/lifinity_text"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
+                    <Button
+                        android:id="@+id/randomVerseButton"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/height_button_secondary"
+                        android:layout_weight="1"
+                        android:background="@drawable/btn_ghost_clay"
+                        android:text="Aleatório"
+                        android:textAllCaps="false"
+                        android:textColor="@color/lifinity_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/dailyVerseButton"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/height_button_secondary"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/btn_ghost_clay"
+                        android:text="Diário"
+                        android:textAllCaps="false"
+                        android:textColor="@color/lifinity_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
             </LinearLayout>
 
             <!-- ===== FAVORITOS ===== -->
