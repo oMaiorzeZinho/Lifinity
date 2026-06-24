@@ -54,6 +54,11 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    // Glide — carregamento de imagens de avatar (do backend /uploads). Uso simples
+    // Glide.with(...).load(...).circleCrop().into(...), sem annotationProcessor.
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    // MPAndroidChart — gráficos da página de Estatísticas (vem do JitPack).
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)

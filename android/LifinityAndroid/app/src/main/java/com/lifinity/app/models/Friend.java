@@ -9,9 +9,17 @@ public class Friend {
     private String username;
     private Integer level;
     private Integer xp;
+    // TODO(backend): GET /friends e /friends/search ainda NÃO devolvem "avatar"
+    // no SELECT (friendController). Enquanto não devolverem, este campo fica null
+    // e o avatar mostra o placeholder (círculo + inicial). A app já está pronta.
+    private String avatar;
 
     public Integer getIduser() {
         return iduser;
+    }
+
+    public String getAvatar() {
+        return avatar;
     }
 
     public String getUsername() {

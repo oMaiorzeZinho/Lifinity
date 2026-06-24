@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -19,6 +20,7 @@ import com.lifinity.app.models.Achievement;
 import com.lifinity.app.models.Task;
 import com.lifinity.app.models.User;
 import com.lifinity.app.network.ApiClient;
+import com.lifinity.app.utils.AvatarLoader;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -42,6 +44,7 @@ public class ProfileActivity extends AppCompatActivity {
     private final Gson gson = new Gson();
 
     private TextView avatarText;
+    private ImageView avatarImage;
     private TextView usernameText;
     private TextView emailText;
     private TextView levelText;
@@ -108,6 +111,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void bindViews() {
         avatarText = findViewById(R.id.profileAvatarText);
+        avatarImage = findViewById(R.id.profileAvatarImage);
         usernameText = findViewById(R.id.profileUsernameText);
         emailText = findViewById(R.id.profileEmailText);
         levelText = findViewById(R.id.profileLevelText);
@@ -176,7 +180,9 @@ public class ProfileActivity extends AppCompatActivity {
         int safeXp = xp == null ? 0 : Math.max(xp, 0);
         int displayLevel = level == null ? calculateLevelFromXp(safeXp) : Math.max(level, 1);
 
-        avatarText.setText(getInitial(username));
+        // Foto de perfil real se houver (o backend devolve "avatar" no login/perfil);
+        // senão, o placeholder (círculo + inicial).
+        AvatarLoader.load(avatarImage, user == null ? null : user.getAvatar(), avatarText, username);
         usernameText.setText(valueOrFallback(username));
         emailText.setText(valueOrFallback(email));
         levelText.setText(String.valueOf(displayLevel));

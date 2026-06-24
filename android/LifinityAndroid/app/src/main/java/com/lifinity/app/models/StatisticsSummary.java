@@ -1,35 +1,25 @@
 package com.lifinity.app.models;
 
-import com.google.gson.annotations.SerializedName;
-
-// Resumo de estatísticas do utilizador vindo da API (/statistics/me).
+/**
+ * Resumo de estatísticas vindo de /statistics/me (objeto "summary").
+ * As chaves correspondem EXATAMENTE às devolvidas pelo módulo C
+ * (gamification.calculateStats): totalTasks, completedTasks, pendingTasks,
+ * lostTasks, totalXP, completionRate (0–100) e productivityScore (0–100).
+ */
 public class StatisticsSummary {
-    @SerializedName("tasksCompleted")
-    private Integer tasksCompleted;
+    private Integer totalTasks;
+    private Integer completedTasks;
+    private Integer pendingTasks;
+    private Integer lostTasks;
+    private Integer totalXP;
+    private Double completionRate;     // percentagem 0–100
+    private Double productivityScore;  // pontuação 0–100
 
-    @SerializedName("tasksCreated")
-    private Integer tasksCreated;
-
-    @SerializedName("tasksMissed")
-    private Integer tasksMissed;
-
-    @SerializedName("xpEarned")
-    private Integer xpEarned;
-
-    @SerializedName("bestDay")
-    private String bestDay;
-
-    @SerializedName("currentStreak")
-    private Integer currentStreak;
-
-    @SerializedName("completionRate")
-    private Double completionRate;
-
-    public Integer getTasksCompleted() { return tasksCompleted; }
-    public Integer getTasksCreated()   { return tasksCreated; }
-    public Integer getTasksMissed()    { return tasksMissed; }
-    public Integer getXpEarned()       { return xpEarned; }
-    public String  getBestDay()        { return bestDay; }
-    public Integer getCurrentStreak()  { return currentStreak; }
-    public Double  getCompletionRate() { return completionRate; }
+    public int getTotalTasks()     { return totalTasks != null ? totalTasks : 0; }
+    public int getCompletedTasks() { return completedTasks != null ? completedTasks : 0; }
+    public int getPendingTasks()   { return pendingTasks != null ? pendingTasks : 0; }
+    public int getLostTasks()      { return lostTasks != null ? lostTasks : 0; }
+    public int getTotalXP()        { return totalXP != null ? totalXP : 0; }
+    public double getCompletionRate()    { return completionRate != null ? completionRate : 0.0; }
+    public double getProductivityScore() { return productivityScore != null ? productivityScore : 0.0; }
 }

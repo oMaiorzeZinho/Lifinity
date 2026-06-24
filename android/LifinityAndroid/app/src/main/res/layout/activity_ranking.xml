@@ -144,13 +144,27 @@
                     android:gravity="center"
                     android:orientation="vertical">
 
-                    <TextView
+                    <!-- Avatar: medalha (fallback) com a FOTO real por cima quando existe -->
+                    <FrameLayout
                         android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:background="@drawable/bg_avatar_clay"
-                        android:gravity="center"
-                        android:text="&#129352;"
-                        android:textSize="26sp" />
+                        android:layout_height="64dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_avatar_clay"
+                            android:gravity="center"
+                            android:text="&#129352;"
+                            android:textSize="26sp" />
+
+                        <ImageView
+                            android:id="@+id/podium2Image"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="Avatar"
+                            android:scaleType="centerCrop"
+                            android:visibility="gone" />
+                    </FrameLayout>
 
                     <TextView
                         android:id="@+id/podium2Username"
@@ -202,13 +216,27 @@
                     android:gravity="center"
                     android:orientation="vertical">
 
-                    <TextView
+                    <!-- Avatar: medalha (fallback) com a FOTO real por cima quando existe -->
+                    <FrameLayout
                         android:layout_width="76dp"
-                        android:layout_height="76dp"
-                        android:background="@drawable/bg_avatar_clay"
-                        android:gravity="center"
-                        android:text="&#129351;"
-                        android:textSize="32sp" />
+                        android:layout_height="76dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_avatar_clay"
+                            android:gravity="center"
+                            android:text="&#129351;"
+                            android:textSize="32sp" />
+
+                        <ImageView
+                            android:id="@+id/podium1Image"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="Avatar"
+                            android:scaleType="centerCrop"
+                            android:visibility="gone" />
+                    </FrameLayout>
 
                     <TextView
                         android:id="@+id/podium1Username"
@@ -258,13 +286,27 @@
                     android:gravity="center"
                     android:orientation="vertical">
 
-                    <TextView
+                    <!-- Avatar: medalha (fallback) com a FOTO real por cima quando existe -->
+                    <FrameLayout
                         android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:background="@drawable/bg_avatar_clay"
-                        android:gravity="center"
-                        android:text="&#129353;"
-                        android:textSize="26sp" />
+                        android:layout_height="64dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_avatar_clay"
+                            android:gravity="center"
+                            android:text="&#129353;"
+                            android:textSize="26sp" />
+
+                        <ImageView
+                            android:id="@+id/podium3Image"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="Avatar"
+                            android:scaleType="centerCrop"
+                            android:visibility="gone" />
+                    </FrameLayout>
 
                     <TextView
                         android:id="@+id/podium3Username"

@@ -3,11 +3,13 @@ package com.lifinity.app.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.lifinity.app.R;
 import com.lifinity.app.models.RankingUser;
+import com.lifinity.app.utils.AvatarLoader;
 import java.util.List;
 
 public class RankingAdapter extends RecyclerView.Adapter<RankingAdapter.ViewHolder> {
@@ -36,6 +38,8 @@ public class RankingAdapter extends RecyclerView.Adapter<RankingAdapter.ViewHold
         h.username.setText(u.getUsername());
         h.level.setText("Nível " + u.getLevel());
         h.xp.setText(u.getXp() + " XP");
+        // Foto real do jogador (o ranking devolve "avatar"); senão, círculo + inicial.
+        AvatarLoader.load(h.avatarImage, u.getAvatar(), h.avatarText, u.getUsername());
         if (u.getIduser() != null && u.getIduser() == currentUserId) {
             h.username.setTextColor(
                     h.itemView.getContext().getResources().getColor(R.color.lifinity_primary, null));
@@ -46,13 +50,16 @@ public class RankingAdapter extends RecyclerView.Adapter<RankingAdapter.ViewHold
     public int getItemCount() { return users.size(); }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        final TextView position, username, level, xp;
+        final TextView position, username, level, xp, avatarText;
+        final ImageView avatarImage;
         ViewHolder(View v) {
             super(v);
             position = v.findViewById(R.id.rankPositionText);
             username = v.findViewById(R.id.rankUsernameText);
             level    = v.findViewById(R.id.rankLevelText);
             xp       = v.findViewById(R.id.rankXpText);
+            avatarText  = v.findViewById(R.id.rankAvatarText);
+            avatarImage = v.findViewById(R.id.rankAvatarImage);
         }
     }
 }

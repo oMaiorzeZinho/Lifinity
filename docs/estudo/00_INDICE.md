@@ -60,6 +60,7 @@ Documento de estudo pessoal e exaustivo do projeto Lifinity. Cada ligação abre
 
 ## 📱 Android
 - [**Redesenho para TEMA CLARO (branco + verde) — 2026-06-24**](android/REDESIGN_TEMA_CLARO_2026-06-24.md) — mudança visual completa de tema escuro → claro: nova paleta, drawables clay suaves, mais espaço, login/registo com wordmark, cabeçalhos, diálogos com tema, FAB robusto e ordenação das tarefas igual à web. **(estado visual atual)**
+- [**Imagens de avatar (Glide) + Gráficos (MPAndroidChart) — 2026-06-24**](android/IMAGENS_GLIDE_E_GRAFICOS_MPCHART_2026-06-24.md) — fotos reais de perfil com Glide (helpers de URL e de avatar, com fallback) e a página de Estatísticas refeita com gráficos a sério (MPAndroidChart), incluindo a correção do modelo de estatísticas.
 - [res/values/ — colors · dimens · themes](android/res/values/_VALUES.md) — paleta da marca, escala de tamanhos/tipografia, tema; inclui as **decisões do refinamento visual de 2026-06-17** (menta suavizada, escala consistente). ⚠️ *Paleta atualizada para CLARA em 2026-06-24 — ver doc acima.*
 - [res/drawable/ — drawables clay](android/res/drawable/_DRAWABLES_CLAY.md) — padrão clay (cartões, inputs, botões, pills) + `btn_ghost_clay` (hierarquia de botões).
 - [Landing, Amigos/Grupos e Calendário](android/FUNCIONALIDADES_LANDING_AMIGOS_GRUPOS_CALENDARIO.md) — três funcionalidades novas (2026-06-18): ecrã de boas-vindas, ecrãs de amigos e grupos, e vista de calendário nas tarefas.

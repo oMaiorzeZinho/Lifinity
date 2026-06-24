@@ -12,9 +12,16 @@ public class FriendRequest {
     private Integer level;
     private Integer xp;
     private String created_at;
+    // TODO(backend): GET /friends/requests ainda NÃO devolve "avatar" no SELECT
+    // (friendController). Enquanto não devolver, fica null → placeholder com inicial.
+    private String avatar;
 
     public Integer getIdfriendship() {
         return idfriendship;
+    }
+
+    public String getAvatar() {
+        return avatar;
     }
 
     public Integer getIduser() {

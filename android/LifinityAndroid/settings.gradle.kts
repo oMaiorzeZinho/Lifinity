@@ -19,6 +19,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // JitPack — necessário para o Glide (imagens de avatar) e para o
+        // MPAndroidChart (gráficos das estatísticas), ambos publicados aqui.
+        maven { url = uri("https://jitpack.io") }
     }
 }
 

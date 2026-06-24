@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +17,7 @@ import com.lifinity.app.api.UserApi;
 import com.lifinity.app.models.RankingUser;
 import com.lifinity.app.models.User;
 import com.lifinity.app.network.ApiClient;
+import com.lifinity.app.utils.AvatarLoader;
 import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -33,6 +35,7 @@ public class RankingActivity extends AppCompatActivity {
     private TextView podium1Username, podium1Xp;
     private TextView podium2Username, podium2Xp;
     private TextView podium3Username, podium3Xp;
+    private ImageView podium1Image, podium2Image, podium3Image;
     private TextView listLabel;
     private TextView headerUserPill;
     private Call<List<RankingUser>> rankingCall;
@@ -63,6 +66,9 @@ public class RankingActivity extends AppCompatActivity {
         podium2Xp       = findViewById(R.id.podium2Xp);
         podium3Username = findViewById(R.id.podium3Username);
         podium3Xp       = findViewById(R.id.podium3Xp);
+        podium1Image    = findViewById(R.id.podium1Image);
+        podium2Image    = findViewById(R.id.podium2Image);
+        podium3Image    = findViewById(R.id.podium3Image);
         listLabel       = findViewById(R.id.rankingListLabel);
         headerUserPill  = findViewById(R.id.headerUserPill);
 
@@ -111,17 +117,21 @@ public class RankingActivity extends AppCompatActivity {
     }
 
     private void showRanking(List<RankingUser> users) {
+        // Avatares do pódio: foto real por cima da medalha (que fica como fallback).
         if (users.size() >= 1) {
             podium1Username.setText(users.get(0).getUsername());
             podium1Xp.setText(users.get(0).getXp() + " XP");
+            AvatarLoader.load(podium1Image, users.get(0).getAvatar(), null, null);
         }
         if (users.size() >= 2) {
             podium2Username.setText(users.get(1).getUsername());
             podium2Xp.setText(users.get(1).getXp() + " XP");
+            AvatarLoader.load(podium2Image, users.get(1).getAvatar(), null, null);
         }
         if (users.size() >= 3) {
             podium3Username.setText(users.get(2).getUsername());
             podium3Xp.setText(users.get(2).getXp() + " XP");
+            AvatarLoader.load(podium3Image, users.get(2).getAvatar(), null, null);
         }
         podiumLayout.setVisibility(View.VISIBLE);
 

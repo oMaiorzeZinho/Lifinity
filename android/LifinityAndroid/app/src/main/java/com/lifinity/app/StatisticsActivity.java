@@ -12,11 +12,29 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.lifinity.app.api.StatisticsApi;
+import com.lifinity.app.models.StatisticsDay;
+import com.lifinity.app.models.StatisticsResponse;
 import com.lifinity.app.models.StatisticsSummary;
 import com.lifinity.app.network.ApiClient;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -26,7 +44,7 @@ public class StatisticsActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "lifinity_prefs";
     private static final String KEY_TOKEN  = "token";
 
-    // Opções do spinner — índice sincronizado com periodValues[]
+    // Opções do spinner — índice sincronizado com PERIOD_VALUES[]
     private static final String[] PERIOD_LABELS = {"Últimos 7 dias", "Últimos 30 dias", "Último ano"};
     private static final String[] PERIOD_VALUES = {"7d", "30d", "1y"};
 
@@ -34,25 +52,28 @@ public class StatisticsActivity extends AppCompatActivity {
     private TextView    errorText;
     private NestedScrollView scrollView;
 
-    private TextView statTasksCompletedText;
-    private TextView statTasksCreatedText;
-    private TextView statTasksMissedText;
-    private TextView statXpEarnedText;
-    private TextView statStreakText;
-    private TextView statCompletionRateText;
-    private TextView statBestDayText;
+    // Cartões de totais
+    private TextView statCompletedValue;
+    private TextView statCreatedValue;
+    private TextView statLostValue;
+    private TextView statXpValue;
+    private TextView statRateValue;
+    private TextView statProductivityValue;
+
+    // Gráficos
+    private BarChart tasksChart;
+    private LineChart xpChart;
 
     // Período actualmente carregado — evita recarregar ao inicializar o spinner
     private String currentPeriod = "7d";
 
     // Call activo — cancelado em onDestroy para evitar fugas de memória
-    private Call<StatisticsSummary> statisticsCall;
+    private Call<StatisticsResponse> statisticsCall;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Redireciona para o login se não houver token guardado
         if (TextUtils.isEmpty(getToken())) {
             openLoginActivity();
             return;
@@ -64,13 +85,15 @@ public class StatisticsActivity extends AppCompatActivity {
         errorText   = findViewById(R.id.statisticsErrorText);
         scrollView  = findViewById(R.id.statisticsScrollView);
 
-        statTasksCompletedText = findViewById(R.id.statTasksCompletedText);
-        statTasksCreatedText   = findViewById(R.id.statTasksCreatedText);
-        statTasksMissedText    = findViewById(R.id.statTasksMissedText);
-        statXpEarnedText       = findViewById(R.id.statXpEarnedText);
-        statStreakText         = findViewById(R.id.statStreakText);
-        statCompletionRateText = findViewById(R.id.statCompletionRateText);
-        statBestDayText        = findViewById(R.id.statBestDayText);
+        statCompletedValue    = findViewById(R.id.statCompletedValue);
+        statCreatedValue      = findViewById(R.id.statCreatedValue);
+        statLostValue         = findViewById(R.id.statLostValue);
+        statXpValue           = findViewById(R.id.statXpValue);
+        statRateValue         = findViewById(R.id.statRateValue);
+        statProductivityValue = findViewById(R.id.statProductivityValue);
+
+        tasksChart = findViewById(R.id.statTasksChart);
+        xpChart    = findViewById(R.id.statXpChart);
 
         findViewById(R.id.statisticsBackButton).setOnClickListener(v -> finish());
 
@@ -84,11 +107,8 @@ public class StatisticsActivity extends AppCompatActivity {
         Spinner spinner = findViewById(R.id.statisticsPeriodSpinner);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_item,
-                PERIOD_LABELS
-        );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                this, R.layout.item_spinner, PERIOD_LABELS);
+        adapter.setDropDownViewResource(R.layout.item_spinner);
         spinner.setAdapter(adapter);
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -108,7 +128,6 @@ public class StatisticsActivity extends AppCompatActivity {
     }
 
     private void loadStatistics(String period) {
-        // Cancela qualquer pedido anterior em voo
         if (statisticsCall != null) {
             statisticsCall.cancel();
         }
@@ -117,9 +136,9 @@ public class StatisticsActivity extends AppCompatActivity {
 
         StatisticsApi api = ApiClient.getClient().create(StatisticsApi.class);
         statisticsCall = api.getStatistics("Bearer " + getToken(), period);
-        statisticsCall.enqueue(new Callback<StatisticsSummary>() {
+        statisticsCall.enqueue(new Callback<StatisticsResponse>() {
             @Override
-            public void onResponse(Call<StatisticsSummary> call, Response<StatisticsSummary> response) {
+            public void onResponse(Call<StatisticsResponse> call, Response<StatisticsResponse> response) {
                 if (call.isCanceled()) return;
                 progressBar.setVisibility(View.GONE);
 
@@ -128,11 +147,11 @@ public class StatisticsActivity extends AppCompatActivity {
                     return;
                 }
 
-                bindStats(response.body());
+                bindStatistics(response.body());
             }
 
             @Override
-            public void onFailure(Call<StatisticsSummary> call, Throwable t) {
+            public void onFailure(Call<StatisticsResponse> call, Throwable t) {
                 if (call.isCanceled()) return;
                 progressBar.setVisibility(View.GONE);
                 showError("Sem ligação ao servidor. Confirma que o backend está ativo.");
@@ -140,35 +159,153 @@ public class StatisticsActivity extends AppCompatActivity {
         });
     }
 
-    // Preenche os 7 cartões com os dados recebidos; null → "—".
-    private void bindStats(StatisticsSummary s) {
-        statTasksCompletedText.setText(s.getTasksCompleted() != null
-                ? String.valueOf(s.getTasksCompleted()) : "—");
-
-        statTasksCreatedText.setText(s.getTasksCreated() != null
-                ? String.valueOf(s.getTasksCreated()) : "—");
-
-        statTasksMissedText.setText(s.getTasksMissed() != null
-                ? String.valueOf(s.getTasksMissed()) : "—");
-
-        statXpEarnedText.setText(s.getXpEarned() != null
-                ? String.valueOf(s.getXpEarned()) : "—");
-
-        statStreakText.setText(s.getCurrentStreak() != null
-                ? String.valueOf(s.getCurrentStreak()) : "—");
-
-        // Taxa de conclusão: Double 0.0–1.0 → percentagem inteira, ex. 0.73 → "73%"
-        if (s.getCompletionRate() != null) {
-            int pct = (int) (s.getCompletionRate() * 100);
-            statCompletionRateText.setText(pct + "%");
-        } else {
-            statCompletionRateText.setText("—");
+    /** Preenche os cartões de totais e desenha os dois gráficos. */
+    private void bindStatistics(StatisticsResponse data) {
+        StatisticsSummary s = data.getSummary();
+        if (s != null) {
+            statCompletedValue.setText(String.valueOf(s.getCompletedTasks()));
+            statCreatedValue.setText(String.valueOf(s.getTotalTasks()));
+            statLostValue.setText(String.valueOf(s.getLostTasks()));
+            statXpValue.setText(String.valueOf(s.getTotalXP()));
+            // completionRate já vem em 0–100 (percentagem) do backend.
+            statRateValue.setText(Math.round(s.getCompletionRate()) + "%");
+            statProductivityValue.setText(String.valueOf(Math.round(s.getProductivityScore())));
         }
 
-        statBestDayText.setText(!TextUtils.isEmpty(s.getBestDay()) ? s.getBestDay() : "—");
+        List<StatisticsDay> chartData = data.getChartData() != null
+                ? data.getChartData() : new ArrayList<>();
+        setupTasksChart(chartData);
+        setupXpChart(chartData);
 
         errorText.setVisibility(View.GONE);
         scrollView.setVisibility(View.VISIBLE);
+    }
+
+    // ===================== GRÁFICOS (MPAndroidChart) =====================
+
+    /** Cria um formatador de eixo X que mostra a etiqueta (dd/MM) de cada dia. */
+    private ValueFormatter dayLabelFormatter(List<String> labels) {
+        return new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                int i = Math.round(value);
+                if (i >= 0 && i < labels.size()) return labels.get(i);
+                return "";
+            }
+        };
+    }
+
+    /** Gráfico de barras EMPILHADAS: concluídas (verde) + perdidas (coral) por dia. */
+    private void setupTasksChart(List<StatisticsDay> days) {
+        List<String> labels = new ArrayList<>();
+        List<BarEntry> entries = new ArrayList<>();
+
+        for (int i = 0; i < days.size(); i++) {
+            StatisticsDay d = days.get(i);
+            labels.add(d.getLabel());
+            // Pilha: [concluídas, perdidas] empilhadas na mesma barra.
+            entries.add(new BarEntry(i, new float[]{d.getTasksCompleted(), d.getTasksLost()}));
+        }
+
+        int green = ContextCompat.getColor(this, R.color.lifinity_primary);
+        int coral = ContextCompat.getColor(this, R.color.lifinity_coral);
+
+        BarDataSet dataSet = new BarDataSet(entries, "");
+        dataSet.setColors(green, coral);
+        dataSet.setStackLabels(new String[]{"Concluídas", "Perdidas"});
+        dataSet.setDrawValues(false);
+
+        BarData barData = new BarData(dataSet);
+        barData.setBarWidth(0.6f);
+
+        styleCommon(tasksChart, labels);
+        tasksChart.setData(barData);
+
+        Legend legend = tasksChart.getLegend();
+        legend.setEnabled(true);
+        legend.setTextColor(ContextCompat.getColor(this, R.color.lifinity_text_secondary));
+        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+
+        tasksChart.animateY(700);
+        tasksChart.invalidate();
+    }
+
+    /** Gráfico de linhas: XP ganho por dia (verde, preenchido). */
+    private void setupXpChart(List<StatisticsDay> days) {
+        List<String> labels = new ArrayList<>();
+        List<Entry> entries = new ArrayList<>();
+
+        for (int i = 0; i < days.size(); i++) {
+            StatisticsDay d = days.get(i);
+            labels.add(d.getLabel());
+            entries.add(new Entry(i, d.getXpGained()));
+        }
+
+        int green = ContextCompat.getColor(this, R.color.lifinity_primary);
+
+        LineDataSet dataSet = new LineDataSet(entries, "XP ganho");
+        dataSet.setColor(green);
+        dataSet.setLineWidth(2.4f);
+        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        dataSet.setDrawValues(false);
+        // Em períodos curtos mostram-se os pontos; em períodos longos ficam limpos.
+        boolean fewPoints = days.size() <= 14;
+        dataSet.setDrawCircles(fewPoints);
+        dataSet.setCircleColor(green);
+        dataSet.setCircleRadius(3.5f);
+        dataSet.setDrawCircleHole(false);
+        dataSet.setDrawFilled(true);
+        dataSet.setFillColor(green);
+        dataSet.setFillAlpha(45);
+        dataSet.setHighlightEnabled(false);
+
+        LineData lineData = new LineData(dataSet);
+
+        styleCommon(xpChart, labels);
+        xpChart.getLegend().setEnabled(false); // série única — legenda redundante
+        xpChart.setData(lineData);
+        xpChart.animateY(700);
+        xpChart.invalidate();
+    }
+
+    /**
+     * Estilo comum aos dois gráficos no tema claro: sem moldura/descrição pesada,
+     * eixo X em baixo com as etiquetas dos dias, eixo Y à esquerda a começar em 0,
+     * texto dos eixos em cinza secundário e sem linhas de grelha agressivas.
+     */
+    private void styleCommon(com.github.mikephil.charting.charts.BarLineChartBase<?> chart,
+                             List<String> labels) {
+        int axisText = ContextCompat.getColor(this, R.color.lifinity_text_secondary);
+        int gridColor = ContextCompat.getColor(this, R.color.lifinity_border);
+
+        chart.getDescription().setEnabled(false);
+        chart.setNoDataText("Sem dados para este período.");
+        chart.setNoDataTextColor(axisText);
+        chart.setDrawGridBackground(false);
+        chart.setScaleYEnabled(false);
+        chart.setPinchZoom(false);
+        chart.setExtraBottomOffset(8f);
+
+        XAxis xAxis = chart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setDrawGridLines(false);
+        xAxis.setDrawAxisLine(false);
+        xAxis.setGranularity(1f);
+        xAxis.setTextColor(axisText);
+        xAxis.setTextSize(9f);
+        xAxis.setLabelRotationAngle(-45f);
+        xAxis.setLabelCount(Math.min(Math.max(labels.size(), 1), 7), false);
+        xAxis.setValueFormatter(dayLabelFormatter(labels));
+
+        YAxis left = chart.getAxisLeft();
+        left.setAxisMinimum(0f);
+        left.setGranularity(1f);
+        left.setTextColor(axisText);
+        left.setDrawAxisLine(false);
+        left.setGridColor(gridColor);
+
+        chart.getAxisRight().setEnabled(false);
     }
 
     private void showLoading() {

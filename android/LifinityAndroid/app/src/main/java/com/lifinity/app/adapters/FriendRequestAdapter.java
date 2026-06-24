@@ -1,10 +1,10 @@
 package com.lifinity.app.adapters;
 
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,10 +12,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.lifinity.app.R;
 import com.lifinity.app.models.FriendRequest;
+import com.lifinity.app.utils.AvatarLoader;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /** Adapter dos pedidos de amizade recebidos, com botões de aceitar e recusar. */
 public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdapter.ViewHolder> {
@@ -60,6 +60,7 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView avatarText;
+        private final ImageView avatarImage;
         private final TextView usernameText;
         private final Button acceptButton;
         private final Button declineButton;
@@ -67,6 +68,7 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             avatarText = itemView.findViewById(R.id.requestAvatarText);
+            avatarImage = itemView.findViewById(R.id.requestAvatarImage);
             usernameText = itemView.findViewById(R.id.requestUsernameText);
             acceptButton = itemView.findViewById(R.id.requestAcceptButton);
             declineButton = itemView.findViewById(R.id.requestDeclineButton);
@@ -75,7 +77,8 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
         void bind(FriendRequest request, OnRequestActionListener listener) {
             String username = request.getUsername();
             usernameText.setText(username);
-            avatarText.setText(initialOf(username));
+            // Mostra a foto real se houver; senão, o placeholder (círculo + inicial).
+            AvatarLoader.load(avatarImage, request.getAvatar(), avatarText, username);
 
             acceptButton.setOnClickListener(v -> {
                 if (listener != null) listener.onAccept(request);
@@ -83,11 +86,6 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
             declineButton.setOnClickListener(v -> {
                 if (listener != null) listener.onDecline(request);
             });
-        }
-
-        private String initialOf(String username) {
-            if (TextUtils.isEmpty(username)) return "?";
-            return username.substring(0, 1).toUpperCase(Locale.getDefault());
         }
     }
 }

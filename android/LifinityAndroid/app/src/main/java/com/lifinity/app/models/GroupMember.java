@@ -11,9 +11,16 @@ public class GroupMember {
     private Integer xp;
     private String role;
     private String muted_until;
+    // TODO(backend): GET /groups/{id}/members ainda NÃO devolve "avatar" no SELECT
+    // (groupController). Enquanto não devolver, fica null → placeholder com inicial.
+    private String avatar;
 
     public Integer getIduser() {
         return iduser;
+    }
+
+    public String getAvatar() {
+        return avatar;
     }
 
     public String getUsername() {
