@@ -1,36 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Botão primário clay: gradiente menta, raio 16dp -->
+<!-- Botão primário clay (tema claro): verde da marca com texto BRANCO.
+     O gradiente vai do verde principal ao verde escuro (ambos com contraste AA
+     para texto branco). Um realce branco ténue no topo dá o brilho "clay". -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true">
-        <layer-list>
-            <item>
-                <shape>
-                    <gradient
-                        android:angle="152"
-                        android:startColor="@color/lifinity_primary"
-                        android:endColor="@color/lifinity_primary_dark" />
-                    <corners android:radius="@dimen/radius_control" />
-                </shape>
-            </item>
-        </layer-list>
+        <shape>
+            <gradient
+                android:angle="270"
+                android:startColor="@color/lifinity_primary_dark"
+                android:endColor="#0C5A2F" />
+            <corners android:radius="@dimen/radius_control" />
+        </shape>
     </item>
     <item>
         <layer-list>
-            <!-- Realce superior-esquerdo (brilho plástico) -->
-            <item
-                android:bottom="6dp"
-                android:right="6dp">
+            <!-- Realce superior (brilho plástico subtil) -->
+            <item android:bottom="6dp">
                 <shape>
-                    <solid android:color="#28FFFFFF" />
+                    <solid android:color="#33FFFFFF" />
                     <corners android:radius="@dimen/radius_control" />
                 </shape>
             </item>
-            <!-- Gradiente principal menta -->
+            <!-- Gradiente principal verde (claro o suficiente em cima, escuro em baixo,
+                 mantendo o texto branco legível em toda a superfície) -->
             <item>
                 <shape>
                     <gradient
-                        android:angle="152"
-                        android:startColor="@color/lifinity_primary_light"
+                        android:angle="270"
+                        android:startColor="@color/lifinity_primary"
                         android:endColor="@color/lifinity_primary_dark" />
                     <corners android:radius="@dimen/radius_control" />
                 </shape>

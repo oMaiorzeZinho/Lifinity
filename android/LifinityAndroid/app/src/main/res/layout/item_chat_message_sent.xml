@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:layout_marginTop="3dp"
-            android:textColor="#0E2C1B"
+            android:textColor="#CCFFFFFF"
             android:textSize="10sp"
             tools:text="14:30" />
     </LinearLayout>

@@ -19,7 +19,7 @@
         android:layout_height="44dp"
         android:background="@drawable/bg_avatar_clay"
         android:gravity="center"
-        android:textColor="@color/lifinity_text_on_primary"
+        android:textColor="@color/lifinity_primary"
         android:textSize="18sp"
         android:textStyle="bold"
         tools:text="A" />

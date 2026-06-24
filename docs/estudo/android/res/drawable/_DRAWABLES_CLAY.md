@@ -1,5 +1,11 @@
 # Android — drawables "clay" (`res/drawable/bg_*.xml`, `btn_*.xml`)
 
+> ⚠️ **ATUALIZAÇÃO 2026-06-24 — TEMA CLARO.** No redesenho para tema claro, os cartões/inputs/
+> botões deixaram de usar gradientes escuros + glows e passaram a **superfícies brancas com
+> bordas hairline + sombra de elevação suave**. A técnica de `<layer-list>`/`<shape>` descrita
+> abaixo continua a ser a base, mas os valores e a estratégia de sombra mudaram — ver
+> [`../../REDESIGN_TEMA_CLARO_2026-06-24.md`](../../REDESIGN_TEMA_CLARO_2026-06-24.md).
+
 > Os ~25 drawables clay repetem todos a **mesma técnica**, por isso explicam-se em conjunto.
 > A estética "clay/claymorphism" cria-se com `<layer-list>` + `<shape>`: uma forma com
 > **gradiente** (do mais claro em cima-esquerda para o mais escuro em baixo-direita) e, por baixo,

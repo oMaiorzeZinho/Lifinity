@@ -1,5 +1,12 @@
 # Android — `res/values/` (colors · dimens · themes) + refinamento visual
 
+> ⚠️ **ATUALIZAÇÃO 2026-06-24 — a app passou a TEMA CLARO (branco + verde).** Os valores
+> de cores/tema descritos abaixo referem-se ao **tema escuro anterior** (histórico de estudo).
+> A paleta atual, os drawables claros, o espaçamento ampliado e o tema Light estão explicados
+> em [`../../REDESIGN_TEMA_CLARO_2026-06-24.md`](../../REDESIGN_TEMA_CLARO_2026-06-24.md).
+> Os **nomes** dos tokens mantiveram-se (só mudaram os valores), por isso a lógica de
+> centralização descrita aqui continua válida.
+
 > Os ficheiros de `res/values/` são o **centro de design** da app Android: tudo o que é cor,
 > tamanho, espaço e tema vive aqui, e os layouts apenas *referenciam* estes tokens
 > (`@color/...`, `@dimen/...`). Mudar um valor aqui propaga-se a toda a app — foi exatamente

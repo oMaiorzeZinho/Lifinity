@@ -14,29 +14,41 @@
         android:orientation="vertical"
         android:padding="@dimen/space_screen">
 
+        <!-- ===== HERO: wordmark da marca + lema ===== -->
+        <!-- O utilizador achava a imagem da logo feia aqui; usamos o nome
+             "Lifinity" estilizado em verde, mais elegante e arejado. -->
+        <TextView
+            style="@style/LifinityWordmark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:text="Lifinity"
+            android:textSize="44sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="28dp"
+            android:letterSpacing="0.02"
+            android:text="Organiza. Concentra-te. Evolui."
+            android:textColor="@color/lifinity_text_secondary"
+            android:textSize="14sp" />
+
+        <!-- ===== CARTÃO DO FORMULÁRIO ===== -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_card_clay"
-            android:elevation="10dp"
+            android:elevation="8dp"
             android:orientation="vertical"
             android:padding="@dimen/space_card_hero">
-
-            <!-- Logo Lifinity (lockup completo: símbolo + marca) — sem tint, proporção preservada -->
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="76dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="8dp"
-                android:adjustViewBounds="true"
-                android:contentDescription="Lifinity"
-                android:scaleType="fitCenter"
-                android:src="@drawable/lifinity_logo" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
                 android:gravity="center"
                 android:text="Entrar na conta"
                 android:textColor="@color/lifinity_text"
@@ -48,7 +60,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:gravity="center"
-                android:text="Usa os teus dados para aceder ao Lifinity."
+                android:text="Bem-vindo de volta — acede com os teus dados."
                 android:textColor="@color/lifinity_text_secondary"
                 android:textSize="@dimen/text_subtitle" />
 
@@ -101,9 +113,9 @@
                 android:id="@+id/loginButton"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/height_button"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="24dp"
                 android:background="@drawable/btn_primary_clay"
-                android:elevation="8dp"
+                android:elevation="6dp"
                 android:text="Entrar"
                 android:textAllCaps="false"
                 android:textColor="@color/lifinity_text_on_primary"

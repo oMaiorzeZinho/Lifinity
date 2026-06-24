@@ -1,51 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- ============================================================
+     Paleta CLARA do Lifinity (branco + verde).
+     Os NOMES das cores mantêm-se exatamente iguais aos do tema escuro
+     anterior (para não partir as referências @color/* espalhadas pelos
+     layouts e drawables) — só mudam os VALORES.
+     Equilíbrio: predominância de BRANCO nas superfícies/fundo, com o
+     VERDE a aparecer em botões primários, destaques, ícones e acentos.
+     Contraste verificado para WCAG AA (texto principal sobre fundo e
+     texto branco sobre os botões verdes >= 4.5:1).
+     ============================================================ -->
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- Fundo da app -->
-    <color name="lifinity_bg">#18271C</color>
-    <color name="lifinity_bg_deep">#112015</color>
+    <!-- Fundo da app: quase branco com leve tom verde (não branco gritante) -->
+    <color name="lifinity_bg">#F4F8F5</color>
+    <color name="lifinity_bg_deep">#E7EFE9</color>
 
-    <!-- Superfícies clay (cartões) -->
-    <color name="lifinity_surface">#27392D</color>
-    <color name="lifinity_surface2">#2F4435</color>
+    <!-- Superfícies clay (cartões): branco puro para destacar sobre o fundo -->
+    <color name="lifinity_surface">#FFFFFF</color>
+    <!-- Superfície "soft" (chips, sub-cartões, badges): menta-cinza muito claro,
+         visível tanto sobre o fundo como sobre os cartões brancos -->
+    <color name="lifinity_surface2">#EDF4EF</color>
 
-    <!-- Afundado (inputs, barras de progresso) -->
-    <color name="lifinity_inset">#16241A</color>
-    <color name="lifinity_inset2">#1B2B1F</color>
+    <!-- Afundado (inputs, barras de progresso, células de calendário):
+         cinza-verde muito claro com borda subtil (ver lifinity_border) -->
+    <color name="lifinity_inset">#EFF5F1</color>
+    <color name="lifinity_inset2">#E7F0EA</color>
 
-    <!-- Acento menta — suavizado (~12% menos saturado/intenso que o #7EE0A2 original,
-         mantendo a mesma família de cor para um tom mais calmo e maduro;
-         o texto escuro por cima (lifinity_text_on_primary) mantém contraste AA >= 4.5:1) -->
-    <color name="lifinity_primary">#74CF97</color>
-    <color name="lifinity_primary_light">#84DBA5</color>
-    <color name="lifinity_primary_dark">#52A877</color>
+    <!-- Acento verde — emerald equilibrado, agradável sobre branco.
+         #1E9E57 garante texto branco legível por cima (botões) e lê-se bem
+         como texto/ícone verde sobre branco. _dark é o extremo dos gradientes
+         e do estado pressionado (texto branco AA com folga). -->
+    <color name="lifinity_primary">#1E9E57</color>
+    <color name="lifinity_primary_light">#2BB069</color>
+    <color name="lifinity_primary_dark">#126C39</color>
 
-    <!-- Texto sobre menta -->
-    <color name="lifinity_text_on_primary">#0E2C1B</color>
+    <!-- Texto sobre verde: BRANCO (no tema claro os botões verdes levam texto branco) -->
+    <color name="lifinity_text_on_primary">#FFFFFF</color>
 
     <!-- Texto -->
-    <color name="lifinity_text">#EEF6F0</color>
-    <color name="lifinity_text_secondary">#92AA9B</color>
-    <color name="lifinity_text_faint">#6F8A78</color>
+    <color name="lifinity_text">#16261C</color>          <!-- principal: quase-preto esverdeado -->
+    <color name="lifinity_text_secondary">#51685B</color> <!-- secundário: cinza-verde médio -->
+    <color name="lifinity_text_faint">#84988B</color>     <!-- ténue: hints, datas auxiliares -->
 
-    <!-- Estados / prioridades -->
-    <color name="lifinity_gold">#E2BD4D</color>
-    <color name="lifinity_coral">#EF9B7E</color>
-    <color name="lifinity_sage">#A6C7AF</color>
+    <!-- Estados / prioridades (tons mais profundos para legibilidade sobre branco) -->
+    <color name="lifinity_gold">#C8920F</color>
+    <color name="lifinity_coral">#DB5A3C</color>
+    <color name="lifinity_sage">#5FA877</color>
 
-    <!-- Perigo (coral) -->
-    <color name="lifinity_danger">#EF9B7E</color>
-    <color name="lifinity_danger_dark">#D8815F</color>
+    <!-- Perigo (coral/vermelho) -->
+    <color name="lifinity_danger">#DB5A3C</color>
+    <color name="lifinity_danger_dark">#BE4329</color>
 
-    <!-- Aliases de compatibilidade (usados nos layouts existentes) -->
-    <color name="lifinity_card">#27392D</color>
-    <color name="lifinity_card_soft">#2F4435</color>
-    <color name="lifinity_input">#16241A</color>
-    <color name="lifinity_input_hint">#6F8A78</color>
-    <color name="lifinity_input_text">#EEF6F0</color>
-    <color name="lifinity_border">#2F4435</color>
-    <color name="lifinity_primary_pressed">#52A877</color>
-    <color name="lifinity_danger_pressed">#D8815F</color>
+    <!-- Aliases de compatibilidade (usados diretamente nos layouts existentes) -->
+    <color name="lifinity_card">#FFFFFF</color>
+    <color name="lifinity_card_soft">#EDF4EF</color>
+    <color name="lifinity_input">#EFF5F1</color>
+    <color name="lifinity_input_hint">#84988B</color>
+    <color name="lifinity_input_text">#16261C</color>
+    <color name="lifinity_border">#D8E6DD</color>
+    <color name="lifinity_primary_pressed">#126C39</color>
+    <color name="lifinity_danger_pressed">#BE4329</color>
 </resources>

@@ -2,19 +2,24 @@
 <!-- Barra de navegação inferior clay com FAB central.
      Incluir no fundo de cada Activity principal.
      Definir android:tag="tasks|community|inspiration|profile" no root para
-     que o Java saiba qual tab está ativa. -->
+     que o Java saiba qual tab está ativa.
+
+     FAB ROBUSTO: o contentor tem 96dp de altura e a barra (70dp) está alinhada
+     ao fundo, deixando 26dp livres em cima. O FAB (64dp) fica alinhado ao topo,
+     pelo que emerge ~26dp acima da barra MAS permanece sempre DENTRO dos limites
+     do FrameLayout — não depende de margens negativas nem do clip dos pais, por
+     isso nunca é cortado. clipChildren/clipToPadding="false" garantem a sombra. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="80dp"
+    android:layout_height="96dp"
     android:clipChildren="false"
     android:clipToPadding="false">
 
-    <!-- Barra de fundo clay -->
+    <!-- Barra de fundo clay (branca), encostada ao fundo -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="70dp"
         android:layout_gravity="bottom"
-        android:layout_marginTop="8dp"
         android:background="@drawable/bg_nav_clay"
         android:elevation="12dp"
         android:gravity="center_vertical"
@@ -22,13 +27,13 @@
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
         android:paddingBottom="4dp"
-        android:paddingTop="8dp">
+        android:paddingTop="6dp">
 
         <!-- Tab Atividades -->
         <LinearLayout
             android:id="@+id/navTabTasks"
             android:layout_width="0dp"
-            android:layout_height="52dp"
+            android:layout_height="54dp"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical"
@@ -57,7 +62,7 @@
         <LinearLayout
             android:id="@+id/navTabCommunity"
             android:layout_width="0dp"
-            android:layout_height="52dp"
+            android:layout_height="54dp"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical"
@@ -91,7 +96,7 @@
         <LinearLayout
             android:id="@+id/navTabInspiration"
             android:layout_width="0dp"
-            android:layout_height="52dp"
+            android:layout_height="54dp"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical"
@@ -120,7 +125,7 @@
         <LinearLayout
             android:id="@+id/navTabProfile"
             android:layout_width="0dp"
-            android:layout_height="52dp"
+            android:layout_height="54dp"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical"
@@ -146,22 +151,19 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- FAB central: emerge acima da barra. Com a barra (72dp) alinhada ao fundo
-         do FrameLayout (80dp), o topo da barra fica a ~8dp; a margem negativa sobe
-         o FAB para o seu centro assentar sobre essa aresta (metade acima, metade
-         sobreposta, como um FAB central clássico). Depende do clipChildren="false"
-         no FrameLayout e nos contentores-pai (já garantido) para não ser cortado. -->
+    <!-- FAB central: alinhado ao topo do contentor de 96dp; como a barra ocupa
+         os 70dp de baixo, o FAB de 64dp emerge ~26dp acima dela, totalmente
+         visível e centrado, com a sombra a aparecer (elevação alta). -->
     <Button
         android:id="@+id/navFab"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:layout_gravity="top|center_horizontal"
-        android:layout_marginTop="-20dp"
         android:background="@drawable/bg_fab_clay"
-        android:elevation="20dp"
+        android:elevation="16dp"
         android:text="+"
         android:textColor="@color/lifinity_text_on_primary"
-        android:textSize="26sp"
+        android:textSize="28sp"
         android:textStyle="bold"
         android:textAllCaps="false" />
 

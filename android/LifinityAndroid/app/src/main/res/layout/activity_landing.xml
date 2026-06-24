@@ -27,15 +27,24 @@
             android:gravity="center_horizontal"
             android:padding="@dimen/space_card_hero">
 
-            <!-- Logo Lifinity (lockup completo) — sem tint, proporção preservada -->
+            <!-- Símbolo Lifinity (ouroboros/infinito) — escuro, lê-se bem sobre o branco -->
             <ImageView
                 android:layout_width="wrap_content"
-                android:layout_height="64dp"
+                android:layout_height="60dp"
                 android:layout_marginTop="6dp"
                 android:adjustViewBounds="true"
                 android:contentDescription="Lifinity"
                 android:scaleType="fitCenter"
                 android:src="@drawable/lifinity_logo" />
+
+            <!-- Wordmark da marca -->
+            <TextView
+                style="@style/LifinityWordmark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Lifinity"
+                android:textSize="34sp" />
 
             <!-- Pequena etiqueta de contexto -->
             <TextView

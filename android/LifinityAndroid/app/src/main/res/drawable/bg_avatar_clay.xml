@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Avatar circular clay: gradiente menta -->
+<!-- Avatar circular (placeholder, tema claro): círculo cinza-verde claro e
+     discreto com borda subtil. A inicial por cima é desenhada em verde/escuro
+     (definida nos layouts/adapters) — evita o "círculo verde gritante". -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
-    <gradient
-        android:angle="135"
-        android:startColor="@color/lifinity_primary_light"
-        android:endColor="@color/lifinity_primary_dark" />
+    <solid android:color="@color/lifinity_surface2" />
+    <stroke android:width="1dp" android:color="@color/lifinity_border" />
 </shape>

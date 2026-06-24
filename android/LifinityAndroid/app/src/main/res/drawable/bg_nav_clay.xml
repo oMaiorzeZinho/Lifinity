@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Barra de navegação inferior (tema claro): branca com cantos superiores
+     arredondados e uma hairline ténue no topo. A sombra suave por cima vem da
+     elevação real da View. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:bottom="3dp">
+    <!-- Linha-guia ténue no topo da barra -->
+    <item>
         <shape>
-            <solid android:color="#1596CDA5" />
+            <solid android:color="@color/lifinity_border" />
             <corners android:topLeftRadius="26dp" android:topRightRadius="26dp" />
         </shape>
     </item>
-    <item>
+    <!-- Superfície branca da barra -->
+    <item android:top="1dp">
         <shape>
-            <gradient
-                android:angle="270"
-                android:startColor="@color/lifinity_surface2"
-                android:endColor="@color/lifinity_surface" />
+            <solid android:color="@color/lifinity_surface" />
             <corners android:topLeftRadius="26dp" android:topRightRadius="26dp" />
         </shape>
     </item>

@@ -6,21 +6,23 @@
      estes tokens em vez de valores soltos.
      ============================================================ -->
 <resources>
-    <!-- ===== Espaçamento (escala 6 / 10 / 14 / 20 / 28) ===== -->
-    <dimen name="space_xs">6dp</dimen>
-    <dimen name="space_sm">10dp</dimen>
-    <dimen name="space_md">14dp</dimen>
-    <dimen name="space_lg">20dp</dimen>
-    <dimen name="space_xl">28dp</dimen>
+    <!-- ===== Espaçamento — escala AMPLIADA (8 / 12 / 16 / 24 / 32) =====
+         A queixa principal era "amontoado": esta escala mais generosa dá à app
+         muito mais ar. Como quase tudo referencia estes tokens, propaga-se. -->
+    <dimen name="space_xs">8dp</dimen>
+    <dimen name="space_sm">12dp</dimen>
+    <dimen name="space_md">16dp</dimen>
+    <dimen name="space_lg">24dp</dimen>
+    <dimen name="space_xl">32dp</dimen>
 
     <!-- Margem lateral de ecrã (consistente em toda a app) -->
-    <dimen name="space_screen">20dp</dimen>
+    <dimen name="space_screen">22dp</dimen>
     <!-- Padding interior dos cartões clay grandes (hero/formulário) -->
-    <dimen name="space_card_hero">24dp</dimen>
+    <dimen name="space_card_hero">28dp</dimen>
     <!-- Padding interior dos cartões clay padrão -->
-    <dimen name="space_card">18dp</dimen>
-    <!-- Folga vertical entre elementos da lista -->
-    <dimen name="space_gap">14dp</dimen>
+    <dimen name="space_card">22dp</dimen>
+    <!-- Folga vertical entre elementos da lista (cartões a respirar) -->
+    <dimen name="space_gap">18dp</dimen>
 
     <!-- ===== Escala tipográfica (aplicar em vez de sp soltos) ===== -->
     <dimen name="text_screen_title">26sp</dimen>   <!-- título grande de ecrã/formulário -->

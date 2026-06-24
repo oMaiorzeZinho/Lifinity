@@ -474,6 +474,17 @@ public class TasksActivity extends AppCompatActivity {
             filteredTasks.add(task);
         }
 
+        // Ordenação igual à web (frontend/src/pages/Tasks.jsx):
+        //  1.º por ESTADO — ativas/pendentes (1), depois perdidas (2), depois concluídas (3);
+        //  desempate dentro do mesmo estado: idtask DECRESCENTE (mais recentes primeiro).
+        filteredTasks.sort((a, b) -> {
+            int orderDiff = getTaskStatusOrder(a) - getTaskStatusOrder(b);
+            if (orderDiff != 0) return orderDiff;
+            long idA = a.getIdtask() != null ? a.getIdtask() : 0L;
+            long idB = b.getIdtask() != null ? b.getIdtask() : 0L;
+            return Long.compare(idB, idA);
+        });
+
         taskAdapter.setTasks(filteredTasks);
 
         if (tasksCountLabel != null) tasksCountLabel.setText(String.valueOf(filteredTasks.size()));
@@ -526,6 +537,13 @@ public class TasksActivity extends AppCompatActivity {
         if (task == null || isTaskCompleted(task)) return false;
         Date dueDate = parseDate(task.getDueDate());
         return dueDate != null && dueDate.before(new Date());
+    }
+
+    /** Ordem de estado para ordenar a lista (igual à web): pendente=1, perdida=2, concluída=3. */
+    private int getTaskStatusOrder(Task task) {
+        if (isTaskCompleted(task)) return 3;
+        if (isTaskLost(task)) return 2;
+        return 1;
     }
 
     private boolean canEditTask(Task task) {
@@ -789,7 +807,8 @@ public class TasksActivity extends AppCompatActivity {
             default: bgRes = R.drawable.bg_pill_media; break;
         }
         pill.setBackgroundResource(bgRes);
-        pill.setTextColor(getColor(R.color.lifinity_text_on_primary));
+        // As pills de prioridade são pastéis claros: usar texto escuro (não branco).
+        pill.setTextColor(getColor(R.color.lifinity_text));
         return pill;
     }
 

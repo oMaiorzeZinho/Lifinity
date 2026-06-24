@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Fundo da app: gradiente claro muito subtil (quase-branco esverdeado).
+     Os cartões brancos destacam-se sobre este fundo levemente tingido. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <gradient
         android:angle="135"
         android:startColor="@color/lifinity_bg"
-        android:centerColor="#1A2F22"
+        android:centerColor="#F0F5F1"
         android:endColor="@color/lifinity_bg_deep" />
 </shape>

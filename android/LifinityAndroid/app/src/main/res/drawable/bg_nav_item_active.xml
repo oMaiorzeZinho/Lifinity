@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Realce do separador ativo na barra inferior: chip verde muito claro. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/lifinity_inset" />
+    <solid android:color="#DCEFE3" />
     <corners android:radius="14dp" />
 </shape>

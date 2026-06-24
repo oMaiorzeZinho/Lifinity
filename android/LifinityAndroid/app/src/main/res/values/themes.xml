@@ -1,13 +1,18 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="Base.Theme.Lifinity" parent="Theme.Material3.DayNight.NoActionBar">
+    <!-- Tema base CLARO do Lifinity (branco + verde). Parent Light do Material3
+         para que os widgets por defeito assumam superfícies claras e texto escuro
+         (e não o roxo/rosa do Material3 dinâmico). -->
+    <style name="Base.Theme.Lifinity" parent="Theme.Material3.Light.NoActionBar">
         <!-- sans-serif-rounded é o substituto do Nunito disponível em todos os Android -->
         <item name="android:fontFamily">sans-serif-rounded</item>
-        <item name="android:windowLightStatusBar">false</item>
+
+        <!-- Status/navigation bar claras com ícones escuros -->
+        <item name="android:windowLightStatusBar">true</item>
         <item name="android:statusBarColor">@color/lifinity_bg</item>
         <item name="android:navigationBarColor">@color/lifinity_bg</item>
         <item name="android:colorBackground">@color/lifinity_bg</item>
 
-        <!-- Acento da marca (menta) — substitui o roxo/rosa por defeito do Material3 -->
+        <!-- Acento da marca (verde) -->
         <item name="colorPrimary">@color/lifinity_primary</item>
         <item name="colorOnPrimary">@color/lifinity_text_on_primary</item>
         <item name="colorPrimaryContainer">@color/lifinity_surface2</item>
@@ -18,30 +23,49 @@
         <item name="colorSecondaryContainer">@color/lifinity_surface2</item>
         <item name="colorOnSecondaryContainer">@color/lifinity_text</item>
 
-        <!-- Terciário: por defeito é rosa/malva no Material3 -> forçar menta -->
         <item name="colorTertiary">@color/lifinity_primary</item>
         <item name="colorOnTertiary">@color/lifinity_text_on_primary</item>
 
+        <!-- Superfícies claras -->
         <item name="colorSurface">@color/lifinity_surface</item>
         <item name="colorOnSurface">@color/lifinity_text</item>
         <item name="colorSurfaceVariant">@color/lifinity_surface2</item>
         <item name="colorOnSurfaceVariant">@color/lifinity_text_secondary</item>
-        <item name="colorError">@color/lifinity_coral</item>
+        <item name="colorError">@color/lifinity_danger</item>
+        <item name="colorOnError">@color/white</item>
 
         <!-- Controlos (switches, checkboxes, cursores, foco de inputs, ripples) -->
         <item name="colorControlActivated">@color/lifinity_primary</item>
-        <item name="colorControlHighlight">#33FFFFFF</item>
-        <item name="android:textColorHighlight">#5574CF97</item>
+        <item name="colorControlHighlight">#221E9E57</item>
+        <item name="android:textColorHighlight">#401E9E57</item>
 
         <!-- Compatibilidade AppCompat (widgets que ainda usam colorAccent) -->
         <item name="colorAccent">@color/lifinity_primary</item>
+
+        <!-- Diálogos/menus com a identidade clara da app (ver ThemeOverlay abaixo).
+             Cobre tanto os AlertDialog do AppCompat como os do Android. -->
+        <item name="alertDialogTheme">@style/ThemeOverlay.Lifinity.Dialog</item>
+        <item name="android:alertDialogTheme">@style/ThemeOverlay.Lifinity.Dialog</item>
     </style>
 
     <style name="Theme.Lifinity" parent="Base.Theme.Lifinity" />
 
-    <!-- Tema de arranque: mostra a logo centrada sobre o fundo escuro durante o
+    <!-- Tema de arranque: mostra a logo centrada sobre o fundo claro durante o
          cold start. Herda tudo do Theme.Lifinity; só troca o windowBackground. -->
     <style name="Theme.Lifinity.Splash" parent="Theme.Lifinity">
         <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+
+    <!-- Overlay dos diálogos: fundo branco arredondado, texto escuro, botões verdes.
+         Substitui o aspeto cinzento por defeito dos AlertDialog/menus. -->
+    <style name="ThemeOverlay.Lifinity.Dialog" parent="ThemeOverlay.AppCompat.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/bg_dialog_clay</item>
+        <item name="android:colorBackground">@color/lifinity_surface</item>
+        <item name="colorAccent">@color/lifinity_primary</item>
+        <item name="colorPrimary">@color/lifinity_primary</item>
+        <item name="colorControlActivated">@color/lifinity_primary</item>
+        <item name="android:textColorPrimary">@color/lifinity_text</item>
+        <item name="android:textColorSecondary">@color/lifinity_text_secondary</item>
+        <item name="android:fontFamily">sans-serif-rounded</item>
     </style>
 </resources>

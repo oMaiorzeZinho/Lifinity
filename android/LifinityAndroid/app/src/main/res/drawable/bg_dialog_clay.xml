@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fundo dos diálogos/menus da app (tema claro): branco com cantos bem
+     arredondados, para os AlertDialog condizerem com a identidade clay em vez
+     do retângulo cinzento por defeito do Android. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/lifinity_surface" />
+    <corners android:radius="24dp" />
+</shape>

@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Bolha recebida (assistente/outro): gradiente superficie clay -->
+<!-- Bolha recebida (assistente/outro, tema claro): superfície branca com borda
+     subtil; o texto por cima é escuro. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <gradient
-        android:angle="152"
-        android:startColor="@color/lifinity_surface2"
-        android:endColor="@color/lifinity_surface" />
+    <solid android:color="@color/lifinity_surface" />
     <corners
         android:topLeftRadius="20dp"
         android:topRightRadius="20dp"
         android:bottomLeftRadius="6dp"
         android:bottomRightRadius="20dp" />
+    <stroke android:width="1dp" android:color="@color/lifinity_border" />
 </shape>

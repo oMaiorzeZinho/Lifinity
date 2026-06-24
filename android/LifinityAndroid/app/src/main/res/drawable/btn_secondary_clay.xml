@@ -1,34 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Botão secundário clay: gradiente surface, raio 16dp -->
+<!-- Botão secundário clay (tema claro): fundo branco com borda subtil e texto
+     escuro. Recua perante o primário verde, mas continua a parecer um botão. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true">
         <shape>
-            <gradient
-                android:angle="152"
-                android:startColor="@color/lifinity_surface"
-                android:endColor="#1E2F24" />
+            <solid android:color="@color/lifinity_inset2" />
             <corners android:radius="@dimen/radius_control" />
+            <stroke android:width="1dp" android:color="@color/lifinity_border" />
         </shape>
     </item>
     <item>
-        <layer-list>
-            <item
-                android:bottom="5dp"
-                android:right="5dp">
-                <shape>
-                    <solid android:color="#0F96CDA5" />
-                    <corners android:radius="@dimen/radius_control" />
-                </shape>
-            </item>
-            <item>
-                <shape>
-                    <gradient
-                        android:angle="152"
-                        android:startColor="@color/lifinity_surface2"
-                        android:endColor="@color/lifinity_surface" />
-                    <corners android:radius="@dimen/radius_control" />
-                </shape>
-            </item>
-        </layer-list>
+        <shape>
+            <solid android:color="@color/lifinity_surface" />
+            <corners android:radius="@dimen/radius_control" />
+            <stroke android:width="1dp" android:color="@color/lifinity_border" />
+        </shape>
     </item>
 </selector>

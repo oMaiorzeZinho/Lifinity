@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Wordmark "Lifinity" (texto da marca, verde) — usado no hero de
+         autenticação. Grande, bold e com leve espaçamento de letra. -->
+    <style name="LifinityWordmark">
+        <item name="android:textColor">@color/lifinity_primary</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.01</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
     <!-- Etiqueta de dia da semana no cabeçalho do calendário (7 colunas iguais). -->
     <style name="CalendarWeekday">
         <item name="android:layout_width">0dp</item>
