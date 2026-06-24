@@ -1,5 +1,7 @@
 # `backend/src/middlewares/uploadMiddleware.js` — upload de imagens (avatares e covers)
 
+> ⚠️ **Atualização 2026-06-24:** novo `uploadContactAttachments` (anexos do contacto, SEM `req.user`, lista branca com PDF/texto, 5MB, máx. 3) e `handleUploadErrors` mais genérico. Ver [Melhorias no formulário de contacto](../../../MELHORIAS_FORMULARIO_CONTACTO_2026-06-24.md).
+
 ## Papel no projeto
 Configura o **multer** para receber uploads de imagens (avatar e imagem de capa do perfil), guardá-las no disco com nomes únicos, validar formato/tamanho e transformar erros em respostas JSON claras. Introduzido na FASE B (commit `7f3548f7`).
 

@@ -6,6 +6,11 @@ Documento de estudo pessoal e exaustivo do projeto Lifinity. Cada ligação abre
 
 ---
 
+## ✨ Melhorias por data (full-stack)
+- [Melhorias no formulário de contacto (2026-06-24)](MELHORIAS_FORMULARIO_CONTACTO_2026-06-24.md) — email inteligente (autenticado vs público), telefone e **anexos** de ficheiros (multer dedicado sem `req.user`, nodemailer attachments, FormData no frontend). Toca em `contactController`, `contactRoutes`, `emailService`, `uploadMiddleware` e `Contact.jsx`.
+
+---
+
 ## 🗄️ Base de Dados
 - [estrutura_lifinity.sql](base_dados/estrutura_lifinity.sql.md) — esquema completo (22 tabelas + seed de badges)
 

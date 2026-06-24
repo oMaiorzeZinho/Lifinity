@@ -34,8 +34,10 @@ android/.idea/
 # Imagens enviadas pelos utilizadores (a estrutura vai para o git, as imagens nao)
 backend/uploads/avatars/*
 backend/uploads/covers/*
+backend/uploads/contact/*
 !backend/uploads/avatars/.gitkeep
 !backend/uploads/covers/.gitkeep
+!backend/uploads/contact/.gitkeep
 
 # Claude Code memory (privado, nao vai para o GitHub)
 .claude/

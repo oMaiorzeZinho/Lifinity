@@ -1,5 +1,7 @@
 # `backend/src/services/emailService.js` — envio de emails (com modo simulação)
 
+> ⚠️ **Atualização 2026-06-24:** `sendEmail` passou a aceitar `attachments` (opcional, formato nodemailer); no modo simulação imprime também os anexos. Ver [Melhorias no formulário de contacto](../../../MELHORIAS_FORMULARIO_CONTACTO_2026-06-24.md).
+
 ## Papel no projeto
 Serviço reutilizável para **enviar emails** via `nodemailer` (boas-vindas no registo, formulário de contacto). O seu truque inteligente: se não houver credenciais SMTP no `.env`, entra em **"modo simulação"** — em vez de enviar, mostra o email na consola e devolve sucesso. Assim a app funciona em qualquer máquina sem configuração extra. Introduzido na FASE E (commit `95d17be7`).
 

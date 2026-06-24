@@ -1,5 +1,7 @@
 # `backend/src/routes/contactRoutes.js` — rota do formulário de contacto
 
+> ⚠️ **Atualização 2026-06-24:** a rota (continua pública) passou a correr o upload de anexos antes do controller: `handleUploadErrors(uploadContactAttachments.array('attachments', 3))`. Ver [Melhorias no formulário de contacto](../../../MELHORIAS_FORMULARIO_CONTACTO_2026-06-24.md).
+
 ## Papel no projeto
 Endpoint do formulário "Contacte-nos". Montado em `/api/contact`. **É a única rota pública do backend** (sem `verifyToken`), porque a página de contacto é acessível sem login. Introduzido na FASE E (commit `95d17be7`).
 

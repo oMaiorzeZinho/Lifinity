@@ -24,8 +24,11 @@ if (isConfigured) {
     console.log('[email] SMTP nao configurado no .env — emails serao simulados no console.');
 }
 
-// Envia um email. Parametros: { to, subject, html, replyTo (opcional) }
-const sendEmail = async ({ to, subject, html, replyTo }) => {
+// Envia um email. Parametros: { to, subject, html, replyTo (opcional),
+// attachments (opcional — array no formato do nodemailer: [{ filename, path }]) }
+const sendEmail = async ({ to, subject, html, replyTo, attachments }) => {
+    const hasAttachments = Array.isArray(attachments) && attachments.length > 0;
+
     // Modo simulação: mostra o email no console em vez de enviar
     if (!isConfigured) {
         console.log('────────────────────────────────────────');
@@ -35,6 +38,10 @@ const sendEmail = async ({ to, subject, html, replyTo }) => {
         console.log(`Assunto: ${subject}`);
         console.log('Corpo:');
         console.log(html);
+        if (hasAttachments) {
+            console.log(`Anexos: ${attachments.length} ficheiro(s)`);
+            attachments.forEach((file) => console.log(`  - ${file.filename} (${file.path})`));
+        }
         console.log('────────────────────────────────────────');
         return { simulated: true };
     }
@@ -45,7 +52,9 @@ const sendEmail = async ({ to, subject, html, replyTo }) => {
             to,
             subject,
             html,
-            ...(replyTo ? { replyTo } : {})
+            ...(replyTo ? { replyTo } : {}),
+            // Só inclui anexos quando existem — não altera o comportamento sem anexos.
+            ...(hasAttachments ? { attachments } : {})
         });
 
         console.log(`[email] Enviado para ${to} (${info.messageId})`);

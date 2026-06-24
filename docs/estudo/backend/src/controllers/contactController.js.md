@@ -1,5 +1,7 @@
 # `backend/src/controllers/contactController.js` — formulário público "Contacte-nos"
 
+> ⚠️ **Atualização 2026-06-24:** email agora **opcional** (autenticados usam o da conta), **anexos** (`req.files`) incluídos no email e limpeza de órfãos em falhas. Ver [Melhorias no formulário de contacto](../../../MELHORIAS_FORMULARIO_CONTACTO_2026-06-24.md).
+
 ## Papel no projeto
 Trata o envio do formulário de contacto. É **público** (sem login), por isso reúne várias defesas: validação de campos, **escape de HTML**, e **anti-spam por IP**. Envia a mensagem por email para o endereço de suporte. FASE E.
 

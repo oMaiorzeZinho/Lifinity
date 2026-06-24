@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -13,6 +13,26 @@ const labelClass = 'lifinity-muted-label mb-2 block';
 
 const MESSAGE_MAX_LENGTH = 2000;
 
+// Anexos: limites espelham os do backend (uploadMiddleware.js) para dar
+// feedback imediato no cliente antes de enviar.
+const MAX_FILES = 3;
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'application/pdf',
+  'text/plain'
+];
+const ACCEPT_ATTR = ACCEPTED_TYPES.join(',');
+
+// Mostra o tamanho do ficheiro de forma legível (KB/MB)
+const formatFileSize = (bytes) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
 // Página "Contacte-nos" — existe em dois sítios:
 // - /dashboard/contact (dentro do layout do dashboard)
 // - /contact (pública, acessível a partir do login, com wrapper próprio)
@@ -24,6 +44,7 @@ const Contact = () => {
     message: ''
   });
 
+  const [files, setFiles] = useState([]);
   const [sending, setSending] = useState(false);
   const [feedback, setFeedback] = useState(null); // { type: 'success' | 'error', text }
 
@@ -33,8 +54,60 @@ const Contact = () => {
   // Fora do dashboard, a página ganha fundo e botão "Voltar ao login"
   const isPublicPage = !location.pathname.startsWith('/dashboard');
 
+  // Email inteligente: se houver sessão iniciada, usamos o email da conta e
+  // escondemos o campo. Lê-se o token/user do localStorage (mesmo padrão do
+  // resto da app). Calculado uma vez (a sessão não muda dentro desta página).
+  const { isAuthenticated, accountEmail } = useMemo(() => {
+    const token = localStorage.getItem('token');
+    let email = '';
+    try {
+      const savedUser = JSON.parse(localStorage.getItem('user') || 'null');
+      email = savedUser?.email || '';
+    } catch {
+      email = '';
+    }
+    return { isAuthenticated: Boolean(token), accountEmail: email };
+  }, []);
+
   const handleChange = (field) => (e) => {
     setForm((current) => ({ ...current, [field]: e.target.value }));
+  };
+
+  // Valida e acrescenta os ficheiros escolhidos (lista branca + tamanho + máximo)
+  const handleFilesSelected = (e) => {
+    const selected = Array.from(e.target.files || []);
+    e.target.value = ''; // permite voltar a escolher o mesmo ficheiro após remover
+    if (selected.length === 0) return;
+
+    const nextFiles = [...files];
+    let error = null;
+
+    for (const file of selected) {
+      if (nextFiles.length >= MAX_FILES) {
+        error = `Podes anexar no máximo ${MAX_FILES} ficheiros.`;
+        break;
+      }
+      if (!ACCEPTED_TYPES.includes(file.type)) {
+        error = `"${file.name}": formato não suportado. Usa imagens, PDF ou texto.`;
+        continue;
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        error = `"${file.name}": excede o limite de 5MB.`;
+        continue;
+      }
+      // Evita duplicados (mesmo nome e tamanho)
+      if (nextFiles.some((f) => f.name === file.name && f.size === file.size)) {
+        continue;
+      }
+      nextFiles.push(file);
+    }
+
+    setFiles(nextFiles);
+    setFeedback(error ? { type: 'error', text: error } : null);
+  };
+
+  const removeFile = (index) => {
+    setFiles((current) => current.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
@@ -44,21 +117,37 @@ const Contact = () => {
       setSending(true);
       setFeedback(null);
 
-      const response = await axios.post(`${API_URL}/contact`, {
-        name: form.name,
-        email: form.email,
-        // O telefone é opcional — só vai se estiver preenchido
-        ...(form.phone.trim() ? { phone: form.phone } : {}),
-        message: form.message
-      });
+      // Há ficheiros => multipart/form-data (FormData). O axios define o
+      // Content-Type (com boundary) automaticamente para FormData.
+      const data = new FormData();
+      data.append('name', form.name);
+
+      // Email: autenticado -> email da conta; público -> email escrito no campo.
+      const emailToSend = isAuthenticated ? accountEmail : form.email;
+      if (emailToSend && emailToSend.trim()) {
+        data.append('email', emailToSend.trim());
+      }
+
+      // Telefone é opcional — só vai se estiver preenchido
+      if (form.phone.trim()) {
+        data.append('phone', form.phone);
+      }
+
+      data.append('message', form.message);
+
+      // Anexos (campo 'attachments', até 3)
+      files.forEach((file) => data.append('attachments', file));
+
+      const response = await axios.post(`${API_URL}/contact`, data);
 
       setFeedback({
         type: 'success',
         text: response.data?.message || 'Mensagem enviada com sucesso!'
       });
 
-      // Limpa o formulário após sucesso
+      // Limpa o formulário e os anexos após sucesso
       setForm({ name: '', email: '', phone: '', message: '' });
+      setFiles([]);
     } catch (err) {
       console.error('Erro ao enviar mensagem de contacto:', err);
       setFeedback({
@@ -91,7 +180,12 @@ const Contact = () => {
       {/* FORMULÁRIO: largura limitada e centrado horizontalmente sob o hero */}
       <div className={`${cardClass} p-6 md:p-8 rounded-4xl max-w-2xl mx-auto`}>
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Nome + Email (o email só aparece para quem NÃO tem sessão) */}
+          <div
+            className={`grid grid-cols-1 gap-5 ${
+              isAuthenticated ? '' : 'md:grid-cols-2'
+            }`}
+          >
             <div>
               <label htmlFor="contact-name" className={labelClass}>
                 Nome
@@ -109,21 +203,31 @@ const Contact = () => {
               />
             </div>
 
-            <div>
-              <label htmlFor="contact-email" className={labelClass}>
-                Email
-              </label>
-              <input
-                id="contact-email"
-                type="email"
-                placeholder="teu@email.com"
-                value={form.email}
-                onChange={handleChange('email')}
-                className={inputClass}
-                required
-              />
-            </div>
+            {!isAuthenticated && (
+              <div>
+                <label htmlFor="contact-email" className={labelClass}>
+                  Email
+                </label>
+                <input
+                  id="contact-email"
+                  type="email"
+                  placeholder="teu@email.com"
+                  value={form.email}
+                  onChange={handleChange('email')}
+                  className={inputClass}
+                  required
+                />
+              </div>
+            )}
           </div>
+
+          {/* Nota discreta para quem tem sessão: respondemos para o email da conta */}
+          {isAuthenticated && (
+            <p className="lifinity-card-soft p-3 rounded-2xl text-xs font-bold text-(--lifinity-text-muted)">
+              Vamos responder para o email da tua conta
+              {accountEmail ? ` (${accountEmail})` : ''}.
+            </p>
+          )}
 
           <div>
             <label htmlFor="contact-phone" className={labelClass}>
@@ -159,6 +263,64 @@ const Contact = () => {
             <p className="text-[10px] font-black uppercase tracking-widest mt-2 text-right text-(--lifinity-text-muted)">
               {form.message.length}/{MESSAGE_MAX_LENGTH}
             </p>
+          </div>
+
+          {/* ANEXOS (imagens / PDF / texto, até 3 ficheiros, 5MB cada) */}
+          <div>
+            <label className={labelClass}>
+              Anexos (opcional)
+            </label>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <label
+                htmlFor="contact-attachments"
+                className={`lifinity-button-secondary px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-pointer ${
+                  files.length >= MAX_FILES ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                + Anexar ficheiro
+              </label>
+              <input
+                id="contact-attachments"
+                type="file"
+                multiple
+                accept={ACCEPT_ATTR}
+                onChange={handleFilesSelected}
+                disabled={files.length >= MAX_FILES}
+                className="hidden"
+              />
+
+              <span className="text-[10px] font-black uppercase tracking-widest text-(--lifinity-text-muted)">
+                Imagens, PDF ou texto · até {MAX_FILES} · máx. 5MB cada
+              </span>
+            </div>
+
+            {/* Lista dos ficheiros escolhidos, com botão de remover */}
+            {files.length > 0 && (
+              <ul className="mt-3 space-y-2">
+                {files.map((file, index) => (
+                  <li
+                    key={`${file.name}-${file.size}-${index}`}
+                    className="lifinity-card-soft p-3 rounded-2xl flex items-center justify-between gap-3"
+                  >
+                    <span className="text-xs font-bold truncate text-(--lifinity-text)">
+                      {file.name}
+                      <span className="text-(--lifinity-text-muted) font-medium">
+                        {' '}· {formatFileSize(file.size)}
+                      </span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeFile(index)}
+                      className="shrink-0 text-[10px] font-black uppercase tracking-widest text-(--lifinity-danger)"
+                      aria-label={`Remover ${file.name}`}
+                    >
+                      Remover
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           {feedback && (
