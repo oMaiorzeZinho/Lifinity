@@ -94,6 +94,17 @@ exports.updatePassword = async (req, res) => {
             return res.status(401).json({ message: "Password atual incorreta." });
         }
 
+        // A nova password não pode ser igual à atual. Como já temos o hash atual,
+        // comparamos a nova com ele: se bcrypt.compare devolver true, são iguais.
+        const isSameAsCurrent = await bcrypt.compare(
+            String(newPassword),
+            users[0].password
+        );
+
+        if (isSameAsCurrent) {
+            return res.status(400).json({ message: "A nova palavra-passe não pode ser igual à atual." });
+        }
+
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(String(newPassword), salt);
 

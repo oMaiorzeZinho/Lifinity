@@ -202,6 +202,20 @@ exports.resetPassword = async (req, res) => {
             return res.status(400).json({ message: 'Código inválido ou expirado.' });
         }
 
+        // A nova palavra-passe não pode ser igual à atual. Buscamos o hash atual
+        // do utilizador (o findValidReset não traz o password) e comparamos.
+        // Se forem iguais, recusamos SEM apagar o código — assim o utilizador pode
+        // tentar outra password com o mesmo código (que ainda está válido).
+        const [currentRows] = await db.execute(
+            'SELECT password FROM USER WHERE iduser = ?',
+            [user.iduser]
+        );
+        const currentHash = currentRows[0] ? currentRows[0].password : null;
+
+        if (currentHash && await bcrypt.compare(newPassword, currentHash)) {
+            return res.status(400).json({ message: 'A nova palavra-passe não pode ser igual à atual.' });
+        }
+
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
 

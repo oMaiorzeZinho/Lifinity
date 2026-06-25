@@ -55,9 +55,18 @@ para não depender do relógio do Node.
 3. **`POST /auth/reset-password`** — `{ email, code, newPassword }`
    - **Revalida** o código (igual ao passo 2). Inválido → `400`.
    - Valida a nova palavra-passe (**mínimo 6 caracteres**, igual às configurações da conta).
+   - **(2026-06-25)** A nova palavra-passe **não pode ser igual à atual**: busca-se o `password`
+     atual do `USER` (o `findValidReset` não o traz) e faz-se `bcrypt.compare(newPassword, hashAtual)`;
+     se for `true` → `400 { message: "A nova palavra-passe não pode ser igual à atual." }`. A recusa
+     acontece **antes** do hash/UPDATE e **NÃO apaga** o código — o utilizador pode tentar outra
+     palavra-passe com o mesmo código (ainda válido).
    - Faz **hash com bcryptjs** (`genSalt(10)` + `hash`) e atualiza `USER.password`.
    - **Apaga** os códigos desse `iduser` (uso único).
    - Responde `200 { message: "Palavra-passe alterada com sucesso." }`.
+
+> A **mudança de palavra-passe no perfil** (`userController.updatePassword`, após login) tem a
+> mesma validação desde 2026-06-25: depois de confirmar a password atual, compara a nova com o hash
+> atual (`bcrypt.compare`) e recusa com `400` se forem iguais.
 
 Helper partilhado `findValidReset(email, code)` (devolve o utilizador quando o código é válido
 e não expirou) evita duplicação entre o passo 2 e o 3. Nunca se devolve o hash nem dados sensíveis.

@@ -1,5 +1,7 @@
 # `backend/src/controllers/userController.js` — perfil, ranking, conta e uploads
 
+> ⚠️ **Atualização 2026-06-25:** em `updatePassword`, depois de confirmar a password atual, a **nova password não pode ser igual à atual** (`bcrypt.compare(newPassword, hashAtual)` → `400` se igual). Mesma validação foi adicionada à recuperação por código — ver [Recuperação de palavra-passe](../../../RECUPERACAO_PALAVRA_PASSE_2026-06-25.md).
+
 ## Papel no projeto
 Gere o utilizador: **ranking**, pesquisa, alterar password/username/bio, **upload de avatar/cover**, apagar conta e **perfil público**. Montado em `/api/users`.
 
