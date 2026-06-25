@@ -1,5 +1,7 @@
 # `backend/src/routes/authRoutes.js` — rotas de autenticação
 
+> ⚠️ **Atualização 2026-06-25:** novas rotas `POST /forgot-password`, `/verify-reset-code` e `/reset-password` (recuperação de palavra-passe). Ver [Recuperação de palavra-passe](../../../RECUPERACAO_PALAVRA_PASSE_2026-06-25.md).
+
 ## Papel no projeto
 Define os endpoints de **registo e login**. Montado em `/api/auth` (ver `index.js`).
 

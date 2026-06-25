@@ -20,7 +20,18 @@ CREATE TABLE USER (
     bio VARCHAR(300) NULL,
     current_streak INT DEFAULT 0,
     last_streak_date DATE DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Códigos de recuperação de palavra-passe (6 dígitos, expiram em 10 minutos,
+-- uso único). Um registo por pedido; os antigos do mesmo utilizador são apagados.
+CREATE TABLE PASSWORD_RESET (
+    idreset INT AUTO_INCREMENT PRIMARY KEY,
+    iduser INT NOT NULL,
+    code VARCHAR(10) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (iduser) REFERENCES USER(iduser) ON DELETE CASCADE
 );
 
 CREATE TABLE CATEGORY (

@@ -1,5 +1,7 @@
 # `docs/base_dados/estrutura_lifinity.sql` — Esquema da base de dados
 
+> ⚠️ **Atualização 2026-06-25:** nova tabela `PASSWORD_RESET` (códigos de recuperação de palavra-passe, com expiração). Há também o `docs/base_dados/password_reset.sql` para correr no phpMyAdmin. Ver [Recuperação de palavra-passe](../../RECUPERACAO_PALAVRA_PASSE_2026-06-25.md).
+
 ## Papel no projeto
 É o **script de criação da base de dados MySQL** do Lifinity. Define todas as tabelas, tipos de colunas, chaves primárias/estrangeiras, restrições (constraints) e ainda insere os dados iniciais das conquistas (tabela `BADGE`). Todo o backend (`backend/src/controllers/*`) faz queries contra estas tabelas, por isso este ficheiro é o **alicerce** de tudo o resto.
 

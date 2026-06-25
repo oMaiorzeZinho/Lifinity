@@ -1,5 +1,7 @@
 # `backend/src/controllers/authController.js` — registo e login
 
+> ⚠️ **Atualização 2026-06-25:** juntaram-se 3 funções de **recuperação de palavra-passe** (`forgotPassword`, `verifyResetCode`, `resetPassword` — código de 6 dígitos, 10 min, uso único, hash bcryptjs). Ver [Recuperação de palavra-passe](../../../RECUPERACAO_PALAVRA_PASSE_2026-06-25.md).
+
 ## Papel no projeto
 Implementa a **autenticação**: criar conta (`register`) e entrar (`login`, devolvendo o token JWT). É chamado pelas rotas públicas de `authRoutes.js`.
 

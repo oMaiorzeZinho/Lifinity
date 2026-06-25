@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import PasswordResetModal from '../components/PasswordResetModal';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -8,6 +9,8 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showResetModal, setShowResetModal] = useState(false);
 
   const navigate = useNavigate();
 
@@ -192,6 +195,12 @@ const Login = () => {
                 </div>
               )}
 
+              {successMessage && (
+                <div className="mt-6 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-400/20 text-emerald-200 text-sm font-bold text-center">
+                  {successMessage}
+                </div>
+              )}
+
               <div className="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <p className="text-sm text-slate-400 font-medium">
                   Ainda não tens conta?
@@ -205,19 +214,44 @@ const Login = () => {
                 </Link>
               </div>
 
-              {/* Link discreto para a página pública de contacto */}
-              <p className="mt-4 text-center">
+              {/* Links discretos: recuperar palavra-passe + contacto */}
+              <div className="mt-4 flex items-center justify-center gap-4 text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMessage('');
+                    setSuccessMessage('');
+                    setShowResetModal(true);
+                  }}
+                  className="text-slate-400 hover:text-white transition-colors"
+                >
+                  Recuperar palavra-passe
+                </button>
+
+                <span className="text-slate-600">·</span>
+
                 <Link
                   to="/contact"
-                  className="text-xs font-bold text-slate-400 hover:text-white transition-colors"
+                  className="text-slate-400 hover:text-white transition-colors"
                 >
                   Contacte-nos
                 </Link>
-              </p>
+              </div>
             </section>
           </div>
         </main>
       </div>
+
+      {/* Modal de recuperação de palavra-passe (3 passos) */}
+      {showResetModal && (
+        <PasswordResetModal
+          onClose={() => setShowResetModal(false)}
+          onSuccess={(msg) => {
+            setMessage('');
+            setSuccessMessage(msg);
+          }}
+        />
+      )}
     </div>
   );
 };

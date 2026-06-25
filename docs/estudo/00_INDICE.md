@@ -7,6 +7,7 @@ Documento de estudo pessoal e exaustivo do projeto Lifinity. Cada ligação abre
 ---
 
 ## ✨ Melhorias por data (full-stack)
+- [Recuperação de palavra-passe por código (2026-06-25)](RECUPERACAO_PALAVRA_PASSE_2026-06-25.md) — fluxo "esqueci-me da palavra-passe": código de 6 dígitos por email (expira em 10 min, uso único), tabela `PASSWORD_RESET`, 3 endpoints em `/auth` e modal de 3 passos no Login. Toca em `authController`, `authRoutes`, `estrutura_lifinity.sql` (+ `password_reset.sql`), `Login.jsx` e `PasswordResetModal.jsx`.
 - [Melhorias no formulário de contacto (2026-06-24)](MELHORIAS_FORMULARIO_CONTACTO_2026-06-24.md) — email inteligente (autenticado vs público), telefone e **anexos** de ficheiros (multer dedicado sem `req.user`, nodemailer attachments, FormData no frontend). Toca em `contactController`, `contactRoutes`, `emailService`, `uploadMiddleware` e `Contact.jsx`.
 
 ---
