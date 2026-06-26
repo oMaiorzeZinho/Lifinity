@@ -183,15 +183,15 @@
 - [x] `CreateTaskActivity.java` — `android/CreateTaskActivity.java.md`
 - [x] `EditTaskActivity.java` — `android/EditTaskActivity.java.md`
 - [x] `RankingActivity.java` — `android/RankingActivity.java.md`
-- [ ] `StatisticsActivity.java`
-- [ ] `InspirationActivity.java`
-- [ ] `AchievementsActivity.java`
+- [x] `StatisticsActivity.java` — `android/StatisticsActivity.java.md`
+- [x] `InspirationActivity.java` — `android/InspirationActivity.java.md`
+- [x] `AchievementsActivity.java` — `android/AchievementsActivity.java.md`
 - [x] `NotificationsActivity.java` — `android/NotificationsActivity.java.md`
 - [x] `CommunityActivity.java` — `android/CommunityActivity.java.md`
-- [ ] `ConversationsActivity.java`
-- [ ] `ChatActivity.java`
-- [ ] `AssistantActivity.java`
-- [ ] `ProfileActivity.java`
+- [x] `ConversationsActivity.java` — `android/ConversationsActivity.java.md`
+- [x] `ChatActivity.java` — `android/ChatActivity.java.md`
+- [x] `AssistantActivity.java` — `android/AssistantActivity.java.md`
+- [x] `ProfileActivity.java` — `android/ProfileActivity.java.md`
 - [x] `SettingsActivity.java` — `android/SettingsActivity.java.md`
 - [x] `BottomNavHelper.java` — `android/BottomNavHelper.java.md`
 - [x] `HeaderHelper.java` — `android/HeaderHelper.java.md`
