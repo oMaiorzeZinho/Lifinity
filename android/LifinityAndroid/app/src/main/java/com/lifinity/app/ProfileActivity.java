@@ -143,14 +143,15 @@ public class ProfileActivity extends AppCompatActivity {
         findViewById(R.id.profileLogoutButton).setOnClickListener(v -> logout());
 
         findViewById(R.id.headerSettingsIcon).setOnClickListener(v -> openSettingsActivity());
-        // Itens de navegação do hub "MAIS NO LIFINITY"
-        // (Estatísticas mudou para o topo das Tarefas; Assistente/Chat para a Comunidade.)
-        findViewById(R.id.profileNavNotifications).setOnClickListener(v ->
-                startActivity(new Intent(ProfileActivity.this, NotificationsActivity.class)));
-        findViewById(R.id.profileNavAchievements).setOnClickListener(v ->
-                startActivity(new Intent(ProfileActivity.this, AchievementsActivity.class)));
-        findViewById(R.id.profileNavSettings).setOnClickListener(v ->
-                startActivity(new Intent(ProfileActivity.this, SettingsActivity.class)));
+
+        // Acesso a TODAS as conquistas: botão "Ver todas" ao lado do título da secção
+        // CONQUISTAS (substitui o antigo item do hub "Mais no Lifinity", removido por
+        // redundância). As Notificações ficam no sino do cabeçalho (HeaderHelper) e as
+        // Definições na engrenagem (headerSettingsIcon).
+        View viewAllAchievements = findViewById(R.id.profileViewAllAchievementsButton);
+        if (viewAllAchievements != null) {
+            viewAllAchievements.setOnClickListener(v -> openAchievementsActivity());
+        }
     }
 
     private String getToken() {

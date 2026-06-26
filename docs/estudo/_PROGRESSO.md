@@ -158,6 +158,13 @@
 > em `android/FUNCIONALIDADES_LANDING_AMIGOS_GRUPOS_CALENDARIO.md` (LandingActivity, FriendsActivity,
 > GroupsActivity, adapters e models de amigos/grupos, e o calendário no TasksActivity).
 
+> **Nota (2026-06-26):** melhorias visuais à barra de navegação e ao Perfil explicadas em
+> `android/MELHORIAS_NAV_E_PERFIL_2026-06-26.md` — ícones do menu como vector drawables Material
+> (`ic_nav_*`), miniatura do avatar na tab Perfil, correção real do FAB ("`<include>`" com
+> `wrap_content` que colapsava os 96dp → `@dimen/nav_total_height`), cabeçalho opaco e remoção da
+> secção "Mais no Lifinity". Toca em `BottomNavHelper.java`, `ProfileActivity.java`, `nav_bottom.xml`
+> e nos cabeçalhos/includes das telas principais.
+
 ### Android — activities e helpers (21)
 - [~] `MainActivity.java` *(routing para a Landing documentado na nota acima)*
 - [ ] `LoginActivity.java`

@@ -4,14 +4,24 @@
      Definir android:tag="tasks|community|inspiration|profile" no root para
      que o Java saiba qual tab está ativa.
 
-     FAB ROBUSTO: o contentor tem 96dp de altura e a barra (70dp) está alinhada
-     ao fundo, deixando 26dp livres em cima. O FAB (64dp) fica alinhado ao topo,
-     pelo que emerge ~26dp acima da barra MAS permanece sempre DENTRO dos limites
-     do FrameLayout — não depende de margens negativas nem do clip dos pais, por
-     isso nunca é cortado. clipChildren/clipToPadding="false" garantem a sombra. -->
+     ÍCONES (consistentes): cada tab usa um ImageView com um vector drawable da
+     família Material (ic_nav_tasks/community/inspiration/profile) — antes eram
+     caracteres/emojis misturados (☰, 👥 a cores, ✦, ○). O BottomNavHelper recolore
+     os ícones por estado (setColorFilter) e mantém os rótulos por baixo.
+
+     TAB PERFIL: em vez do ícone genérico, mostra a MINIATURA da foto de perfil
+     (navTabProfileAvatar, carregada por AvatarLoader). Quando não há foto, fica o
+     ícone "person" (navTabProfileIcon) por baixo — nunca vazio.
+
+     FAB ROBUSTO: o contentor mede @dimen/nav_total_height (96dp = barra 70dp + 26dp
+     de folga em cima). A barra está alinhada ao fundo e o FAB (64dp) ao topo, pelo
+     que emerge ~26dp acima da barra MAS permanece sempre DENTRO dos limites do
+     FrameLayout — nunca é cortado. IMPORTANTE: cada <include> deste layout TEM de
+     fixar android:layout_height="@dimen/nav_total_height"; com wrap_content o
+     FrameLayout colapsa para ~70dp e o FAB desaparece. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="96dp"
+    android:layout_height="@dimen/nav_total_height"
     android:clipChildren="false"
     android:clipToPadding="false">
 
@@ -39,13 +49,12 @@
             android:orientation="vertical"
             android:padding="6dp">
 
-            <TextView
+            <ImageView
                 android:id="@+id/navTabTasksIcon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="&#9776;"
-                android:textSize="18sp"
-                android:textColor="@color/lifinity_text_secondary" />
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="Tarefas"
+                android:src="@drawable/ic_nav_tasks" />
 
             <TextView
                 android:id="@+id/navTabTasksLabel"
@@ -68,13 +77,12 @@
             android:orientation="vertical"
             android:padding="6dp">
 
-            <TextView
+            <ImageView
                 android:id="@+id/navTabCommunityIcon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="&#128101;"
-                android:textSize="18sp"
-                android:textColor="@color/lifinity_text_secondary" />
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="Comunidade"
+                android:src="@drawable/ic_nav_community" />
 
             <TextView
                 android:id="@+id/navTabCommunityLabel"
@@ -102,13 +110,12 @@
             android:orientation="vertical"
             android:padding="6dp">
 
-            <TextView
+            <ImageView
                 android:id="@+id/navTabInspirationIcon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="&#10022;"
-                android:textSize="18sp"
-                android:textColor="@color/lifinity_text_secondary" />
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="Inspiração"
+                android:src="@drawable/ic_nav_inspiration" />
 
             <TextView
                 android:id="@+id/navTabInspirationLabel"
@@ -121,7 +128,7 @@
                 android:textColor="@color/lifinity_text_secondary" />
         </LinearLayout>
 
-        <!-- Tab Perfil -->
+        <!-- Tab Perfil (miniatura do avatar com fallback para o ícone "person") -->
         <LinearLayout
             android:id="@+id/navTabProfile"
             android:layout_width="0dp"
@@ -131,13 +138,28 @@
             android:orientation="vertical"
             android:padding="6dp">
 
-            <TextView
-                android:id="@+id/navTabProfileIcon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="&#9711;"
-                android:textSize="18sp"
-                android:textColor="@color/lifinity_text_secondary" />
+            <FrameLayout
+                android:layout_width="24dp"
+                android:layout_height="24dp">
+
+                <!-- Fallback: ícone "person" (recolorido por estado). -->
+                <ImageView
+                    android:id="@+id/navTabProfileIcon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="Perfil"
+                    android:src="@drawable/ic_nav_profile" />
+
+                <!-- Foto real do utilizador por cima (circular via AvatarLoader);
+                     fica GONE quando não há foto, deixando ver o ícone "person". -->
+                <ImageView
+                    android:id="@+id/navTabProfileAvatar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="Foto de perfil"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone" />
+            </FrameLayout>
 
             <TextView
                 android:id="@+id/navTabProfileLabel"
@@ -151,8 +173,8 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- FAB central: alinhado ao topo do contentor de 96dp; como a barra ocupa
-         os 70dp de baixo, o FAB de 64dp emerge ~26dp acima dela, totalmente
+    <!-- FAB central: alinhado ao topo do contentor de @dimen/nav_total_height; como a
+         barra ocupa os 70dp de baixo, o FAB de 64dp emerge ~26dp acima dela, totalmente
          visível e centrado, com a sombra a aparecer (elevação alta). -->
     <Button
         android:id="@+id/navFab"

@@ -9,16 +9,19 @@
     android:orientation="vertical"
     tools:context=".ProfileActivity">
 
-    <!-- ===== HEADER ===== -->
+    <!-- ===== HEADER (fixo) — fundo opaco + elevação, coerente com as Tarefas:
+         o conteúdo desaparece limpo por baixo ao fazer scroll. -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/lifinity_bg"
+        android:elevation="6dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:paddingTop="16dp"
-        android:paddingBottom="12dp">
+        android:paddingBottom="14dp">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -397,15 +400,42 @@
             </LinearLayout>
 
             <!-- ===== CONQUISTAS ===== -->
-            <TextView
+            <!-- Título + acesso rápido a TODAS as conquistas. Este botão "Ver todas"
+                 substitui o item de Conquistas que estava na secção "Mais no Lifinity"
+                 (removida por ser redundante) e abre o mesmo AchievementsActivity. -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                android:letterSpacing="0.13"
-                android:text="CONQUISTAS"
-                android:textColor="@color/lifinity_text_secondary"
-                android:textSize="11sp"
-                android:textStyle="bold" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:letterSpacing="0.13"
+                    android:text="CONQUISTAS"
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/profileViewAllAchievementsButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_pill_mint"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"
+                    android:text="Ver todas ›"
+                    android:textColor="@color/lifinity_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/profileAchievementsSummaryText"
@@ -510,181 +540,11 @@
                     tools:text="Acumula 500 XP." />
             </LinearLayout>
 
-            <!-- ===== MENU / HUB ===== -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:letterSpacing="0.13"
-                android:text="MAIS NO LIFINITY"
-                android:textColor="@color/lifinity_text_secondary"
-                android:textSize="11sp"
-                android:textStyle="bold" />
-
-            <!-- Item de navegação: Notificações -->
-            <LinearLayout
-                android:id="@+id/profileNavNotifications"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/bg_card_soft_clay"
-                android:clickable="true"
-                android:elevation="5dp"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:minHeight="56dp"
-                android:orientation="horizontal"
-                android:padding="14dp">
-
-                <TextView
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
-                    android:background="@drawable/bg_pill_mint"
-                    android:gravity="center"
-                    android:text="&#128276;"
-                    android:textSize="20sp" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Notificações"
-                        android:textColor="@color/lifinity_text"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Alertas e lembretes"
-                        android:textColor="@color/lifinity_text_secondary"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="›"
-                    android:textColor="@color/lifinity_text_secondary"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <!-- Item de navegação: Conquistas -->
-            <LinearLayout
-                android:id="@+id/profileNavAchievements"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/bg_card_soft_clay"
-                android:clickable="true"
-                android:elevation="5dp"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:minHeight="56dp"
-                android:orientation="horizontal"
-                android:padding="14dp">
-
-                <TextView
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
-                    android:background="@drawable/bg_pill_mint"
-                    android:gravity="center"
-                    android:text="&#127942;"
-                    android:textSize="20sp" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Conquistas"
-                        android:textColor="@color/lifinity_text"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Medalhas e recompensas"
-                        android:textColor="@color/lifinity_text_secondary"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="›"
-                    android:textColor="@color/lifinity_text_secondary"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <!-- Item de navegação: Definições -->
-            <LinearLayout
-                android:id="@+id/profileNavSettings"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/bg_card_soft_clay"
-                android:clickable="true"
-                android:elevation="5dp"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:minHeight="56dp"
-                android:orientation="horizontal"
-                android:padding="14dp">
-
-                <TextView
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
-                    android:background="@drawable/bg_pill_mint"
-                    android:gravity="center"
-                    android:text="&#9881;"
-                    android:textSize="20sp" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Definições"
-                        android:textColor="@color/lifinity_text"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Configurações da conta"
-                        android:textColor="@color/lifinity_text_secondary"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="›"
-                    android:textColor="@color/lifinity_text_secondary"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
+            <!-- Secção "MAIS NO LIFINITY" removida por ser redundante:
+                 - Notificações já está no sino do cabeçalho (HeaderHelper.setupBell);
+                 - Definições já está na engrenagem do cabeçalho (headerSettingsIcon);
+                 - Conquistas passou a ter o botão "Ver todas" ao lado do título da
+                   secção CONQUISTAS (acima). Os 3 itens-cartão foram retirados. -->
 
             <!-- Botões de ação (simplificados) -->
             <Button
@@ -733,6 +593,6 @@
         android:id="@+id/bottomNavInclude"
         layout="@layout/nav_bottom"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="@dimen/nav_total_height" />
 
 </LinearLayout>

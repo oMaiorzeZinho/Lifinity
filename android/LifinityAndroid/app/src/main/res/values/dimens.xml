@@ -48,6 +48,13 @@
     <!-- Botão circular/quadrado de ícone nos cabeçalhos (sino, definições, voltar) -->
     <dimen name="size_header_icon">40dp</dimen>
 
+    <!-- ===== Barra de navegação inferior =====
+         Altura TOTAL do contentor do nav (barra 70dp + folga de 26dp em cima para o
+         FAB emergir). Fonte ÚNICA: usada no nav_bottom.xml E em cada <include>. Se o
+         <include> não fixar esta altura, o FrameLayout colapsa para wrap_content (~70dp)
+         e o FAB deixa de aparecer acima da barra. -->
+    <dimen name="nav_total_height">96dp</dimen>
+
     <!-- ===== Avatares ===== -->
     <dimen name="size_avatar_large">80dp</dimen>
     <dimen name="size_avatar_medium">48dp</dimen>
