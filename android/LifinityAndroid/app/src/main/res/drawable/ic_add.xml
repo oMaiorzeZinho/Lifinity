@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Símbolo "+" (criar) desenhado à mão como vector drawable, para NÃO depender de
+     bibliotecas externas (build robusta). Usado no FAB central de criar tarefa: um
+     "+" branco, encorpado e perfeitamente centrado, fiável em qualquer fonte
+     (substitui o texto "+" do antigo Button, que podia não renderizar). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@color/lifinity_text_on_primary"
+        android:pathData="M10.6,5 h2.8 v5.2 h5.2 v2.8 h-5.2 v5.2 h-2.8 v-5.2 h-5.2 v-2.8 h5.2 z" />
+</vector>

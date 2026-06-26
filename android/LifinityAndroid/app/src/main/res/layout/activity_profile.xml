@@ -123,6 +123,23 @@
                         android:contentDescription="Avatar"
                         android:scaleType="centerCrop"
                         android:visibility="gone" />
+
+                    <!-- Selo "Mudar foto": abre a galeria para escolher uma nova foto de
+                         perfil (upload via PUT /users/me/avatar). Sobreposto ao canto
+                         inferior direito do avatar. -->
+                    <ImageView
+                        android:id="@+id/profileAvatarEditBadge"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
+                        android:layout_gravity="bottom|end"
+                        android:background="@drawable/bg_avatar_edit_badge"
+                        android:clickable="true"
+                        android:contentDescription="Mudar foto de perfil"
+                        android:elevation="4dp"
+                        android:focusable="true"
+                        android:padding="7dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_camera" />
                 </FrameLayout>
 
                 <!-- Nome + email -->
@@ -229,17 +246,23 @@
                     android:textStyle="bold"
                     tools:text="219 XP para nível 6" />
 
+                <!-- Barra de XP: progressDrawable personalizado (track claro + preenchimento
+                     verde com gradiente). maxHeight/minHeight = 16dp são ESSENCIAIS: o
+                     ProgressBar horizontal limita a altura do desenho pelo maxHeight, pelo
+                     que sem isto a barra ficaria fina mesmo com layout_height a 16dp.
+                     Sem progressTint/backgroundTint para não sobrepor as cores do drawable. -->
                 <ProgressBar
                     android:id="@+id/profileLevelProgressBar"
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="match_parent"
-                    android:layout_height="12dp"
+                    android:layout_height="16dp"
                     android:layout_marginTop="10dp"
                     android:indeterminate="false"
                     android:max="100"
+                    android:maxHeight="16dp"
+                    android:minHeight="16dp"
                     android:progress="0"
-                    android:progressBackgroundTint="@color/lifinity_inset"
-                    android:progressTint="@color/lifinity_primary" />
+                    android:progressDrawable="@drawable/xp_progress_bar" />
             </LinearLayout>
 
             <!-- ===== RESUMO DE ATIVIDADES ===== -->

@@ -2,6 +2,7 @@ package com.lifinity.app;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -9,19 +10,25 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.lifinity.app.api.AchievementApi;
 import com.lifinity.app.api.TaskApi;
+import com.lifinity.app.api.UserApi;
 import com.lifinity.app.models.Achievement;
 import com.lifinity.app.models.Task;
 import com.lifinity.app.models.User;
 import com.lifinity.app.network.ApiClient;
 import com.lifinity.app.utils.AvatarLoader;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,6 +38,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -40,6 +50,8 @@ public class ProfileActivity extends AppCompatActivity {
     private static final String KEY_TOKEN = "token";
     private static final String KEY_USER = "user";
     private static final String NOT_AVAILABLE = "Nao disponivel";
+    // Limite de 2MB para a foto (igual ao do backend) — evita enviar ficheiros enormes.
+    private static final long MAX_AVATAR_BYTES = 2L * 1024 * 1024;
 
     private final Gson gson = new Gson();
 
@@ -70,6 +82,11 @@ public class ProfileActivity extends AppCompatActivity {
     private Call<List<Task>> tasksCall;
     private Call<JsonObject> checkAchievementsCall;
     private Call<List<Achievement>> achievementsCall;
+    private Call<JsonObject> avatarUploadCall;
+
+    // Seletor de imagem da galeria (photo picker / GetContent): NÃO exige permissões
+    // perigosas de armazenamento. Tem de ser registado antes de a Activity ficar STARTED.
+    private ActivityResultLauncher<String> pickImageLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +100,17 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
         BottomNavHelper.setup(this, BottomNavHelper.Tab.PROFILE);
         HeaderHelper.setupBell(this);
+
+        // Regista o seletor de imagem da galeria (antes do estado STARTED). Quando o
+        // utilizador escolhe uma imagem, faz-se o upload para o backend.
+        pickImageLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                uri -> {
+                    if (uri != null) {
+                        uploadAvatar(uri);
+                    }
+                });
+
         bindViews();
         setupButtons();
         bindUser(getSavedUser());
@@ -152,6 +180,16 @@ public class ProfileActivity extends AppCompatActivity {
         if (viewAllAchievements != null) {
             viewAllAchievements.setOnClickListener(v -> openAchievementsActivity());
         }
+
+        // Selo "Mudar foto" sobreposto ao avatar: abre a galeria (apenas imagens).
+        View editAvatarBadge = findViewById(R.id.profileAvatarEditBadge);
+        if (editAvatarBadge != null) {
+            editAvatarBadge.setOnClickListener(v -> {
+                if (pickImageLauncher != null) {
+                    pickImageLauncher.launch("image/*");
+                }
+            });
+        }
     }
 
     private String getToken() {
@@ -179,7 +217,11 @@ public class ProfileActivity extends AppCompatActivity {
         Integer xp = user == null ? null : user.getXp();
         Integer level = user == null ? null : user.getLevel();
         int safeXp = xp == null ? 0 : Math.max(xp, 0);
-        int displayLevel = level == null ? calculateLevelFromXp(safeXp) : Math.max(level, 1);
+        // O nível canónico deriva SEMPRE do XP (mesma fórmula do backend), para que o
+        // nível mostrado e a barra de progresso sejam coerentes. Assim evita-se o bug de
+        // a barra parecer "cheia" quando o nível guardado estava dessincronizado do XP.
+        // Só se recorre ao nível do servidor quando não há XP disponível.
+        int displayLevel = xp != null ? calculateLevelFromXp(safeXp) : (level == null ? 1 : Math.max(level, 1));
 
         // Foto de perfil real se houver (o backend devolve "avatar" no login/perfil);
         // senão, o placeholder (círculo + inicial).
@@ -205,7 +247,9 @@ public class ProfileActivity extends AppCompatActivity {
         progress = Math.max(0, Math.min(progress, 100));
 
         levelProgressBar.setProgress(progress);
-        levelProgressLabel.setText(Math.max(nextLevelXp - xp, 0) + " XP para nivel " + (level + 1));
+        // Label por cima da barra: XP que falta para o próximo nível + percentagem atual.
+        levelProgressLabel.setText(Math.max(nextLevelXp - xp, 0) + " XP para nivel " + (level + 1)
+                + "  (" + progress + "%)");
     }
 
     private int calculateLevelFromXp(int xp) {
@@ -534,6 +578,164 @@ public class ProfileActivity extends AppCompatActivity {
         return value;
     }
 
+    // ───────── Upload da foto de perfil (galeria → PUT /users/me/avatar) ─────────
+
+    /** Lê a imagem escolhida, valida tamanho/tipo e envia-a para o backend. */
+    private void uploadAvatar(Uri uri) {
+        String token = getToken();
+        if (TextUtils.isEmpty(token)) {
+            openLoginActivity();
+            return;
+        }
+
+        byte[] bytes;
+        try {
+            bytes = readBytes(uri);
+        } catch (Exception e) {
+            Toast.makeText(this, "Nao foi possivel ler a imagem.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (bytes == null || bytes.length == 0) {
+            Toast.makeText(this, "Imagem invalida.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (bytes.length > MAX_AVATAR_BYTES) {
+            Toast.makeText(this, "Imagem demasiado grande (max 2MB).", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // O backend só aceita JPG/PNG/WebP — validamos no cliente para falhar cedo.
+        String mime = getContentResolver().getType(uri);
+        if (mime != null
+                && !mime.equals("image/jpeg")
+                && !mime.equals("image/png")
+                && !mime.equals("image/webp")) {
+            Toast.makeText(this, "Formato invalido. Usa JPG, PNG ou WebP.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        String safeMime = TextUtils.isEmpty(mime) ? "image/jpeg" : mime;
+        Toast.makeText(this, "A enviar foto...", Toast.LENGTH_SHORT).show();
+
+        MediaType mediaType = MediaType.parse(safeMime);
+        RequestBody requestBody = RequestBody.create(mediaType, bytes);
+        // Nome com extensão coerente com o tipo: o backend usa a extensão do ficheiro.
+        MultipartBody.Part part = MultipartBody.Part.createFormData(
+                "image", "avatar" + extensionForMime(mime), requestBody);
+
+        UserApi userApi = ApiClient.getClient().create(UserApi.class);
+        if (avatarUploadCall != null) {
+            avatarUploadCall.cancel();
+        }
+        avatarUploadCall = userApi.updateAvatar("Bearer " + token, part);
+        avatarUploadCall.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if (!response.isSuccessful() || response.body() == null) {
+                    Toast.makeText(ProfileActivity.this,
+                            "Nao foi possivel atualizar a foto.", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                onAvatarUpdated(extractAvatarPath(response.body()));
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                if (call.isCanceled()) {
+                    return;
+                }
+
+                Toast.makeText(ProfileActivity.this,
+                        "Falha de rede ao enviar a foto.", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    /** Lê todos os bytes do Uri através do ContentResolver (sem bibliotecas externas). */
+    private byte[] readBytes(Uri uri) throws Exception {
+        try (InputStream in = getContentResolver().openInputStream(uri);
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            if (in == null) {
+                return null;
+            }
+
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+            return out.toByteArray();
+        }
+    }
+
+    private String extensionForMime(String mime) {
+        if ("image/png".equals(mime)) {
+            return ".png";
+        }
+        if ("image/webp".equals(mime)) {
+            return ".webp";
+        }
+        return ".jpg";
+    }
+
+    /** Extrai o novo caminho do avatar da resposta { message, user: { avatar } }. */
+    private String extractAvatarPath(JsonObject body) {
+        try {
+            if (body.has("user") && body.get("user").isJsonObject()) {
+                JsonObject user = body.getAsJsonObject("user");
+                if (user.has("avatar") && !user.get("avatar").isJsonNull()) {
+                    return user.get("avatar").getAsString();
+                }
+            }
+        } catch (Exception ignored) {
+            // Sem caminho — o servidor guardou na mesma; refletirá no próximo carregamento.
+        }
+        return null;
+    }
+
+    /** Após upload com sucesso: atualiza a foto no cartão, na barra e no cache (prefs). */
+    private void onAvatarUpdated(String newPath) {
+        if (!TextUtils.isEmpty(newPath)) {
+            updateSavedAvatar(newPath);
+
+            // Recarrega a foto no cartão de perfil...
+            User updated = getSavedUser();
+            AvatarLoader.load(avatarImage,
+                    updated == null ? null : updated.getAvatar(),
+                    avatarText,
+                    updated == null ? null : updated.getUsername());
+
+            // ...e a miniatura na barra de navegação inferior.
+            ImageView navAvatar = findViewById(R.id.navTabProfileAvatar);
+            if (navAvatar != null) {
+                AvatarLoader.load(navAvatar, newPath, null, null);
+            }
+        }
+
+        Toast.makeText(this, "Foto atualizada.", Toast.LENGTH_SHORT).show();
+    }
+
+    /** Atualiza apenas o campo "avatar" no JSON do utilizador guardado (preserva o resto). */
+    private void updateSavedAvatar(String newPath) {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String savedUser = prefs.getString(KEY_USER, null);
+        try {
+            JsonObject userJson = TextUtils.isEmpty(savedUser)
+                    ? new JsonObject()
+                    : gson.fromJson(savedUser, JsonObject.class);
+            if (userJson == null) {
+                userJson = new JsonObject();
+            }
+            userJson.addProperty("avatar", newPath);
+            prefs.edit().putString(KEY_USER, gson.toJson(userJson)).apply();
+        } catch (Exception ignored) {
+            // Se o cache não puder ser atualizado, a foto foi na mesma guardada no servidor.
+        }
+    }
+
     private void openTasksActivity() {
         Intent intent = new Intent(this, TasksActivity.class);
         startActivity(intent);
@@ -581,6 +783,9 @@ public class ProfileActivity extends AppCompatActivity {
         }
         if (achievementsCall != null) {
             achievementsCall.cancel();
+        }
+        if (avatarUploadCall != null) {
+            avatarUploadCall.cancel();
         }
         super.onDestroy();
     }

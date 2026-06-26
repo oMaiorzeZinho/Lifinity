@@ -25,6 +25,8 @@
             android:textStyle="bold"
             tools:text="Primeira atividade" />
 
+        <!-- SELO de já-destacada: verde sólido (distingue-se do botão de ação "Destacar",
+             que é um contorno ghost). Mostrado só nas conquistas em destaque. -->
         <TextView
             android:id="@+id/achievementHighlightedText"
             android:layout_width="wrap_content"
@@ -35,7 +37,7 @@
             android:paddingTop="4dp"
             android:paddingEnd="10dp"
             android:paddingBottom="4dp"
-            android:text="Destacada"
+            android:text="★ Destacada"
             android:textColor="@color/lifinity_text_on_primary"
             android:textSize="11sp"
             android:textStyle="bold"
@@ -80,4 +82,27 @@
             android:textStyle="bold"
             tools:text="Desbloqueada" />
     </LinearLayout>
+
+    <!-- AÇÃO "Destacar": botão ghost (contorno), visualmente DIFERENTE do selo verde
+         "★ Destacada". Só aparece em conquistas DESBLOQUEADAS. Texto alterna entre
+         "Destacar" (não destacada) e "Remover destaque" (já destacada — toggle). -->
+    <TextView
+        android:id="@+id/achievementHighlightButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/btn_ghost_clay"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:text="Destacar"
+        android:textColor="@color/lifinity_primary"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        tools:visibility="visible" />
 </LinearLayout>

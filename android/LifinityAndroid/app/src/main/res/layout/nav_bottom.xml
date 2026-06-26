@@ -175,18 +175,24 @@
 
     <!-- FAB central: alinhado ao topo do contentor de @dimen/nav_total_height; como a
          barra ocupa os 70dp de baixo, o FAB de 64dp emerge ~26dp acima dela, totalmente
-         visível e centrado, com a sombra a aparecer (elevação alta). -->
-    <Button
+         visível e centrado, com a sombra a aparecer (elevação alta).
+         É um ImageView (não um Button) com o "+" como vector drawable centrado: o tema
+         Material trocava o <Button> por um MaterialButton (insets/handling do texto
+         próprios) e o "+" deixava de aparecer; um ImageView com @drawable/ic_add
+         garante o "+" branco bem visível e centrado, e o onClick mantém-se (definido no
+         BottomNavHelper, que trata o FAB como View). -->
+    <ImageView
         android:id="@+id/navFab"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_gravity="top|center_horizontal"
         android:background="@drawable/bg_fab_clay"
+        android:clickable="true"
+        android:contentDescription="Criar tarefa"
         android:elevation="16dp"
-        android:text="+"
-        android:textColor="@color/lifinity_text_on_primary"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:textAllCaps="false" />
+        android:focusable="true"
+        android:padding="16dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_add" />
 
 </FrameLayout>
