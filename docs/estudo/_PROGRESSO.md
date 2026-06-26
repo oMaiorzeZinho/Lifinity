@@ -173,15 +173,15 @@
 > e nos cabeçalhos/includes das telas principais.
 
 ### Android — activities e helpers (21)
-- [~] `MainActivity.java` *(routing para a Landing documentado na nota acima)*
-- [ ] `LoginActivity.java`
-- [ ] `RegisterActivity.java`
-- [~] `TasksActivity.java` *(vista de calendário documentada na nota acima)*
+- [x] `MainActivity.java` — doc completo `android/MainActivity.java.md`
+- [x] `LoginActivity.java` — `android/LoginActivity.java.md` (explica os padrões comuns das activities)
+- [x] `RegisterActivity.java` — `android/RegisterActivity.java.md`
+- [~] `TasksActivity.java` *(vista de calendário documentada na nota acima; doc completo por fazer)*
 - [x] `LandingActivity.java` *(ver nota 2026-06-18)*
 - [x] `FriendsActivity.java` *(ver nota 2026-06-18)*
 - [x] `GroupsActivity.java` *(ver nota 2026-06-18)*
-- [ ] `CreateTaskActivity.java`
-- [ ] `EditTaskActivity.java`
+- [x] `CreateTaskActivity.java` — `android/CreateTaskActivity.java.md`
+- [x] `EditTaskActivity.java` — `android/EditTaskActivity.java.md`
 - [ ] `RankingActivity.java`
 - [ ] `StatisticsActivity.java`
 - [ ] `InspirationActivity.java`
@@ -193,8 +193,8 @@
 - [ ] `AssistantActivity.java`
 - [ ] `ProfileActivity.java`
 - [ ] `SettingsActivity.java`
-- [ ] `BottomNavHelper.java`
-- [ ] `HeaderHelper.java`
+- [x] `BottomNavHelper.java` — `android/BottomNavHelper.java.md`
+- [x] `HeaderHelper.java` — `android/HeaderHelper.java.md`
 
 ### Android — adapters (8)
 - [ ] `adapters/TaskAdapter.java`
