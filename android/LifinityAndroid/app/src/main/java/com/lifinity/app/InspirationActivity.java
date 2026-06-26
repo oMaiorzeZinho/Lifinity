@@ -7,17 +7,26 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.lifinity.app.api.ChatApi;
 import com.lifinity.app.api.InspirationApi;
+import com.lifinity.app.models.ChatMessage;
+import com.lifinity.app.models.Conversation;
+import com.lifinity.app.models.SendChatMessageRequest;
 import com.lifinity.app.models.Verse;
 import com.lifinity.app.network.ApiClient;
 
@@ -43,16 +52,27 @@ public class InspirationActivity extends AppCompatActivity {
     private Button dailyVerseButton;
     private Button favoriteButton;
     private Button copyVerseButton;
+    private ImageView shareVerseButton;
     private ProgressBar progressBar;
     private LinearLayout favoritesContainer;
+    private LinearLayout themeFilterContainer;
+    private Spinner themeSpinner;
 
     private Verse currentVerse;
     private Call<Verse> dailyVerseCall;
     private Call<Verse> randomVerseCall;
     private Call<List<Verse>> favoritesCall;
     private Call<JsonObject> toggleFavoriteCall;
+    private Call<List<Conversation>> conversationsCall;
+    private Call<ChatMessage> shareMessageCall;
     private final List<Verse> favorites = new ArrayList<>();
     private final Gson gson = new Gson();
+
+    // Filtro por tema dos favoritos: "Todos" + temas únicos derivados dinamicamente.
+    private static final String THEME_ALL = "Todos";
+    private String selectedFavoriteTheme = THEME_ALL;
+    // Evita reagir ao evento do Spinner enquanto o repovoamos por código.
+    private boolean suppressThemeSpinnerEvent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,14 +95,19 @@ public class InspirationActivity extends AppCompatActivity {
         dailyVerseButton = findViewById(R.id.dailyVerseButton);
         favoriteButton = findViewById(R.id.favoriteVerseButton);
         copyVerseButton = findViewById(R.id.copyVerseButton);
+        shareVerseButton = findViewById(R.id.shareVerseButton);
         progressBar = findViewById(R.id.inspirationProgressBar);
         favoritesContainer = findViewById(R.id.inspirationFavoritesContainer);
+        themeFilterContainer = findViewById(R.id.inspirationThemeFilterContainer);
+        themeSpinner = findViewById(R.id.inspirationFavoritesThemeSpinner);
 
         randomVerseButton.setOnClickListener(v -> loadRandomVerse());
         dailyVerseButton.setOnClickListener(v -> loadDailyVerse(false));
         favoriteButton.setOnClickListener(v -> toggleCurrentFavorite());
         copyVerseButton.setOnClickListener(v -> copyCurrentVerseToClipboard());
+        shareVerseButton.setOnClickListener(v -> shareVerse(currentVerse));
 
+        setupThemeSpinnerListener();
         setupBottomNav();
         HeaderHelper.setupBell(this);
         loadInitialData();
@@ -314,15 +339,82 @@ public class InspirationActivity extends AppCompatActivity {
     }
 
     private void bindFavorites() {
+        setupThemeSpinner();
+        renderFavorites();
+    }
+
+    // Reconstrói as opções do filtro a partir dos temas ÚNICOS presentes nos favoritos.
+    private void setupThemeSpinner() {
+        List<String> themes = new ArrayList<>();
+        themes.add(THEME_ALL);
+        for (Verse favorite : favorites) {
+            String theme = favorite.getTheme();
+            if (!TextUtils.isEmpty(theme) && !themes.contains(theme)) {
+                themes.add(theme);
+            }
+        }
+
+        // Se o tema selecionado já não existe nos favoritos, volta a "Todos".
+        if (!themes.contains(selectedFavoriteTheme)) {
+            selectedFavoriteTheme = THEME_ALL;
+        }
+
+        // Esconde o filtro quando não há temas (só "Todos") — evita um seletor inútil.
+        themeFilterContainer.setVisibility(themes.size() > 1 ? View.VISIBLE : View.GONE);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item_spinner, themes);
+        adapter.setDropDownViewResource(R.layout.item_spinner);
+
+        // Repovoar o Spinner dispara onItemSelected; suprimimos para não duplicar o render.
+        suppressThemeSpinnerEvent = true;
+        themeSpinner.setAdapter(adapter);
+        themeSpinner.setSelection(Math.max(themes.indexOf(selectedFavoriteTheme), 0));
+        suppressThemeSpinnerEvent = false;
+    }
+
+    private void setupThemeSpinnerListener() {
+        themeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (suppressThemeSpinnerEvent) {
+                    return;
+                }
+                Object item = parent.getItemAtPosition(position);
+                selectedFavoriteTheme = item == null ? THEME_ALL : item.toString();
+                renderFavorites();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+
+    // Filtra os favoritos pelo tema selecionado e desenha os cartões.
+    private void renderFavorites() {
         favoritesContainer.removeAllViews();
 
         if (favorites.isEmpty()) {
+            favoritesEmptyText.setText("Ainda não tens versículos favoritos.");
+            favoritesEmptyText.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        List<Verse> displayed = new ArrayList<>();
+        for (Verse favorite : favorites) {
+            if (THEME_ALL.equals(selectedFavoriteTheme)
+                    || selectedFavoriteTheme.equals(favorite.getTheme())) {
+                displayed.add(favorite);
+            }
+        }
+
+        if (displayed.isEmpty()) {
+            favoritesEmptyText.setText("Nenhum favorito neste tema.");
             favoritesEmptyText.setVisibility(View.VISIBLE);
             return;
         }
 
         favoritesEmptyText.setVisibility(View.GONE);
-        for (Verse favorite : favorites) {
+        for (Verse favorite : displayed) {
             favoritesContainer.addView(createFavoriteView(favorite));
         }
     }
@@ -375,6 +467,29 @@ public class InspirationActivity extends AppCompatActivity {
             card.addView(theme);
         }
 
+        // Linha de ações: Partilhar (ghost) + Remover (danger), lado a lado.
+        LinearLayout actionsRow = new LinearLayout(this);
+        actionsRow.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout.LayoutParams actionsParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        actionsParams.setMargins(0, dp(12), 0, 0);
+        actionsRow.setLayoutParams(actionsParams);
+
+        int secondaryHeight = getResources().getDimensionPixelSize(R.dimen.height_button_secondary);
+
+        Button shareButton = new Button(this);
+        shareButton.setText("Partilhar");
+        shareButton.setTransformationMethod(null);
+        shareButton.setTextColor(getColor(R.color.lifinity_primary));
+        shareButton.setTextSize(14);
+        shareButton.setTypeface(shareButton.getTypeface(), android.graphics.Typeface.BOLD);
+        shareButton.setBackgroundResource(R.drawable.btn_ghost_clay);
+        shareButton.setOnClickListener(v -> shareVerse(favorite));
+        shareButton.setLayoutParams(new LinearLayout.LayoutParams(0, secondaryHeight, 1f));
+        actionsRow.addView(shareButton);
+
         Button removeButton = new Button(this);
         removeButton.setText("Remover");
         removeButton.setTransformationMethod(null);
@@ -383,14 +498,12 @@ public class InspirationActivity extends AppCompatActivity {
         removeButton.setTypeface(removeButton.getTypeface(), android.graphics.Typeface.BOLD);
         removeButton.setBackgroundResource(R.drawable.btn_danger_clay);
         removeButton.setOnClickListener(v -> toggleFavorite(favorite.getIdverse(), isSameVerse(favorite, currentVerse)));
+        LinearLayout.LayoutParams removeParams = new LinearLayout.LayoutParams(0, secondaryHeight, 1f);
+        removeParams.setMargins(dp(10), 0, 0, 0);
+        removeButton.setLayoutParams(removeParams);
+        actionsRow.addView(removeButton);
 
-        LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                getResources().getDimensionPixelSize(R.dimen.height_button)
-        );
-        buttonParams.setMargins(0, dp(12), 0, 0);
-        removeButton.setLayoutParams(buttonParams);
-        card.addView(removeButton);
+        card.addView(actionsRow);
 
         return card;
     }
@@ -545,6 +658,130 @@ public class InspirationActivity extends AppCompatActivity {
         finish();
     }
 
+    // ───────── Partilhar versículo para uma conversa EXISTENTE ─────────
+    // Âmbito: SÓ conversas que já existem (getConversations). Não cria conversas novas
+    // nem lista amigos/grupos. Envia o versículo formatado via sendMessage.
+
+    private void shareVerse(Verse verse) {
+        if (verse == null || TextUtils.isEmpty(verse.getText())) {
+            Toast.makeText(this, "Versículo indisponível para partilhar.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String token = getToken();
+        if (TextUtils.isEmpty(token)) {
+            openLoginActivity();
+            return;
+        }
+
+        String content = formatVerseForShare(verse);
+        Toast.makeText(this, "A carregar conversas...", Toast.LENGTH_SHORT).show();
+
+        ChatApi chatApi = ApiClient.getClient().create(ChatApi.class);
+        if (conversationsCall != null) {
+            conversationsCall.cancel();
+        }
+        conversationsCall = chatApi.getConversations("Bearer " + token);
+        conversationsCall.enqueue(new Callback<List<Conversation>>() {
+            @Override
+            public void onResponse(Call<List<Conversation>> call, Response<List<Conversation>> response) {
+                if (!response.isSuccessful() || response.body() == null) {
+                    Toast.makeText(InspirationActivity.this,
+                            "Não foi possível carregar as conversas.", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                // Só conversas válidas (com id) entram na lista de escolha.
+                List<Conversation> valid = new ArrayList<>();
+                for (Conversation conversation : response.body()) {
+                    if (conversation != null && conversation.getIdconversation() != null) {
+                        valid.add(conversation);
+                    }
+                }
+
+                if (valid.isEmpty()) {
+                    Toast.makeText(InspirationActivity.this,
+                            "Ainda não tens conversas para partilhar.", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                showShareDialog(valid, content);
+            }
+
+            @Override
+            public void onFailure(Call<List<Conversation>> call, Throwable t) {
+                if (call.isCanceled()) {
+                    return;
+                }
+                Toast.makeText(InspirationActivity.this,
+                        "Falha de rede ao carregar as conversas.", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    // Diálogo (tema claro existente, via alertDialogTheme) que lista as conversas
+    // existentes; o utilizador escolhe uma e o versículo é enviado para lá.
+    private void showShareDialog(List<Conversation> conversations, String content) {
+        CharSequence[] names = new CharSequence[conversations.size()];
+        for (int i = 0; i < conversations.size(); i++) {
+            String name = conversations.get(i).getName();
+            names[i] = TextUtils.isEmpty(name) ? "Conversa" : name;
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle("Partilhar para...")
+                .setItems(names, (dialog, which) ->
+                        sendVerseToConversation(conversations.get(which), content))
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void sendVerseToConversation(Conversation conversation, String content) {
+        String token = getToken();
+        if (TextUtils.isEmpty(token)) {
+            openLoginActivity();
+            return;
+        }
+        if (conversation == null || conversation.getIdconversation() == null) {
+            return;
+        }
+
+        ChatApi chatApi = ApiClient.getClient().create(ChatApi.class);
+        if (shareMessageCall != null) {
+            shareMessageCall.cancel();
+        }
+        shareMessageCall = chatApi.sendMessage(
+                "Bearer " + token,
+                conversation.getIdconversation(),
+                new SendChatMessageRequest(content));
+        shareMessageCall.enqueue(new Callback<ChatMessage>() {
+            @Override
+            public void onResponse(Call<ChatMessage> call, Response<ChatMessage> response) {
+                if (!response.isSuccessful()) {
+                    Toast.makeText(InspirationActivity.this,
+                            "Não foi possível enviar o versículo.", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                Toast.makeText(InspirationActivity.this,
+                        "Versículo enviado.", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<ChatMessage> call, Throwable t) {
+                if (call.isCanceled()) {
+                    return;
+                }
+                Toast.makeText(InspirationActivity.this,
+                        "Falha de rede ao enviar o versículo.", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    // Formato igual ao browser: «"texto" — Livro cap:verso» (aspas curvas + travessão).
+    private String formatVerseForShare(Verse verse) {
+        return "“" + valueOrFallback(verse.getText(), "") + "” — " + getReference(verse);
+    }
+
     private void copyCurrentVerseToClipboard() {
         if (currentVerse == null || TextUtils.isEmpty(currentVerse.getText())) {
             Toast.makeText(this, "Versículo indisponível para copiar.", Toast.LENGTH_SHORT).show();
@@ -574,6 +811,12 @@ public class InspirationActivity extends AppCompatActivity {
         }
         if (toggleFavoriteCall != null) {
             toggleFavoriteCall.cancel();
+        }
+        if (conversationsCall != null) {
+            conversationsCall.cancel();
+        }
+        if (shareMessageCall != null) {
+            shareMessageCall.cancel();
         }
         super.onDestroy();
     }

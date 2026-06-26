@@ -124,141 +124,204 @@
                 android:layout_marginTop="20dp"
                 android:background="@drawable/bg_card_clay"
                 android:elevation="10dp"
-                android:orientation="vertical"
-                android:padding="24dp">
+                android:orientation="vertical">
 
-                <LinearLayout
+                <!-- BANNER com imagem de fundo (como no browser): a imagem
+                     (bible_banner) preenche em centerCrop, com um overlay escuro por
+                     cima para o texto BRANCO se ler bem. O FrameLayout recorta os filhos
+                     aos cantos arredondados via clipToOutline + @drawable/bg_verse_hero.
+                     A imagem é só do versículo (o fundo geral da página mantém-se claro). -->
+                <FrameLayout
+                    android:id="@+id/inspirationVerseHero"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:layout_margin="16dp"
+                    android:background="@drawable/bg_verse_hero"
+                    android:clipToOutline="true"
+                    android:minHeight="200dp">
 
-                    <TextView
-                        android:id="@+id/inspirationCardModeText"
-                        android:layout_width="0dp"
+                    <!-- Imagem de fundo -->
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="Imagem de fundo do versículo"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/bible_banner" />
+
+                    <!-- Overlay escuro para legibilidade -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/bg_verse_overlay" />
+
+                    <!-- Conteúdo do versículo (texto branco sobre a imagem+overlay) -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:letterSpacing="0.1"
-                        android:text="Versículo do Dia"
-                        android:textColor="@color/lifinity_primary"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
+                        android:orientation="vertical"
+                        android:padding="20dp">
 
-                    <TextView
-                        android:id="@+id/inspirationThemeText"
-                        android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/inspirationCardModeText"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:letterSpacing="0.1"
+                                android:text="Versículo do Dia"
+                                android:textColor="#FFFFFF"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/inspirationThemeText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/bg_pill_mint"
+                                android:paddingStart="12dp"
+                                android:paddingEnd="12dp"
+                                android:paddingTop="5dp"
+                                android:paddingBottom="5dp"
+                                android:text="Geral"
+                                android:textColor="@color/lifinity_primary"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- Aspas decorativas -->
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:lineSpacingMultiplier="0.4"
+                            android:text="&#8220;"
+                            android:textColor="#B3FFFFFF"
+                            android:textSize="56sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/inspirationVerseText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:lineSpacingExtra="4dp"
+                            android:shadowColor="#99000000"
+                            android:shadowDx="0"
+                            android:shadowDy="1"
+                            android:shadowRadius="6"
+                            android:text="A carregar versículo..."
+                            android:textColor="#FFFFFF"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/inspirationReferenceText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:textColor="#F0FFFFFF"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            tools:text="— João 3:16" />
+                    </LinearLayout>
+                </FrameLayout>
+
+                <!-- AÇÕES (na zona clay, por baixo da imagem — legíveis sobre o cartão) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="20dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bg_pill_mint"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp"
-                        android:paddingTop="5dp"
-                        android:paddingBottom="5dp"
-                        android:text="Geral"
-                        android:textColor="@color/lifinity_primary"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
+                        android:orientation="horizontal">
 
-                <!-- Aspas decorativas -->
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:lineSpacingMultiplier="0.4"
-                    android:text="&#8220;"
-                    android:textColor="@color/lifinity_primary"
-                    android:textSize="56sp"
-                    android:textStyle="bold" />
+                        <Button
+                            android:id="@+id/favoriteVerseButton"
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/height_button"
+                            android:layout_weight="1"
+                            android:background="@drawable/btn_primary_clay"
+                            android:elevation="6dp"
+                            android:text="♥ Guardar"
+                            android:textAllCaps="false"
+                            android:textColor="@color/lifinity_text_on_primary"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/inspirationVerseText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:lineSpacingExtra="4dp"
-                    android:text="A carregar versículo..."
-                    android:textColor="@color/lifinity_text"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
+                        <!-- Partilhar versículo para uma conversa existente (ícone vetorial). -->
+                        <ImageView
+                            android:id="@+id/shareVerseButton"
+                            android:layout_width="52dp"
+                            android:layout_height="@dimen/height_button"
+                            android:layout_marginStart="10dp"
+                            android:background="@drawable/btn_secondary_clay"
+                            android:clickable="true"
+                            android:contentDescription="Partilhar versículo"
+                            android:elevation="4dp"
+                            android:focusable="true"
+                            android:padding="14dp"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/ic_share" />
 
-                <TextView
-                    android:id="@+id/inspirationReferenceText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:textColor="@color/lifinity_primary"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    tools:text="— João 3:16" />
+                        <!-- Ícone de copiar: emoji de prancheta (renderiza de forma
+                             fiável em qualquer fonte, ao contrário do ⧉ U+29C9 que
+                             podia aparecer como quadrado vazio). -->
+                        <Button
+                            android:id="@+id/copyVerseButton"
+                            android:layout_width="52dp"
+                            android:layout_height="@dimen/height_button"
+                            android:layout_marginStart="10dp"
+                            android:background="@drawable/btn_secondary_clay"
+                            android:elevation="4dp"
+                            android:text="&#128203;"
+                            android:textAllCaps="false"
+                            android:textColor="@color/lifinity_text"
+                            android:textSize="18sp" />
+                    </LinearLayout>
 
-                <!-- Ações -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="22dp"
-                    android:orientation="horizontal">
+                    <!-- Ações secundárias lado a lado e mais leves (ghost), para a secção
+                         respirar em vez de empilhar botões pesados. O "♥ Guardar" acima
+                         continua a ser a ação principal forte. Ids e onClick mantêm-se. -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
 
-                    <Button
-                        android:id="@+id/favoriteVerseButton"
-                        android:layout_width="0dp"
-                        android:layout_height="@dimen/height_button"
-                        android:layout_weight="1"
-                        android:background="@drawable/btn_primary_clay"
-                        android:elevation="6dp"
-                        android:text="♥ Guardar"
-                        android:textAllCaps="false"
-                        android:textColor="@color/lifinity_text_on_primary"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
+                        <Button
+                            android:id="@+id/randomVerseButton"
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/height_button_secondary"
+                            android:layout_weight="1"
+                            android:background="@drawable/btn_ghost_clay"
+                            android:text="Aleatório"
+                            android:textAllCaps="false"
+                            android:textColor="@color/lifinity_primary"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
 
-                    <!-- Ícone de copiar: emoji de prancheta (renderiza de forma
-                         fiável em qualquer fonte, ao contrário do ⧉ U+29C9 que
-                         podia aparecer como quadrado vazio). -->
-                    <Button
-                        android:id="@+id/copyVerseButton"
-                        android:layout_width="52dp"
-                        android:layout_height="@dimen/height_button"
-                        android:layout_marginStart="10dp"
-                        android:background="@drawable/btn_secondary_clay"
-                        android:elevation="4dp"
-                        android:text="&#128203;"
-                        android:textAllCaps="false"
-                        android:textColor="@color/lifinity_text"
-                        android:textSize="18sp" />
-                </LinearLayout>
-
-                <!-- Ações secundárias lado a lado e mais leves (ghost), para a secção
-                     respirar em vez de empilhar botões pesados. O "♥ Guardar" acima
-                     continua a ser a ação principal forte. Ids e onClick mantêm-se. -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:orientation="horizontal">
-
-                    <Button
-                        android:id="@+id/randomVerseButton"
-                        android:layout_width="0dp"
-                        android:layout_height="@dimen/height_button_secondary"
-                        android:layout_weight="1"
-                        android:background="@drawable/btn_ghost_clay"
-                        android:text="Aleatório"
-                        android:textAllCaps="false"
-                        android:textColor="@color/lifinity_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <Button
-                        android:id="@+id/dailyVerseButton"
-                        android:layout_width="0dp"
-                        android:layout_height="@dimen/height_button_secondary"
-                        android:layout_marginStart="10dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/btn_ghost_clay"
-                        android:text="Diário"
-                        android:textAllCaps="false"
-                        android:textColor="@color/lifinity_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
+                        <Button
+                            android:id="@+id/dailyVerseButton"
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/height_button_secondary"
+                            android:layout_marginStart="10dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/btn_ghost_clay"
+                            android:text="Diário"
+                            android:textAllCaps="false"
+                            android:textColor="@color/lifinity_primary"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
 
@@ -280,6 +343,44 @@
                     android:textColor="@color/lifinity_text_secondary"
                     android:textSize="11sp"
                     android:textStyle="bold" />
+
+                <!-- Filtro por tema (Task 2): temas derivados DINAMICAMENTE dos favoritos.
+                     Oculto quando não há temas nos favoritos. "Todos" mostra tudo. -->
+                <LinearLayout
+                    android:id="@+id/inspirationThemeFilterContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Filtrar por tema"
+                        android:textColor="@color/lifinity_text_secondary"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/height_button"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/bg_card_soft_clay"
+                        android:elevation="4dp"
+                        android:gravity="center_vertical">
+
+                        <Spinner
+                            android:id="@+id/inspirationFavoritesThemeSpinner"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@null"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="16dp"
+                            android:popupBackground="@drawable/bg_card_clay" />
+                    </LinearLayout>
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/inspirationFavoritesEmptyText"
