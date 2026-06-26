@@ -196,15 +196,16 @@
 - [x] `BottomNavHelper.java` — `android/BottomNavHelper.java.md`
 - [x] `HeaderHelper.java` — `android/HeaderHelper.java.md`
 
-### Android — adapters (8)
-- [ ] `adapters/TaskAdapter.java`
-- [ ] `adapters/RankingAdapter.java`
-- [ ] `adapters/AchievementAdapter.java`
-- [ ] `adapters/NotificationAdapter.java`
-- [ ] `adapters/ChatMessageAdapter.java`
-- [ ] `adapters/ConversationAdapter.java`
-- [ ] `adapters/AssistantAdapter.java`
-- [ ] `adapters/AssistantMessageAdapter.java`
+### Android — adapters (8) ✅ — docs em `android/adapters/`
+- [x] `adapters/TaskAdapter.java` *(explica o padrão RecyclerView/Adapter/ViewHolder)*
+- [x] `adapters/RankingAdapter.java`
+- [x] `adapters/AchievementAdapter.java`
+- [x] `adapters/NotificationAdapter.java`
+- [x] `adapters/ChatMessageAdapter.java` *(2 view types)*
+- [x] `adapters/ConversationAdapter.java`
+- [x] `adapters/AssistantAdapter.java` *(variante alternativa, não usada pela AssistantActivity)*
+- [x] `adapters/AssistantMessageAdapter.java` *(o usado pelo assistente)*
+- *(adapters de amigos/grupos — `FriendAdapter`, `FriendRequestAdapter`, `GroupAdapter` — no doc das funcionalidades Landing/Amigos/Grupos.)*
 
 ### Android — layouts e recursos (agrupados)
 - [ ] `res/layout/*.xml` — layouts principais (activities + items) — documentar em vários ficheiros
