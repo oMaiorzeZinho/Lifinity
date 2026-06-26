@@ -176,23 +176,23 @@
 - [x] `MainActivity.java` — doc completo `android/MainActivity.java.md`
 - [x] `LoginActivity.java` — `android/LoginActivity.java.md` (explica os padrões comuns das activities)
 - [x] `RegisterActivity.java` — `android/RegisterActivity.java.md`
-- [~] `TasksActivity.java` *(vista de calendário documentada na nota acima; doc completo por fazer)*
+- [x] `TasksActivity.java` — doc completo `android/TasksActivity.java.md` (lista + filtros + calendário)
 - [x] `LandingActivity.java` *(ver nota 2026-06-18)*
 - [x] `FriendsActivity.java` *(ver nota 2026-06-18)*
 - [x] `GroupsActivity.java` *(ver nota 2026-06-18)*
 - [x] `CreateTaskActivity.java` — `android/CreateTaskActivity.java.md`
 - [x] `EditTaskActivity.java` — `android/EditTaskActivity.java.md`
-- [ ] `RankingActivity.java`
+- [x] `RankingActivity.java` — `android/RankingActivity.java.md`
 - [ ] `StatisticsActivity.java`
 - [ ] `InspirationActivity.java`
 - [ ] `AchievementsActivity.java`
-- [ ] `NotificationsActivity.java`
-- [ ] `CommunityActivity.java`
+- [x] `NotificationsActivity.java` — `android/NotificationsActivity.java.md`
+- [x] `CommunityActivity.java` — `android/CommunityActivity.java.md`
 - [ ] `ConversationsActivity.java`
 - [ ] `ChatActivity.java`
 - [ ] `AssistantActivity.java`
 - [ ] `ProfileActivity.java`
-- [ ] `SettingsActivity.java`
+- [x] `SettingsActivity.java` — `android/SettingsActivity.java.md`
 - [x] `BottomNavHelper.java` — `android/BottomNavHelper.java.md`
 - [x] `HeaderHelper.java` — `android/HeaderHelper.java.md`
 

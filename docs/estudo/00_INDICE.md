@@ -84,6 +84,8 @@ Documento de estudo pessoal e exaustivo do projeto Lifinity. Cada ligação abre
 - [MainActivity](android/MainActivity.java.md) — porteiro (token → Landing ou Tarefas) · [LoginActivity](android/LoginActivity.java.md) ⭐ *(explica os padrões comuns: ciclo de vida, Retrofit enqueue, SharedPreferences, Intents)* · [RegisterActivity](android/RegisterActivity.java.md)
 - [CreateTaskActivity](android/CreateTaskActivity.java.md) · [EditTaskActivity](android/EditTaskActivity.java.md) — formulários de criar/editar tarefa
 - [BottomNavHelper](android/BottomNavHelper.java.md) — barra inferior (tabs + FAB + avatar) · [HeaderHelper](android/HeaderHelper.java.md) — sino de notificações
+- [TasksActivity](android/TasksActivity.java.md) ⭐ — o hub: cartão XP, resumo, lista com filtros/pesquisa, e vista de calendário nativa
+- [RankingActivity](android/RankingActivity.java.md) — pódio + lista por XP · [NotificationsActivity](android/NotificationsActivity.java.md) — sino/lista (optimistic UI) · [CommunityActivity](android/CommunityActivity.java.md) — hub social · [SettingsActivity](android/SettingsActivity.java.md) — username/password/apagar conta
 
 ### Melhorias por data
 - [**Inspiração: banner do versículo, filtro de temas e partilha — 2026-06-26**](android/INSPIRACAO_BANNER_FILTRO_PARTILHA_2026-06-26.md) — três melhorias na página de Inspiração: **imagem de fundo** atrás do versículo do dia (mesma `bible-banner.jpg` da web, com overlay escuro + texto branco e cantos via `clipToOutline`), **filtro por tema** nos favoritos (Spinner com temas dinâmicos + "Todos") e **partilhar versículo** para uma conversa **existente** (diálogo com `getConversations` + `sendMessage`, conteúdo «"texto" — Livro cap:verso»).
