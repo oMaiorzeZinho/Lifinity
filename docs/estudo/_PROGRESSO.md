@@ -127,33 +127,39 @@
 - [x] `api/AssistantApi.java`
 - *(nota: `FriendApi.java` e `GroupApi.java` ficaram explicados no doc das funcionalidades Landing/Amigos/Grupos.)*
 
-### Android — models (28)
-- [ ] `models/User.java`
-- [ ] `models/LoginRequest.java`
-- [ ] `models/LoginResponse.java`
-- [ ] `models/RegisterRequest.java`
-- [ ] `models/RegisterResponse.java`
-- [ ] `models/Task.java`
-- [ ] `models/CreateTaskRequest.java`
-- [ ] `models/UpdateTaskRequest.java`
-- [ ] `models/CompleteTaskResponse.java`
-- [ ] `models/RankingUser.java`
-- [ ] `models/StatisticsResponse.java`
-- [ ] `models/StatisticsSummary.java`
-- [ ] `models/StatisticsDay.java`
-- [ ] `models/Verse.java`
-- [ ] `models/Achievement.java`
-- [ ] `models/Notification.java`
-- [ ] `models/AppNotification.java`
-- [ ] `models/ChatMessage.java`
-- [ ] `models/Conversation.java`
-- [ ] `models/SendChatMessageRequest.java`
-- [ ] `models/AssistantMessage.java`
-- [ ] `models/AssistantSendRequest.java`
-- [ ] `models/AssistantSendResponse.java`
-- [ ] `models/UpdateUsernameRequest.java`
-- [ ] `models/UpdatePasswordRequest.java`
-- [ ] `models/DeleteAccountRequest.java`
+### Android — models (28) ✅ — agrupados por domínio em 4 docs sob `android/models/`
+> `_MODELS_AUTH_USER.md` · `_MODELS_TASKS.md` · `_MODELS_STATS_INSPIRATION_ACHIEVEMENTS.md` · `_MODELS_NOTIFICATIONS_CHAT_ASSISTANT.md`
+- [x] `models/User.java`
+- [x] `models/LoginRequest.java`
+- [x] `models/LoginResponse.java`
+- [x] `models/RegisterRequest.java`
+- [x] `models/RegisterResponse.java`
+- [x] `models/Task.java`
+- [x] `models/CreateTaskRequest.java`
+- [x] `models/UpdateTaskRequest.java`
+- [x] `models/CompleteTaskResponse.java`
+- [x] `models/RankingUser.java`
+- [x] `models/StatisticsResponse.java`
+- [x] `models/StatisticsSummary.java`
+- [x] `models/StatisticsDay.java`
+- [x] `models/Verse.java`
+- [x] `models/Achievement.java`
+- [x] `models/Notification.java`
+- [x] `models/AppNotification.java`
+- [x] `models/ChatMessage.java`
+- [x] `models/Conversation.java`
+- [x] `models/SendChatMessageRequest.java`
+- [x] `models/AssistantMessage.java`
+- [x] `models/AssistantSendRequest.java`
+- [x] `models/AssistantSendResponse.java`
+- [x] `models/UpdateUsernameRequest.java`
+- [x] `models/UpdatePasswordRequest.java`
+- [x] `models/DeleteAccountRequest.java`
+- *(models de amigos/grupos — `Friend`, `FriendRequest`, `Group`, `GroupMember`, `CreateGroupRequest`, `JoinGroupRequest`, `SendFriendRequest` — explicados no doc das funcionalidades Landing/Amigos/Grupos.)*
+
+### Android — utils (2) ✅ — `android/utils/_UTILS_IMAGENS.md`
+- [x] `utils/ImageUrlHelper.java`
+- [x] `utils/AvatarLoader.java`
 
 > **Nota (2026-06-18):** funcionalidades novas Landing/Amigos/Grupos/Calendário explicadas em conjunto
 > em `android/FUNCIONALIDADES_LANDING_AMIGOS_GRUPOS_CALENDARIO.md` (LandingActivity, FriendsActivity,
