@@ -65,6 +65,16 @@ Documento de estudo pessoal e exaustivo do projeto Lifinity. Cada ligação abre
 - `Login.jsx`, `Register.jsx`, `Home.jsx`, `Dashboard.jsx`, `Tasks.jsx`, `Ranking.jsx`, `Statistics.jsx`, `Inspiration.jsx`, `Community.jsx`, `Profile.jsx`, `Chat.jsx`, `Contact.jsx`
 
 ## 📱 Android
+
+### Estudo do código (ficheiro a ficheiro)
+**Configuração e rede**
+- [Configuração: Gradle + Manifest](android/config/_CONFIG_GRADLE_MANIFEST.md) — `settings.gradle.kts`, `build.gradle.kts` (raiz + app), `libs.versions.toml`, `AndroidManifest.xml` (build, dependências, IP da API, ecrãs e permissões).
+- [network/ApiClient.java](android/network/ApiClient.java.md) — a fábrica Singleton do Retrofit (URL base, timeouts, logging, Gson).
+
+**APIs Retrofit** (interfaces que falam com o backend)
+- [AuthApi](android/api/AuthApi.java.md) · [TaskApi](android/api/TaskApi.java.md) · [UserApi](android/api/UserApi.java.md) · [AccountApi](android/api/AccountApi.java.md) · [StatisticsApi](android/api/StatisticsApi.java.md) · [InspirationApi](android/api/InspirationApi.java.md) · [AchievementApi](android/api/AchievementApi.java.md) · [NotificationApi](android/api/NotificationApi.java.md) · [ChatApi](android/api/ChatApi.java.md) · [AssistantApi](android/api/AssistantApi.java.md)
+
+### Melhorias por data
 - [**Inspiração: banner do versículo, filtro de temas e partilha — 2026-06-26**](android/INSPIRACAO_BANNER_FILTRO_PARTILHA_2026-06-26.md) — três melhorias na página de Inspiração: **imagem de fundo** atrás do versículo do dia (mesma `bible-banner.jpg` da web, com overlay escuro + texto branco e cantos via `clipToOutline`), **filtro por tema** nos favoritos (Spinner com temas dinâmicos + "Todos") e **partilhar versículo** para uma conversa **existente** (diálogo com `getConversations` + `sendMessage`, conteúdo «"texto" — Livro cap:verso»).
 - [**FAB "+", barra de XP, foto de perfil e destaque de conquistas — 2026-06-26**](android/FAB_BARRA_XP_FOTO_PERFIL_DESTAQUES_2026-06-26.md) — quatro melhorias: **"+" garantido no FAB** (`<Button>`→`ImageView` com vector `ic_add`, fugindo ao `MaterialButton`), **barra de XP** com aspeto de jogo (`xp_progress_bar` drawable + `maxHeight`; nível derivado do XP para a fração ser correta), **mudar foto de perfil pela galeria** (photo picker `GetContent` sem permissões + multipart `PUT /users/me/avatar`) e **destacar conquistas** (botão ghost distinto do selo verde, diálogo de substituição quando já há 3, `PUT /achievements/highlights`).
 - [**Melhorias na barra de navegação e no Perfil — 2026-06-26**](android/MELHORIAS_NAV_E_PERFIL_2026-06-26.md) — ícones do menu coerentes (Material como vector drawables, sem o emoji a cores), **miniatura do avatar** na tab Perfil, **correção real do FAB "+"** (o `<include>` com `wrap_content` colapsava os 96dp → fixado com `@dimen/nav_total_height`), cabeçalho das Tarefas opaco (sem sobreposição ao scroll) e secção "Mais no Lifinity" removida (Conquistas com botão "Ver todas").

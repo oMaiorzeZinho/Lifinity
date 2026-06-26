@@ -104,27 +104,28 @@
 - [ ] `frontend/src/pages/Chat.jsx`
 - [x] `frontend/src/pages/Contact.jsx`
 
-### Android — config (5)
-- [ ] `android/LifinityAndroid/settings.gradle.kts`
-- [ ] `android/LifinityAndroid/build.gradle.kts`
-- [ ] `android/LifinityAndroid/app/build.gradle.kts`
-- [ ] `android/LifinityAndroid/gradle/libs.versions.toml`
-- [ ] `android/LifinityAndroid/app/src/main/AndroidManifest.xml`
+### Android — config (5) ✅ — agrupados em `android/config/_CONFIG_GRADLE_MANIFEST.md`
+- [x] `android/LifinityAndroid/settings.gradle.kts`
+- [x] `android/LifinityAndroid/build.gradle.kts`
+- [x] `android/LifinityAndroid/app/build.gradle.kts`
+- [x] `android/LifinityAndroid/gradle/libs.versions.toml`
+- [x] `android/LifinityAndroid/app/src/main/AndroidManifest.xml`
 
-### Android — rede (1)
-- [ ] `network/ApiClient.java`
+### Android — rede (1) ✅
+- [x] `network/ApiClient.java`
 
-### Android — interfaces API Retrofit (10)
-- [ ] `api/AuthApi.java`
-- [ ] `api/TaskApi.java`
-- [ ] `api/UserApi.java`
-- [ ] `api/AccountApi.java`
-- [ ] `api/StatisticsApi.java`
-- [ ] `api/InspirationApi.java`
-- [ ] `api/AchievementApi.java`
-- [ ] `api/NotificationApi.java`
-- [ ] `api/ChatApi.java`
-- [ ] `api/AssistantApi.java`
+### Android — interfaces API Retrofit (10) ✅
+- [x] `api/AuthApi.java`
+- [x] `api/TaskApi.java`
+- [x] `api/UserApi.java`
+- [x] `api/AccountApi.java`
+- [x] `api/StatisticsApi.java`
+- [x] `api/InspirationApi.java`
+- [x] `api/AchievementApi.java`
+- [x] `api/NotificationApi.java`
+- [x] `api/ChatApi.java`
+- [x] `api/AssistantApi.java`
+- *(nota: `FriendApi.java` e `GroupApi.java` ficaram explicados no doc das funcionalidades Landing/Amigos/Grupos.)*
 
 ### Android — models (28)
 - [ ] `models/User.java`
