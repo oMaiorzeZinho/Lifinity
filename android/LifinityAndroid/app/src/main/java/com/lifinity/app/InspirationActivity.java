@@ -51,7 +51,8 @@ public class InspirationActivity extends AppCompatActivity {
     private Button randomVerseButton;
     private Button dailyVerseButton;
     private Button favoriteButton;
-    private Button copyVerseButton;
+    // Botão de copiar é um ImageView (ícone vetorial ic_copy), igual ao de partilhar.
+    private ImageView copyVerseButton;
     private ImageView shareVerseButton;
     private ProgressBar progressBar;
     private LinearLayout favoritesContainer;
@@ -73,6 +74,12 @@ public class InspirationActivity extends AppCompatActivity {
     private String selectedFavoriteTheme = THEME_ALL;
     // Evita reagir ao evento do Spinner enquanto o repovoamos por código.
     private boolean suppressThemeSpinnerEvent;
+
+    // "Mostrar mais / mostrar menos" dos favoritos: por defeito mostram-se só os
+    // 4 mais recentes (a lista já vem do backend por created_at DESC). O botão
+    // expande para todos (do tema filtrado) e volta a colapsar.
+    private static final int FAVORITES_COLLAPSED_COUNT = 4;
+    private boolean favoritesExpanded;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -381,6 +388,8 @@ public class InspirationActivity extends AppCompatActivity {
                 }
                 Object item = parent.getItemAtPosition(position);
                 selectedFavoriteTheme = item == null ? THEME_ALL : item.toString();
+                // Ao trocar de tema, recomeça colapsado (4 mais recentes desse tema).
+                favoritesExpanded = false;
                 renderFavorites();
             }
 
@@ -414,9 +423,46 @@ public class InspirationActivity extends AppCompatActivity {
         }
 
         favoritesEmptyText.setVisibility(View.GONE);
-        for (Verse favorite : displayed) {
-            favoritesContainer.addView(createFavoriteView(favorite));
+
+        // Mostra só os 4 mais recentes por defeito (a lista já vem por created_at DESC
+        // do backend, por isso os primeiros são os mais recentes). Se estiver expandido,
+        // mostra todos os do tema atualmente filtrado.
+        int total = displayed.size();
+        int limit = favoritesExpanded ? total : Math.min(FAVORITES_COLLAPSED_COUNT, total);
+        for (int i = 0; i < limit; i++) {
+            favoritesContainer.addView(createFavoriteView(displayed.get(i)));
         }
+
+        // Botão "Mostrar mais / Mostrar menos" — só quando há mais de 4 no tema atual.
+        if (total > FAVORITES_COLLAPSED_COUNT) {
+            favoritesContainer.addView(createToggleFavoritesButton(total));
+        }
+    }
+
+    // Botão discreto (ghost) que alterna entre os 4 mais recentes e todos os favoritos.
+    private View createToggleFavoritesButton(int total) {
+        Button toggle = new Button(this);
+        toggle.setTransformationMethod(null);
+        toggle.setAllCaps(false);
+        toggle.setText(favoritesExpanded
+                ? "Mostrar menos"
+                : "Mostrar mais (" + (total - FAVORITES_COLLAPSED_COUNT) + ")");
+        toggle.setTextColor(getColor(R.color.lifinity_primary));
+        toggle.setTextSize(14);
+        toggle.setTypeface(toggle.getTypeface(), android.graphics.Typeface.BOLD);
+        toggle.setBackgroundResource(R.drawable.btn_ghost_clay);
+
+        int secondaryHeight = getResources().getDimensionPixelSize(R.dimen.height_button_secondary);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, secondaryHeight);
+        toggle.setLayoutParams(params);
+
+        toggle.setOnClickListener(v -> {
+            favoritesExpanded = !favoritesExpanded;
+            renderFavorites();
+        });
+
+        return toggle;
     }
 
     private View createFavoriteView(Verse favorite) {

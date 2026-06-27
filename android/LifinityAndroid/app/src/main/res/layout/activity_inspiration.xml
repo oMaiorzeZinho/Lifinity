@@ -138,7 +138,7 @@
                     android:layout_margin="16dp"
                     android:background="@drawable/bg_verse_hero"
                     android:clipToOutline="true"
-                    android:minHeight="200dp">
+                    android:minHeight="150dp">
 
                     <!-- Imagem de fundo -->
                     <ImageView
@@ -154,12 +154,13 @@
                         android:layout_height="match_parent"
                         android:background="@drawable/bg_verse_overlay" />
 
-                    <!-- Conteúdo do versículo (texto branco sobre a imagem+overlay) -->
+                    <!-- Conteúdo do versículo (texto branco sobre a imagem+overlay).
+                         Padding mais compacto (16dp) para a faixa ficar mais baixa. -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="20dp">
+                        android:padding="16dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -193,15 +194,15 @@
                                 android:textStyle="bold" />
                         </LinearLayout>
 
-                        <!-- Aspas decorativas -->
+                        <!-- Aspas decorativas (mais pequenas, para a faixa ficar baixa) -->
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
+                            android:layout_marginTop="4dp"
                             android:lineSpacingMultiplier="0.4"
                             android:text="&#8220;"
                             android:textColor="#B3FFFFFF"
-                            android:textSize="56sp"
+                            android:textSize="34sp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -215,14 +216,14 @@
                             android:shadowRadius="6"
                             android:text="A carregar versículo..."
                             android:textColor="#FFFFFF"
-                            android:textSize="22sp"
+                            android:textSize="18sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/inspirationReferenceText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="16dp"
+                            android:layout_marginTop="10dp"
                             android:textColor="#F0FFFFFF"
                             android:textSize="14sp"
                             android:textStyle="bold"
@@ -272,20 +273,23 @@
                             android:scaleType="fitCenter"
                             android:src="@drawable/ic_share" />
 
-                        <!-- Ícone de copiar: emoji de prancheta (renderiza de forma
-                             fiável em qualquer fonte, ao contrário do ⧉ U+29C9 que
-                             podia aparecer como quadrado vazio). -->
-                        <Button
+                        <!-- Ícone de copiar: vector drawable ic_copy (dois retângulos
+                             sobrepostos, o símbolo universal de copiar). Substituiu o emoji
+                             de prancheta, que não representava bem "copiar". Mesmo estilo do
+                             botão de partilhar ao lado (ImageView + btn_secondary_clay). -->
+                        <ImageView
                             android:id="@+id/copyVerseButton"
                             android:layout_width="52dp"
                             android:layout_height="@dimen/height_button"
                             android:layout_marginStart="10dp"
                             android:background="@drawable/btn_secondary_clay"
+                            android:clickable="true"
+                            android:contentDescription="Copiar versículo"
                             android:elevation="4dp"
-                            android:text="&#128203;"
-                            android:textAllCaps="false"
-                            android:textColor="@color/lifinity_text"
-                            android:textSize="18sp" />
+                            android:focusable="true"
+                            android:padding="14dp"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/ic_copy" />
                     </LinearLayout>
 
                     <!-- Ações secundárias lado a lado e mais leves (ghost), para a secção
