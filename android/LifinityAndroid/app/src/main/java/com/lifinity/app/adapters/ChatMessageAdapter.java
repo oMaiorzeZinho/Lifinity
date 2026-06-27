@@ -1,5 +1,6 @@
 package com.lifinity.app.adapters;
 
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,7 +65,19 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if (holder instanceof SentViewHolder) {
             ((SentViewHolder) holder).bind(msg);
         } else {
-            ((ReceivedViewHolder) holder).bind(msg);
+            // Mostra o nome do remetente só na 1.ª mensagem de uma sequência:
+            // se a mensagem anterior for de OUTRO remetente (ou for minha), mostra-se.
+            boolean showName = true;
+            if (position > 0) {
+                ChatMessage previous = messages.get(position - 1);
+                boolean previousIsMine = previous.isMine(currentUserId);
+                boolean sameSender = !previousIsMine
+                        && previous.getIduser() != null
+                        && msg.getIduser() != null
+                        && previous.getIduser().intValue() == msg.getIduser().intValue();
+                showName = !sameSender;
+            }
+            ((ReceivedViewHolder) holder).bind(msg, showName);
         }
     }
 
@@ -92,14 +105,25 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     static class ReceivedViewHolder extends RecyclerView.ViewHolder {
         private final TextView messageText;
+        private final TextView senderName;
 
         ReceivedViewHolder(@NonNull View itemView) {
             super(itemView);
             messageText = itemView.findViewById(R.id.chatMessageText);
+            senderName  = itemView.findViewById(R.id.chatSenderName);
         }
 
-        void bind(ChatMessage msg) {
+        void bind(ChatMessage msg, boolean showName) {
             messageText.setText(msg.getContent() != null ? msg.getContent() : "");
+
+            // Nome de quem enviou — visível só na 1.ª mensagem de cada sequência.
+            String name = msg.getSenderName();
+            if (showName && !TextUtils.isEmpty(name)) {
+                senderName.setText(name);
+                senderName.setVisibility(View.VISIBLE);
+            } else {
+                senderName.setVisibility(View.GONE);
+            }
         }
     }
 }

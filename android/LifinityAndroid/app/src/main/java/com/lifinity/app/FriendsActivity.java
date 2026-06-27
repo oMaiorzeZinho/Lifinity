@@ -9,6 +9,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,7 +22,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.gson.JsonObject;
 import com.lifinity.app.adapters.FriendAdapter;
 import com.lifinity.app.adapters.FriendRequestAdapter;
+import com.lifinity.app.api.ChatApi;
 import com.lifinity.app.api.FriendApi;
+import com.lifinity.app.models.CreatePrivateConversationRequest;
 import com.lifinity.app.models.Friend;
 import com.lifinity.app.models.FriendRequest;
 import com.lifinity.app.models.SendFriendRequest;
@@ -63,6 +66,7 @@ public class FriendsActivity extends AppCompatActivity {
     private Call<List<Friend>> searchCall;
     private Call<List<FriendRequest>> requestsCall;
     private Call<JsonObject> actionCall;
+    private Call<JsonObject> privateConvCall;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,8 +92,8 @@ public class FriendsActivity extends AppCompatActivity {
 
         findViewById(R.id.friendsBackButton).setOnClickListener(v -> finish());
 
-        // Lista de amigos: ação "Remover".
-        friendsAdapter = new FriendAdapter("Remover", this::confirmRemoveFriend);
+        // Lista de amigos: botão "•••" que abre o menu de opções.
+        friendsAdapter = new FriendAdapter(this::showFriendOptions);
         friendsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         friendsRecyclerView.setAdapter(friendsAdapter);
 
@@ -195,6 +199,84 @@ public class FriendsActivity extends AppCompatActivity {
         FriendApi api = ApiClient.getClient().create(FriendApi.class);
         actionCall = api.removeFriend("Bearer " + getToken(), friend.getIduser());
         actionCall.enqueue(simpleCallback("Amigo removido.", this::loadFriends));
+    }
+
+    // ===== Menu de opções do amigo (Abrir conversa / Ver perfil / Remover) =====
+
+    // Abre o menu "•••" ancorado ao botão do amigo.
+    private void showFriendOptions(Friend friend, View anchor) {
+        if (friend == null || friend.getIduser() == null) return;
+
+        PopupMenu menu = new PopupMenu(this, anchor);
+        menu.getMenu().add(0, 1, 0, "Abrir conversa");
+        menu.getMenu().add(0, 2, 1, "Ver perfil");
+        menu.getMenu().add(0, 3, 2, "Remover");
+        menu.setOnMenuItemClickListener(item -> {
+            switch (item.getItemId()) {
+                case 1:
+                    openConversationWith(friend);
+                    return true;
+                case 2:
+                    showFriendProfile(friend);
+                    return true;
+                case 3:
+                    confirmRemoveFriend(friend);
+                    return true;
+                default:
+                    return false;
+            }
+        });
+        menu.show();
+    }
+
+    // Cria/obtém a conversa privada com o amigo e abre o ChatActivity.
+    private void openConversationWith(Friend friend) {
+        if (friend == null || friend.getIduser() == null) return;
+
+        ChatApi api = ApiClient.getClient().create(ChatApi.class);
+        privateConvCall = api.createPrivateConversation(
+                "Bearer " + getToken(),
+                new CreatePrivateConversationRequest(friend.getIduser()));
+        privateConvCall.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if (call.isCanceled()) return;
+
+                JsonObject body = response.body();
+                if (!response.isSuccessful() || body == null
+                        || !body.has("idconversation") || body.get("idconversation").isJsonNull()) {
+                    Toast.makeText(FriendsActivity.this,
+                            "Não foi possível abrir a conversa.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                int idconversation = body.get("idconversation").getAsInt();
+                Intent intent = new Intent(FriendsActivity.this, ChatActivity.class);
+                intent.putExtra(ChatActivity.EXTRA_CONVERSATION_ID, idconversation);
+                // O cabeçalho do chat mostra o nome do amigo.
+                intent.putExtra(ChatActivity.EXTRA_CONVERSATION_NAME, friend.getUsername());
+                startActivity(intent);
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                if (call.isCanceled()) return;
+                Toast.makeText(FriendsActivity.this,
+                        "Sem ligação ao servidor.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // Mostra a informação do amigo num diálogo simples.
+    // TODO(futuro): ecrã de perfil público dedicado no Android (a web usa PublicProfileModal).
+    private void showFriendProfile(Friend friend) {
+        if (friend == null) return;
+        String info = "Nível " + friend.getLevel() + " · " + friend.getXp() + " XP";
+        new AlertDialog.Builder(this)
+                .setTitle(friend.getUsername())
+                .setMessage(info)
+                .setPositiveButton("Fechar", null)
+                .show();
     }
 
     // ===== Pesquisa + pedidos =====
@@ -355,6 +437,7 @@ public class FriendsActivity extends AppCompatActivity {
         if (searchCall != null) searchCall.cancel();
         if (requestsCall != null) requestsCall.cancel();
         if (actionCall != null) actionCall.cancel();
+        if (privateConvCall != null) privateConvCall.cancel();
         super.onDestroy();
     }
 }

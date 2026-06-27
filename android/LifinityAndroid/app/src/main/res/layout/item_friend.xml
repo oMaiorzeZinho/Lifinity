@@ -65,6 +65,7 @@
             tools:text="Nível 5 · 2043 XP" />
     </LinearLayout>
 
+    <!-- Botão de ação por texto (ex.: "Adicionar" nos resultados de pesquisa). -->
     <Button
         android:id="@+id/friendActionButton"
         android:layout_width="wrap_content"
@@ -79,4 +80,21 @@
         android:textColor="@color/lifinity_primary"
         android:textSize="13sp"
         android:textStyle="bold" />
+
+    <!-- Botão "•••" (mais opções) — usado na lista de amigos para abrir o menu
+         (Abrir conversa / Ver perfil / Remover). Escondido nos resultados de pesquisa. -->
+    <Button
+        android:id="@+id/friendOptionsButton"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_marginStart="10dp"
+        android:background="@drawable/btn_secondary_clay"
+        android:letterSpacing="0.08"
+        android:minWidth="0dp"
+        android:text="&#8226;&#8226;&#8226;"
+        android:textAllCaps="false"
+        android:textColor="@color/lifinity_text"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
 </LinearLayout>

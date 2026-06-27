@@ -10,6 +10,33 @@
     android:orientation="horizontal"
     android:padding="@dimen/space_card">
 
+    <!-- Avatar: placeholder (círculo + inicial) com a FOTO real por cima quando existe.
+         Em grupos não há foto, fica o placeholder com a inicial do nome do grupo. -->
+    <FrameLayout
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:layout_marginEnd="12dp">
+
+        <TextView
+            android:id="@+id/convAvatarText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_avatar_clay"
+            android:gravity="center"
+            android:textColor="@color/lifinity_primary"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            tools:text="A" />
+
+        <ImageView
+            android:id="@+id/convAvatarImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="Avatar"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
+    </FrameLayout>
+
     <!-- Conteúdo principal: nome + última mensagem -->
     <LinearLayout
         android:layout_width="0dp"

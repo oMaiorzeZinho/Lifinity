@@ -5,6 +5,12 @@ import com.google.gson.annotations.SerializedName;
 // Mensagem do chat com o assistente IA (role = "user" | "assistant").
 public class AssistantMessage {
     private Integer idmessage;
+
+    // O backend devolve o autor no campo "sender" (valores "user" | "assistant"),
+    // não "role". Antes, ao reabrir o assistente, este campo ficava null e todas as
+    // mensagens (incluindo as minhas) eram tratadas como sendo da IA. O "alternate"
+    // mantém compatível o construtor local que continua a usar o nome interno "role".
+    @SerializedName(value = "sender", alternate = {"role"})
     private String role;
     private String content;
 

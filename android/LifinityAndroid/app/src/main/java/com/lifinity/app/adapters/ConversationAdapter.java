@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.lifinity.app.R;
 import com.lifinity.app.models.Conversation;
+import com.lifinity.app.utils.AvatarLoader;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -65,6 +67,8 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         private final TextView lastMessageText;
         private final TextView dateText;
         private final TextView unreadBadge;
+        private final TextView avatarText;
+        private final ImageView avatarImage;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -72,11 +76,18 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
             lastMessageText = itemView.findViewById(R.id.convLastMessageText);
             dateText        = itemView.findViewById(R.id.convDateText);
             unreadBadge     = itemView.findViewById(R.id.convUnreadBadge);
+            avatarText      = itemView.findViewById(R.id.convAvatarText);
+            avatarImage     = itemView.findViewById(R.id.convAvatarImage);
         }
 
         void bind(Conversation conversation, OnConversationClickListener listener) {
-            nameText.setText(!TextUtils.isEmpty(conversation.getName())
-                    ? conversation.getName() : "Conversa");
+            // Nome correto: grupos -> name; privadas -> nome do amigo (other_username)
+            String displayName = conversation.getDisplayName();
+            nameText.setText(displayName);
+
+            // Avatar: foto do outro utilizador nas privadas; nos grupos fica o
+            // placeholder (círculo + inicial do nome), pois não há avatar de grupo.
+            AvatarLoader.load(avatarImage, conversation.getDisplayAvatar(), avatarText, displayName);
 
             if (!TextUtils.isEmpty(conversation.getLastMessage())) {
                 lastMessageText.setText(conversation.getLastMessage());

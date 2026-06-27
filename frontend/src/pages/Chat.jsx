@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import PublicProfileModal from '../components/PublicProfileModal';
+import { getImageUrl } from '../utils/imageUrl';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -64,6 +65,38 @@ const getConversationPreview = (conversation) => {
   }
 
   return conversation.last_message;
+};
+
+// Avatar de uma conversa: foto do outro utilizador (privadas), ícone (grupos) ou
+// inicial do nome como fallback. Usa o helper getImageUrl (caminho -> URL completo).
+const ConversationAvatar = ({ conversation, sizeClass = 'w-14 h-14' }) => {
+  if (!conversation) return null;
+
+  const baseClass = `${sizeClass} shrink-0 rounded-2xl border border-(--lifinity-border)`;
+
+  if (conversation.type === 'group') {
+    return (
+      <div className={`${baseClass} bg-(--lifinity-primary-muted) flex items-center justify-center text-(--lifinity-primary-strong)`}>
+        <svg className="w-1/2 h-1/2" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+        </svg>
+      </div>
+    );
+  }
+
+  const avatarUrl = getImageUrl(conversation.other_avatar);
+
+  return avatarUrl ? (
+    <img
+      src={avatarUrl}
+      alt=""
+      className={`${baseClass} object-cover`}
+    />
+  ) : (
+    <div className={`${baseClass} bg-(--lifinity-primary-muted) flex items-center justify-center font-black text-(--lifinity-text)`}>
+      {conversation.other_username?.charAt(0)?.toUpperCase() || 'U'}
+    </div>
+  );
 };
 
 const Chat = () => {
@@ -519,22 +552,28 @@ const Chat = () => {
                         : 'lifinity-card-soft border-(--lifinity-border) hover:bg-(--lifinity-primary-muted)'
                     }`}
                   >
-                    <div className="flex items-center gap-2">
-                      {conversation.type === 'group' && (
-                        <span className="shrink-0 rounded-lg bg-(--lifinity-primary-muted) border border-(--lifinity-border) px-2 py-1 text-[9px] font-black uppercase tracking-widest text-(--lifinity-primary-strong)">
-                          Grupo
-                        </span>
-                      )}
-                      <p className="text-lg font-black truncate text-(--lifinity-text)">
-                        {getConversationTitle(conversation)}
-                      </p>
+                    <div className="flex items-start gap-3">
+                      {/* Foto do outro utilizador (privadas) ou ícone (grupos) */}
+                      <ConversationAvatar conversation={conversation} sizeClass="w-11 h-11" />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          {conversation.type === 'group' && (
+                            <span className="shrink-0 rounded-lg bg-(--lifinity-primary-muted) border border-(--lifinity-border) px-2 py-1 text-[9px] font-black uppercase tracking-widest text-(--lifinity-primary-strong)">
+                              Grupo
+                            </span>
+                          )}
+                          <p className="text-lg font-black truncate text-(--lifinity-text)">
+                            {getConversationTitle(conversation)}
+                          </p>
+                        </div>
+                        <p className="text-[10px] font-black uppercase tracking-widest mt-1 text-(--lifinity-text-muted)">
+                          {getConversationSubtitle(conversation)}
+                        </p>
+                        <p className="text-sm font-medium mt-4 line-clamp-2 text-(--lifinity-text-muted)">
+                          {getConversationPreview(conversation)}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-[10px] font-black uppercase tracking-widest mt-1 text-(--lifinity-text-muted)">
-                      {getConversationSubtitle(conversation)}
-                    </p>
-                    <p className="text-sm font-medium mt-4 line-clamp-2 text-(--lifinity-text-muted)">
-                      {getConversationPreview(conversation)}
-                    </p>
                   </button>
                 );
               })
@@ -545,30 +584,36 @@ const Chat = () => {
         <section className={`${cardClass} rounded-4xl overflow-hidden min-h-160 lg:min-h-0 lg:h-full flex flex-col`}>
           <div className="p-6 border-b border-(--lifinity-border) lg:shrink-0">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-              <div>
-                <p className="lifinity-muted-label mb-2">
-                  Conversa ativa
-                </p>
-                <h3 className="text-2xl font-black tracking-tight text-(--lifinity-text)">
-                  {isAssistantSelected
-                    ? 'Assistente Lifinity'
-                    : getConversationTitle(selectedConversation)}
-                </h3>
-                {selectedConversation && (
-                  <p className="text-[10px] font-black uppercase tracking-widest mt-2 text-(--lifinity-text-muted)">
-                    {getConversationSubtitle(selectedConversation)}
-                  </p>
+              <div className="flex items-start gap-4">
+                {/* Foto do outro utilizador (privadas) ou ícone (grupos) */}
+                {!isAssistantSelected && selectedConversation && (
+                  <ConversationAvatar conversation={selectedConversation} />
                 )}
-                {selectedConversation?.type === 'private' &&
-                  selectedConversation.other_user_id && (
-                    <button
-                      type="button"
-                      onClick={() => openPublicProfile(selectedConversation.other_user_id)}
-                      className="mt-3 text-[10px] font-black uppercase tracking-widest transition-colors text-(--lifinity-primary) hover:text-(--lifinity-primary-strong)"
-                    >
-                      Ver perfil publico
-                    </button>
+                <div>
+                  <p className="lifinity-muted-label mb-2">
+                    Conversa ativa
+                  </p>
+                  <h3 className="text-2xl font-black tracking-tight text-(--lifinity-text)">
+                    {isAssistantSelected
+                      ? 'Assistente Lifinity'
+                      : getConversationTitle(selectedConversation)}
+                  </h3>
+                  {selectedConversation && (
+                    <p className="text-[10px] font-black uppercase tracking-widest mt-2 text-(--lifinity-text-muted)">
+                      {getConversationSubtitle(selectedConversation)}
+                    </p>
                   )}
+                  {selectedConversation?.type === 'private' &&
+                    selectedConversation.other_user_id && (
+                      <button
+                        type="button"
+                        onClick={() => openPublicProfile(selectedConversation.other_user_id)}
+                        className="mt-3 text-[10px] font-black uppercase tracking-widest transition-colors text-(--lifinity-primary) hover:text-(--lifinity-primary-strong)"
+                      >
+                        Ver perfil publico
+                      </button>
+                    )}
+                </div>
               </div>
 
               {isGroupSelected && (

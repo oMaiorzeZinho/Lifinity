@@ -160,6 +160,7 @@ exports.getConversations = async (req, res) => {
                 other_user.username AS other_username,
                 other_user.level AS other_level,
                 other_user.xp AS other_xp,
+                other_user.avatar AS other_avatar,
                 (
                     SELECT COUNT(*)
                     FROM CONVERSATION_MEMBER cm_count

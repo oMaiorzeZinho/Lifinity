@@ -18,9 +18,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Adapter reutilizável para mostrar amigos OU resultados de pesquisa. O texto do
- * botão de ação ("Remover" ou "Adicionar") e o que ele faz são passados no construtor,
- * para o mesmo item servir os dois casos sem duplicação.
+ * Adapter reutilizável para mostrar amigos OU resultados de pesquisa.
+ *
+ * Tem dois modos:
+ *  - modo AÇÃO (construtor com actionLabel): mostra um botão de texto ("Adicionar"
+ *    nos resultados de pesquisa) que dispara {@link OnFriendActionListener};
+ *  - modo OPÇÕES (construtor com {@link OnFriendOptionsListener}): mostra um botão
+ *    "•••" que abre o menu de opções (Abrir conversa / Ver perfil / Remover) — usado
+ *    na lista de amigos.
  */
 public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder> {
 
@@ -28,13 +33,31 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         void onFriendAction(Friend friend);
     }
 
+    // Listener do botão "•••" (mais opções) na lista de amigos.
+    public interface OnFriendOptionsListener {
+        void onFriendOptions(Friend friend, View anchor);
+    }
+
     private final List<Friend> friends = new ArrayList<>();
     private final String actionLabel;
     private final OnFriendActionListener actionListener;
+    private final OnFriendOptionsListener optionsListener;
+    private final boolean optionsMode;
 
+    // Construtor do modo AÇÃO (botão de texto, ex.: "Adicionar").
     public FriendAdapter(String actionLabel, OnFriendActionListener actionListener) {
         this.actionLabel = actionLabel;
         this.actionListener = actionListener;
+        this.optionsListener = null;
+        this.optionsMode = false;
+    }
+
+    // Construtor do modo OPÇÕES (botão "•••" que abre o menu de 3 opções).
+    public FriendAdapter(OnFriendOptionsListener optionsListener) {
+        this.actionLabel = null;
+        this.actionListener = null;
+        this.optionsListener = optionsListener;
+        this.optionsMode = true;
     }
 
     public void setFriends(List<Friend> newFriends) {
@@ -55,7 +78,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(friends.get(position), actionLabel, actionListener);
+        holder.bind(friends.get(position), optionsMode, actionLabel, actionListener, optionsListener);
     }
 
     @Override
@@ -69,6 +92,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         private final TextView usernameText;
         private final TextView levelText;
         private final Button actionButton;
+        private final Button optionsButton;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -77,19 +101,33 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
             usernameText = itemView.findViewById(R.id.friendUsernameText);
             levelText = itemView.findViewById(R.id.friendLevelText);
             actionButton = itemView.findViewById(R.id.friendActionButton);
+            optionsButton = itemView.findViewById(R.id.friendOptionsButton);
         }
 
-        void bind(Friend friend, String actionLabel, OnFriendActionListener listener) {
+        void bind(Friend friend, boolean optionsMode, String actionLabel,
+                  OnFriendActionListener actionListener, OnFriendOptionsListener optionsListener) {
             String username = friend.getUsername();
             usernameText.setText(username);
             // Mostra a foto real se houver; senão, o placeholder (círculo + inicial).
             AvatarLoader.load(avatarImage, friend.getAvatar(), avatarText, username);
             levelText.setText("Nível " + friend.getLevel() + " · " + friend.getXp() + " XP");
 
-            actionButton.setText(actionLabel);
-            actionButton.setOnClickListener(v -> {
-                if (listener != null) listener.onFriendAction(friend);
-            });
+            if (optionsMode) {
+                // Lista de amigos: botão "•••" que abre o menu de opções.
+                actionButton.setVisibility(View.GONE);
+                optionsButton.setVisibility(View.VISIBLE);
+                optionsButton.setOnClickListener(v -> {
+                    if (optionsListener != null) optionsListener.onFriendOptions(friend, v);
+                });
+            } else {
+                // Resultados de pesquisa: botão de texto ("Adicionar").
+                optionsButton.setVisibility(View.GONE);
+                actionButton.setVisibility(View.VISIBLE);
+                actionButton.setText(actionLabel);
+                actionButton.setOnClickListener(v -> {
+                    if (actionListener != null) actionListener.onFriendAction(friend);
+                });
+            }
         }
     }
 }

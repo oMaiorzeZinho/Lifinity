@@ -114,8 +114,8 @@ public class ConversationsActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, ChatActivity.class);
         intent.putExtra(ChatActivity.EXTRA_CONVERSATION_ID, conversation.getIdconversation());
-        intent.putExtra(ChatActivity.EXTRA_CONVERSATION_NAME,
-                conversation.getName() != null ? conversation.getName() : "Conversa");
+        // Passa o nome já resolvido (nome do amigo nas privadas; nome do grupo nos grupos)
+        intent.putExtra(ChatActivity.EXTRA_CONVERSATION_NAME, conversation.getDisplayName());
         startActivity(intent);
     }
 
