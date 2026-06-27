@@ -9,10 +9,15 @@
     android:orientation="vertical"
     tools:context=".InspirationActivity">
 
-    <!-- ===== HEADER (marca + sino) ===== -->
+    <!-- ===== HEADER (marca + sino) =====
+         Fundo OPACO + elevação (igual ao Perfil/Tarefas): sem isto, o conteúdo do
+         NestedScrollView desenhava-se POR CIMA do cabeçalho e o título "Inspiração"
+         colidia com o logo/wordmark. Agora o conteúdo desliza limpo por baixo. -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/lifinity_bg"
+        android:elevation="6dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="20dp"
@@ -131,14 +136,19 @@
                      cima para o texto BRANCO se ler bem. O FrameLayout recorta os filhos
                      aos cantos arredondados via clipToOutline + @drawable/bg_verse_hero.
                      A imagem é só do versículo (o fundo geral da página mantém-se claro). -->
+                <!-- ALTURA FIXA (200dp): a causa real da faixa gigante era o FrameLayout
+                     em wrap_content com a ImageView de fundo em match_parent — a imagem
+                     grande inflava a medição e esticava a faixa muito além do texto. Com
+                     altura fixa, a ImageView preenche exatamente esta altura em centerCrop
+                     e o texto fica por cima, numa faixa compacta. (Versículos muito longos
+                     podem cortar ligeiramente — aceitável, o objetivo é a faixa pequena.) -->
                 <FrameLayout
                     android:id="@+id/inspirationVerseHero"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="200dp"
                     android:layout_margin="16dp"
                     android:background="@drawable/bg_verse_hero"
-                    android:clipToOutline="true"
-                    android:minHeight="150dp">
+                    android:clipToOutline="true">
 
                     <!-- Imagem de fundo -->
                     <ImageView
