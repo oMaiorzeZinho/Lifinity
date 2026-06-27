@@ -74,9 +74,12 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         private final TextView priorityPill;
         private final TextView statusText;
         private final TextView dueDateText;
+        private final TextView creatorAssigneeText;
         private final TextView createdAtText;
         private final Button completeButton;
-        private final Button optionsButton;
+        // optionsButton é agora um ImageView (ic_dots); declarado como View para o
+        // setOnClickListener funcionar sem ClassCastException no findViewById.
+        private final View optionsButton;
         private final Context context;
 
         TaskViewHolder(@NonNull View itemView) {
@@ -87,6 +90,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             priorityPill = itemView.findViewById(R.id.taskPriorityPill);
             statusText = itemView.findViewById(R.id.taskStatusText);
             dueDateText = itemView.findViewById(R.id.taskDueDateText);
+            creatorAssigneeText = itemView.findViewById(R.id.taskCreatorAssigneeText);
             createdAtText = itemView.findViewById(R.id.taskCreatedAtText);
             completeButton = itemView.findViewById(R.id.taskCompleteButton);
             optionsButton = itemView.findViewById(R.id.taskOptionsButton);
@@ -110,6 +114,15 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             bindPriorityPill(task.getPriority());
             bindStatus(task);
             bindDueDate(task.getDueDate());
+
+            // Linha "criador para destinatário" (escondida nas tarefas pessoais).
+            String creatorAssignee = task.getCreatorAssigneeLabel();
+            if (!TextUtils.isEmpty(creatorAssignee)) {
+                creatorAssigneeText.setText(creatorAssignee);
+                creatorAssigneeText.setVisibility(View.VISIBLE);
+            } else {
+                creatorAssigneeText.setVisibility(View.GONE);
+            }
 
             String createdAt = formatShortDate(task.getCreatedAt());
             if (!TextUtils.isEmpty(createdAt)) {

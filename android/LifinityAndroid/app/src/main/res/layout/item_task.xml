@@ -98,6 +98,20 @@
             tools:visibility="visible" />
     </LinearLayout>
 
+    <!-- Quem criou / para quem (ex.: "teste para cliente"). Escondida nas tarefas
+         pessoais (criadas por mim só para mim). -->
+    <TextView
+        android:id="@+id/taskCreatorAssigneeText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="@color/lifinity_text_secondary"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        tools:text="teste para cliente"
+        tools:visibility="visible" />
+
     <!-- Data de criação (discreta) -->
     <TextView
         android:id="@+id/taskCreatedAtText"
@@ -130,21 +144,21 @@
             android:textStyle="bold" />
 
         <!-- Botão de mais opções (a lógica abre o menu no TaskAdapter — não mexer).
-             Usa três pontos "•••" (bullets, que rendam em qualquer fonte, ao
-             contrário do ⋮ U+22EE que aparecia como quadrado vazio) e texto claro
-             de alto contraste para o ícone ser sempre visível. -->
-        <Button
+             É um ImageView com o vector ic_dots (três pontos): o inflater NÃO o
+             substitui por um MaterialButton (que pintava o fundo de verde e fazia os
+             "•••" desaparecerem). Mesmo id e mesmo tamanho — o onClick continua igual. -->
+        <ImageView
             android:id="@+id/taskOptionsButton"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginStart="10dp"
             android:background="@drawable/btn_secondary_clay"
+            android:clickable="true"
+            android:contentDescription="Mais opções"
             android:elevation="4dp"
-            android:letterSpacing="0.08"
-            android:text="&#8226;&#8226;&#8226;"
-            android:textAllCaps="false"
-            android:textColor="@color/lifinity_text"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:focusable="true"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_dots" />
     </LinearLayout>
 </LinearLayout>

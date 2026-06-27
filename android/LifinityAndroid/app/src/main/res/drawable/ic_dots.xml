@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Três pontos horizontais "•••" (Material more_horiz) desenhados à mão como vector
+     drawable, para NÃO depender de bibliotecas. Usado nos botões de "mais opções"
+     (tarefas e amigos). Substitui o texto "•••" do antigo <Button>, que com o tema
+     Material era convertido em MaterialButton (fundo verde + texto próprio) e fazia os
+     pontos desaparecerem. Cor escura (lifinity_text) para se ler sobre o fundo claro. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@color/lifinity_text"
+        android:pathData="M6,10c-1.1,0 -2,0.9 -2,2s0.9,2 2,2 2,-0.9 2,-2 -0.9,-2 -2,-2zM12,10c-1.1,0 -2,0.9 -2,2s0.9,2 2,2 2,-0.9 2,-2 -0.9,-2 -2,-2zM18,10c-1.1,0 -2,0.9 -2,2s0.9,2 2,2 2,-0.9 2,-2 -0.9,-2 -2,-2z" />
+</vector>

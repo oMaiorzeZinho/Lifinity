@@ -92,7 +92,9 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         private final TextView usernameText;
         private final TextView levelText;
         private final Button actionButton;
-        private final Button optionsButton;
+        // optionsButton é agora um ImageView (ic_dots); declarado como View para o
+        // setVisibility/setOnClickListener funcionarem sem ClassCastException.
+        private final View optionsButton;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);

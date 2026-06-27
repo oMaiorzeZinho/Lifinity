@@ -43,12 +43,18 @@
                 android:src="@drawable/lifinity_logo"
                 android:contentDescription="Lifinity" />
 
-            <!-- Wordmark da marca ao lado do símbolo -->
+            <!-- Wordmark da marca ao lado do símbolo.
+                 maxLines/singleLine: garante que "Lifinity" fica SEMPRE numa linha só
+                 (antes quebrava para "Lifinit"+"y" quando o cabeçalho estava apertado
+                 com a pill de utilizador, o ícone de estatísticas e o sino). -->
             <TextView
                 style="@style/LifinityWordmark"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:singleLine="true"
                 android:text="Lifinity"
                 android:textSize="20sp" />
         </LinearLayout>

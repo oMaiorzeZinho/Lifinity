@@ -82,19 +82,21 @@
         android:textStyle="bold" />
 
     <!-- Botão "•••" (mais opções) — usado na lista de amigos para abrir o menu
-         (Abrir conversa / Ver perfil / Remover). Escondido nos resultados de pesquisa. -->
-    <Button
+         (Abrir conversa / Ver perfil / Remover). Escondido nos resultados de pesquisa.
+         ImageView com o vector ic_dots: o inflater não o troca por MaterialButton (que
+         pintava o fundo de verde e escondia os "•••"). O adapter controla a visibilidade
+         e o onClick — mantêm-se o mesmo id e o facto de ser uma View. -->
+    <ImageView
         android:id="@+id/friendOptionsButton"
         android:layout_width="44dp"
         android:layout_height="44dp"
         android:layout_marginStart="10dp"
         android:background="@drawable/btn_secondary_clay"
-        android:letterSpacing="0.08"
-        android:minWidth="0dp"
-        android:text="&#8226;&#8226;&#8226;"
-        android:textAllCaps="false"
-        android:textColor="@color/lifinity_text"
-        android:textSize="18sp"
-        android:textStyle="bold"
+        android:clickable="true"
+        android:contentDescription="Mais opções"
+        android:focusable="true"
+        android:padding="11dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_dots"
         android:visibility="gone" />
 </LinearLayout>
