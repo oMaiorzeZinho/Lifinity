@@ -90,6 +90,115 @@
                 android:textColorHint="@color/lifinity_input_hint"
                 android:textSize="16sp" />
 
+            <!-- ===== DESTINO (igual ao browser) =====
+                 Por defeito "Só para mim"; permite escolher vários amigos e/ou grupos.
+                 NÃO se usam <Button> (o tema converte-os em MaterialButton e estraga o
+                 aspeto) — são LinearLayout/TextView clicáveis. As linhas de amigos/grupos
+                 são criadas em runtime no CreateTaskActivity. O estado selecionado/não
+                 (fundo + cor do texto) é aplicado em Java. -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:letterSpacing="0.13"
+                android:text="DESTINO"
+                android:textColor="@color/lifinity_text_secondary"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <!-- Só para mim (estado inicial = selecionado, definido em Java) -->
+            <TextView
+                android:id="@+id/createTaskOnlyMeButton"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_card_soft_clay"
+                android:gravity="center"
+                android:text="Só para mim"
+                android:textColor="@color/lifinity_text"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <!-- Cabeçalho "Amigos" (clicável: mostra/esconde o contentor) -->
+            <LinearLayout
+                android:id="@+id/createTaskFriendsHeader"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_input_clay"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <TextView
+                    android:id="@+id/createTaskFriendsHeaderText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Amigos"
+                    android:textColor="@color/lifinity_text"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/createTaskFriendsArrow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="▼"
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- Contentor de amigos (preenchido em Java; escondido por defeito) -->
+            <LinearLayout
+                android:id="@+id/createTaskFriendsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical"
+                android:visibility="gone" />
+
+            <!-- Cabeçalho "Grupos" (clicável: mostra/esconde o contentor) -->
+            <LinearLayout
+                android:id="@+id/createTaskGroupsHeader"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_input_clay"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <TextView
+                    android:id="@+id/createTaskGroupsHeaderText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Grupos"
+                    android:textColor="@color/lifinity_text"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/createTaskGroupsArrow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="▼"
+                    android:textColor="@color/lifinity_text_secondary"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- Contentor de grupos (preenchido em Java; escondido por defeito) -->
+            <LinearLayout
+                android:id="@+id/createTaskGroupsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical"
+                android:visibility="gone" />
+
             <TextView
                 android:id="@+id/createTaskErrorText"
                 android:layout_width="match_parent"

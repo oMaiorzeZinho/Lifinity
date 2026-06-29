@@ -70,7 +70,6 @@ public class TasksActivity extends AppCompatActivity {
     private TextView xpCardXpNumber;
     private ProgressBar xpCardProgressBar;
     private TextView xpCardProgressLabel;
-    private TextView headerUserPill;
 
     // Resumo de hoje
     private TextView summaryPendingCount;
@@ -183,7 +182,6 @@ public class TasksActivity extends AppCompatActivity {
         xpCardXpNumber = findViewById(R.id.xpCardXpNumber);
         xpCardProgressBar = findViewById(R.id.xpCardProgressBar);
         xpCardProgressLabel = findViewById(R.id.xpCardProgressLabel);
-        headerUserPill = findViewById(R.id.headerUserPill);
 
         summaryPendingCount = findViewById(R.id.summaryPendingCount);
         summaryCompletedCount = findViewById(R.id.summaryCompletedCount);
@@ -205,11 +203,6 @@ public class TasksActivity extends AppCompatActivity {
         String username = user.getUsername();
         int xp = user.getXp() != null ? Math.max(user.getXp(), 0) : 0;
         int level = user.getLevel() != null ? Math.max(user.getLevel(), 1) : calculateLevelFromXp(xp);
-
-        // Pill do header
-        if (!TextUtils.isEmpty(username)) {
-            headerUserPill.setText(username + " · NÍV " + level);
-        }
 
         // Cartão XP
         xpCardLevelNumber.setText(String.valueOf(level));

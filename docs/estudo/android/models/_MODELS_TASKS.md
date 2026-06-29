@@ -14,11 +14,17 @@ métodos).
   "perdida" comparando `due_date` com agora).
 
 ## `CreateTaskRequest` / `UpdateTaskRequest` — corpos de criar/editar
-São **idênticos**: `title`, `description`, `priority`, `due_date`, com construtor
+Base **idêntica**: `title`, `description`, `priority`, `due_date`, com construtor
 `(title, description, priority, dueDate)`. Viram JSON no `POST /tasks` (criar) e `PUT /tasks/{id}`
 (editar). Existem dois por clareza semântica (e para poderem divergir no futuro).
 - Repara que o **parâmetro** do construtor é `dueDate` (camelCase) mas o **campo** é `due_date` — é o campo
   que conta para o JSON enviado (`{ ..., "due_date": ... }`), batendo certo com o que o backend espera.
+- **`CreateTaskRequest` ganhou (2026-06-29) o destino:** dois campos `List<Integer> assignees` (iduser de
+  amigos) e `List<Integer> groups` (idgroup), inicializados a lista vazia, com `setAssignees`/`setGroups`.
+  Os **nomes têm de ser exatamente** `assignees`/`groups` para o GSON gerar o JSON que o `taskController`
+  já esperava (vazias = "só para mim"). O construtor antigo de 4 parâmetros mantém-se (compatibilidade); as
+  listas preenchem-se pelos *setters*. Detalhe:
+  [RETOQUES_TAREFAS_E_INSPIRACAO_2026-06-29.md](../RETOQUES_TAREFAS_E_INSPIRACAO_2026-06-29.md).
 
 ## `CompleteTaskResponse` — resposta ao concluir
 Campos: `message`, `newXP`, `newLevel`. Quando se conclui uma tarefa (`PUT /tasks/complete/{id}`), o

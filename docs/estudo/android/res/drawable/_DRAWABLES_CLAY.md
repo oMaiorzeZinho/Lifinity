@@ -49,3 +49,15 @@ que baralhava qual era a ação principal.
 
 O princípio (uma ação principal forte + secundárias discretas) é o mesmo a seguir noutros ecrãs
 sempre que existam botões principal e secundário juntos.
+
+## `bg_level_badge.xml` + reutilização do `xp_progress_bar.xml` (cartão XP das Tarefas, 2026-06-29)
+No retoque do cartão "NÍVEL · XP" das Tarefas (ver
+[`../../RETOQUES_TAREFAS_E_INSPIRACAO_2026-06-29.md`](../../RETOQUES_TAREFAS_E_INSPIRACAO_2026-06-29.md)):
+- **`bg_level_badge.xml` (novo):** um `<shape>` retângulo arredondado (raio 20dp) com **gradiente verde
+  da marca** (`lifinity_primary_light → lifinity_primary`, ângulo 135°). É o fundo do "selo" do nível
+  (caixa 72×72dp), onde o "NÍVEL" + número aparecem em **branco**. Dá o aspeto "de jogo" ao cartão.
+- **`xp_progress_bar.xml` (já existia, agora reutilizado):** este `<layer-list>` (track claro + progresso
+  verde recortado por `<clip>`) tinha sido feito para a barra de XP do Perfil mas **não estava a ser
+  usado nas Tarefas**. A barra do cartão XP passou a usá-lo via `android:progressDrawable`, com
+  `min/maxHeight=16dp` (essencial: o `ProgressBar` horizontal limita a altura do desenho pelo `maxHeight`).
+  As cores deixam de vir de `progressTint`/`progressBackgroundTint` — vêm do drawable.

@@ -14,6 +14,9 @@ Liga os campos do versículo (modo, tema, texto, referência), os botões (Guard
   `currentVerse` e chamam `bindCurrentVerse(modo)` que escreve modo, tema, texto e referência. O **banner**
   (imagem de fundo + overlay) é só no XML; o Java não mexe nas cores. Ver
   [Inspiração: banner/filtro/partilha](INSPIRACAO_BANNER_FILTRO_PARTILHA_2026-06-26.md).
+  > **2026-06-29:** a altura fixa do banner subiu de **200dp → 250dp** (só no XML) para a **referência**
+  > dos versículos mais longos (ex.: João 14:27) deixar de cortar. Ver
+  > [RETOQUES_TAREFAS_E_INSPIRACAO_2026-06-29.md](RETOQUES_TAREFAS_E_INSPIRACAO_2026-06-29.md).
 
 ## Favoritos + filtro por tema
 - `loadFavorites` (`GET /inspiration/favorites`) enche a lista `favorites`.

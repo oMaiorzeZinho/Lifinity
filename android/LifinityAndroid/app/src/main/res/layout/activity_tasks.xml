@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -59,22 +60,10 @@
                 android:textSize="20sp" />
         </LinearLayout>
 
-        <!-- Pill utilizador (nível) -->
-        <TextView
-            android:id="@+id/headerUserPill"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
-            android:background="@drawable/bg_card_soft_clay"
-            android:elevation="4dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp"
-            android:textColor="@color/lifinity_primary"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            tools:text="Telmo · NÍV 5" />
+        <!-- Pill de utilizador REMOVIDA: apertava o espaço do cabeçalho e fazia o
+             wordmark "Lifinity" cortar ("Lifin..."). O nível continua visível no
+             cartão XP logo abaixo, por isso a pill era redundante. Sem ela, o bloco
+             "Logo + marca" (weight=1) tem espaço de sobra e "Lifinity" fica inteiro. -->
 
         <!-- Botão estatísticas -->
         <TextView
@@ -148,78 +137,107 @@
                 android:orientation="vertical"
                 android:padding="20dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:letterSpacing="0.13"
-                    android:text="NÍVEL"
-                    android:textColor="@color/lifinity_text_secondary"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
-
+                <!-- Layout horizontal: badge de nível à esquerda + info de XP à direita,
+                     dando ao cartão um aspeto mais polido, "de jogo". Os ids
+                     (xpCardLevelNumber / xpCardXpNumber / xpCardProgressBar /
+                     xpCardProgressLabel) mantêm-se EXATAMENTE iguais — o
+                     TasksActivity.java não precisa de alterações. -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/xpCardLevelNumber"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/lifinity_text"
-                        android:textSize="36sp"
-                        android:textStyle="bold"
-                        tools:text="5" />
+                    <!-- BADGE do nível: caixa verde (gradiente) com "NÍVEL" + número
+                         em branco. O "NÍVEL" vive agora aqui dentro (não há label solto). -->
+                    <LinearLayout
+                        android:layout_width="72dp"
+                        android:layout_height="72dp"
+                        android:background="@drawable/bg_level_badge"
+                        android:gravity="center"
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:text=" · "
-                        android:textColor="@color/lifinity_text_secondary"
-                        android:textSize="22sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:letterSpacing="0.1"
+                            android:text="NÍVEL"
+                            android:textColor="#FFFFFF"
+                            android:textSize="9sp"
+                            android:textStyle="bold" />
 
-                    <TextView
-                        android:id="@+id/xpCardXpNumber"
+                        <TextView
+                            android:id="@+id/xpCardLevelNumber"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="#FFFFFF"
+                            android:textSize="30sp"
+                            android:textStyle="bold"
+                            tools:text="8" />
+                    </LinearLayout>
+
+                    <!-- COLUNA DIREITA: XP em destaque + barra de progresso + label -->
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:textColor="@color/lifinity_text"
-                        android:textSize="30sp"
-                        android:textStyle="bold"
-                        tools:text="2043" />
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="XP"
-                        android:textColor="@color/lifinity_primary"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        <!-- Linha do XP (número grande + " XP" mais pequeno, alinhados em baixo) -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="bottom"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/xpCardXpNumber"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/lifinity_text"
+                                android:textSize="32sp"
+                                android:textStyle="bold"
+                                tools:text="2251" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="4dp"
+                                android:text=" XP"
+                                android:textColor="@color/lifinity_primary"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- Barra de XP encorpada: usa o drawable xp_progress_bar (que já
+                             existia mas NÃO estava a ser usado). 16dp + min/maxHeight 16dp
+                             são essenciais — o ProgressBar horizontal limita a altura do
+                             desenho pelo maxHeight; sem isto a barra ficaria fina. O
+                             drawable já trata das cores (sem progressTint). -->
+                        <ProgressBar
+                            android:id="@+id/xpCardProgressBar"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="16dp"
+                            android:layout_marginTop="12dp"
+                            android:indeterminate="false"
+                            android:max="100"
+                            android:maxHeight="16dp"
+                            android:minHeight="16dp"
+                            android:progress="0"
+                            android:progressDrawable="@drawable/xp_progress_bar" />
+
+                        <TextView
+                            android:id="@+id/xpCardProgressLabel"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:textColor="@color/lifinity_text_secondary"
+                            android:textSize="13sp"
+                            tools:text="Faltam 11 XP para o nível 9" />
+                    </LinearLayout>
                 </LinearLayout>
-
-                <!-- Barra de progresso do nível -->
-                <ProgressBar
-                    android:id="@+id/xpCardProgressBar"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="10dp"
-                    android:layout_marginTop="12dp"
-                    android:indeterminate="false"
-                    android:max="100"
-                    android:progress="0"
-                    android:progressBackgroundTint="@color/lifinity_inset"
-                    android:progressTint="@color/lifinity_primary" />
-
-                <TextView
-                    android:id="@+id/xpCardProgressLabel"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:textColor="@color/lifinity_text_secondary"
-                    android:textSize="13sp"
-                    tools:text="Faltam 219 XP para o nível 6" />
             </LinearLayout>
 
             <!-- ===== CARTÃO RESUMO DE HOJE ===== -->
@@ -256,7 +274,7 @@
                         android:elevation="5dp"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp">
+                        android:padding="10dp">
 
                         <TextView
                             android:id="@+id/summaryPendingCount"
@@ -267,15 +285,25 @@
                             android:textStyle="bold"
                             tools:text="3" />
 
+                        <!-- Label numa linha só: sem letterSpacing (era o que fazia
+                             transbordar e quebrar "CONCLUÍDAS"), match_parent + gravity
+                             center para o autosize ter largura de referência, e autosize
+                             do AppCompat (app:autoSize*) para encolher só o necessário. -->
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:letterSpacing="0.05"
+                            android:gravity="center"
+                            android:maxLines="1"
+                            android:singleLine="true"
                             android:text="PENDENTES"
                             android:textColor="@color/lifinity_text_secondary"
                             android:textSize="10sp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            app:autoSizeMaxTextSize="10sp"
+                            app:autoSizeMinTextSize="8sp"
+                            app:autoSizeStepGranularity="1sp"
+                            app:autoSizeTextType="uniform" />
                     </LinearLayout>
 
                     <!-- Mini-cartão Concluídas -->
@@ -288,7 +316,7 @@
                         android:elevation="5dp"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp">
+                        android:padding="10dp">
 
                         <TextView
                             android:id="@+id/summaryCompletedCount"
@@ -299,15 +327,23 @@
                             android:textStyle="bold"
                             tools:text="2" />
 
+                        <!-- "CONCLUÍDAS" é o label mais comprido — sem letterSpacing,
+                             singleLine e autosize, fica numa linha só (já não parte). -->
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:letterSpacing="0.05"
+                            android:gravity="center"
+                            android:maxLines="1"
+                            android:singleLine="true"
                             android:text="CONCLUÍDAS"
                             android:textColor="@color/lifinity_text_secondary"
                             android:textSize="10sp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            app:autoSizeMaxTextSize="10sp"
+                            app:autoSizeMinTextSize="8sp"
+                            app:autoSizeStepGranularity="1sp"
+                            app:autoSizeTextType="uniform" />
                     </LinearLayout>
 
                     <!-- Mini-cartão Perdidas -->
@@ -320,7 +356,7 @@
                         android:elevation="5dp"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp">
+                        android:padding="10dp">
 
                         <TextView
                             android:id="@+id/summaryLostCount"
@@ -331,15 +367,23 @@
                             android:textStyle="bold"
                             tools:text="1" />
 
+                        <!-- Mesmo tratamento dos outros dois labels, para os três
+                             ficarem visualmente iguais (uma linha, centrados). -->
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:letterSpacing="0.05"
+                            android:gravity="center"
+                            android:maxLines="1"
+                            android:singleLine="true"
                             android:text="PERDIDAS"
                             android:textColor="@color/lifinity_text_secondary"
                             android:textSize="10sp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            app:autoSizeMaxTextSize="10sp"
+                            app:autoSizeMinTextSize="8sp"
+                            app:autoSizeStepGranularity="1sp"
+                            app:autoSizeTextType="uniform" />
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>

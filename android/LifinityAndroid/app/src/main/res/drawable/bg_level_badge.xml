@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "Badge" de nível do cartão XP das Tarefas: retângulo bem arredondado com
+     gradiente verde da marca (claro -> base). Dá um aspeto de "selo de jogo" ao
+     número do nível, que aparece em branco por cima. Usado como android:background
+     de um LinearLayout quadrado (72x72dp). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="20dp" />
+    <gradient
+        android:angle="135"
+        android:startColor="@color/lifinity_primary_light"
+        android:endColor="@color/lifinity_primary" />
+</shape>

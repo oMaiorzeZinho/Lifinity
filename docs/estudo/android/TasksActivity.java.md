@@ -6,6 +6,13 @@ de XP/nível**, o **resumo de hoje** (pendentes/concluídas/perdidas), a **lista
 filtros, e uma **vista de calendário** alternativa. Permite **concluir**, **editar** e **ocultar/eliminar**
 tarefas. É a maior activity — vale a pena estudá-la com calma.
 
+> **Retoques visuais 2026-06-29** ([detalhe](RETOQUES_TAREFAS_E_INSPIRACAO_2026-06-29.md)): removeu-se a
+> **pill "utilizador · NÍV X"** do cabeçalho (apertava o wordmark "Lifinity", que cortava) — também se
+> tiraram as **3 referências `headerUserPill`** deste Java, senão dava `NullPointerException`; os labels do
+> **"Resumo de hoje"** passaram a caber numa linha (sem `letterSpacing` + `singleLine` + autosize); e o
+> **cartão XP** foi redesenhado (badge de nível + barra `xp_progress_bar`), **sem mudar ids** — por isso
+> este Java não precisou de tocar no cartão.
+
 ## `onCreate` — montar tudo
 ```java
 String token = getToken();
