@@ -288,13 +288,37 @@ public class TasksActivity extends AppCompatActivity {
     private void updateSummary() {
         int pending = 0, completed = 0, lost = 0;
         for (Task task : allTasks) {
-            if (isTaskCompleted(task)) completed++;
-            else if (isTaskLost(task)) lost++;
-            else pending++;
+            // PENDENTES: todas as pendentes (não concluídas e não perdidas), como antes.
+            // CONCLUÍDAS/PERDIDAS: só as de HOJE (concluída hoje / prazo é hoje). As
+            // concluídas/perdidas noutro dia não entram em nenhuma das três — em
+            // particular NÃO podem cair em "pendentes".
+            if (isTaskCompleted(task)) {
+                if (isSameDayAsToday(task.getCompletedAt())) completed++;
+            } else if (isTaskLost(task)) {
+                if (isSameDayAsToday(task.getDueDate())) lost++;
+            } else {
+                pending++;
+            }
         }
         if (summaryPendingCount != null) summaryPendingCount.setText(String.valueOf(pending));
         if (summaryCompletedCount != null) summaryCompletedCount.setText(String.valueOf(completed));
         if (summaryLostCount != null) summaryLostCount.setText(String.valueOf(lost));
+    }
+
+    /**
+     * true se a data (string do servidor) cai no mesmo dia de hoje (ano+mês+dia).
+     * Usa o mesmo parseDate dos restantes cálculos. Null/não parsável → false.
+     * (Assume o fuso do servidor — na demo local é o mesmo PC, portanto correto.)
+     */
+    private boolean isSameDayAsToday(String dateStr) {
+        Date date = parseDate(dateStr);
+        if (date == null) return false;
+        Calendar taskDay = Calendar.getInstance();
+        taskDay.setTime(date);
+        Calendar today = Calendar.getInstance();
+        return taskDay.get(Calendar.YEAR) == today.get(Calendar.YEAR)
+                && taskDay.get(Calendar.MONTH) == today.get(Calendar.MONTH)
+                && taskDay.get(Calendar.DAY_OF_MONTH) == today.get(Calendar.DAY_OF_MONTH);
     }
 
     private void confirmCompleteTask(Task task) {

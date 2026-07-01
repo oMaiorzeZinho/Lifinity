@@ -61,3 +61,13 @@ No retoque do cartão "NÍVEL · XP" das Tarefas (ver
   usado nas Tarefas**. A barra do cartão XP passou a usá-lo via `android:progressDrawable`, com
   `min/maxHeight=16dp` (essencial: o `ProgressBar` horizontal limita a altura do desenho pelo `maxHeight`).
   As cores deixam de vir de `progressTint`/`progressBackgroundTint` — vêm do drawable.
+
+## `bg_card_lost.xml` + `ic_check.xml`/`ic_close.xml` (2026-07-01)
+- **`bg_card_lost.xml`** — cartão de tarefa **perdida**: espelha o `bg_card_clay` (mesmos cantos 30dp)
+  mas em coral muito claro (`#FCEAE5`) com borda coral (`@color/lifinity_coral`, 1.5dp). Aplicado em
+  runtime no `TaskAdapter` (o cartão inteiro fica vermelho, com a informação legível por cima). Ver
+  [`../../CORRECOES_RESUMO_CHATBOT_PERFIL_2026-07-01.md`](../../CORRECOES_RESUMO_CHATBOT_PERFIL_2026-07-01.md).
+- **`ic_check.xml`** (✓, branco) / **`ic_close.xml`** (✕, secundário) — vectores Material usados nos
+  botões de **aceitar/recusar** pedido de amizade. Foram precisos porque os `<Button>` com `android:text`
+  eram convertidos em `MaterialButton` pelo tema e o símbolo desaparecia (**mesmo motivo do FAB/•••**):
+  passaram a `ImageView` com estes `src`.

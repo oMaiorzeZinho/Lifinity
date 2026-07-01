@@ -13,6 +13,11 @@ public class Task {
     private String due_date;
     private String created_at;
 
+    // Data/hora em que a tarefa foi concluída (o backend devolve via t.*). Usado no
+    // "Resumo de hoje" para contar só as CONCLUÍDAS de hoje (e não as de sempre).
+    @SerializedName("completed_at")
+    private String completed_at;
+
     // Campos de origem/atribuição já devolvidos pelo backend (taskController):
     //  - creator_username: quem criou a tarefa;
     //  - assignee_names: nomes dos destinatários diretos (amigos), "A, B" ou null;
@@ -29,6 +34,16 @@ public class Task {
 
     @SerializedName("task_origin")
     private String task_origin;
+
+    // Sinalizadores (0/1) já devolvidos pelo backend: indicam se a tarefa tem
+    // destinatários individuais (amigos) e/ou grupos. Usados para esconder o botão
+    // "Concluir" quando a tarefa foi criada por mim para outra pessoa (só o
+    // destinatário a pode concluir — o backend responde 403 caso contrário).
+    @SerializedName("has_assignees")
+    private Integer has_assignees;
+
+    @SerializedName("has_groups")
+    private Integer has_groups;
 
     public Integer getIdtask() {
         return idtask;
@@ -58,8 +73,22 @@ public class Task {
         return created_at;
     }
 
+    public String getCompletedAt() {
+        return completed_at;
+    }
+
     public String getCreatorUsername() {
         return creator_username;
+    }
+
+    /** true se a tarefa tem destinatários individuais (amigos). */
+    public boolean hasAssignees() {
+        return has_assignees != null && has_assignees == 1;
+    }
+
+    /** true se a tarefa foi atribuída a grupos. */
+    public boolean hasGroups() {
+        return has_groups != null && has_groups == 1;
     }
 
     public String getAssigneeNames() {

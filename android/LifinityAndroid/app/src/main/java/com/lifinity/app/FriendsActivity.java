@@ -4,10 +4,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
@@ -24,11 +27,15 @@ import com.lifinity.app.adapters.FriendAdapter;
 import com.lifinity.app.adapters.FriendRequestAdapter;
 import com.lifinity.app.api.ChatApi;
 import com.lifinity.app.api.FriendApi;
+import com.lifinity.app.api.UserApi;
+import com.lifinity.app.models.Achievement;
 import com.lifinity.app.models.CreatePrivateConversationRequest;
 import com.lifinity.app.models.Friend;
 import com.lifinity.app.models.FriendRequest;
+import com.lifinity.app.models.PublicProfile;
 import com.lifinity.app.models.SendFriendRequest;
 import com.lifinity.app.network.ApiClient;
+import com.lifinity.app.utils.AvatarLoader;
 
 import java.util.List;
 
@@ -67,6 +74,7 @@ public class FriendsActivity extends AppCompatActivity {
     private Call<List<FriendRequest>> requestsCall;
     private Call<JsonObject> actionCall;
     private Call<JsonObject> privateConvCall;
+    private Call<PublicProfile> publicProfileCall;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -267,16 +275,125 @@ public class FriendsActivity extends AppCompatActivity {
         });
     }
 
-    // Mostra a informação do amigo num diálogo simples.
-    // TODO(futuro): ecrã de perfil público dedicado no Android (a web usa PublicProfileModal).
+    // Popup de perfil do amigo (rico, como o PublicProfileModal da web): avatar,
+    // nome, "Nível X · Y XP" e as conquistas em destaque. Preenche já o que temos do
+    // objeto Friend e completa com GET /users/{iduser}/public-profile (avatar + badges).
     private void showFriendProfile(Friend friend) {
         if (friend == null) return;
-        String info = "Nível " + friend.getLevel() + " · " + friend.getXp() + " XP";
+
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_friend_profile, null);
+        TextView avatarText = view.findViewById(R.id.profileAvatarText);
+        ImageView avatarImage = view.findViewById(R.id.profileAvatarImage);
+        TextView usernameText = view.findViewById(R.id.profileUsernameText);
+        TextView levelXpText = view.findViewById(R.id.profileLevelXpText);
+        ProgressBar profileProgress = view.findViewById(R.id.profileProgressBar);
+        LinearLayout badgesContainer = view.findViewById(R.id.profileBadgesContainer);
+
+        // Dados imediatos, a partir do objeto Friend (o endpoint não devolve xp).
+        usernameText.setText(friend.getUsername());
+        levelXpText.setText("Nível " + friend.getLevel() + " · " + friend.getXp() + " XP");
+        avatarText.setText(AvatarLoader.initialOf(friend.getUsername()));
+
         new AlertDialog.Builder(this)
-                .setTitle(friend.getUsername())
-                .setMessage(info)
+                .setView(view)
                 .setPositiveButton("Fechar", null)
                 .show();
+
+        if (friend.getIduser() == null) {
+            showNoBadges(badgesContainer);
+            return;
+        }
+
+        // Completa com o perfil público (avatar real + conquistas em destaque).
+        profileProgress.setVisibility(View.VISIBLE);
+        UserApi api = ApiClient.getClient().create(UserApi.class);
+        publicProfileCall = api.getPublicProfile("Bearer " + getToken(), friend.getIduser());
+        publicProfileCall.enqueue(new Callback<PublicProfile>() {
+            @Override
+            public void onResponse(Call<PublicProfile> call, Response<PublicProfile> response) {
+                if (call.isCanceled()) return;
+                profileProgress.setVisibility(View.GONE);
+
+                PublicProfile profile = response.isSuccessful() ? response.body() : null;
+                if (profile == null) {
+                    showNoBadges(badgesContainer);
+                    return;
+                }
+
+                // Foto real por cima do placeholder (círculo + inicial).
+                AvatarLoader.load(avatarImage, profile.getAvatar(), avatarText, friend.getUsername());
+
+                List<Achievement> badges = profile.getHighlightedBadges();
+                badgesContainer.removeAllViews();
+                if (badges == null || badges.isEmpty()) {
+                    showNoBadges(badgesContainer);
+                    return;
+                }
+                int shown = Math.min(badges.size(), 3);
+                for (int i = 0; i < shown; i++) {
+                    badgesContainer.addView(makeBadgeCard(badges.get(i)));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PublicProfile> call, Throwable t) {
+                if (call.isCanceled()) return;
+                profileProgress.setVisibility(View.GONE);
+                showNoBadges(badgesContainer);
+            }
+        });
+    }
+
+    /** Mensagem "Sem conquistas em destaque." no contentor das conquistas. */
+    private void showNoBadges(LinearLayout container) {
+        container.removeAllViews();
+        TextView tv = new TextView(this);
+        tv.setText("Sem conquistas em destaque.");
+        tv.setTextColor(getColor(R.color.lifinity_text_faint));
+        tv.setTextSize(13);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(8);
+        tv.setLayoutParams(lp);
+        container.addView(tv);
+    }
+
+    /** Mini-cartão de uma conquista em destaque (★ nome + descrição). */
+    private View makeBadgeCard(Achievement badge) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setBackgroundResource(R.drawable.bg_card_soft_clay);
+        card.setPadding(dp(12), dp(12), dp(12), dp(12));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(8);
+        card.setLayoutParams(lp);
+
+        TextView name = new TextView(this);
+        name.setText("★ " + (badge.getName() != null ? badge.getName() : "Conquista"));
+        name.setTextColor(getColor(R.color.lifinity_text));
+        name.setTextSize(14);
+        name.setTypeface(name.getTypeface(), android.graphics.Typeface.BOLD);
+        card.addView(name);
+
+        String desc = badge.getDescription();
+        if (!TextUtils.isEmpty(desc)) {
+            TextView description = new TextView(this);
+            description.setText(desc);
+            description.setTextColor(getColor(R.color.lifinity_text_secondary));
+            description.setTextSize(12);
+            LinearLayout.LayoutParams dlp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dlp.topMargin = dp(4);
+            description.setLayoutParams(dlp);
+            card.addView(description);
+        }
+        return card;
+    }
+
+    private int dp(int value) {
+        return (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, value, getResources().getDisplayMetrics());
     }
 
     // ===== Pesquisa + pedidos =====
@@ -438,6 +555,7 @@ public class FriendsActivity extends AppCompatActivity {
         if (requestsCall != null) requestsCall.cancel();
         if (actionCall != null) actionCall.cancel();
         if (privateConvCall != null) privateConvCall.cancel();
+        if (publicProfileCall != null) publicProfileCall.cancel();
         super.onDestroy();
     }
 }

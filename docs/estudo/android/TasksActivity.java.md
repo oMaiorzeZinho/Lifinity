@@ -61,8 +61,15 @@ xpCardProgressLabel.setText("Faltam " + (nextLevelXp - xp) + " XP para o nível 
   os cálculos baterem certo no telemóvel sem mais um pedido.
 
 ## `loadTasks` — buscar e processar
-`GET /tasks` → guarda tudo em `allTasks`, depois `updateSummary()` (conta pendentes/concluídas/perdidas) e
-`applyFilters()` (filtra + ordena + mostra). Em 401/403 mostra "Sessão inválida".
+`GET /tasks` → guarda tudo em `allTasks`, depois `updateSummary()` e `applyFilters()` (filtra + ordena +
+mostra). Em 401/403 mostra "Sessão inválida".
+
+**`updateSummary` (corrigido 2026-07-01):** "PENDENTES" conta **todas** as pendentes (não concluídas e
+não perdidas); "CONCLUÍDAS" e "PERDIDAS" contam **só as de hoje** (concluída hoje via `completed_at` /
+prazo é hoje via `due_date`). As concluídas/perdidas de outro dia não entram em nenhuma das três (não
+podem cair em "pendentes"). O helper `isSameDayAsToday(String)` usa o `parseDate` existente e compara
+ano+mês+dia com hoje (`Calendar`). Antes contava concluídas/perdidas de sempre (ex.: 12/8). Ver
+[CORRECOES_RESUMO_CHATBOT_PERFIL_2026-07-01.md](CORRECOES_RESUMO_CHATBOT_PERFIL_2026-07-01.md).
 
 ## Filtros e ordenação — `setupFilters` + `applyFilters`
 - **Filtros:** dois `Spinner` (estado: Todas/Pendentes/Concluídas/Perdidas; prioridade: Todas/Baixa/Média/

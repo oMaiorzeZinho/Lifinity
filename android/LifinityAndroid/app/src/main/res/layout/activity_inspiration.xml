@@ -136,17 +136,17 @@
                      cima para o texto BRANCO se ler bem. O FrameLayout recorta os filhos
                      aos cantos arredondados via clipToOutline + @drawable/bg_verse_hero.
                      A imagem é só do versículo (o fundo geral da página mantém-se claro). -->
-                <!-- ALTURA FIXA (250dp): a causa real da faixa gigante era o FrameLayout
+                <!-- ALTURA FIXA (300dp): a causa real da faixa gigante era o FrameLayout
                      em wrap_content com a ImageView de fundo em match_parent — a imagem
                      grande inflava a medição e esticava a faixa muito além do texto. Com
                      altura fixa, a ImageView preenche exatamente esta altura em centerCrop
-                     e o texto fica por cima, numa faixa compacta. Subiu de 200dp para
-                     250dp (só um pouco) para que a REFERÊNCIA dos versículos mais longos
-                     (ex.: João 14:27) deixe de cortar em baixo. -->
+                     e o texto fica por cima. Subiu para 300dp (+ texto do versículo um
+                     pouco menor) para caberem versículos LONGOS como Jeremias 29:11
+                     ("Porque eu bem sei os pensamentos...") sem cortar no fim. -->
                 <FrameLayout
                     android:id="@+id/inspirationVerseHero"
                     android:layout_width="match_parent"
-                    android:layout_height="250dp"
+                    android:layout_height="300dp"
                     android:layout_margin="16dp"
                     android:background="@drawable/bg_verse_hero"
                     android:clipToOutline="true">
@@ -205,7 +205,7 @@
                                 android:textStyle="bold" />
                         </LinearLayout>
 
-                        <!-- Aspas decorativas (mais pequenas, para a faixa ficar baixa) -->
+                        <!-- Aspas decorativas (mais pequenas, para caber texto longo) -->
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -213,7 +213,7 @@
                             android:lineSpacingMultiplier="0.4"
                             android:text="&#8220;"
                             android:textColor="#B3FFFFFF"
-                            android:textSize="34sp"
+                            android:textSize="28sp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -227,7 +227,7 @@
                             android:shadowRadius="6"
                             android:text="A carregar versículo..."
                             android:textColor="#FFFFFF"
-                            android:textSize="18sp"
+                            android:textSize="16sp"
                             android:textStyle="bold" />
 
                         <TextView

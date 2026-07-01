@@ -103,6 +103,12 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         ) {
             titleText.setText(valueOrFallback(task.getTitle(), "Atividade sem título"));
 
+            // Cartão inteiro a coral quando a tarefa está perdida (toda a informação
+            // continua legível por cima). Define-se SEMPRE nos dois casos por causa da
+            // reciclagem de views (senão um cartão reciclado ficaria vermelho por engano).
+            boolean lost = isLost(task);
+            itemView.setBackgroundResource(lost ? R.drawable.bg_card_lost : R.drawable.bg_card_clay);
+
             String description = task.getDescription();
             if (!TextUtils.isEmpty(description)) {
                 descriptionText.setText(description);
@@ -170,11 +176,18 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         }
 
         private void bindStatus(Task task) {
+            // Nota: repõe-se SEMPRE fundo e cor em cada caso (reciclagem de views).
             if (isCompleted(task)) {
                 statusText.setText("Concluída");
+                statusText.setBackgroundResource(R.drawable.bg_card_soft_clay);
+                statusText.setTextColor(context.getColor(R.color.lifinity_text_secondary));
                 statusText.setVisibility(View.VISIBLE);
             } else if (isLost(task)) {
-                statusText.setText("Perdida");
+                // Perdida: o cartão inteiro já está coral, por isso o estado passa a ser
+                // um rótulo VERMELHO sem chip (em vez do antigo chip cinzento "Perdida").
+                statusText.setText("PERDIDA");
+                statusText.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+                statusText.setTextColor(context.getColor(R.color.lifinity_danger));
                 statusText.setVisibility(View.VISIBLE);
             } else {
                 statusText.setVisibility(View.GONE);
@@ -212,7 +225,15 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
         private boolean canCompleteTask(Task task) {
             if (task == null || task.getIdtask() == null) return false;
-            return !isCompleted(task) && !isLost(task);
+            if (isCompleted(task) || isLost(task)) return false;
+            // Tarefa com destinatários individuais (amigos): só o destinatário a conclui.
+            // Se tem assignees e eu NÃO sou o destinatário (task_origin != 'assigned_to_me'),
+            // escondo o "Concluir" para evitar o erro 403 do backend. Tarefas de grupo
+            // (sem assignees individuais) mantêm o "Concluir" (qualquer membro conclui).
+            boolean hasAssignees = task.hasAssignees();
+            boolean iAmAssignee = "assigned_to_me".equals(task.getTaskOrigin());
+            if (hasAssignees && !iAmAssignee) return false;
+            return true;
         }
 
         private boolean isCompleted(Task task) {

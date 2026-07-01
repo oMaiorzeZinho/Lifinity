@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Popup "Ver perfil" de um amigo (rico, como o PublicProfileModal da web):
+     avatar + nome + "Nível X · Y XP" + conquistas em destaque. O fundo branco
+     arredondado vem do tema do AlertDialog; aqui é só o conteúdo. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Avatar: placeholder (círculo + inicial) com a FOTO real por cima quando existe -->
+        <FrameLayout
+            android:layout_width="72dp"
+            android:layout_height="72dp">
+
+            <TextView
+                android:id="@+id/profileAvatarText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_avatar_clay"
+                android:gravity="center"
+                android:textColor="@color/lifinity_primary"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                tools:text="A" />
+
+            <ImageView
+                android:id="@+id/profileAvatarImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="Avatar"
+                android:scaleType="centerCrop"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/profileUsernameText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:textColor="@color/lifinity_text"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:text="Ana Silva" />
+
+        <!-- Pill "Nível X · Y XP" -->
+        <TextView
+            android:id="@+id/profileLevelXpText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_pill_mint"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:textColor="@color/lifinity_primary"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            tools:text="Nível 5 · 2043 XP" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:letterSpacing="0.13"
+            android:text="CONQUISTAS EM DESTAQUE"
+            android:textColor="@color/lifinity_text_secondary"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <ProgressBar
+            android:id="@+id/profileProgressBar"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:indeterminateTint="@color/lifinity_primary"
+            android:visibility="gone" />
+
+        <!-- Conquistas em destaque (preenchidas em Java, até 3) -->
+        <LinearLayout
+            android:id="@+id/profileBadgesContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical" />
+    </LinearLayout>
+</ScrollView>

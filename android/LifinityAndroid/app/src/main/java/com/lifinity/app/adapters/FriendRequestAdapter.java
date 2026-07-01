@@ -3,7 +3,6 @@ package com.lifinity.app.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -62,8 +61,10 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
         private final TextView avatarText;
         private final ImageView avatarImage;
         private final TextView usernameText;
-        private final Button acceptButton;
-        private final Button declineButton;
+        // Aceitar/recusar são ImageView (ic_check/ic_close); declarados como View para o
+        // findViewById + setOnClickListener funcionarem sem ClassCastException.
+        private final View acceptButton;
+        private final View declineButton;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);

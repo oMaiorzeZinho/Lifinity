@@ -29,8 +29,11 @@ Há **dois** models de notificação (importante saber distingui-los na defesa):
 - **`AssistantMessage`** — mensagem da conversa com o assistente. Campos: `idmessage`, `role`
   (`"user"`/`"assistant"`), `content`, `created_at`. Construtor `(role, content)` para criar localmente;
   `isUser()` distingue quem falou (para alinhar/colorir a bolha no adapter).
-- **`AssistantSendRequest`** — corpo do envio: só **`message`** (a pergunta do utilizador). ⚠️ Repara que o
-  campo aqui é `message` (não `content` como no chat normal) — são endpoints diferentes.
+- **`AssistantSendRequest`** — corpo do envio: só **`content`** (a pergunta do utilizador). ⚠️ **Correção
+  2026-07-01:** o campo chamava-se `message`, mas o backend (`assistantController`) lê `req.body.content`
+  (igual ao chat normal e ao browser). Com o nome errado, o backend recebia conteúdo vazio, respondia
+  **400** e a app mostrava sempre o texto de *fallback* ("Não consegui gerar uma resposta..."). Renomeado
+  para `content` — o chatbot voltou a responder.
 - **`AssistantSendResponse`** — resposta: **`userMessage`** + **`assistantMessage`** (ambos
   `AssistantMessage`, com `@SerializedName`). Ou seja, o backend devolve **as duas** mensagens de uma vez (a
   do utilizador, já guardada, e a resposta gerada pelo Gemini) — a app adiciona ambas à lista.

@@ -12,6 +12,12 @@ métodos).
 - `priority` é texto (`"alta"`/`"media"`/`"baixa"`); `status` é texto (ex.: `"concluida"`); `due_date` é a
   data-limite. Vários ecrãs interpretam estes textos (ex.: ordenar/colorir por prioridade, ver se está
   "perdida" comparando `due_date` com agora).
+- **Campos acrescentados a 2026-07-01** (todos já devolvidos pelo backend):
+  - `completed_at` (`getCompletedAt()`) — data/hora de conclusão; usado no "Resumo de hoje" para contar
+    só as **concluídas de hoje**.
+  - `has_assignees`/`has_groups` (0/1) → `hasAssignees()`/`hasGroups()` — indicam se a tarefa tem
+    destinatários individuais (amigos) e/ou grupos. Usados no `TaskAdapter.canCompleteTask` para esconder
+    o "Concluir" quando **eu** criei a tarefa para outra pessoa (evita o **403** do backend).
 
 ## `CreateTaskRequest` / `UpdateTaskRequest` — corpos de criar/editar
 Base **idêntica**: `title`, `description`, `priority`, `due_date`, com construtor

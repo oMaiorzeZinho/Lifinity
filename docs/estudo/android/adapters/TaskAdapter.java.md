@@ -40,13 +40,21 @@ O adapter não sabe o que fazer ao concluir/abrir opções — isso é da **acti
 
 ## `bind` — preencher uma linha de tarefa
 - Título (com *fallback* "Atividade sem título"); descrição só visível se existir.
+- **Fundo do cartão (2026-07-01):** define-se **sempre** — `bg_card_lost` (coral) se a tarefa está
+  **perdida**, senão `bg_card_clay` (branco). Tem de ser sempre nos dois casos por causa da reciclagem
+  de views (senão um cartão reciclado ficaria vermelho por engano).
 - **`bindPriorityPill`** — pinta a pílula de prioridade: "ALTA"/`bg_pill_alta`, "MÉDIA"/`bg_pill_media`,
   "BAIXA"/`bg_pill_baixa` (e um *fallback* neutro).
-- **`bindStatus`** — mostra "Concluída"/"Perdida" (ou esconde).
+- **`bindStatus`** — concluída → chip cinzento "Concluída"; **perdida → rótulo vermelho "PERDIDA"** (sem
+  chip, fundo transparente — o cartão inteiro já está coral); senão esconde. Repõe fundo/cor em cada
+  caso (reciclagem).
 - **`bindDueDate`/`formatShortDate`** — formata as datas para `dd/MM/yyyy` (tentando vários formatos do
   servidor com `parseDate`).
-- **Botão concluir** só aparece se `canCompleteTask` (não concluída nem perdida) — a mesma regra da activity,
-  repetida aqui para a UI. As funções `isCompleted`/`isLost` são iguais às da `TasksActivity`.
+- **Botão concluir** só aparece se `canCompleteTask`. A regra (2026-07-01, igual à web): não concluída,
+  não perdida **e** (a tarefa **não** tem destinatários individuais **ou** eu sou o destinatário —
+  `hasAssignees()` + `task_origin == "assigned_to_me"`). Assim, uma tarefa que **eu** criei para um
+  amigo esconde o "Concluir" (senão o backend responde **403**); tarefas de **grupo** mantêm-no. As
+  funções `isCompleted`/`isLost` são iguais às da `TasksActivity`.
 
 ## Ligações
 - **Layout da linha:** `res/layout/item_task.xml`. **Model:** `Task`.

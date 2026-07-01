@@ -65,30 +65,33 @@
             android:textSize="12sp" />
     </LinearLayout>
 
-    <!-- Aceitar -->
-    <Button
+    <!-- Aceitar (✓): ImageView com vector ic_check. NÃO é <Button> — o tema Material
+         convertia-o em MaterialButton e o símbolo desaparecia (mesmo bug do FAB/•••). -->
+    <ImageView
         android:id="@+id/requestAcceptButton"
         android:layout_width="44dp"
         android:layout_height="44dp"
         android:layout_marginStart="8dp"
         android:background="@drawable/btn_primary_clay"
+        android:clickable="true"
+        android:contentDescription="Aceitar"
         android:elevation="6dp"
-        android:text="&#10003;"
-        android:textAllCaps="false"
-        android:textColor="@color/lifinity_text_on_primary"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:focusable="true"
+        android:padding="11dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_check" />
 
-    <!-- Recusar -->
-    <Button
+    <!-- Recusar (✕): ImageView com vector ic_close (mesmo motivo). -->
+    <ImageView
         android:id="@+id/requestDeclineButton"
         android:layout_width="44dp"
         android:layout_height="44dp"
         android:layout_marginStart="8dp"
         android:background="@drawable/btn_ghost_clay"
-        android:text="&#10005;"
-        android:textAllCaps="false"
-        android:textColor="@color/lifinity_text_secondary"
-        android:textSize="15sp"
-        android:textStyle="bold" />
+        android:clickable="true"
+        android:contentDescription="Recusar"
+        android:focusable="true"
+        android:padding="12dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_close" />
 </LinearLayout>

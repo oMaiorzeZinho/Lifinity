@@ -44,6 +44,14 @@ Ou seja, se o JSON vier sem um campo, o *getter* devolve um valor seguro ("—",
 crash. É uma defesa contra dados incompletos, útil porque o `RankingAdapter` mostra estes valores
 diretamente.
 
+## `PublicProfile` — perfil público de outro utilizador (2026-07-01)
+Resposta de `GET /users/{iduser}/public-profile`, usado no popup "Ver perfil" de um amigo
+(`FriendsActivity`). Campos: `username`, `level`, `avatar`, `bio`, `highlightedBadges`
+(`List<Achievement>` — reutiliza o model de conquistas, os campos coincidem) e `totalUnlockedBadges`.
+**Pormenor:** o endpoint **não** devolve `xp` — o popup usa o `xp` do objeto `Friend` já disponível na
+lista de amigos. `highlightedBadges`/`totalUnlockedBadges` usam `@SerializedName` (camelCase vindo do
+backend). Espelha o `PublicProfileModal` da web. O layout do popup é `dialog_friend_profile.xml`.
+
 ## `UpdateUsernameRequest` / `UpdatePasswordRequest` / `DeleteAccountRequest` — definições de conta
 Corpos dos pedidos do `SettingsActivity` (via `AccountApi`):
 - **`UpdateUsernameRequest(newUsername)`** → `{ "newUsername": ... }`.
