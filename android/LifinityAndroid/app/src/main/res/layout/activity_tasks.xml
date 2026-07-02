@@ -502,6 +502,30 @@
                     tools:text="5" />
             </LinearLayout>
 
+            <!-- ===== OCULTAR CONCLUÍDAS/PERDIDAS =====
+                 Chip discreto (TextView clicável, não <Button>, para ficar leve e evitar
+                 o MaterialButton) que alterna um FILTRO DE VISUALIZAÇÃO: esconde da LISTA
+                 as tarefas concluídas/perdidas, SEM as eliminar nem afetar o "Resumo de
+                 hoje" (que conta a partir de allTasks). Texto/estilo/estado são definidos
+                 em Java (updateToggleHiddenButton). Só visível no modo Lista. -->
+            <TextView
+                android:id="@+id/tasksToggleHiddenButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/bg_card_soft_clay"
+                android:clickable="true"
+                android:focusable="true"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                android:text="Ocultar concluídas/perdidas"
+                android:textColor="@color/lifinity_text_secondary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
             <!-- ===== FEEDBACK ESTADOS ===== -->
             <ProgressBar
                 android:id="@+id/tasksProgressBar"

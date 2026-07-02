@@ -54,6 +54,8 @@ public class TasksActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "lifinity_prefs";
     private static final String KEY_TOKEN = "token";
     private static final String KEY_USER = "user";
+    // Preferência do filtro de visualização "ocultar concluídas/perdidas" (lembrada entre sessões).
+    private static final String KEY_HIDE_DONE = "hide_completed_lost";
 
     private ProgressBar progressBar;
     private TextView errorText;
@@ -64,6 +66,10 @@ public class TasksActivity extends AppCompatActivity {
     private Spinner priorityFilterSpinner;
     private RecyclerView tasksRecyclerView;
     private TextView tasksCountLabel;
+
+    // Filtro de visualização "ocultar concluídas/perdidas" (só esconde da lista).
+    private TextView toggleHiddenButton;
+    private boolean hideCompletedAndLost;
 
     // Cartão XP
     private TextView xpCardLevelNumber;
@@ -82,7 +88,6 @@ public class TasksActivity extends AppCompatActivity {
     private Call<List<Task>> tasksCall;
     private Call<CompleteTaskResponse> completeTaskCall;
     private Call<JsonObject> deleteTaskCall;
-    private Call<JsonObject> hideCompletedVisibleTasksCall;
     private final Gson gson = new Gson();
 
     // ===== Vista de calendário =====
@@ -123,6 +128,7 @@ public class TasksActivity extends AppCompatActivity {
         setupFilters();
         setupBottomNav();
         setupViewToggle();
+        setupHideToggle();
         HeaderHelper.setupBell(this);
         bindUserHeader();
 
@@ -151,6 +157,46 @@ public class TasksActivity extends AppCompatActivity {
         updateViewModeToggle();
     }
 
+    /**
+     * Liga o chip "Ocultar concluídas/perdidas" — um FILTRO DE VISUALIZAÇÃO local:
+     * apenas esconde da lista as tarefas concluídas/perdidas (não elimina nem arquiva,
+     * e NÃO toca no resumo, que continua a contá-las a partir de allTasks). A escolha é
+     * lembrada entre sessões nas SharedPreferences.
+     */
+    private void setupHideToggle() {
+        hideCompletedAndLost = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .getBoolean(KEY_HIDE_DONE, false);
+        updateToggleHiddenButton();
+        if (toggleHiddenButton != null) {
+            toggleHiddenButton.setOnClickListener(v -> {
+                hideCompletedAndLost = !hideCompletedAndLost;
+                getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+                        .putBoolean(KEY_HIDE_DONE, hideCompletedAndLost).apply();
+                updateToggleHiddenButton();
+                applyFilters();
+            });
+        }
+    }
+
+    /** Atualiza texto/estilo do chip consoante o estado do filtro (ocultar ↔ mostrar). */
+    private void updateToggleHiddenButton() {
+        if (toggleHiddenButton == null) return;
+        if (hideCompletedAndLost) {
+            // Está a OCULTAR → oferece "Mostrar todas" (destacado a menta).
+            toggleHiddenButton.setText("Mostrar todas");
+            toggleHiddenButton.setBackgroundResource(R.drawable.bg_pill_mint);
+            toggleHiddenButton.setTextColor(getColor(R.color.lifinity_primary));
+        } else {
+            // Está a MOSTRAR tudo → oferece "Ocultar concluídas/perdidas" (discreto).
+            toggleHiddenButton.setText("Ocultar concluídas/perdidas");
+            toggleHiddenButton.setBackgroundResource(R.drawable.bg_card_soft_clay);
+            toggleHiddenButton.setTextColor(getColor(R.color.lifinity_text_secondary));
+        }
+        // Re-aplica o padding: setBackgroundResource pode repor o padding do drawable (0).
+        int padH = dp(14), padV = dp(7);
+        toggleHiddenButton.setPadding(padH, padV, padH, padV);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -177,6 +223,7 @@ public class TasksActivity extends AppCompatActivity {
         priorityFilterSpinner = findViewById(R.id.tasksPriorityFilterSpinner);
         tasksRecyclerView = findViewById(R.id.tasksRecyclerView);
         tasksCountLabel = findViewById(R.id.tasksCountLabel);
+        toggleHiddenButton = findViewById(R.id.tasksToggleHiddenButton);
 
         xpCardLevelNumber = findViewById(R.id.xpCardLevelNumber);
         xpCardXpNumber = findViewById(R.id.xpCardXpNumber);
@@ -485,6 +532,9 @@ public class TasksActivity extends AppCompatActivity {
         String priorityFilter = getSelectedFilterValue(priorityFilterSpinner);
 
         for (Task task : allTasks) {
+            // Filtro de visualização "ocultar concluídas/perdidas": esconde-as SÓ da lista
+            // (não toca em allTasks nem no resumo, que continua a contá-las).
+            if (hideCompletedAndLost && (isTaskCompleted(task) || isTaskLost(task))) continue;
             if (!matchesSearch(task, query)) continue;
             if (!matchesStatusFilter(task, statusFilter)) continue;
             if (!matchesPriorityFilter(task, priorityFilter)) continue;
@@ -678,6 +728,11 @@ public class TasksActivity extends AppCompatActivity {
 
         inactive.setBackgroundResource(android.R.color.transparent);
         inactive.setTextColor(getColor(R.color.lifinity_text_secondary));
+
+        // O chip de ocultar só faz sentido na LISTA (no calendário não há lista para filtrar).
+        if (toggleHiddenButton != null) {
+            toggleHiddenButton.setVisibility(calendarMode ? View.GONE : View.VISIBLE);
+        }
     }
 
     /** Constrói a grelha mensal: agrupa as tarefas com prazo por dia e desenha as células. */
@@ -895,7 +950,6 @@ public class TasksActivity extends AppCompatActivity {
         if (tasksCall != null) tasksCall.cancel();
         if (completeTaskCall != null) completeTaskCall.cancel();
         if (deleteTaskCall != null) deleteTaskCall.cancel();
-        if (hideCompletedVisibleTasksCall != null) hideCompletedVisibleTasksCall.cancel();
         if (dayDialog != null && dayDialog.isShowing()) dayDialog.dismiss();
         super.onDestroy();
     }

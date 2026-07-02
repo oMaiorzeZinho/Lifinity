@@ -86,6 +86,17 @@ ano+mês+dia com hoje (`Calendar`). Antes contava concluídas/perdidas de sempre
 - **Como se sabe o estado:** `isTaskCompleted` (status == "concluida") e `isTaskLost` (não concluída **e**
   `due_date` já passou, comparando com `new Date()`). `parseDate` tenta vários formatos de data do servidor.
 
+## Filtro de visualização "Ocultar concluídas/perdidas" (2026-07-02)
+Um chip (`tasksToggleHiddenButton`) alterna a flag `hideCompletedAndLost`. É um **filtro só de vista**:
+- em `applyFilters`, no início do loop, `if (hideCompletedAndLost && (isTaskCompleted(task) ||
+  isTaskLost(task))) continue;` — esconde-as de `filteredTasks` (a LISTA), mas **não** de `allTasks`;
+- por isso **`updateSummary` fica intacto** (itera `allTasks`) e os contadores do "Resumo de hoje" /
+  Estatísticas continuam a contar as ocultas. **Não elimina nada** — é reversível;
+- `setupHideToggle()` lê/guarda a preferência (`SharedPreferences`, `hide_completed_lost`) e liga o clique;
+  `updateToggleHiddenButton()` troca texto/estilo ("Ocultar concluídas/perdidas" ↔ "Mostrar todas");
+- o chip só aparece na Lista (escondido no calendário, via `updateViewModeToggle`).
+- Detalhe e o "porquê": [OCULTAR_CONCLUIDAS_PERDIDAS_2026-07-02.md](OCULTAR_CONCLUIDAS_PERDIDAS_2026-07-02.md).
+
 ## Concluir / Eliminar — diálogos de confirmação
 - **`confirmCompleteTask`** abre um `AlertDialog` "Queres concluir?"; ao confirmar chama `completeTask` →
   `PUT /tasks/complete/{id}`. A resposta traz **novo XP/nível** → `updateStoredUser` (atualiza o `User` no
